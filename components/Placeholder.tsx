@@ -1,7 +1,10 @@
 // ── จุดเปลี่ยนเป็นของจริง #4 ──
 // ทุกตำแหน่งที่เห็น <Placeholder label="..." /> คือจุดที่รอภาพจริง
-// เมื่อได้ภาพแล้ว แทนที่ component นี้ด้วย <Image /> ของ next/image
+// ตอนนี้วาดภาพจำลองด้วย SVG (components/artwork.tsx) แทนกล่องเปล่า
+// เมื่อได้ภาพแล้ว แทนที่ component นี้ด้วย <Image /> ของ next/image แล้วลบ artwork.tsx ทิ้ง
 // (สัดส่วนภาพถูกล็อกไว้แล้ว: hero 16:9, สินค้า 4:5, บทความ 16:9)
+
+import { Artwork } from './artwork';
 
 type Props = {
   label: string;
@@ -9,6 +12,8 @@ type Props = {
   fill?: boolean;
   dark?: boolean;
   className?: string;
+  /** ซ่อนป้ายชื่อภาพ — ใช้ตอนพรีวิวให้ลูกค้าดูโดยไม่มีข้อความกำกับ */
+  hideLabel?: boolean;
 };
 
 export default function Placeholder({
@@ -17,24 +22,27 @@ export default function Placeholder({
   fill = false,
   dark = false,
   className = '',
+  hideLabel = false,
 }: Props) {
-  const tone = dark
-    ? 'from-stone-700 via-stone-800 to-stone-900 text-stone-400'
-    : 'from-stone-200 via-stone-300 to-stone-400 text-stone-600';
   return (
     <div
-      className={`${fill ? 'absolute inset-0 h-full w-full' : 'relative w-full'} overflow-hidden bg-gradient-to-br ${tone} ${className}`}
+      className={`${fill ? 'absolute inset-0 h-full w-full' : 'relative w-full'} overflow-hidden ${className}`}
       style={fill ? undefined : { aspectRatio: ratio.replace('/', ' / ') }}
       role="img"
       aria-label={`ภาพประกอบ: ${label}`}
     >
-      <div className="absolute inset-x-0 top-1/2 h-px bg-current opacity-10" aria-hidden />
-      <div className="absolute inset-y-0 left-1/2 w-px bg-current opacity-10" aria-hidden />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="border border-current px-3 py-1.5 text-[10px] font-normal uppercase tracking-widest2 opacity-60">
+      <Artwork label={label} dark={dark} />
+
+      {!hideLabel && (
+        <span
+          className={`pointer-events-none absolute bottom-3 left-3 text-[9px] uppercase tracking-widest2 ${
+            dark ? 'text-stone-400/50' : 'text-stone-600/45'
+          }`}
+          aria-hidden
+        >
           {label}
         </span>
-      </div>
+      )}
     </div>
   );
 }
