@@ -1,0 +1,181 @@
+// ── i18n MOCK ──
+// จุดเปลี่ยนเป็นของจริง #3: dictionary สองภาษาแบบง่ายสำหรับเดโม่
+// ของจริงแนะนำย้ายไป next-intl / เส้นทาง /en แยก เพื่อ SEO ต่อภาษา
+// ตอนนี้แปลครบ: เมนู, หน้าแรก, หน้าสินค้ารวม + ปุ่ม/ป้ายที่ใช้ร่วมกัน
+
+export type Lang = 'th' | 'en';
+
+export const dict = {
+  th: {
+    nav: {
+      home: 'หน้าแรก',
+      about: 'เกี่ยวกับเรา',
+      products: 'สินค้า',
+      articles: 'บทความ',
+      contact: 'ติดต่อเรา',
+      showroom: 'นัดชมโชว์รูม',
+    },
+    common: {
+      inquire: 'สอบถามสินค้านี้',
+      priceOnRequest: 'สอบถามราคา',
+      viewAll: 'ดูทั้งหมด',
+      readMore: 'อ่านต่อ',
+      explore: 'ชมคอลเลกชัน',
+      scroll: 'เลื่อนเพื่อชม',
+      category: { all: 'ทั้งหมด', kitchen: 'ครัว', bath: 'ห้องน้ำ' } as Record<string, string>,
+    },
+    home: {
+      heroKicker: 'PREMIUM KITCHEN & BATH DEALER',
+      heroTitle: 'ศิลปะของครัว\nที่คู่ควรกับบ้านคุณ',
+      heroSub: 'คัดสรรอุปกรณ์ครัวและสุขภัณฑ์จากแบรนด์ชั้นนำระดับโลก สำหรับบ้านที่ไม่ประนีประนอมเรื่องดีไซน์',
+      catTitle: 'สองโลกของเรา',
+      catSub: 'เลือกเดินชมตามหมวดที่คุณกำลังมองหา',
+      catKitchen: 'ครัว',
+      catKitchenDesc: 'ซิงก์ · ก๊อก · เตา · เครื่องใช้บิลท์อิน · ชุดครัวสั่งตัด',
+      catBath: 'ห้องน้ำ',
+      catBathDesc: 'สุขภัณฑ์อัจฉริยะ · ฝักบัว · อ่างล้างหน้า · อ่างอาบน้ำ',
+      featuredKicker: 'FEATURED COLLECTION',
+      featuredTitle: 'สินค้าเด่นประจำฤดูกาล',
+      featuredHint: 'เลื่อนลงเพื่อชมสินค้า — แนวนอน',
+      storyKicker: 'OUR STORY',
+      storySlides: [
+        {
+          title: 'เริ่มจากความเชื่อเรื่องงานฝีมือ',
+          body: 'กว่า 25 ปีที่เราคัดสรรอุปกรณ์ครัวและสุขภัณฑ์ด้วยเกณฑ์เดียว — ต้องเป็นชิ้นที่เราอยากใช้ในบ้านของเราเอง',
+        },
+        {
+          title: 'โชว์รูมที่ให้คุณ "ลองจริง"',
+          body: 'ทุกก๊อกเปิดได้ ทุกฝักบัวมีน้ำไหล ทุกลิ้นชักเปิดปิดให้ฟังเสียง เพราะของพรีเมียมต้องพิสูจน์ได้ด้วยการสัมผัส',
+        },
+        {
+          title: 'อยู่ด้วยกันจนหลังการติดตั้ง',
+          body: 'ทีมช่างของเราเองดูแลตั้งแต่วัดหน้างาน ติดตั้ง จนถึงบริการหลังการขาย — รับประกันชิ้นงานสูงสุด 10 ปี',
+        },
+      ],
+      statsTitle: 'ตัวเลขที่เราภูมิใจ',
+      stats: [
+        { value: 25, suffix: '+', label: 'ปีประสบการณ์' },
+        { value: 480, suffix: '+', label: 'โครงการที่ส่งมอบ' },
+        { value: 12, suffix: '', label: 'แบรนด์พาร์ทเนอร์ระดับโลก' },
+        { value: 2, suffix: '', label: 'โชว์รูมในกรุงเทพฯ' },
+      ],
+      articlesKicker: 'JOURNAL',
+      articlesTitle: 'บทความล่าสุด',
+      ctaTitle: 'ให้เราช่วยสร้างครัวในฝันของคุณ',
+      ctaSub: 'นัดหมายเข้าชมโชว์รูมพร้อมที่ปรึกษาส่วนตัว ไม่มีค่าใช้จ่าย',
+      ctaBtn: 'นัดหมายชมโชว์รูม',
+    },
+    products: {
+      kicker: 'COLLECTION',
+      title: 'สินค้าทั้งหมด',
+      sub: 'อุปกรณ์ครัวและสุขภัณฑ์คัดสรร 12 รายการ — ทุกชิ้นสัมผัสจริงได้ที่โชว์รูม',
+      filterLabel: 'หมวดหมู่',
+      empty: 'ไม่พบสินค้าในหมวดนี้',
+      specs: 'สเปกสินค้า',
+      related: 'สินค้าใกล้เคียง',
+    },
+    contact: {
+      title: 'ติดต่อเรา',
+      sub: 'ทีมที่ปรึกษาพร้อมตอบทุกคำถาม ภายใน 24 ชั่วโมง',
+      name: 'ชื่อ',
+      email: 'อีเมลหรือเบอร์โทร',
+      interest: 'สนใจสินค้าหมวด',
+      message: 'ข้อความ',
+      send: 'ส่งข้อความ',
+      toast: 'ส่งข้อความเรียบร้อย เราจะติดต่อกลับภายใน 24 ชม. (เดโม่ — ยังไม่เชื่อมระบบจริง)',
+    },
+    footer: {
+      blurb: 'ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม คัดสรรจากแบรนด์ชั้นนำระดับโลก',
+      nav: 'เมนู',
+      contact: 'ติดต่อ',
+      rights: 'สงวนลิขสิทธิ์',
+    },
+  },
+  en: {
+    nav: {
+      home: 'Home',
+      about: 'About',
+      products: 'Products',
+      articles: 'Journal',
+      contact: 'Contact',
+      showroom: 'Book a Visit',
+    },
+    common: {
+      inquire: 'Inquire about this piece',
+      priceOnRequest: 'Price on request',
+      viewAll: 'View all',
+      readMore: 'Read more',
+      explore: 'Explore the collection',
+      scroll: 'Scroll to explore',
+      category: { all: 'All', kitchen: 'Kitchen', bath: 'Bath' } as Record<string, string>,
+    },
+    home: {
+      heroKicker: 'PREMIUM KITCHEN & BATH DEALER',
+      heroTitle: 'The Art of the Kitchen,\nWorthy of Your Home',
+      heroSub: 'A curated selection of kitchen equipment and sanitary ware from the world’s finest brands — for homes that never compromise on design.',
+      catTitle: 'Two Worlds',
+      catSub: 'Browse by the space you are dreaming about',
+      catKitchen: 'Kitchen',
+      catKitchenDesc: 'Sinks · Faucets · Hobs · Built-in appliances · Bespoke kitchens',
+      catBath: 'Bath',
+      catBathDesc: 'Intelligent toilets · Showers · Basins · Bathtubs',
+      featuredKicker: 'FEATURED COLLECTION',
+      featuredTitle: 'This Season’s Highlights',
+      featuredHint: 'Keep scrolling — the gallery moves sideways',
+      storyKicker: 'OUR STORY',
+      storySlides: [
+        {
+          title: 'Born from a belief in craft',
+          body: 'For over 25 years we have curated kitchen and bath pieces with a single criterion — would we want this in our own home?',
+        },
+        {
+          title: 'A showroom you can actually try',
+          body: 'Every faucet runs, every shower flows, every drawer glides. Premium quality should be proven by touch.',
+        },
+        {
+          title: 'With you long after installation',
+          body: 'Our own team handles survey, installation and after-sales care — with warranties of up to 10 years.',
+        },
+      ],
+      statsTitle: 'Numbers we are proud of',
+      stats: [
+        { value: 25, suffix: '+', label: 'Years of experience' },
+        { value: 480, suffix: '+', label: 'Projects delivered' },
+        { value: 12, suffix: '', label: 'World-class brand partners' },
+        { value: 2, suffix: '', label: 'Showrooms in Bangkok' },
+      ],
+      articlesKicker: 'JOURNAL',
+      articlesTitle: 'Latest Stories',
+      ctaTitle: 'Let us build the kitchen you dream of',
+      ctaSub: 'Book a private showroom visit with a personal consultant — free of charge.',
+      ctaBtn: 'Book a showroom visit',
+    },
+    products: {
+      kicker: 'COLLECTION',
+      title: 'All Products',
+      sub: 'Twelve curated kitchen and bath pieces — every one on display at our showroom.',
+      filterLabel: 'Category',
+      empty: 'No products in this category',
+      specs: 'Specifications',
+      related: 'Related pieces',
+    },
+    contact: {
+      title: 'Contact Us',
+      sub: 'Our consultants reply within 24 hours',
+      name: 'Name',
+      email: 'Email or phone',
+      interest: 'Interested in',
+      message: 'Message',
+      send: 'Send message',
+      toast: 'Message sent — we will get back to you within 24 hours. (Demo only)',
+    },
+    footer: {
+      blurb: 'Premium kitchen & bath dealer, curated from the world’s finest brands.',
+      nav: 'Menu',
+      contact: 'Contact',
+      rights: 'All rights reserved',
+    },
+  },
+};
+
+export type Dict = (typeof dict)['th'];

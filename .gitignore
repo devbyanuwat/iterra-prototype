@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+.vercel/
+.env*
+!.env.example
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+
+# Next 16 สร้าง 2 ไฟล์นี้ให้อัตโนมัติทุกครั้งที่รัน dev
+AGENTS.md
+CLAUDE.md
