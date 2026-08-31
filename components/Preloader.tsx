@@ -56,12 +56,10 @@ export default function Preloader({
     } catch {
       // sessionStorage อาจถูกปิด (private mode / เข้ม cookie) — gate แค่ไม่จำ ไม่ควรพัง
     }
-    // ตั้ง attribute หลัง fade จบเท่านั้น — กฎกัน flash คือ
-    // `[data-iterra-entered] [data-preloader]{display:none!important}`
-    // ถ้าตั้งก่อน overlay จะหายทันทีเฟรมเดียว แล้ว gsap ไปไล่ opacity
-    // ให้ของที่มองไม่เห็นอยู่ 550ms กว่า onEnter จะทำงาน
+    // ไม่ต้องเขียน attribute อะไรที่ <html> — sessionStorage เป็นแหล่งความจริงเดียว
+    // และ component ก็ unmount ตัวเองอยู่แล้วเมื่อ gated เป็น false
+    // (ของเดิมเขียน data-iterra-entered ไว้ ซึ่งไม่มีใครอ่านแล้วหลังเลิกใช้ CSS กฎนั้น)
     const done = () => {
-      document.documentElement.setAttribute('data-iterra-entered', '1');
       setGated(false);
       onEnter?.();
     };
@@ -219,23 +217,26 @@ export default function Preloader({
 
   return (
     <>
-      {/* กัน flash ของ overlay สำหรับคนที่ผ่าน gate มาแล้วใน session นี้:
-          สคริปต์อยู่ใน HTML ที่ export ออกมา จึงรันก่อน React hydrate
-          ต้องเขียนเป็น data-attribute ไม่ใช่ className — className ของ <html>
-          เป็นของ app/layout.tsx (ตัวแปรฟอนต์) ถ้าไปเติมคลาสก่อน hydrate
-          React จะฟ้อง hydration mismatch ส่วน attribute ที่ React ไม่ได้ render
-          จะไม่ถูกนำมาเทียบ */}
-      <style
-        dangerouslySetInnerHTML={{
-          __html: '[data-iterra-entered] [data-preloader]{display:none!important}',
-        }}
-      />
+      {/* กัน flash ของ overlay สำหรับคนที่ผ่าน gate มาแล้วใน session นี้
+          สคริปต์นี้อยู่ใน HTML ที่ส่งมา จึงรันก่อน React hydrate
+          markup ฝั่ง server ไม่มีทางรู้ค่า sessionStorage จึง render overlay มาเสมอ
+          แล้วให้สคริปต์นี้ซ่อนทันทีถ้าเคยเข้ามาแล้ว
+
+          มันแทรก <style> เข้าไปใน <head> เอง ไม่ไปแตะ attribute หรือ class ของ
+          <html> — สองอย่างนั้นเป็นของ app/layout.tsx ถ้าไปเขียนทับก่อน hydrate
+          React จะฟ้อง "tree hydrated but some attributes ... didn't match"
+          ทุกครั้งที่โหลดเต็มหน้าในเซสชันที่ผ่านประตูมาแล้ว
+          (เจอจริงตอนย้ายมา mount ที่ layout — ตอนอยู่ใต้ page ยังไม่โผล่)
+          node ที่สคริปต์สร้างเองไม่ได้อยู่ในต้นไม้ของ React จึงไม่ถูกนำไปเทียบ */}
       <script
         dangerouslySetInnerHTML={{
           __html:
             "try{if(sessionStorage.getItem('" +
             storageKey +
-            "')==='1')document.documentElement.setAttribute('data-iterra-entered','1')}catch(e){}",
+            "')==='1'){var s=document.createElement('style');" +
+            "s.setAttribute('data-preloader-skip','');" +
+            "s.textContent='[data-preloader]{display:none!important}';" +
+            'document.head.appendChild(s);}}catch(e){}',
         }}
       />
       <div
