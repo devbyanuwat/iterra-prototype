@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Anuphan, Archivo } from 'next/font/google';
+import { DM_Sans, IBM_Plex_Sans_Thai } from 'next/font/google';
 import './globals.css';
 import { LangProvider } from '@/components/LangProvider';
 import SmoothScroll from '@/components/SmoothScroll';
@@ -8,21 +8,22 @@ import Footer from '@/components/Footer';
 import JsonLd from '@/components/JsonLd';
 import { CONTACT, SITE_NAME, SITE_TAGLINE_EN, SITE_TAGLINE_TH, SITE_URL } from '@/lib/site';
 
-// Display + micro-caps. wdth is what lets headlines stretch past the frame.
-const archivo = Archivo({
+// Display + micro-caps. Variable — opsz ปรับรูปตัวอักษรตามขนาดที่ใช้จริง
+// ไม่มีแกน wdth (ต่างจาก Archivo เดิม) การยืดพาดหัวจึงทำด้วย transform แทน
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  axes: ['wdth'],
+  axes: ['opsz'],
   weight: 'variable',
   display: 'swap',
-  variable: '--font-archivo',
+  variable: '--font-dm-sans',
 });
 
-// Body face: Thai + Latin.
-const anuphan = Anuphan({
+// Body face: ไทย + ละติน · ไม่ใช่ variable font ต้องระบุน้ำหนักเป็นชุด
+const plexThai = IBM_Plex_Sans_Thai({
   subsets: ['latin', 'thai'],
-  weight: 'variable',
+  weight: ['100', '400', '700'],
   display: 'swap',
-  variable: '--font-anuphan',
+  variable: '--font-plex-thai',
 });
 
 export const metadata: Metadata = {
@@ -62,7 +63,7 @@ const organizationJsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th" className={`${archivo.variable} ${anuphan.variable}`}>
+    <html lang="th" className={`${dmSans.variable} ${plexThai.variable}`}>
       <body>
         <LangProvider>
           <SmoothScroll />

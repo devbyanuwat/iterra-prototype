@@ -11,7 +11,7 @@
 // - revert() ทุกครั้งตอน unmount ไม่งั้น DOM เหลือ <div> ครอบบรรทัดค้างไว้
 //   แล้วข้อความไทยจะเสียการตัดบรรทัด
 // - autoSplit: true ให้ split ใหม่เมื่อฟอนต์โหลดเสร็จหรือจอเปลี่ยนขนาด
-//   (Anuphan เป็น variable font โหลดทีหลัง → บรรทัดขยับ)
+//   (ฟอนต์โหลดทีหลัง → บรรทัดขยับ)
 //
 // ทำไมต้อง dangerouslySetInnerHTML แทนการส่ง children ตรง ๆ:
 // SplitText เอา text node ที่ React เป็นเจ้าของออกแล้วใส่ <div> บรรทัดแทน
@@ -42,7 +42,7 @@ type Props = {
   /** เผยตอน scroll ถึง หรือเผยทันทีที่ mount (ใช้กับ hero หลัง preloader) */
   trigger?: 'scroll' | 'mount';
   /** ครอบแต่ละบรรทัดด้วย overflow:hidden ให้บรรทัดเลื่อนขึ้นจากใต้เส้น
-   *  ปิดเมื่อ element นั้นจะถูกยืด wdth ทีหลัง ไม่งั้นโดน clip ด้านข้าง */
+   *  ปิดเมื่อ element นั้นจะถูก scaleX ทีหลัง ไม่งั้นโดน clip ด้านข้าง */
   mask?: boolean;
   stagger?: number;
   duration?: number;

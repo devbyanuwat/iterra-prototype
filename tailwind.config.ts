@@ -39,8 +39,10 @@ const config: Config = {
         widest2: '0.22em',
       },
       fontFamily: {
-        sans: ['var(--font-anuphan)', 'Noto Sans Thai', 'system-ui', 'sans-serif'],
-        display: ['var(--font-archivo)', 'system-ui', 'sans-serif'],
+        // ทั้งสอง family อยู่ในทั้งสอง stack — DM Sans ไม่มีอักษรไทย
+        // ถ้าไม่ใส่ Plex Thai ต่อท้าย display พาดหัวไทยจะตกไปใช้ฟอนต์ระบบ
+        sans: ['var(--font-plex-thai)', 'var(--font-dm-sans)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-dm-sans)', 'var(--font-plex-thai)', 'system-ui', 'sans-serif'],
       },
     },
   },

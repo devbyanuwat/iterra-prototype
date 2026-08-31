@@ -252,7 +252,6 @@ export default function Preloader({
           <p
             data-pre-fade
             className="font-display text-[22vw] font-extralight leading-[0.8] tabular-nums text-cream md:text-[14vw]"
-            style={{ fontVariationSettings: '"wdth" 80' }}
             aria-live="polite"
             aria-label={`${pct} percent`}
           >

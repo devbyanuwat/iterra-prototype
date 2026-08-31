@@ -2,8 +2,8 @@
 
 // Hero AD-1 "โชว์รูมตอนดึก": สินค้าเป็นวัตถุลอยในห้องมืด spotlight รับสี --accent
 //
-// เดสก์ท็อป: pin + scrub — สินค้า scale ขึ้นและลอยขึ้น · พาดหัวยืดแกน wdth 88 → 125
-// (Archivo variable) · spotlight หรี่ลง
+// เดสก์ท็อป: pin + scrub — สินค้า scale ขึ้นและลอยขึ้น · พาดหัวยืดออกด้านข้าง
+// ด้วย scaleX 1 → 1.16 · spotlight หรี่ลง
 // มือถือ / reduced-motion: ไม่ pin ไม่ parallax — เห็นเนื้อหาครบนิ่ง ๆ
 //
 // ข้อมูลทุกอย่างรับเป็น prop และมีค่า default จาก i18n เพื่อให้ HomeContent
@@ -35,8 +35,7 @@ type Props = {
 // ไม่ใช่ passive phase ของ useEffect
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-const WDTH_FROM = 88;
-const WDTH_TO = 125;
+const HEAD_SCALE_TO = 1.16;
 
 export default function Hero({
   image,
@@ -96,25 +95,12 @@ export default function Hero({
 
       if (product) tl.to(product, { scale: 1.22, yPercent: -14 }, 0);
       if (spot) tl.to(spot, { opacity: 0.18, scale: 1.35 }, 0);
-      // ยืดแกน wdth ของ Archivo
-      // (นี่คือจุดเดียวที่ยอมให้ animate อย่างอื่นนอกจาก transform/opacity
-      //  เพราะสเปก §5 กำหนดไว้ตรง ๆ — จำกัดไว้ที่เดสก์ท็อปและหัวเดียว)
-      //
-      // ห้าม tween ตัว custom property ตรง ๆ ด้วย gsap.to(el, {'--hero-wdth': 125})
-      // GSAP จะพยายามแปลงหน่วยแล้วเขียนค่าเพี้ยนเป็น 0.000125 → เบราว์เซอร์ clamp
-      // ไปที่ขอบล่างของแกน (62) พาดหัวเลยบีบแคบค้างตลอด
-      // ใช้ proxy object แล้ว setProperty เองจึงได้ค่าที่ถูกต้อง
-      if (heading) {
-        const axis = { v: WDTH_FROM };
-        tl.to(
-          axis,
-          {
-            v: WDTH_TO,
-            onUpdate: () => heading.style.setProperty('--hero-wdth', String(axis.v)),
-          },
-          0,
-        );
-      }
+      // พาดหัวยืดออกด้านข้างตาม progress (สเปก §5)
+      // DM Sans ไม่มีแกน wdth เหมือน Archivo เดิม จึงยืดด้วย scaleX แทน
+      // ได้ผลตรงตามเจตนาเดิม (พาดหัวล้นเฟรม) และเป็น transform ล้วน
+      // ไม่เกิด reflow ต่างจากการ animate font-variation-settings
+      // origin ซ้ายเพื่อให้ยืดไปทางขอบขวา ไม่ใช่บานออกสองข้าง
+      if (heading) tl.fromTo(heading, { scaleX: 1 }, { scaleX: HEAD_SCALE_TO }, 0);
       if (hint) tl.to(hint, { opacity: 0, duration: 0.25 }, 0);
     });
 
@@ -166,17 +152,7 @@ export default function Hero({
           trigger="mount"
           mask={false}
           data-hero-title
-          className="mb-6 max-w-[16ch] whitespace-pre-line font-display text-[13vw] font-extralight leading-[0.92] text-cream md:text-[7.5vw]"
-          style={
-            {
-              '--hero-wdth': WDTH_FROM,
-              fontVariationSettings: '"wdth" var(--hero-wdth)',
-              // Archivo ไม่มีสระ/พยัญชนะไทย ถ้าไม่ใส่ Anuphan ต่อท้าย
-              // พาดหัวไทยจะตกไปใช้ฟอนต์ระบบ (Thonburi) แทน
-              // ทางแก้ถาวรอยู่ที่ fontFamily.display ใน tailwind.config.ts (นอกขอบเขต task D)
-              fontFamily: 'var(--font-archivo), var(--font-anuphan), system-ui, sans-serif',
-            } as React.CSSProperties
-          }
+          className="mb-6 max-w-[16ch] origin-left whitespace-pre-line font-display text-[13vw] font-extralight leading-[0.92] text-cream will-change-transform md:text-[7.5vw]"
         >
           {heroTitle}
         </SplitReveal>
