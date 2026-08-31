@@ -10,6 +10,12 @@ export type Post = {
   cover: string; // ป้ายชื่อภาพ placeholder (16:9)
   tag: string;
   body: string[]; // ย่อหน้าภาษาไทย
+  // ── ยังไม่มีฉบับอังกฤษ ──
+  // title กับ excerpt แปลครบแล้ว แต่ tag และเนื้อบทความยังมีแต่ไทย
+  // ประกาศช่องไว้ให้เติมทีหลังได้โดยไม่ต้องแก้ component
+  // ถ้าไม่มีค่า ตัว component จะตกกลับไปใช้ไทย ไม่ปล่อยโหนดว่าง
+  tagEn?: string;
+  bodyEn?: string[];
 };
 
 export const posts: Post[] = [
