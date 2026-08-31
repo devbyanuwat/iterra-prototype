@@ -83,7 +83,7 @@ export default function Nav() {
 
       {/* เมนูมือถือแบบเต็มจอ */}
       <div
-        className={`fixed inset-0 z-[60] flex flex-col bg-ink text-paper transition-transform duration-500 md:hidden ${
+        className={`fixed inset-0 z-[60] flex flex-col bg-base text-cream transition-transform duration-500 md:hidden ${
           open ? 'translate-y-0' : '-translate-y-full'
         }`}
         aria-hidden={!open}

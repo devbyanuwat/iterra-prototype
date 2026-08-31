@@ -5,7 +5,6 @@
 // + แผนที่ placeholder (ของจริงฝัง Google Maps embed ตรงนี้)
 
 import { useEffect, useRef, useState } from 'react';
-import Placeholder from './Placeholder';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { CONTACT } from '@/lib/site';
@@ -35,9 +34,9 @@ export default function ContactContent() {
     <>
       <section className="px-6 pb-28 pt-36 md:px-[8vw] md:pt-44">
         <Reveal>
-          <p className="mb-4 text-[11px] uppercase tracking-widest2 text-warm-500">CONTACT</p>
-          <h1 className="text-4xl font-extralight tracking-wide md:text-5xl">{t.contact.title}</h1>
-          <p className="mt-4 text-sm font-light text-warm-500">{t.contact.sub}</p>
+          <p className="mb-4 micro">CONTACT</p>
+          <h1 className="font-display text-4xl font-extralight tracking-wide text-cream md:text-5xl">{t.contact.title}</h1>
+          <p className="mt-4 text-sm font-light text-dim">{t.contact.sub}</p>
         </Reveal>
 
         <div className="mt-16 grid gap-16 lg:grid-cols-2 lg:gap-[6vw]">
@@ -45,29 +44,29 @@ export default function ContactContent() {
           <Reveal>
             <form onSubmit={handleSubmit} className="space-y-7">
               <div>
-                <label htmlFor="name" className="mb-2 block text-[11px] uppercase tracking-widest2 text-warm-500">
+                <label htmlFor="name" className="mb-2 block micro">
                   {t.contact.name}
                 </label>
                 <input
                   id="name"
                   name="name"
                   required
-                  className="w-full border-b border-warm-300 bg-transparent py-3 text-sm font-light outline-none transition-colors focus:border-ink"
+                  className="w-full border-b border-line-12 bg-transparent py-3 text-sm font-light text-cream outline-none transition-colors focus:border-accent"
                 />
               </div>
               <div>
-                <label htmlFor="email" className="mb-2 block text-[11px] uppercase tracking-widest2 text-warm-500">
+                <label htmlFor="email" className="mb-2 block micro">
                   {t.contact.email}
                 </label>
                 <input
                   id="email"
                   name="email"
                   required
-                  className="w-full border-b border-warm-300 bg-transparent py-3 text-sm font-light outline-none transition-colors focus:border-ink"
+                  className="w-full border-b border-line-12 bg-transparent py-3 text-sm font-light text-cream outline-none transition-colors focus:border-accent"
                 />
               </div>
               <div>
-                <label htmlFor="interest" className="mb-2 block text-[11px] uppercase tracking-widest2 text-warm-500">
+                <label htmlFor="interest" className="mb-2 block micro">
                   {t.contact.interest}
                 </label>
                 <select
@@ -75,26 +74,26 @@ export default function ContactContent() {
                   name="interest"
                   value={interest}
                   onChange={(e) => setInterest(e.target.value)}
-                  className="w-full border-b border-warm-300 bg-transparent py-3 text-sm font-light outline-none focus:border-ink"
+                  className="w-full border-b border-line-12 bg-transparent py-3 text-sm font-light text-cream outline-none focus:border-accent"
                 >
-                  <option value="kitchen">{t.common.category.kitchen}</option>
-                  <option value="bath">{t.common.category.bath}</option>
+                  <option value="kitchen" className="bg-surface text-cream">{t.common.category.kitchen}</option>
+                  <option value="bath" className="bg-surface text-cream">{t.common.category.bath}</option>
                 </select>
               </div>
               <div>
-                <label htmlFor="message" className="mb-2 block text-[11px] uppercase tracking-widest2 text-warm-500">
+                <label htmlFor="message" className="mb-2 block micro">
                   {t.contact.message}
                 </label>
                 <textarea
                   id="message"
                   name="message"
                   rows={5}
-                  className="w-full resize-none border-b border-warm-300 bg-transparent py-3 text-sm font-light outline-none transition-colors focus:border-ink"
+                  className="w-full resize-none border-b border-line-12 bg-transparent py-3 text-sm font-light text-cream outline-none transition-colors focus:border-accent"
                 />
               </div>
               <button
                 type="submit"
-                className="border border-ink px-10 py-4 text-[11px] uppercase tracking-widest2 transition-colors duration-300 hover:bg-ink hover:text-paper"
+                className="border border-line-12 px-10 py-4 text-[11px] uppercase tracking-widest2 text-cream transition-colors duration-300 hover:border-accent hover:text-accent"
               >
                 {t.contact.send}
               </button>
@@ -103,13 +102,14 @@ export default function ContactContent() {
 
           {/* ข้อมูล + แผนที่ */}
           <Reveal delay={0.15}>
-            <address className="mb-8 space-y-2.5 text-sm font-light not-italic leading-relaxed text-stone-600">
+            <address className="mb-8 space-y-2.5 text-sm font-light not-italic leading-relaxed text-dim">
               <p>{CONTACT.address_th}</p>
               <p>{CONTACT.phone} · LINE {CONTACT.line}</p>
               <p>{CONTACT.email}</p>
               <p>{CONTACT.hours_th}</p>
             </address>
-            <Placeholder label="แผนที่ Google Maps (ฝังของจริงตรงนี้)" ratio="16/9" />
+            {/* แผนที่: ฝัง Google Maps embed ตรงนี้ตอนขึ้นจริง */}
+            <div className="aspect-video w-full border border-line-6 bg-surface" aria-hidden />
           </Reveal>
         </div>
       </section>
@@ -118,7 +118,7 @@ export default function ContactContent() {
       <div
         role="status"
         aria-live="polite"
-        className={`fixed bottom-8 left-1/2 z-[70] w-[calc(100%-3rem)] max-w-md -translate-x-1/2 border border-ink/10 bg-ink px-6 py-4 text-center text-[13px] font-light text-paper shadow-2xl transition-all duration-500 ${
+        className={`fixed bottom-8 left-1/2 z-[70] w-[calc(100%-3rem)] max-w-md -translate-x-1/2 border border-line-12 bg-surface px-6 py-4 text-center text-[13px] font-light text-cream shadow-2xl transition-all duration-500 ${
           toast ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-6 opacity-0'
         }`}
       >

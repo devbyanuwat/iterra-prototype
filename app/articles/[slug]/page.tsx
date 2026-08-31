@@ -42,17 +42,14 @@ export default async function ArticlePage({ params }: Props) {
     mainEntityOfPage: `${SITE_URL}/articles/${post.slug}/`,
   };
 
-  // แทรกภาพ parallax หลังย่อหน้าที่ 2 และ 4
-  const imageAfter: Record<number, string> = {
-    1: `${post.cover} — ภาพแทรก 01`,
-    3: `${post.cover} — ภาพแทรก 02`,
-  };
+  // แทรกภาพ parallax หลังย่อหน้าที่ 2 และ 4 (ยังไม่มีภาพบทความจริง — กรอบตาม token)
+  const imageAfter = new Set([1, 3]);
 
   return (
     <article className="px-6 pb-28 pt-36 md:pt-44">
       <div className="mx-auto max-w-2xl">
         <Reveal>
-          <p className="mb-4 text-[11px] uppercase tracking-widest2 text-warm-500">
+          <p className="mb-4 micro">
             {post.tag} ·{' '}
             {new Date(post.date).toLocaleDateString('th-TH', {
               year: 'numeric',
@@ -60,35 +57,35 @@ export default async function ArticlePage({ params }: Props) {
               day: 'numeric',
             })}
           </p>
-          <h1 className="text-3xl font-extralight leading-snug tracking-wide md:text-5xl md:leading-[1.25]">
+          <h1 className="font-display text-3xl font-extralight leading-snug tracking-wide text-cream md:text-5xl md:leading-[1.25]">
             {post.title.th}
           </h1>
         </Reveal>
       </div>
 
       <Reveal className="mx-auto mt-12 max-w-4xl">
-        <ParallaxImage label={post.cover} ratio="16/9" speed={-6} />
+        <ParallaxImage ratio="16/9" speed={-6} />
       </Reveal>
 
       <div className="mx-auto mt-14 max-w-2xl">
         {post.body.map((para, i) => (
           <div key={i}>
             <Reveal y={24}>
-              <p className="mb-8 text-[15px] font-light leading-loose text-stone-700">{para}</p>
+              <p className="mb-8 text-[15px] font-light leading-loose text-dim">{para}</p>
             </Reveal>
-            {imageAfter[i] && (
+            {imageAfter.has(i) && (
               <Reveal className="mb-10">
-                <ParallaxImage label={imageAfter[i]} ratio="3/2" speed={i % 2 ? 6 : -6} />
+                <ParallaxImage ratio="3/2" speed={i % 2 ? 6 : -6} />
               </Reveal>
             )}
           </div>
         ))}
 
         <Reveal>
-          <div className="mt-12 border-t border-warm-200 pt-8">
+          <div className="mt-12 border-t border-line-6 pt-8">
             <Link
               href="/articles/"
-              className="text-[11px] uppercase tracking-widest2 underline-offset-8 hover:underline"
+              className="micro underline-offset-8 hover:underline"
             >
               ← กลับไปหน้าบทความ
             </Link>

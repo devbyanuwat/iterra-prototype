@@ -159,7 +159,7 @@ export default function Hero({
 
         <p
           data-hero-fade
-          className="mb-10 max-w-xl text-sm font-light leading-relaxed text-dim md:text-base"
+          className="mb-10 max-w-xl text-sm font-light leading-relaxed text-dim md:text-[1rem]"
         >
           {heroSub}
         </p>

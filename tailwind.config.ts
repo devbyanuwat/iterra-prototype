@@ -21,19 +21,6 @@ const config: Config = {
         },
         // Driven by the --accent custom property; tweened on swatch change.
         accent: 'var(--accent)',
-
-        // DEPRECATED light palette — kept only so the ~100 call sites in
-        // components/ and the other routes keep rendering while they are
-        // migrated to the tokens above. Delete once that migration lands.
-        paper: '#faf9f7',
-        ink: '#1c1917',
-        warm: {
-          100: '#f5f4f1',
-          200: '#e9e7e2',
-          300: '#d6d3cc',
-          400: '#a8a29e',
-          500: '#78716c',
-        },
       },
       letterSpacing: {
         widest2: '0.22em',

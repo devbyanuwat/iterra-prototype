@@ -103,7 +103,7 @@ export default function HorizontalGallery({ items }: Props) {
         <div className="mt-4 flex items-baseline justify-between gap-3">
           <div>
             <p className="micro">{t.common.category[p.category]}</p>
-            <h3 className="mt-1 text-base font-light tracking-wide text-cream">{p.name[lang]}</h3>
+            <h3 className="mt-1 text-[1rem] font-light tracking-wide text-cream">{p.name[lang]}</h3>
           </div>
           {meta ? <span className="whitespace-nowrap text-[11px] text-dim">{meta}</span> : null}
         </div>

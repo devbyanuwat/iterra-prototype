@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "check:artwork": "node scripts/check-artwork.mjs"
+    "start": "next start"
   },
   "dependencies": {
     "gsap": "^3.15.0",
