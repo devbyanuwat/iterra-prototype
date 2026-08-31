@@ -20,6 +20,7 @@ average colour is printed as `HEX #rrggbb` for use as the finish accent.
 """
 
 import sys
+from collections import deque
 from pathlib import Path
 
 from PIL import Image
@@ -33,6 +34,25 @@ NEAR_MIN = 236
 # Below the product's contact line there is nothing but the baked-in drop shadow, so
 # pixels down there are faded from much further into the greys.
 SHADOW_MIN = 200
+
+# ── the baked drop shadow (see shadow_background) ───────────────────────────────────────
+# Largest brightness drop the descent may take in one 4-connected step. Measured on the
+# masters: the shadow's own gradient peaks at 5 levels/px right under the contact point,
+# while a product silhouette is a 13-124 level cliff.
+SHADOW_STEP = 6
+# The shadow is a neutral darkening of a neutral plate. Anything tinted is product.
+SHADOW_CHROMA = 12
+# The descent must stay clear of the tones the product body itself occupies, or it walks
+# straight into a white basin. Measured floor = 75th percentile of the surviving pixels
+# plus this: matte black lands at ~117, brushed metal at ~225, white ceramic above BG_MIN
+# (which switches the pass off entirely, which is the right answer for a white-on-white shot).
+SHADOW_MARGIN = 40
+# Fraction of the descent's boundary that may end on that floor rather than on a silhouette.
+# A descent that stalls on the floor can only erase part of the shadow, and a half-erased
+# shadow with a ragged edge looks worse than the smear — so the whole pass is dropped.
+SHADOW_STALL = 0.02
+# ...and a backstop on how much of the opaque area one descent may claim.
+SHADOW_MAX = 0.40
 
 
 def flood_background(px, w, h):
@@ -82,6 +102,73 @@ def flood_background(px, w, h):
     return filled
 
 
+def shadow_background(px, w, h, filled):
+    """Descend out of the keyed plate into the drop shadow Kohler bakes into the master.
+
+    `flood_background` cannot reach it. The plate is a flat 255 but the shadow's outer
+    penumbra lands at 249-252 — under BG_MIN — so the strict fill stops at the pool's rim and
+    the whole ellipse survives fully opaque at 230-252. On #08090A that reads as a white
+    puddle under the product. It is not a near-white leftover either: its core drops to
+    ~180, which is dark enough that the old `y > bottom` ramp counted it as product body and
+    put the bounding box *below* the shadow, leaving that ramp with nothing to act on.
+
+    So walk the gradient instead of thresholding it. From the plate, step into a neighbour
+    only if it is neutral and no more than SHADOW_STEP darker: the shadow's own slope is
+    0-5 levels/px, a product silhouette is a 13-124 level cliff. A floor derived from the
+    product's own tone stops the descent before it can enter the body.
+
+    Returns a bytearray marking the pixels to key out, or None to leave the image alone.
+    """
+    vals = sorted(min(p) for p, f in zip(px, filled) if not f)
+    if not vals:
+        return None
+    floor = vals[len(vals) * 3 // 4] + SHADOW_MARGIN
+    if floor >= BG_MIN:
+        # A white product on a white plate: there is no tonal room between the two, so
+        # there is no shadow to separate. Ceramics land here.
+        return None
+
+    reach = bytearray(filled)
+    level = bytearray(w * h)
+    queue = deque()
+    for i, f in enumerate(filled):
+        if f:
+            level[i] = BG_MIN  # enter from the plate at the gate, not at its literal 255
+            queue.append(i)
+
+    cliffed = stalled = 0
+    while queue:
+        i = queue.popleft()
+        lo = level[i] - SHADOW_STEP
+        y, x = divmod(i, w)
+        for nx, ny, j in ((x - 1, y, i - 1), (x + 1, y, i + 1), (x, y - 1, i - w), (x, y + 1, i + w)):
+            if nx < 0 or nx >= w or ny < 0 or ny >= h or reach[j]:
+                continue
+            r, g, b = px[j]
+            m = min(r, g, b)
+            if max(r, g, b) - m > SHADOW_CHROMA:
+                continue
+            if m < lo:  # a silhouette: the descent has found the product's own edge
+                cliffed += 1
+                continue
+            if m < floor:  # the descent ran out of headroom before it found one
+                stalled += 1
+                continue
+            reach[j] = 1
+            level[j] = min(BG_MIN, m)
+            queue.append(j)
+
+    added = sum(1 for i, r in enumerate(reach) if r and not filled[i])
+    if not added or stalled > SHADOW_STALL * (cliffed + stalled):
+        return None
+    if added > SHADOW_MAX * (w * h - sum(filled)):
+        return None
+    for i, f in enumerate(filled):
+        if f:
+            reach[i] = 0
+    return reach
+
+
 def key(path):
     im = Image.open(path).convert("RGB")
     w, h = im.size
@@ -93,10 +180,21 @@ def key(path):
     # 255 there. Reject anything dimmer so the caller drops the finish rather than ship it.
     corners = [min(im.getpixel(c)) for c in ((0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1))]
     if min(corners) < BG_MIN:
-        return None, (0, 0, 0, 0), 0.0, 0.0
+        return None, (0, 0, 0, 0), 0.0, 0.0, 0
 
     px = list(im.getdata())
     filled = flood_background(px, w, h)
+
+    # Fold the baked drop shadow into the background before anything downstream reads it:
+    # with the pool gone the bounding box lands on the product's real contact line, which is
+    # what the ramp below has always assumed.
+    shadow = shadow_background(px, w, h, filled)
+    shadow_px = 0
+    if shadow is not None:
+        for i, s in enumerate(shadow):
+            if s:
+                filled[i] = 1
+                shadow_px += 1
 
     alpha = bytearray(255 if not f else 0 for f in filled)
 
@@ -120,7 +218,7 @@ def key(path):
         if x > right:
             right = x
     if bottom < 0:  # nothing but near-white survived — bail out, caller will flag it
-        return None, (0, 0, 0, 0), 0.0, 0.0
+        return None, (0, 0, 0, 0), 0.0, 0.0, 0
 
     # What the flood fill leaves behind gets cleaned up in two ways:
     #  1) under the product body there is nothing but the drop shadow Kohler bakes into
@@ -164,7 +262,7 @@ def key(path):
         box = (max(xs) - min(xs) + 1) * (max(ys) - min(ys) + 1)
         fill = len(xs) / box
     keyed = sum(1 for a in alpha if a < 200) / (w * h)
-    return out, (left, top, right, bottom), keyed, fill
+    return out, (left, top, right, bottom), keyed, fill, shadow_px
 
 
 def swatch(src, out_dir, base):
@@ -194,7 +292,7 @@ def main():
     if "--swatch" in sys.argv[1:]:
         return swatch(src, out_dir, base)
 
-    img, bbox, keyed, fill = key(src)
+    img, bbox, keyed, fill, shadow_px = key(src)
     if img is None:
         print("FAIL not-shot-on-white", src, file=sys.stderr)
         return 1
@@ -204,18 +302,22 @@ def main():
         print(f"FAIL unkeyed-plate fill={fill:.3f} keyed={keyed:.2f}", src, file=sys.stderr)
         return 1
 
-    # Never upscale: a handful of Scene7 masters are narrower than 1400 (Scene7 answers a
-    # too-large `wid` with a 403), and blowing those up would only cost bytes.
-    src_w = img.size[0]
-    widths = sorted({min(t, src_w) for t in widths}, reverse=True)
-    for i, target in enumerate(widths):
-        w, h = img.size
-        scaled = img if w == target else img.resize((target, round(h * target / w)), Image.LANCZOS)
-        name = f"{base}.webp" if i == 0 else f"{base}-{target}.webp"
-        scaled.save(out_dir / name, "WEBP", quality=86, method=6)
+    # --dry reports what the key would do without writing, so a re-key run can pick out the
+    # frames the shadow pass actually changes instead of re-encoding all 306.
+    if "--dry" not in sys.argv[1:]:
+        # Never upscale: a handful of Scene7 masters are narrower than 1400 (Scene7 answers a
+        # too-large `wid` with a 403), and blowing those up would only cost bytes.
+        src_w = img.size[0]
+        widths = sorted({min(t, src_w) for t in widths}, reverse=True)
+        for i, target in enumerate(widths):
+            w, h = img.size
+            scaled = img if w == target else img.resize((target, round(h * target / w)), Image.LANCZOS)
+            name = f"{base}.webp" if i == 0 else f"{base}-{target}.webp"
+            scaled.save(out_dir / name, "WEBP", quality=86, method=6)
 
     l, t, r, b = bbox
-    print(f"OK keyed={keyed:.3f} fill={fill:.3f} bbox={l},{t},{r},{b} out={out_dir / (base + '.webp')}")
+    print(f"OK keyed={keyed:.3f} fill={fill:.3f} shadow={shadow_px} bbox={l},{t},{r},{b} "
+          f"out={out_dir / (base + '.webp')}")
     return 0
 
 
