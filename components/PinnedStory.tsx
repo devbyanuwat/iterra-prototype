@@ -2,22 +2,50 @@
 
 // Section "เรื่องราวแบรนด์" — pinned + scrub
 // เดสก์ท็อป: ตรึงจอไว้ แล้วให้ภาพ/ข้อความ 3 ชุดสลับตาม scroll progress
-// มือถือ / reduced-motion: แสดงเป็น 3 บล็อกซ้อนกันตามปกติ (markup แยกชุด)
+// มือถือ / reduced-motion: แสดงเป็นบล็อกซ้อนกันตามปกติ (markup แยกชุด)
+//
+// รูปรับเป็น prop `images` — ยังไม่มีของจริงตอนนี้ ถ้าไม่ส่งมาจะ render
+// กรอบ surface เปล่าตาม token ไม่ผูกกับ lib/products
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Placeholder from './Placeholder';
+import SplitReveal from './SplitReveal';
 import { useLang } from './LangProvider';
 
-const IMAGE_LABELS = ['เรื่องราว ภาพ 01 (โชว์รูม)', 'เรื่องราว ภาพ 02 (สัมผัสจริง)', 'เรื่องราว ภาพ 03 (ทีมติดตั้ง)'];
+// ScrollTrigger ที่ pin จะย้าย element ของเราไปอยู่ใต้ .pin-spacer ที่มันสร้างเอง
+// React ไม่รู้เรื่องนี้ พอ unmount จะสั่ง removeChild จาก parent เดิม → NotFoundError
+// แล้วหน้าถัดไปพังทั้งหน้า cleanup ต้องรันใน layout phase (ก่อน React ลบ DOM)
+// ไม่ใช่ passive phase ของ useEffect
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-export default function PinnedStory() {
+export type StorySlide = { title: string; body: string };
+
+type Props = {
+  slides?: StorySlide[];
+  kicker?: string;
+  /** path รูปเรียงตาม slide — ช่องที่ว่างจะเป็นกรอบเปล่า */
+  images?: (string | undefined)[];
+};
+
+function Frame({ src, className = '' }: { src?: string; className?: string }) {
+  if (!src) {
+    return <div className={`border border-line-12 bg-surface ${className}`} aria-hidden />;
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- static export, รูป local จาก scraper
+    <img src={src} alt="" className={`object-cover ${className}`} />
+  );
+}
+
+export default function PinnedStory({ slides, kicker, images = [] }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const { t } = useLang();
-  const slides = t.home.storySlides;
 
-  useEffect(() => {
+  const items = slides ?? t.home.storySlides;
+  const storyKicker = kicker ?? t.home.storyKicker;
+
+  useIsoLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const el = root.current;
     if (!el) return;
@@ -42,7 +70,7 @@ export default function PinnedStory() {
         },
       });
 
-      for (let i = 1; i < slides.length; i++) {
+      for (let i = 1; i < items.length; i++) {
         tl.to(imgs[i - 1], { opacity: 0, duration: 0.35 }, `step${i}`)
           .to(texts[i - 1], { opacity: 0, y: -24, duration: 0.35 }, `step${i}`)
           .fromTo(imgs[i], { opacity: 0 }, { opacity: 1, duration: 0.35 }, `step${i}+=0.18`)
@@ -64,34 +92,36 @@ export default function PinnedStory() {
     });
 
     return () => mm.revert();
-  }, [slides.length]);
+  }, [items.length]);
 
   return (
-    <section className="bg-ink text-paper">
+    <section className="bg-base text-cream">
       {/* ── เดสก์ท็อป: pinned ── */}
       <div ref={root} className="relative hidden md:block">
         <div className="flex h-screen items-stretch overflow-hidden">
           <div className="relative w-1/2">
-            {IMAGE_LABELS.map((label, i) => (
-              <div key={label} data-story-img className="absolute inset-0">
-                <Placeholder fill dark label={label} />
+            {items.map((s, i) => (
+              <div key={s.title} data-story-img className="absolute inset-0">
+                <Frame src={images[i]} className="h-full w-full" />
               </div>
             ))}
           </div>
           <div className="relative flex w-1/2 items-center px-[6vw]">
             <span
               data-story-bar
-              className="absolute left-0 top-[20%] h-[60%] w-px bg-paper/25 will-change-transform"
+              className="absolute left-0 top-[20%] h-[60%] w-px bg-line-12 will-change-transform"
               aria-hidden
             />
             <div className="relative h-48 w-full">
-              {slides.map((s, i) => (
+              {items.map((s, i) => (
                 <div key={s.title} data-story-text className="absolute inset-0">
-                  <p className="mb-4 text-[11px] uppercase tracking-widest2 text-paper/50">
-                    {t.home.storyKicker} — 0{i + 1}
+                  <p className="micro mb-4">
+                    {storyKicker} — 0{i + 1}
                   </p>
-                  <h2 className="mb-5 text-3xl font-extralight tracking-wide lg:text-4xl">{s.title}</h2>
-                  <p className="max-w-md text-sm font-light leading-relaxed text-paper/70">{s.body}</p>
+                  <h2 className="mb-5 font-display text-3xl font-extralight tracking-wide lg:text-4xl">
+                    {s.title}
+                  </h2>
+                  <p className="max-w-md text-sm font-light leading-relaxed text-dim">{s.body}</p>
                 </div>
               ))}
             </div>
@@ -101,14 +131,16 @@ export default function PinnedStory() {
 
       {/* ── มือถือ: บล็อกซ้อนธรรมดา ── */}
       <div className="space-y-14 px-6 py-20 md:hidden">
-        {slides.map((s, i) => (
+        {items.map((s, i) => (
           <div key={s.title}>
-            <Placeholder label={IMAGE_LABELS[i]} ratio="3/2" dark className="mb-6" />
-            <p className="mb-2 text-[11px] uppercase tracking-widest2 text-paper/50">
-              {t.home.storyKicker} — 0{i + 1}
+            <Frame src={images[i]} className="mb-6 aspect-[3/2] w-full" />
+            <p className="micro mb-2">
+              {storyKicker} — 0{i + 1}
             </p>
-            <h2 className="mb-3 text-2xl font-extralight tracking-wide">{s.title}</h2>
-            <p className="text-sm font-light leading-relaxed text-paper/70">{s.body}</p>
+            <SplitReveal as="h2" className="mb-3 font-display text-2xl font-extralight tracking-wide">
+              {s.title}
+            </SplitReveal>
+            <p className="text-sm font-light leading-relaxed text-dim">{s.body}</p>
           </div>
         ))}
       </div>

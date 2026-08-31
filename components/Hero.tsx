@@ -1,103 +1,211 @@
 'use client';
 
-// Hero parallax 3 ชั้น: พื้นหลัง (depth 0.15) → ภาพสินค้า (0.4) → ตัวหนังสือ (0.75)
-// + พื้นหลัง scale 1.0 → 1.08 ตาม scroll
-// มือถือ: ตัด parallax เหลือ intro fade · reduced-motion: นิ่งทั้งหมด
+// Hero AD-1 "โชว์รูมตอนดึก": สินค้าเป็นวัตถุลอยในห้องมืด spotlight รับสี --accent
+//
+// เดสก์ท็อป: pin + scrub — สินค้า scale ขึ้นและลอยขึ้น · พาดหัวยืดแกน wdth 88 → 125
+// (Archivo variable) · spotlight หรี่ลง
+// มือถือ / reduced-motion: ไม่ pin ไม่ parallax — เห็นเนื้อหาครบนิ่ง ๆ
+//
+// ข้อมูลทุกอย่างรับเป็น prop และมีค่า default จาก i18n เพื่อให้ HomeContent
+// ที่เรียก <Hero /> เปล่า ๆ ยัง compile ได้ · task E จะส่งรูปสินค้าจริงเข้ามา
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Placeholder from './Placeholder';
+import SplitReveal from './SplitReveal';
 import { useLang } from './LangProvider';
 
-export default function Hero() {
+type Props = {
+  /** path รูปสินค้าพื้นโปร่ง — task E ส่งของจริงเข้ามา */
+  image?: string;
+  imageAlt?: string;
+  kicker?: string;
+  title?: string;
+  sub?: string;
+  ctaHref?: string;
+  ctaLabel?: string;
+  /** ล็อกสี accent ของ section นี้ (ปกติปล่อยให้ FinishProvider คุม --accent) */
+  accent?: string;
+};
+
+// ScrollTrigger ที่ pin จะย้าย element ของเราไปอยู่ใต้ .pin-spacer ที่มันสร้างเอง
+// React ไม่รู้เรื่องนี้ พอ unmount จะสั่ง removeChild จาก parent เดิม → NotFoundError
+// แล้วหน้าถัดไปพังทั้งหน้า cleanup ต้องรันใน layout phase (ก่อน React ลบ DOM)
+// ไม่ใช่ passive phase ของ useEffect
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
+const WDTH_FROM = 88;
+const WDTH_TO = 125;
+
+export default function Hero({
+  image,
+  imageAlt = '',
+  kicker,
+  title,
+  sub,
+  ctaHref = '/products/',
+  ctaLabel,
+  accent,
+}: Props) {
   const root = useRef<HTMLElement>(null);
   const { t } = useLang();
 
-  useEffect(() => {
+  const heroKicker = kicker ?? t.home.heroKicker;
+  const heroTitle = title ?? t.home.heroTitle;
+  const heroSub = sub ?? t.home.heroSub;
+  const heroCta = ctaLabel ?? t.common.explore;
+
+  useIsoLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const el = root.current;
     if (!el) return;
 
     const mm = gsap.matchMedia(el);
 
-    // intro: ตัวหนังสือ fade-up ทีละบรรทัด
+    // intro: kicker / sub / ปุ่ม fade ขึ้น (พาดหัวเป็นหน้าที่ของ SplitReveal)
     mm.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.fromTo(
-        el.querySelectorAll('[data-hero-fade]'),
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out', stagger: 0.12, delay: 0.2 },
-      );
+      gsap.from(el.querySelectorAll('[data-hero-fade]'), {
+        opacity: 0,
+        y: 28,
+        duration: 1,
+        ease: 'power3.out',
+        stagger: 0.1,
+        delay: 0.35,
+      });
     });
 
-    // parallax หลายชั้น: เดสก์ท็อปเท่านั้น
+    // pin + scrub: เดสก์ท็อปเท่านั้น
     mm.add('(prefers-reduced-motion: no-preference) and (min-width: 768px)', () => {
-      const st = { trigger: el, start: 'top top', end: 'bottom top', scrub: true } as const;
-      el.querySelectorAll<HTMLElement>('[data-depth]').forEach((layer) => {
-        const depth = parseFloat(layer.dataset.depth || '0');
-        gsap.to(layer, { yPercent: depth * 42, ease: 'none', scrollTrigger: { ...st } });
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: el,
+          start: 'top top',
+          end: '+=110%',
+          pin: true,
+          scrub: 0.6,
+          invalidateOnRefresh: true,
+        },
       });
-      gsap.fromTo(
-        el.querySelector('[data-hero-scale]'),
-        { scale: 1 },
-        { scale: 1.08, ease: 'none', scrollTrigger: { ...st } },
-      );
+
+      const product = el.querySelector<HTMLElement>('[data-hero-product]');
+      const spot = el.querySelector<HTMLElement>('[data-hero-spot]');
+      const heading = el.querySelector<HTMLElement>('[data-hero-title]');
+      const hint = el.querySelector<HTMLElement>('[data-hero-hint]');
+
+      if (product) tl.to(product, { scale: 1.22, yPercent: -14 }, 0);
+      if (spot) tl.to(spot, { opacity: 0.18, scale: 1.35 }, 0);
+      // ยืดแกน wdth ของ Archivo
+      // (นี่คือจุดเดียวที่ยอมให้ animate อย่างอื่นนอกจาก transform/opacity
+      //  เพราะสเปก §5 กำหนดไว้ตรง ๆ — จำกัดไว้ที่เดสก์ท็อปและหัวเดียว)
+      //
+      // ห้าม tween ตัว custom property ตรง ๆ ด้วย gsap.to(el, {'--hero-wdth': 125})
+      // GSAP จะพยายามแปลงหน่วยแล้วเขียนค่าเพี้ยนเป็น 0.000125 → เบราว์เซอร์ clamp
+      // ไปที่ขอบล่างของแกน (62) พาดหัวเลยบีบแคบค้างตลอด
+      // ใช้ proxy object แล้ว setProperty เองจึงได้ค่าที่ถูกต้อง
+      if (heading) {
+        const axis = { v: WDTH_FROM };
+        tl.to(
+          axis,
+          {
+            v: WDTH_TO,
+            onUpdate: () => heading.style.setProperty('--hero-wdth', String(axis.v)),
+          },
+          0,
+        );
+      }
+      if (hint) tl.to(hint, { opacity: 0, duration: 0.25 }, 0);
     });
 
     return () => mm.revert();
   }, []);
 
   return (
-    <section ref={root} className="relative h-[100svh] min-h-[560px] overflow-hidden bg-ink">
-      {/* ชั้น 1: ภาพพื้นหลังเต็มจอ */}
-      <div data-depth="0.15" className="absolute inset-0 will-change-transform">
-        <div data-hero-scale className="absolute inset-0 origin-center will-change-transform">
-          <Placeholder fill dark label="ภาพครัว HERO 16:9" />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-black/25" aria-hidden />
+    <section
+      ref={root}
+      className="relative flex h-[100svh] min-h-[560px] flex-col justify-end overflow-hidden bg-base text-cream"
+      style={accent ? ({ '--accent': accent } as React.CSSProperties) : undefined}
+    >
+      {/* spotlight: แสงในห้องมืด รับสีจาก --accent */}
+      <div
+        data-hero-spot
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-[38%] h-[110vmax] w-[110vmax] -translate-x-1/2 -translate-y-1/2 will-change-transform"
+        style={{
+          background:
+            'radial-gradient(closest-side, color-mix(in srgb, var(--accent) 26%, transparent), transparent 70%)',
+        }}
+      />
+
+      {/* สินค้า: วัตถุลอยกลางห้อง */}
+      <div
+        data-hero-product
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[62vh] w-[70vw] max-w-[520px] -translate-x-1/2 -translate-y-[54%] will-change-transform md:w-[34vw]"
+      >
+        {image ? (
+          // eslint-disable-next-line @next/next/no-img-element -- static export + รูปพื้นโปร่งจาก scraper, ไม่ต้องผ่าน optimizer
+          <img
+            src={image}
+            alt={imageAlt}
+            className="h-full w-full object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.65)]"
+          />
+        ) : (
+          <div className="h-full w-full rounded-sm border border-line-12 bg-surface/40" aria-hidden />
+        )}
       </div>
 
-      {/* ชั้น 2: ภาพสินค้าลอย */}
-      <div
-        data-depth="0.4"
-        className="absolute bottom-[16vh] right-[7vw] hidden w-[24vw] max-w-sm will-change-transform md:block"
-      >
-        <Placeholder label="ภาพสินค้า HERO 4:5" ratio="4/5" className="shadow-2xl shadow-black/40" />
-      </div>
-
-      {/* ชั้น 3: ตัวหนังสือ */}
-      <div
-        data-depth="0.75"
-        className="relative z-10 flex h-full flex-col items-start justify-end px-6 pb-28 text-white will-change-transform md:px-[8vw]"
-      >
-        <p data-hero-fade className="mb-5 text-[11px] uppercase tracking-widest2 text-white/70">
-          {t.home.heroKicker}
+      {/* ตัวหนังสือ */}
+      <div className="relative z-10 px-6 pb-24 md:px-[8vw] md:pb-28">
+        <p data-hero-fade className="micro mb-5">
+          {heroKicker}
         </p>
-        <h1
-          data-hero-fade
-          className="mb-6 whitespace-pre-line text-4xl font-extralight leading-[1.15] tracking-wide md:text-6xl"
+
+        <SplitReveal
+          as="h1"
+          trigger="mount"
+          mask={false}
+          data-hero-title
+          className="mb-6 max-w-[16ch] whitespace-pre-line font-display text-[13vw] font-extralight leading-[0.92] text-cream md:text-[7.5vw]"
+          style={
+            {
+              '--hero-wdth': WDTH_FROM,
+              fontVariationSettings: '"wdth" var(--hero-wdth)',
+              // Archivo ไม่มีสระ/พยัญชนะไทย ถ้าไม่ใส่ Anuphan ต่อท้าย
+              // พาดหัวไทยจะตกไปใช้ฟอนต์ระบบ (Thonburi) แทน
+              // ทางแก้ถาวรอยู่ที่ fontFamily.display ใน tailwind.config.ts (นอกขอบเขต task D)
+              fontFamily: 'var(--font-archivo), var(--font-anuphan), system-ui, sans-serif',
+            } as React.CSSProperties
+          }
         >
-          {t.home.heroTitle}
-        </h1>
-        <p data-hero-fade className="mb-10 max-w-xl text-sm font-light leading-relaxed text-white/75 md:text-base">
-          {t.home.heroSub}
+          {heroTitle}
+        </SplitReveal>
+
+        <p
+          data-hero-fade
+          className="mb-10 max-w-xl text-sm font-light leading-relaxed text-dim md:text-base"
+        >
+          {heroSub}
         </p>
+
         <div data-hero-fade>
           <Link
-            href="/products/"
-            className="inline-block border border-white/60 px-9 py-3.5 text-[11px] uppercase tracking-widest2 transition-colors duration-300 hover:bg-white hover:text-ink"
+            href={ctaHref}
+            className="inline-block border border-line-12 px-9 py-3.5 text-cream transition-colors duration-300 hover:border-accent hover:text-accent"
           >
-            {t.common.explore}
+            <span className="micro !text-current">{heroCta}</span>
           </Link>
         </div>
       </div>
 
-      {/* scroll hint */}
-      <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 text-white/60" aria-hidden>
+      <div
+        data-hero-hint
+        className="pointer-events-none absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
+        aria-hidden
+      >
         <div className="flex flex-col items-center gap-2">
-          <span className="text-[10px] uppercase tracking-widest2">{t.common.scroll}</span>
-          <span className="block h-8 w-px animate-pulse bg-white/50" />
+          <span className="micro">{t.common.scroll}</span>
+          <span className="block h-8 w-px bg-line-12" />
         </div>
       </div>
     </section>

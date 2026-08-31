@@ -53,9 +53,10 @@ export default function TiltCard({ children, className = '' }: Props) {
   return (
     <div ref={outer} className={className}>
       <div ref={inner} className="relative will-change-transform [transform-style:preserve-3d]">
+        {/* เงาบนพื้นมืด: ใช้ดำเข้มแทน stone อ่อน ไม่งั้นกลายเป็นฝ้าสว่างบน #08090A */}
         <div
           aria-hidden
-          className="absolute inset-3 -z-10 bg-stone-900/15 blur-2xl transition-transform duration-300"
+          className="absolute inset-3 -z-10 bg-black/60 blur-2xl transition-transform duration-300"
           style={{ transform: 'translate(var(--sx, 0px), var(--sy, 0px))' }}
         />
         {children}
