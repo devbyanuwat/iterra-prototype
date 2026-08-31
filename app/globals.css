@@ -5,6 +5,16 @@
 :root {
   /* Default accent — overridden per selected finish (spec §2). */
   --accent: #c9a227;
+
+  /* The focus ring deliberately does NOT use --accent.
+     --accent is the average colour of the selected finish swatch, so it can land
+     anywhere in the palette. Matte Black (#1F1F21) is only 1.21:1 against the
+     #08090A page background, and four products select it on mount — that made the
+     focus indicator effectively invisible on those pages (AC 7).
+     A contrast-critical token cannot be driven by product data, so this is a fixed
+     value: cream on base is 15.6:1, and it matches the ring the finish chips
+     already paint for themselves in FinishSwatches. */
+  --focus-ring: #ede9e3;
 }
 
 html {
@@ -34,9 +44,9 @@ body {
   color: #6e7275;
 }
 
-/* Focus ring readable on #08090A */
+/* Focus ring readable on #08090A for every accent — see --focus-ring above */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   /* No border-radius here — it would square off every rounded element that
      takes focus, e.g. the circular finish chips. The outline follows the

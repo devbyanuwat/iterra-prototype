@@ -69,9 +69,9 @@ export default function ProductDetail({ slug }: { slug: string }) {
 
             {/* ผิวเคลือบ */}
             <Reveal>
-              <h2 className="micro mb-4 mt-10">{lang === 'th' ? 'ผิวเคลือบ' : 'FINISH'}</h2>
+              <h2 className="micro mb-4 mt-10">{t.common.finish}</h2>
               <FinishSwatches />
-              <FinishLabel className="text-sm font-light text-cream" />
+              <FinishLabel className="mt-3 block text-sm font-light text-cream" />
             </Reveal>
 
             {/* ตารางสเปก */}

@@ -11,17 +11,8 @@ import { products, type Category } from '@/lib/products';
 
 type Filter = 'all' | Category;
 
-// t.products.sub ยังเขียนตายตัวว่า "12 รายการ" / "Twelve curated…" ตั้งแต่ตอนเป็น mock
-// ตอนนี้แคตตาล็อกจริงมีเป็นร้อยชิ้น ประโยคนั้นเลยผิดข้อเท็จจริง
-// lib/i18n.ts อยู่นอกขอบเขต task E จึงประกอบประโยคจากจำนวนจริงที่นี่แทน
-// ถ้าแก้ i18n เมื่อไหร่ ให้กลับไปใช้ t.products.sub ได้เลย
-const SUB = {
-  th: (n: number) => `อุปกรณ์ครัวและสุขภัณฑ์คัดสรร ${n} รายการ — ทุกชิ้นสัมผัสจริงได้ที่โชว์รูม`,
-  en: (n: number) => `${n} curated kitchen and bath pieces — every one on display at our showroom.`,
-};
-
 export default function ProductsContent() {
-  const { lang, t } = useLang();
+  const { t } = useLang();
   const [filter, setFilter] = useState<Filter>('all');
 
   useEffect(() => {
@@ -39,7 +30,7 @@ export default function ProductsContent() {
           <p className="mb-4 micro">{t.products.kicker}</p>
           <h1 className="font-display text-4xl font-extralight tracking-wide text-cream md:text-5xl">{t.products.title}</h1>
           <p className="mt-4 max-w-lg text-sm font-light leading-relaxed text-dim">
-            {SUB[lang](products.length)}
+            {t.products.sub(products.length)}
           </p>
         </Reveal>
 

@@ -27,8 +27,18 @@ export default function ProductCard({ product }: { product: Product }) {
               // eslint-disable-next-line @next/next/no-img-element -- static export, รูป local จาก scraper
               <img
                 src={finish.image}
-                srcSet={`${finish.image700} 700w, ${finish.image} 1400w`}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                // ใส่ srcSet เฉพาะตอนที่ไฟล์ครึ่งขนาดมีอยู่จริง — สินค้าที่ master
+                // เล็กกว่า 700px จะได้ image700 เท่ากับ image (ดู ProductStage)
+                srcSet={
+                  finish.image700 !== finish.image
+                    ? `${finish.image700} 700w, ${finish.image} 1400w`
+                    : undefined
+                }
+                sizes={
+                  finish.image700 !== finish.image
+                    ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+                    : undefined
+                }
                 alt={product.name[lang]}
                 loading="lazy"
                 decoding="async"
@@ -61,9 +71,7 @@ export default function ProductCard({ product }: { product: Product }) {
           {/* จุดสีเป็นภาพล้วน — บอกจำนวนเฉดเป็นข้อความให้ screen reader แทน */}
           {product.finishes.length > 1 && (
             <span className="sr-only">
-              {lang === 'th'
-                ? `มี ${product.finishes.length} เฉดผิวเคลือบ`
-                : `${product.finishes.length} finishes available`}
+              {t.common.finishCount(product.finishes.length)}
             </span>
           )}
         </div>

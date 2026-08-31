@@ -62,7 +62,7 @@ export default function HorizontalGallery({ items }: Props) {
         });
       };
 
-      gsap.to(trackEl, {
+      const tween = gsap.to(trackEl, {
         x: () => -amount(),
         ease: 'none',
         scrollTrigger: {
@@ -77,6 +77,30 @@ export default function HorizontalGallery({ items }: Props) {
         },
       });
       updateDepth();
+
+      // การ์ดถูกเลื่อนด้วย transform ใน container ที่ overflow-hidden
+      // transform ไม่ใช่ scroll เบราว์เซอร์จึงพาการ์ดที่อยู่นอกกรอบเข้ามาเองไม่ได้
+      // กด Tab แล้วโฟกัสจะไปอยู่บนลิงก์ที่มองไม่เห็น หน้าดูเหมือนไม่ตอบสนอง (ขัด AC 7)
+      // แก้โดยดันตำแหน่ง scroll ให้ตรงกับการ์ดที่เพิ่งได้โฟกัส แล้ว pin จะเลื่อนตามเอง
+      const st = tween.scrollTrigger;
+      const onFocusIn = (e: FocusEvent) => {
+        if (!st) return;
+        const card = (e.target as HTMLElement | null)?.closest<HTMLElement>('[data-gcard]');
+        if (!card) return;
+        const span = amount();
+        if (span <= 0) return;
+
+        // ระยะของการ์ดวัดเทียบกับ track — ทั้งคู่ขยับด้วยกัน ผลต่างจึงเป็นตำแหน่งก่อนถูกเลื่อน
+        const offset = card.getBoundingClientRect().left - trackEl.getBoundingClientRect().left;
+        const margin = window.innerWidth * 0.08; // เท่ากับ px-[8vw] ของ track
+        const progress = Math.min(1, Math.max(0, (offset - margin) / span));
+        const y = st.start + progress * (st.end - st.start);
+        // ถ้าอยู่ในกรอบอยู่แล้วไม่ต้องขยับ กัน scroll กระตุกตอน Tab ผ่านการ์ดที่เห็นอยู่
+        if (Math.abs(window.scrollY - y) < 8) return;
+        window.scrollTo({ top: y, behavior: 'auto' });
+      };
+      trackEl.addEventListener('focusin', onFocusIn);
+      return () => trackEl.removeEventListener('focusin', onFocusIn);
     });
 
     return () => mm.revert();

@@ -30,15 +30,21 @@ const FADE_S = 0.42; // 420ms ตามสเปก §5
 const LOAD_WATCHDOG_MS = 1500;
 
 /**
- * ไฟล์บนดิสก์มีสองขนาดต่อ finish: `<CODE>.webp` (1400) และ `<CODE>-700.webp` (700)
- * scraper เป็นคนสร้างทั้งคู่ (สเปก §3.3 ขั้น 5)
+ * เดิมประกอบ URL ตัวเล็กเองด้วย regex (`.webp` → `-700.webp`) แล้วประกาศ 700w/1400w ตายตัว
+ * ซึ่งผิดกับสินค้าที่ master จาก Scene7 เล็กกว่า 700px — key-white.py ไม่อัปสเกล
+ * ไฟล์ `-700.webp` จึงไม่มีจริง (taut-21370t-4cd, july-72821x-4, patio-22586x-s)
+ * เบราว์เซอร์เลือก candidate 700w แล้วได้ 404 เวทีเลยขึ้นเป็น alt text บนพื้นดำ
+ *
+ * generated data มี `image700` ที่ชี้ไปยังไฟล์ที่ถูกต้องอยู่แล้ว และจะเท่ากับ `image`
+ * เมื่อไม่มีไฟล์ครึ่งขนาด — ใช้ค่านั้นแทน และใส่ srcSet เฉพาะตอนที่มีสองไฟล์จริง
+ * (ถ้ามีไฟล์เดียว srcSet ที่มี candidate เดียวไม่ได้ช่วยอะไร แถมยังต้องโกหกความกว้าง)
  */
-function srcSetFor(src: string) {
-  const small = src.replace(/\.webp$/, '-700.webp');
-  return `${small} 700w, ${src} 1400w`;
+function srcSetFor(src: string, src700: string) {
+  if (!src700 || src700 === src) return undefined;
+  return `${src700} 700w, ${src} 1400w`;
 }
 
-type Layer = { key: string; src: string };
+type Layer = { key: string; src: string; src700: string };
 
 type Props = {
   /** ชื่อสินค้าไว้ทำ alt — ควรเป็นชื่อในภาษาที่กำลังแสดง */
@@ -63,7 +69,7 @@ export default function ProductStage({
 
   // front = รูปที่กำลังจะเป็นตัวจริง · back = รูปเดิมที่ยังค้างไว้ระหว่าง crossfade
   const [front, setFront] = useState<Layer | null>(
-    selected ? { key: selected.code, src: selected.image } : null,
+    selected ? { key: selected.code, src: selected.image, src700: selected.image700 } : null,
   );
   const [back, setBack] = useState<Layer | null>(null);
 
@@ -79,7 +85,7 @@ export default function ProductStage({
       if (prev?.key === selected.code) return prev;
       if (prev) setBack(prev);
       faded.current = false;
-      return { key: selected.code, src: selected.image };
+      return { key: selected.code, src: selected.image, src700: selected.image700 };
     });
   }, [selected]);
 
@@ -154,8 +160,8 @@ export default function ProductStage({
           <img
             key={back.key}
             src={back.src}
-            srcSet={srcSetFor(back.src)}
-            sizes={sizes}
+            srcSet={srcSetFor(back.src, back.src700)}
+            sizes={srcSetFor(back.src, back.src700) ? sizes : undefined}
             alt=""
             decoding="async"
             className="h-full w-full object-contain"
@@ -179,8 +185,8 @@ export default function ProductStage({
             if (el?.complete) runFade();
           }}
           src={front.src}
-          srcSet={srcSetFor(front.src)}
-          sizes={sizes}
+          srcSet={srcSetFor(front.src, front.src700)}
+          sizes={srcSetFor(front.src, front.src700) ? sizes : undefined}
           alt={name}
           decoding="async"
           fetchPriority={priority ? 'high' : 'auto'}

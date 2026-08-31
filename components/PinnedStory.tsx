@@ -45,6 +45,11 @@ export default function PinnedStory({ slides, kicker, images = [] }: Props) {
   const items = slides ?? t.home.storySlides;
   const storyKicker = kicker ?? t.home.storyKicker;
 
+  // ลายเซ็นของเนื้อหา ไม่ใช่ตัว array — ผู้เรียกที่ส่ง slides เป็น literal inline
+  // จะได้ reference ใหม่ทุก render ถ้า dep เป็น [items] เอฟเฟกต์จะสร้าง
+  // ScrollTrigger ใหม่ทุกครั้ง
+  const signature = items.map((s) => s.title).join('|');
+
   useIsoLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const el = root.current;
@@ -92,7 +97,11 @@ export default function PinnedStory({ slides, kicker, images = [] }: Props) {
     });
 
     return () => mm.revert();
-  }, [items.length]);
+    // ต้องผูกกับตัว items จริง ไม่ใช่แค่ความยาว: สลับ TH/EN แล้วจำนวนสไลด์เท่าเดิม (3)
+    // แต่เนื้อหาเปลี่ยนทั้งชุด ถ้า dep เป็น items.length เอฟเฟกต์จะไม่รันใหม่
+    // timeline เดิมจะถือ node ที่ถูกถอดไปแล้ว แล้ว section ค้าง pin อยู่ 220%
+    // โดยที่ข้อความสามชุดซ้อนทับกันอ่านไม่ออก (แก้ได้ด้วยการรีโหลดอย่างเดียว)
+  }, [signature]);
 
   return (
     <section className="bg-base text-cream">
@@ -100,8 +109,8 @@ export default function PinnedStory({ slides, kicker, images = [] }: Props) {
       <div ref={root} className="relative hidden md:block">
         <div className="flex h-screen items-stretch overflow-hidden">
           <div className="relative w-1/2">
-            {items.map((s, i) => (
-              <div key={s.title} data-story-img className="absolute inset-0">
+            {items.map((_s, i) => (
+              <div key={i} data-story-img className="absolute inset-0">
                 <Frame src={images[i]} className="h-full w-full" />
               </div>
             ))}
@@ -114,7 +123,7 @@ export default function PinnedStory({ slides, kicker, images = [] }: Props) {
             />
             <div className="relative h-48 w-full">
               {items.map((s, i) => (
-                <div key={s.title} data-story-text className="absolute inset-0">
+                <div key={i} data-story-text className="absolute inset-0">
                   <p className="micro mb-4">
                     {storyKicker} — 0{i + 1}
                   </p>
@@ -132,7 +141,7 @@ export default function PinnedStory({ slides, kicker, images = [] }: Props) {
       {/* ── มือถือ: บล็อกซ้อนธรรมดา ── */}
       <div className="space-y-14 px-6 py-20 md:hidden">
         {items.map((s, i) => (
-          <div key={s.title}>
+          <div key={i}>
             <Frame src={images[i]} className="mb-6 aspect-[3/2] w-full" />
             <p className="micro mb-2">
               {storyKicker} — 0{i + 1}

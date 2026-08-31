@@ -17,6 +17,9 @@ export const dict = {
     },
     common: {
       inquire: 'สอบถามสินค้านี้',
+      finish: 'ผิวเคลือบ',
+      chooseFinish: 'เลือกผิวเคลือบ',
+      finishCount: (n: number) => `มี ${n} เฉดผิวเคลือบ`,
       priceOnRequest: 'สอบถามราคา',
       viewAll: 'ดูทั้งหมด',
       readMore: 'อ่านต่อ',
@@ -68,7 +71,7 @@ export const dict = {
     products: {
       kicker: 'COLLECTION',
       title: 'สินค้าทั้งหมด',
-      sub: 'อุปกรณ์ครัวและสุขภัณฑ์คัดสรร 12 รายการ — ทุกชิ้นสัมผัสจริงได้ที่โชว์รูม',
+      sub: (n: number) => `อุปกรณ์ครัวและสุขภัณฑ์คัดสรร ${n} รายการ — ทุกชิ้นสัมผัสจริงได้ที่โชว์รูม`,
       filterLabel: 'หมวดหมู่',
       empty: 'ไม่พบสินค้าในหมวดนี้',
       specs: 'สเปกสินค้า',
@@ -102,6 +105,9 @@ export const dict = {
     },
     common: {
       inquire: 'Inquire about this piece',
+      finish: 'Finish',
+      chooseFinish: 'Choose a finish',
+      finishCount: (n: number) => `${n} finishes available`,
       priceOnRequest: 'Price on request',
       viewAll: 'View all',
       readMore: 'Read more',
@@ -153,7 +159,7 @@ export const dict = {
     products: {
       kicker: 'COLLECTION',
       title: 'All Products',
-      sub: 'Twelve curated kitchen and bath pieces — every one on display at our showroom.',
+      sub: (n: number) => `${n} curated kitchen and bath pieces — every one on display at our showroom.`,
       filterLabel: 'Category',
       empty: 'No products in this category',
       specs: 'Specifications',

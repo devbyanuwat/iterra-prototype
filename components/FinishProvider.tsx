@@ -161,10 +161,18 @@ export default function FinishProvider({
     [finishes],
   );
 
-  // รายการ finish เปลี่ยน (เปลี่ยนสินค้า) — กลับไปที่ตัวแรกเสมอ
+  // รายการ finish เปลี่ยน (เปลี่ยนสินค้า) — กลับไปที่เฉดตั้งต้นเสมอ
+  // เดิมโค้ดเก็บ index เดิมไว้ถ้ายังไม่เกินขอบ ซึ่งขัดกับคอมเมนต์: ผู้เรียกที่สลับ
+  // finishes ในที่เดิม (ไม่ได้เปลี่ยน route) จะไปโผล่ที่เฉดที่ 5 ของสินค้าใหม่
+  // ข้าม render แรกไว้ ไม่งั้นจะทับ initialCode ที่เพิ่งคำนวณไป
+  const mounted = useRef(false);
   useEffect(() => {
-    setIndex((i) => (i < finishes.length ? i : 0));
-  }, [finishes]);
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    setIndex(initialIndex);
+  }, [finishes, initialIndex]);
 
   const value = useMemo<FinishContextValue>(
     () => ({

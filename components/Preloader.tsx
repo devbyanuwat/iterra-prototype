@@ -56,9 +56,12 @@ export default function Preloader({
     } catch {
       // sessionStorage อาจถูกปิด (private mode / เข้ม cookie) — gate แค่ไม่จำ ไม่ควรพัง
     }
-    document.documentElement.setAttribute('data-iterra-entered', '1');
-
+    // ตั้ง attribute หลัง fade จบเท่านั้น — กฎกัน flash คือ
+    // `[data-iterra-entered] [data-preloader]{display:none!important}`
+    // ถ้าตั้งก่อน overlay จะหายทันทีเฟรมเดียว แล้ว gsap ไปไล่ opacity
+    // ให้ของที่มองไม่เห็นอยู่ 550ms กว่า onEnter จะทำงาน
     const done = () => {
+      document.documentElement.setAttribute('data-iterra-entered', '1');
       setGated(false);
       onEnter?.();
     };

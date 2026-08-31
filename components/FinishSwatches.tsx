@@ -17,10 +17,6 @@ import Image from 'next/image';
 import { useFinish } from './FinishProvider';
 import { useLang } from './LangProvider';
 
-// lib/i18n.ts ยังไม่มีคีย์นี้ และ lib/** อยู่นอกขอบเขต task C
-// เมื่อไหร่ที่มีคีย์แล้ว เปลี่ยนมาอ่านจาก t ได้เลย ตัว prop `label` override อยู่แล้ว
-const GROUP_LABEL = { th: 'เลือกผิวเคลือบ', en: 'Choose a finish' } as const;
-
 type Props = {
   className?: string;
   /** ป้ายกำกับกลุ่มสำหรับ screen reader */
@@ -31,7 +27,7 @@ type Props = {
 
 export default function FinishSwatches({ className = '', label, size = 44 }: Props) {
   const { finishes, selected, selectedIndex, select, hasChoice } = useFinish();
-  const { lang } = useLang();
+  const { lang, t } = useLang();
 
   // ชิปที่ "รับ Tab" อยู่ตอนนี้ — ปกติคือตัวที่เลือก แต่ลูกศรย้ายได้โดยยังไม่เลือก
   const [focusIndex, setFocusIndex] = useState(selectedIndex);
@@ -86,7 +82,7 @@ export default function FinishSwatches({ className = '', label, size = 44 }: Pro
   return (
     <div
       role="group"
-      aria-label={label ?? GROUP_LABEL[lang]}
+      aria-label={label ?? t.common.chooseFinish}
       // p-1 เผื่อที่ให้วงแหวนโฟกัสวงนอก (box-shadow 4px) ไม่ให้โดนตัด
       // ถ้า caller ครอบด้วย overflow-hidden หรือชนขอบคอนเทนเนอร์
       className={`flex flex-wrap items-center gap-3 p-1 ${className}`}
@@ -115,12 +111,6 @@ export default function FinishSwatches({ className = '', label, size = 44 }: Pro
               'hover:scale-110',
               // วงแหวนสองชั้นตอนโฟกัส: เส้นดำชิดขอบชิปกันชิปขาวกลืนกับวงนอก
               'focus-visible:outline-none',
-              // globals.css มีกฎกลาง `:focus-visible { border-radius: 2px }`
-              // ซึ่งไปทับ rounded-full ทำให้ชิปกลายเป็นสี่เหลี่ยมตอนโฟกัส
-              // (ตรวจเจอจริง: computed radius 2px เฉพาะชิปที่โฟกัส)
-              // ตัวนี้ specificity สูงกว่าเลยชนะ · ต้นเหตุจริงอยู่ที่ globals.css
-              // ซึ่งอยู่นอกขอบเขต task C
-              'focus-visible:rounded-full',
               'focus-visible:shadow-[0_0_0_2px_#08090A,0_0_0_4px_#EDE9E3]',
               isOn ? 'ring-2 ring-cream ring-offset-2 ring-offset-base' : 'ring-1 ring-line-12',
             ].join(' ')}
@@ -141,12 +131,15 @@ export default function FinishSwatches({ className = '', label, size = 44 }: Pro
 }
 
 /**
- * ป้ายชื่อเฉดสำหรับสินค้าที่มีเฉดเดียว — ใช้แทนแถวสวอตช์ที่ไม่ถูก render
- * ปลอดภัยที่จะวางไว้เสมอ: สินค้าที่มีหลายเฉดจะไม่แสดงอะไร
+ * ชื่อเฉดที่เลือกอยู่ — แสดงเสมอ ทั้งสินค้าเฉดเดียวและหลายเฉด
+ *
+ * เดิมคืน null เมื่อมีหลายเฉด ทำให้สินค้า 67 ชิ้นที่มีสวอตช์ ผู้ใช้ที่มองเห็น
+ * ไม่มีทางรู้ว่าเฉดที่เลือกอยู่ชื่ออะไร — ชื่อมีอยู่แค่ใน aria-label กับ title
+ * (screen reader ได้ยิน, เมาส์ต้องรอ tooltip, ที่เหลือไม่ได้เลย)
  */
 export function FinishLabel({ className = '' }: { className?: string }) {
-  const { selected, hasChoice } = useFinish();
+  const { selected } = useFinish();
   const { lang } = useLang();
-  if (hasChoice || !selected) return null;
+  if (!selected) return null;
   return <span className={className}>{selected.name[lang]}</span>;
 }

@@ -47,6 +47,8 @@ export default function TiltCard({ children, className = '' }: Props) {
     return () => {
       el.removeEventListener('mousemove', onMove);
       el.removeEventListener('mouseleave', onLeave);
+      // quickTo สร้าง tween ค้างไว้กับ card — ถอด listener อย่างเดียวไม่พอ
+      gsap.killTweensOf(card);
     };
   }, []);
 
