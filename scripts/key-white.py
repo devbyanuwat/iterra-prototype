@@ -24,9 +24,9 @@ from pathlib import Path
 
 from PIL import Image
 
-# Connected-to-border pixels at or above this brightness are background. The plate is a
-# flat 255, so the only pixels in the 246..252 band are product: a Kohler ceramic deck
-# renders at 246-248 and the spec's 246 cutoff let the fill walk straight into it.
+# Connected-to-border pixels at or above this brightness are background. The plate is
+# normally a flat 255, so the only pixels in the 246..252 band are product: a Kohler ceramic
+# deck renders at 246-248 and the spec's 246 cutoff let the fill walk straight into it.
 BG_MIN = 252
 # Leftover pixels this bright are candidates for the shadow ramp / edge feather.
 NEAR_MIN = 236
@@ -86,12 +86,14 @@ def key(path):
     im = Image.open(path).convert("RGB")
     w, h = im.size
 
-    # Not every Scene7 asset is shot on the white plate — a few (Moxie showerheads, for
-    # one) come on a grey studio gradient, and keying those leaves the whole grey card
-    # opaque. Reject them here so the caller can drop the finish instead of shipping a box.
-    corners = [im.getpixel(c) for c in ((0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1))]
-    if any(min(c) < BG_MIN for c in corners):
-        return None, (0, 0, 0, 0), 0.0
+    # Not every Scene7 asset is shot on the flat white plate. A few come on a grey studio
+    # gradient (Moxie showerheads), and a few sit on a lit floor with a vignette — those
+    # leave a white puddle under the product that no threshold can separate from the
+    # ceramic above it. Both give themselves away at the corners: a real plate is a flat
+    # 255 there. Reject anything dimmer so the caller drops the finish rather than ship it.
+    corners = [min(im.getpixel(c)) for c in ((0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1))]
+    if min(corners) < BG_MIN:
+        return None, (0, 0, 0, 0), 0.0, 0.0
 
     px = list(im.getdata())
     filled = flood_background(px, w, h)
@@ -118,7 +120,7 @@ def key(path):
         if x > right:
             right = x
     if bottom < 0:  # nothing but near-white survived — bail out, caller will flag it
-        return None, (0, 0, 0, 0), 0.0
+        return None, (0, 0, 0, 0), 0.0, 0.0
 
     # What the flood fill leaves behind gets cleaned up in two ways:
     #  1) under the product body there is nothing but the drop shadow Kohler bakes into
@@ -150,8 +152,19 @@ def key(path):
 
     out = im.convert("RGBA")
     out.putalpha(Image.frombytes("L", (w, h), bytes(alpha)))
+
+    # How solid the surviving region is inside its own bounding box. A real product is an
+    # irregular silhouette and never fills its box; a studio card that was not keyed at all
+    # fills it exactly. This separates the two far better than the keyed fraction does — a
+    # top-view kitchen sink keys perfectly yet only clears 47% of the frame.
+    xs = [i % w for i, a in enumerate(alpha) if a > 200]
+    ys = [i // w for i, a in enumerate(alpha) if a > 200]
+    fill = 0.0
+    if xs:
+        box = (max(xs) - min(xs) + 1) * (max(ys) - min(ys) + 1)
+        fill = len(xs) / box
     keyed = sum(1 for a in alpha if a < 200) / (w * h)
-    return out, (left, top, right, bottom), keyed
+    return out, (left, top, right, bottom), keyed, fill
 
 
 def swatch(src, out_dir, base):
@@ -181,18 +194,20 @@ def main():
     if "--swatch" in sys.argv[1:]:
         return swatch(src, out_dir, base)
 
-    img, bbox, keyed = key(src)
+    img, bbox, keyed, fill = key(src)
     if img is None:
         print("FAIL not-shot-on-white", src, file=sys.stderr)
         return 1
-    # Some assets are shot on a grey card inset into a white margin: the fill clears the
-    # margin and leaves the card, which reads as a big opaque slab. A Kohler product fills
-    # 3-13% of its frame, so anything holding a third of the image is that failure.
-    if keyed < 0.70:
-        print(f"FAIL only-{keyed:.2f}-keyed", src, file=sys.stderr)
+    # A grey card inset into a white margin keys down to a perfect opaque rectangle. Real
+    # products top out around 0.98 fill (a straight-on kitchen sink); cards hit 1.00.
+    if fill >= 0.995 or keyed < 0.05:
+        print(f"FAIL unkeyed-plate fill={fill:.3f} keyed={keyed:.2f}", src, file=sys.stderr)
         return 1
 
-    widths = sorted(set(widths), reverse=True)
+    # Never upscale: a handful of Scene7 masters are narrower than 1400 (Scene7 answers a
+    # too-large `wid` with a 403), and blowing those up would only cost bytes.
+    src_w = img.size[0]
+    widths = sorted({min(t, src_w) for t in widths}, reverse=True)
     for i, target in enumerate(widths):
         w, h = img.size
         scaled = img if w == target else img.resize((target, round(h * target / w)), Image.LANCZOS)
@@ -200,7 +215,7 @@ def main():
         scaled.save(out_dir / name, "WEBP", quality=86, method=6)
 
     l, t, r, b = bbox
-    print(f"OK keyed={keyed:.3f} bbox={l},{t},{r},{b} out={out_dir / (base + '.webp')}")
+    print(f"OK keyed={keyed:.3f} fill={fill:.3f} bbox={l},{t},{r},{b} out={out_dir / (base + '.webp')}")
     return 0
 
 

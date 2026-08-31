@@ -17,8 +17,7 @@
  */
 
 import { createRequire } from 'node:module';
-import { execSync } from 'node:child_process';
-import { spawnSync } from 'node:child_process';
+import { execSync, spawn } from 'node:child_process';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import os from 'node:os';
@@ -41,8 +40,9 @@ const argv = Object.fromEntries(
 );
 const FRESH = !!argv.fresh;
 const PAGES = Number(argv.pages ?? 2);
-const WANT_TOTAL = Number(argv.products ?? 12);
 const MAX_FINISHES = Number(argv['max-finishes'] ?? 6);
+// Keying 300+ frames of pure-Python flood fill is the whole runtime, so it fans out.
+const CONCURRENCY = Number(argv.concurrency ?? Math.max(2, os.cpus().length - 4));
 
 /** Listing pages to crawl. `kind` maps onto the Product.category union. */
 const CATEGORIES = [
@@ -93,12 +93,18 @@ async function getText(url, tries = 3) {
   }
 }
 
-async function getBuffer(url, tries = 3) {
+async function getBuffer(url, tries = 5) {
   for (let i = 0; i < tries; i++) {
-    const r = await fetch(url, { headers: { 'user-agent': UA, referer: ORIGIN + '/' } });
-    if (r.ok) return Buffer.from(await r.arrayBuffer());
-    if (i === tries - 1) throw new Error(`HTTP ${r.status} for ${url}`);
-    await sleep(800 * (i + 1));
+    try {
+      const r = await fetch(url, { headers: { 'user-agent': UA, referer: ORIGIN + '/' } });
+      if (r.ok) return Buffer.from(await r.arrayBuffer());
+      throw new Error(`HTTP ${r.status} for ${url}`);
+    } catch (e) {
+      // A dropped connection has to retry like a bad status does — an earlier run lost 55
+      // products to a DNS blip because a thrown fetch escaped this loop on the first try.
+      if (i === tries - 1) throw e;
+      await sleep(1000 * 2 ** i);
+    }
   }
 }
 
@@ -261,71 +267,60 @@ async function readCandidates(list) {
   ).filter(Boolean);
 }
 
-// ── stage 3: pick the line-up ───────────────────────────────────────────────
+// ── stage 3: order the catalogue ────────────────────────────────────────────
 
-/**
- * Rank by finish count, then spread. The Thai catalogue is thin and heavy on
- * near-identical SKUs from the same collection, so cap how many of a collection or
- * a sub-category can land in the final twelve.
- */
 const finishCount = (c) => new Set(c.variants.map((v) => v.code).filter(Boolean)).size;
 
-function select(candidates, want = WANT_TOTAL) {
-  const usable = candidates.filter((c) => finishCount(c) >= 2 && c.desc && c.title);
-  usable.sort((a, b) => finishCount(b) - finishCount(a) || a.model.localeCompare(b.model));
+/**
+ * Shots that pass every automatic gate but still key badly, confirmed by eye against
+ * #08090A. 22244K-S is photographed on a lit floor whose bright patch is walled off from
+ * the plate by the toilet's own shadow, so the border fill cannot reach it and it ships as
+ * a white puddle. One frame out of 307; the spec calls for dropping these rather than
+ * loosening a threshold that would start eating white ceramic elsewhere.
+ */
+const MANUAL_REJECT = new Set(['22244K-S']);
 
-  // The brief asks for an even kitchen/bath split, but the Thai catalogue cannot supply
-  // it: every kitchen SKU (and every toilet and lavatory) ships in a single finish, so a
-  // kitchen slot can only be filled by dropping the >= 2 finishes rule. Fill the split
-  // as far as it goes, then top up from whatever qualifies and say so.
-  const supply = Object.fromEntries(
-    ['kitchen', 'bath'].map((k) => [k, usable.filter((c) => c.kind === k).length]),
-  );
-  const perKind = {
-    kitchen: Math.min(want / 2, supply.kitchen),
-    bath: Math.min(want / 2, supply.bath),
-  };
-  const shortfall = want - perKind.kitchen - perKind.bath;
-  if (shortfall > 0) {
-    const spare = perKind.kitchen < want / 2 ? 'bath' : 'kitchen';
-    perKind[spare] = Math.min(supply[spare], perKind[spare] + shortfall);
-    log(`   !! only ${supply.kitchen} kitchen / ${supply.bath} bath products have >= 2 finishes`);
-    log(`   !! falling back to ${perKind.kitchen} kitchen + ${perKind.bath} bath`);
-  }
-
-  const chosen = [];
-  for (const capCollection of [1, 2, 3, 4]) {
-    for (const capGroup of [2, 3, 4, 6, 8]) {
-      for (const c of usable) {
-        if (chosen.includes(c)) continue;
-        const kindN = chosen.filter((x) => x.kind === c.kind).length;
-        if (kindN >= perKind[c.kind]) continue;
-        const collN = chosen.filter((x) => x.collection === c.collection).length;
-        if (collN >= capCollection) continue;
-        const groupN = chosen.filter((x) => x.group === c.group).length;
-        if (groupN >= capGroup) continue;
-        chosen.push(c);
-      }
-      if (chosen.length >= want) break;
-    }
-    if (chosen.length >= want) break;
-  }
-  // Anything left over, still ranked, is the reserve: some products turn out to have no
-  // keyable shot at all and the caller pulls a replacement from here.
-  return { chosen: chosen.slice(0, want), reserve: usable.filter((c) => !chosen.includes(c)) };
+/**
+ * Everything the site sells ships, single-finish products included — they render a finish
+ * label instead of a swatch row. Multi-finish products sort first because they are the ones
+ * that demonstrate the swatch feature and the home page features them.
+ */
+function orderCatalogue(candidates) {
+  return candidates
+    .filter((c) => finishCount(c) >= 1 && c.title && !MANUAL_REJECT.has(c.model))
+    .sort(
+      (a, b) =>
+        finishCount(b) - finishCount(a) ||
+        a.kind.localeCompare(b.kind) ||
+        a.group.localeCompare(b.group) ||
+        a.model.localeCompare(b.model),
+    );
 }
 
 // ── stage 4: images ─────────────────────────────────────────────────────────
 
 const keyScript = path.join(ROOT, 'scripts', 'key-white.py');
 
+/** Keying is CPU-bound pure Python, so it runs out of process and several at a time. */
 function runPython(args) {
-  const r = spawnSync('python3', [keyScript, ...args], { encoding: 'utf8' });
-  if (r.status !== 0) throw new Error((r.stderr || r.stdout || 'python failed').trim());
-  return r.stdout.trim();
+  return new Promise((resolve, reject) => {
+    const child = spawn('python3', [keyScript, ...args]);
+    let out = '';
+    let err = '';
+    child.stdout.on('data', (d) => (out += d));
+    child.stderr.on('data', (d) => (err += d));
+    child.on('error', reject);
+    child.on('close', (code) =>
+      code === 0 ? resolve(out.trim()) : reject(new Error((err || out || 'python failed').trim())),
+    );
+  });
 }
 
-const assetUrl = (asset, wid) => `https://kohler.scene7.com/is/image/${asset}?wid=${wid}&fmt=png`;
+// A handful of asset ids carry spaces ("kohlerchina/New Patio two-piece"), which Scene7
+// answers with a 403 unless they are re-encoded after parsePdp decoded them.
+const assetUrl = (asset, wid) =>
+  `https://kohler.scene7.com/is/image/${asset.split('/').map(encodeURIComponent).join('/')}?fmt=png` +
+  (wid ? `&wid=${wid}` : '');
 
 function slugify(model, title) {
   const base = (title || '')
@@ -354,6 +349,30 @@ async function finishNames() {
   return map;
 }
 
+/**
+ * Finish chips are shared across the whole catalogue — a dozen codes cover 190 products —
+ * so each is fetched, keyed and averaged once and then copied into each product folder.
+ */
+const chipCache = new Map();
+
+async function chipFor(code, tmp) {
+  if (!chipCache.has(code)) {
+    chipCache.set(
+      code,
+      (async () => {
+        const cacheDir = path.join(tmp, 'chips');
+        await fsp.mkdir(cacheDir, { recursive: true });
+        const webp = path.join(cacheDir, `swatch-${code}.webp`);
+        const raw = path.join(cacheDir, `swatch-${code}.png`);
+        await fsp.writeFile(raw, await getBuffer(`https://kohler.scene7.com/is/image/PAWEB/swatch_${code}?wid=88`));
+        const hex = (await runPython(['--swatch', raw, cacheDir, `swatch-${code}`])).match(/#[0-9A-F]{6}/)?.[0];
+        return { webp, accent: hex || '#8A8A8A' };
+      })(),
+    );
+  }
+  return chipCache.get(code);
+}
+
 async function buildProduct(cand, enHtml, palette, tmp) {
   const slug = slugify(cand.model, cand.title);
   const dir = path.join(OUT_DIR, slug);
@@ -374,44 +393,63 @@ async function buildProduct(cand, enHtml, palette, tmp) {
       // Keying is the slow part, so a re-run only redoes finishes it has not keyed yet.
       let out = 'cached';
       if (FRESH || !fs.existsSync(path.join(dir, `${code}.webp`))) {
-        const png = await getBuffer(assetUrl(v.asset, 1400));
+        // Scene7 will not upscale: asking for wid=1400 from a master narrower than that
+        // comes back 403, so fall back to the asset's native size.
+        const png = await getBuffer(assetUrl(v.asset, 1400)).catch(() => getBuffer(assetUrl(v.asset)));
         const raw = path.join(tmp, `${slug}-${code}.png`);
         await fsp.writeFile(raw, png);
-        out = runPython([raw, dir, code]);
+        out = await runPython([raw, dir, code]);
+        await fsp.rm(raw, { force: true });
       }
 
-      const chip = await getBuffer(`https://kohler.scene7.com/is/image/PAWEB/swatch_${code}?wid=88`);
-      const rawChip = path.join(tmp, `swatch-${code}.png`);
-      await fsp.writeFile(rawChip, chip);
-      const accent = runPython(['--swatch', rawChip, dir, `swatch-${code}`]).match(/#[0-9A-F]{6}/)?.[0] || '#8A8A8A';
+      const chip = await chipFor(code, tmp);
+      await fsp.copyFile(chip.webp, path.join(dir, `swatch-${code}.webp`));
 
-      const enName = palette[code] || enByCode.get(code)?.color || v.color || code;
+      let enName = palette[code] || enByCode.get(code)?.color || v.color || code;
+      let thName = (v.color || enName).split(';')[0].trim() || enName;
+      if (code === 'NA') {
+        // Kohler uses NA for "no colour option" and labels it "Not Applicable". Single-finish
+        // products show that name instead of a swatch row, so it has to say something — the
+        // material spec is what the finish actually is on these (stainless, mostly).
+        const mat = (specsOf) => specsOf?.find((s) => /วัสดุ|^material/i.test(s.label))?.value;
+        thName = mat(cand.specs) || thName;
+        enName = mat(en?.specs) || enName;
+      }
       finishes.push({
         code,
-        name: { th: (v.color || enName).split(';')[0].trim() || enName, en: enName },
+        name: { th: thName, en: enName },
         swatch: `/products/${slug}/swatch-${code}.webp`,
-        accent,
+        accent: chip.accent,
         image: `/products/${slug}/${code}.webp`,
-        image700: `/products/${slug}/${code}-700.webp`,
+        // A master narrower than 700 yields no half-size variant; point at the full frame.
+        image700: fs.existsSync(path.join(dir, `${code}-700.webp`))
+          ? `/products/${slug}/${code}-700.webp`
+          : `/products/${slug}/${code}.webp`,
       });
-      log(`    ${code} ${accent} ${out.replace(/ out=.*/, '')}`);
+      log(`    ${cand.model} ${code} ${chip.accent} ${out.replace(/ out=.*/, '')}`);
     } catch (e) {
-      log(`    !! ${code}: ${e.message}`);
+      log(`    !! ${cand.model} ${code}: ${e.message}`);
     }
   }
-  if (finishes.length < 2) {
+  // Single-finish products ship too — they render a finish label instead of a swatch row.
+  // Only a product with no keyable shot at all is dropped.
+  if (finishes.length < 1) {
     await fsp.rm(dir, { recursive: true, force: true });
     return null;
   }
 
   const specs = cand.specs.slice(0, 3).concat(cand.features.slice(0, 3).map((f, i) => ({ label: `คุณสมบัติ ${i + 1}`, value: f })));
 
+  // Two thirds of the catalogue has no Information paragraph on its PDP. Where that is the
+  // case the feature bullets are the only prose the site carries, so they stand in for it.
+  const blurb = (long, features) => long || (features || []).slice(0, 3).join(' · ');
+
   return {
     slug,
     model: `K-${cand.model}`,
     category: cand.kind,
     name: { th: cand.title.split('|').pop().trim() || cand.title, en: en?.title?.split('|').pop().trim() || cand.collection },
-    desc: { th: cand.desc, en: en?.desc || '' },
+    desc: { th: blurb(cand.desc, cand.features), en: blurb(en?.desc, en?.features) },
     specs: specs.slice(0, 6),
     finishes,
     spec_sheet: cand.pdf,
@@ -422,19 +460,12 @@ async function buildProduct(cand, enHtml, palette, tmp) {
 
 const j = (v) => JSON.stringify(v);
 
-function emit(products) {
-  // Feature the widest finish ranges — three per category where a category has them,
-  // topped up to six overall so the home page never runs short.
+function emit(all) {
+  // Multi-finish products lead the array: they are the only ones that demonstrate the
+  // swatch row, and the home page reads off the front of this list.
   const byFinishes = (a, b) => b.finishes.length - a.finishes.length;
-  const featuredSlugs = new Set(
-    ['kitchen', 'bath'].flatMap((k) =>
-      products.filter((p) => p.category === k).sort(byFinishes).slice(0, 3).map((p) => p.slug),
-    ),
-  );
-  for (const p of [...products].sort(byFinishes)) {
-    if (featuredSlugs.size >= 6) break;
-    featuredSlugs.add(p.slug);
-  }
+  const products = [...all].sort(byFinishes);
+  const featuredSlugs = new Set(products.slice(0, 6).map((p) => p.slug));
 
   const body = products
     .map((p) => {
@@ -496,7 +527,11 @@ export type Product = {
   name: { th: string; en: string };
   desc: { th: string; en: string };
   specs: { label: string; value: string }[];
-  /** always >= 2 */
+  /**
+   * Always at least one. Two thirds of the Thai catalogue ships in a single finish — those
+   * products must render the finish name as a label, NOT a one-button swatch row, so branch
+   * on finishes.length > 1 rather than assuming a row is always meaningful.
+   */
   finishes: Finish[];
   featured?: boolean;
   /** kept so components written against the mock data still compile */
@@ -537,10 +572,10 @@ async function main() {
   const multi = candidates.filter((c) => finishCount(c) >= 2);
   log(`   ${candidates.length} read, ${multi.length} with >= 2 finishes`);
 
-  log('3. selecting line-up');
-  const { chosen, reserve } = select(candidates);
-  for (const c of chosen) log(`   [${c.kind}/${c.group}] ${c.model} ${finishCount(c)} finishes — ${c.collection}`);
-  if (chosen.length < WANT_TOTAL) throw new Error(`only ${chosen.length} products qualified`);
+  log('3. ordering the catalogue');
+  const queue = orderCatalogue(candidates).slice(0, Number(argv.limit ?? Infinity));
+  const totalFinishes = queue.reduce((n, c) => n + Math.min(finishCount(c), MAX_FINISHES), 0);
+  log(`   ${queue.length} products, ${totalFinishes} finish images to key`);
 
   log('4. downloading + keying images');
   const palette = await finishNames();
@@ -548,11 +583,8 @@ async function main() {
   await fsp.mkdir(tmp, { recursive: true });
   await fsp.mkdir(OUT_DIR, { recursive: true });
 
-  const products = [];
-  const queue = [...chosen, ...reserve];
-  for (const cand of queue) {
-    if (products.length >= WANT_TOTAL) break;
-    log(`   ${cand.model}`);
+  let done = 0;
+  const built = await pool(queue, CONCURRENCY, async (cand) => {
     let enHtml = null;
     try {
       enHtml = await getText(pdpUrl(cand.model, cand.sku, 'en'));
@@ -560,13 +592,27 @@ async function main() {
       /* English page is optional */
     }
     const p = await buildProduct(cand, enHtml, palette, tmp);
-    if (p) products.push(p);
-    else log(`   !! dropped ${cand.model} — fewer than 2 keyable finishes, pulling a replacement`);
-  }
+    if (!p) log(`   !! dropped ${cand.model} — no keyable shot`);
+    log(`   [${++done}/${queue.length}] ${cand.model}`);
+    return p;
+  });
+  const products = built.filter(Boolean);
 
   log('5. writing lib/products.generated.ts');
   await fsp.writeFile(GENERATED, emit(products));
-  log(`   ${products.length} products, ${products.reduce((n, p) => n + p.finishes.length, 0)} finish images`);
+  const finishes = products.reduce((n, p) => n + p.finishes.length, 0);
+  const multiN = products.filter((p) => p.finishes.length > 1).length;
+  log(`   ${products.length} products (${multiN} multi-finish, ${products.length - multiN} single), ${finishes} finish images`);
+  log(`   public/products is ${(await dirSize(OUT_DIR) / 1024 / 1024).toFixed(1)} MB`);
+}
+
+async function dirSize(dir) {
+  let total = 0;
+  for (const e of await fsp.readdir(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    total += e.isDirectory() ? await dirSize(p) : (await fsp.stat(p)).size;
+  }
+  return total;
 }
 
 await main();
