@@ -9,6 +9,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // AD-1 showroom palette (spec §2)
+        base: '#08090A',
+        surface: '#111315',
+        cream: '#EDE9E3',
+        dim: '#6E7275',
+        line: {
+          DEFAULT: 'rgba(255,255,255,0.06)',
+          6: 'rgba(255,255,255,0.06)',
+          12: 'rgba(255,255,255,0.12)',
+        },
+        // Driven by the --accent custom property; tweened on swatch change.
+        accent: 'var(--accent)',
+
+        // DEPRECATED light palette — kept only so the ~100 call sites in
+        // components/ and the other routes keep rendering while they are
+        // migrated to the tokens above. Delete once that migration lands.
         paper: '#faf9f7',
         ink: '#1c1917',
         warm: {
@@ -23,7 +39,8 @@ const config: Config = {
         widest2: '0.22em',
       },
       fontFamily: {
-        sans: ['Inter', 'Noto Sans Thai', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-anuphan)', 'Noto Sans Thai', 'system-ui', 'sans-serif'],
+        display: ['var(--font-archivo)', 'system-ui', 'sans-serif'],
       },
     },
   },
