@@ -199,6 +199,23 @@ async function crawlListings() {
 
 const VARIANT_RE = /<span class="koh-product-variant[^>]*>/g;
 
+/**
+ * og:title is "<collection> | <descriptive name>" and EITHER half can be empty — a bare
+ * " | " ships on SKUs the site never named. Splitting and taking the last piece therefore
+ * has to drop the empty halves first, or the separator leaks into the name ("Wellworth™ |",
+ * or just "|" when both halves are blank). Returns '' when the page genuinely carries no
+ * name anywhere; callers fall back to the model number.
+ */
+function parseName(html) {
+  const og = stripTags(html.match(/<meta property="og:title" content="([^"]*)"/)?.[1] || '');
+  const part = og
+    .split('|')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .pop();
+  return part || stripTags(html.match(/koh-product-name">([\s\S]*?)<\/h1>/)?.[1] || '');
+}
+
 function parsePdp(html, model) {
   const variants = [];
   for (const m of html.matchAll(VARIANT_RE)) {
@@ -214,21 +231,28 @@ function parsePdp(html, model) {
     variants.push({ sku, color, code, asset: decodeURIComponent(asset) });
   }
 
-  // Spec rows are flat sibling spans, and some rows carry an extra description span
-  // (the CAD/PDF resource list), so titles and values cannot be zipped by index —
-  // walk them in document order and pair each title with the description that follows.
+  // Spec rows are flat sibling spans, so walk them in document order rather than zipping by
+  // index. A title owns exactly the ONE description that follows it: the ขนาด row ships an
+  // empty description and then a SECOND description holding the technical-resources <ul>
+  // ("Rough In/Spec Sheet", "รายการที่ตรงกัน" — PDF links and related-product chrome).
+  // Letting an empty description fall through would pair that chrome with the label, so an
+  // unclaimed description is skipped and a label with no value drops its row entirely.
   const specs = [];
   let pendingLabel = null;
   for (const m of html.matchAll(
     /koh-product-col-(title|description)">([\s\S]*?)<\/span>/g,
   )) {
-    const text = stripTags(m[2]).replace(/:$/, '').replace(/,\s*$/, '').trim();
+    const clean = (s) => stripTags(s).replace(/:$/, '').replace(/,\s*$/, '').trim();
     if (m[1] === 'title') {
-      pendingLabel = text || null;
-    } else if (pendingLabel && text) {
-      specs.push({ label: pendingLabel, value: text });
-      pendingLabel = null;
+      pendingLabel = clean(m[2]) || null;
+      continue;
     }
+    if (!pendingLabel) continue;
+    const label = pendingLabel;
+    pendingLabel = null;
+    if (/koh-pdf-link|koh-product-resources-technical-info/.test(m[2])) continue;
+    const value = clean(m[2]);
+    if (value) specs.push({ label, value });
   }
 
   const featureBlock = html.match(/koh-product-features-title">[^<]*<\/h2>([\s\S]{0,6000}?)<\/ul>/);
@@ -237,7 +261,9 @@ function parsePdp(html, model) {
     : [];
 
   return {
+    // `title` stays raw — slugify() and the catalogue filter both read it.
     title: stripTags(html.match(/<meta property="og:title" content="([^"]*)"/)?.[1] || ''),
+    name: parseName(html),
     collection: stripTags(html.match(/<meta name="twitter:title" content="([^"]*)"/)?.[1] || ''),
     desc: stripTags(html.match(/koh-product-long-description">([\s\S]*?)<\/div>/)?.[1] || ''),
     specs,
@@ -247,7 +273,9 @@ function parsePdp(html, model) {
   };
 }
 
-const pdpUrl = (model, sku, lang) =>
+export { parsePdp, getText, GENERATED, CACHE_DIR };
+
+export const pdpUrl = (model, sku, lang) =>
   `${ORIGIN}${lang === 'en' ? '/en' : ''}/productDetails/${encodeURIComponent(model)}?skuid=${encodeURIComponent(sku)}`;
 
 async function readCandidates(list) {
@@ -373,6 +401,22 @@ async function chipFor(code, tmp) {
   return chipCache.get(code);
 }
 
+/**
+ * The name/spec pair a product ships with, from its TH candidate and optional EN parse.
+ * Exported so scripts/repair-pdp-fields.mjs re-derives exactly what a full run would emit.
+ * A page with no name at all falls back to the model number — never an empty string.
+ */
+export function displayFields(cand, en) {
+  const th = cand.name || `K-${cand.model}`;
+  return {
+    name: { th, en: en?.name || cand.collection || th },
+    specs: cand.specs
+      .slice(0, 3)
+      .concat(cand.features.slice(0, 3).map((f, i) => ({ label: `คุณสมบัติ ${i + 1}`, value: f })))
+      .slice(0, 6),
+  };
+}
+
 async function buildProduct(cand, enHtml, palette, tmp) {
   const slug = slugify(cand.model, cand.title);
   const dir = path.join(OUT_DIR, slug);
@@ -438,7 +482,7 @@ async function buildProduct(cand, enHtml, palette, tmp) {
     return null;
   }
 
-  const specs = cand.specs.slice(0, 3).concat(cand.features.slice(0, 3).map((f, i) => ({ label: `คุณสมบัติ ${i + 1}`, value: f })));
+  const { name, specs } = displayFields(cand, en);
 
   // Two thirds of the catalogue has no Information paragraph on its PDP. Where that is the
   // case the feature bullets are the only prose the site carries, so they stand in for it.
@@ -448,9 +492,9 @@ async function buildProduct(cand, enHtml, palette, tmp) {
     slug,
     model: `K-${cand.model}`,
     category: cand.kind,
-    name: { th: cand.title.split('|').pop().trim() || cand.title, en: en?.title?.split('|').pop().trim() || cand.collection },
+    name,
     desc: { th: blurb(cand.desc, cand.features), en: blurb(en?.desc, en?.features) },
-    specs: specs.slice(0, 6),
+    specs,
     finishes,
     spec_sheet: cand.pdf,
   };
@@ -460,7 +504,7 @@ async function buildProduct(cand, enHtml, palette, tmp) {
 
 const j = (v) => JSON.stringify(v);
 
-function emit(all) {
+export function emit(all) {
   // Multi-finish products lead the array: they are the only ones that demonstrate the
   // swatch row, and the home page reads off the front of this list.
   const byFinishes = (a, b) => b.finishes.length - a.finishes.length;
@@ -615,4 +659,7 @@ async function dirSize(dir) {
   return total;
 }
 
-await main();
+// Only crawl when run directly — scripts/repair-pdp-fields.mjs imports the parser from here.
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await main();
+}

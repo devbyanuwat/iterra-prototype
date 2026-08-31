@@ -864,7 +864,7 @@ export const products: Product[] = [
     slug: "modulo-78024t-4",
     model: "K-78024T-4",
     category: "bath",
-    name: { th: "Modulo™ |", en: "Thermostatic bath & shower valve and trim with Lever handles" },
+    name: { th: "Modulo™", en: "Thermostatic bath & shower valve and trim with Lever handles" },
     desc: { th: "คอมโพเนนท์ คอลเล็คชั่นที่สัมผัสได้ถึงความทันสมัย เปิดโอกาสที่ให้คุณสร้างสรรค์ดีไซน์ได้อย่างอิสระ ทั้งหัวก๊อก มือจับหรือพื้นผิววัสดุ ให้ตรงตามรสนิยมและสไตล์ของตัวเอง ไม่ว่าจะเป็นรูปแบบใดก็สวยรับกันทั้งก๊อกน้ำ ชุดฝักบัวและอุปกรณ์ประกอบห้องน้ำ", en: "Modern, polished, and streamlined, the Components™ Modulo™ collection provides smooth control of both temperature and volume. This thermostatic bath and shower trim, featuring two modern lever style handles, includes the valve for easy installation. Pair with your Components™ shower faucets and accessories for a customized aesthetic." },
     specs: [
       { label: "ขนาด", value: "H 80 มิลลิเมตร, W 180 มิลลิเมตร" },
@@ -1175,7 +1175,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมยืนอาบแบบติดผนังพร้อมฝักบัวสายอ่อน", en: "Exposed wall-mount shower only faucet" },
     desc: { th: "ด้วยการเจียระไนรูปทรงอย่างแม่นยำและพื้นผิวที่เรียบสนิท แสดงออกถึงความมีรสนิยม ที่แต่งเติมห้องน้ำแบบโมเดิร์นได้อย่างสมบูรณ์แบบนำความเป็นมินิมัลมาใช้ได้ลงตัวในทุก พื้นที่ รูปทรงที่แตกต่างกันสองขั้วทั้งแบบทรงกลมและจตุรัส แต่กลับหลอมรวมกันเป็น หนึ่งเดียว สะท้อนภาพที่สวยงามในทุกมุมมอง แม้แต่รายละเอียดเล็ก ๆ น้อย ๆ ก็ยังมี เอกลักษณ์เฉพาะตัว ส่งผลให้คอลเล็กชั่นนี้เป็นอีกระดับของความเลิศล้ำที่เหนือกว่า", en: "Full Range Collection - Complete line of products that provides a total bathroom solution. · Finish with Confidence - KOHLER finishes resist corrosion and tarnishing twice as long as industry standards. · Power of space - a platfor that brings more storage space" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Parallel™" },
       { label: "การติดตั้ง", value: "แบบติดผนัง" },
       { label: "คุณสมบัติ 1", value: "เซรามิกวาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน" },
@@ -1218,7 +1217,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมลงอ่างอาบน้ำและยืนอาบแบบติดผนังพร้อมฝักบัวสายอ่อน", en: "Exposed wall-mount bath and shower faucet" },
     desc: { th: "ด้วยการเจียระไนรูปทรงอย่างแม่นยำและพื้นผิวที่เรียบสนิท แสดงออกถึงความมีรสนิยม ที่แต่งเติมห้องน้ำแบบโมเดิร์นได้อย่างสมบูรณ์แบบนำความเป็นมินิมัลมาใช้ได้ลงตัวในทุก พื้นที่ รูปทรงที่แตกต่างกันสองขั้วทั้งแบบทรงกลมและจตุรัส แต่กลับหลอมรวมกันเป็น หนึ่งเดียว สะท้อนภาพที่สวยงามในทุกมุมมอง แม้แต่รายละเอียดเล็ก ๆ น้อย ๆ ก็ยังมี เอกลักษณ์เฉพาะตัว ส่งผลให้คอลเล็กชั่นนี้เป็นอีกระดับของความเลิศล้ำที่เหนือกว่า", en: "Full Range Collection - Complete line of products that provides a total bathroom solution. · Finish with Confidence - KOHLER finishes resist corrosion and tarnishing twice as long as industry standards. · Power of space - a platfor that brings more storage space" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Parallel™" },
       { label: "การติดตั้ง", value: "แบบติดผนัง" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากทองเหลือง" },
@@ -1468,7 +1466,7 @@ export const products: Product[] = [
     slug: "anthem-26348t-9",
     model: "K-26348T-9",
     category: "bath",
-    name: { th: "Anthem™ |", en: "Four-outlet recessed mechanical thermostatic valve control" },
+    name: { th: "Anthem™", en: "Four-outlet recessed mechanical thermostatic valve control" },
     desc: { th: "", en: "Thermostatic technology allows you to maintain consistent temperature and flow control for the ultimate shower experience. This sleek thermostatic valve control panel with recessed push buttons is designed for use with an Anthem four-port thermostatic valve (K-26342T). The trim plate includes a temperature control knob with integrated adjustable high-temperature limit stop as well as shower outlet activation buttons that pop out for the adjustment of water flow (up to 30.3 lpm)." },
     specs: [
       { label: "ขนาด", value: "H 103 มิลลิเมตร, W 403 มิลลิเมตร" },
@@ -1790,7 +1788,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมอ่างล้างหน้าเซ็นเตอร์ 8” (มือบิดแบบครอส) รุ่นโอเคชัน", en: "Widespread bathroom sink faucet with cross handles and Cane spout, 8.3 lpm" },
     desc: { th: "ใส่ความเป็นแฟชั่น สร้างสรรค์จุดสนใจ โอเคชัน คอลเลคชั่น ได้รับแรงบันดาลใจจากแฟชั่นชั้นสูงและความงามอันแสนเย้ายวนใจของ ยุคทองแห่งฮอลลีวูดด้วยการออกแบบอย่างไร้ที่ติ สะกดทุกสายตา ตั้งแต่มุมโค้งมนไปจนถึง ความวาววามของฐานก๊อก จึงเปี่ยมด้วยความสง่างาม ประณีตบรรจง และสะท้อนยุคสมัย แห่งความมีเสน่ห์ เพื่อเป็นจุดศูนย์กลางความสนใจอย่างแท้จริง", en: "Unapologetically luxurious and truly unforgettable, Occasion bathroom faucets and accessories draw inspiration from 1960s Hollywood glamour and extravagance. Fashioned after the era’s sleek dress lines and bold car designs, the Occasion collection reflects graceful elegance, blending classic midcentury and modern design. Customize your bathroom with the collection’s distinctive pentagonal accents, faceted bases, flowing lines, and delicate edges. Sleek and statuesque, the Occasion widespread bathroom sink faucet with cross handles and Cane spout is as fashionable as it is functional." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Occasion™" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากทองเหลือง" },
       { label: "คุณสมบัติ 2", value: "เซรามิกวาล์วป้องกันการรั่่วซึม รับประกันตลอดอายุการใช้งาน" },
@@ -2347,7 +2344,6 @@ export const products: Product[] = [
     name: { th: "หัวก๊อกลงอ่างอาบน้ำ", en: "Dm bath faucets w/ arc design" },
     desc: { th: "ผลิตจากทองเหลือง · เคลือบผิวพิเศษจากโคห์เลอร์ คงทน เงางาม · เหมาะกับชุดมือบิด รุ่นอาร์ทิแฟคส์ (จําหน่ายแยก)", en: "Create a look all your own with the Artifacts collection. Timeless and classic in its inspiration, Artifacts allows you to coordinate faucets, accessories, showering, and finishes to express your personal style." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Artifacts™" },
       { label: "การติดตั้ง", value: "ตั้งบนเคาน์เตอร์" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากทองเหลือง" },
@@ -2591,7 +2587,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมยืนอาบแบบติดผนังพร้อมฝักบัวสายอ่อน รุ่นโอเคชัน", en: "Single-handle shower faucet, 9.5 lpm" },
     desc: { th: "ผลิตจากทองเหลือง · วัสดุเคลือบผิวพิเศษจากโคห์เลอร์ คงทน เงางาม · เซรามิกวาล์วป้องกัน การรั่วซึม รับประกันตลอดอายุการใช้งาน", en: "Unapologetically luxurious and truly unforgettable, Occasion™ bathroom faucets and accessories draw inspiration from 1960s Hollywood glamour and extravagance. Fashioned after the era’s sleek dress lines and bold car designs, the Occasion™ collection reflects graceful elegance, blending classic midcentury and modern design. Customize your bathroom with the collection’s distinctive pentagonal accents, faceted bases, flowing lines, and delicate edges. This shower faucet features an exposed 35 mm mixing valve, Statement™ multifunction handshower, hose, handshower holder, and a single handle for easy adjustment of water volume and temperature." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Occasion™" },
       { label: "การติดตั้ง", value: "แบบติดผนัง" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากทองเหลือง" },
@@ -2626,7 +2621,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมลงอ่างอาบน้ำและยืนอาบแบบติดผนัง พร้อมฝักบัวสายอ่อน รุ่นโอเคชัน", en: "Single-handle bath and shower faucet, 9.5 lpm" },
     desc: { th: "ผลิตจากทองเหลือง · เซรามิกวาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน · วัสดุเคลือบผิวพิเศษจากโคห์เลอร์ คงทน เงางาม", en: "Unapologetically luxurious and truly unforgettable, Occasion™ bathroom faucets and accessories draw inspiration from 1960s Hollywood glamour and extravagance. Fashioned after the era’s sleek dress lines and bold car designs, the Occasion™ collection reflects graceful elegance, blending classic midcentury and modern design. Customize your bathroom with the collection’s distinctive pentagonal accents, faceted bases, flowing lines, and delicate edges. This bath and shower faucet features an exposed 35 mm mixing valve, Statement™ multifunction handshower, hose, handshower holder, and a single handle for easy adjustment of water volume and temperature." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Occasion™" },
       { label: "การติดตั้ง", value: "แบบติดผนัง" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากทองเหลือง" },
@@ -2661,7 +2655,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมลงอ่างอาบน้ำและยืนอาบ พร้อมชุดฝักบัวสายอ่อนและชุดฝักบัวก้านแข็ง รุ่นโอเคชัน", en: "Three-way single-handle bath/shower column with rainhead and handshower, 9.5 lpm" },
     desc: { th: "ผลิตจากทองเหลือง · เซรามิกวาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน · วัสดุเคลือบผิวพิเศษจากโคห์เลอร์ คงทน เงางาม", en: "Unapologetically luxurious and truly unforgettable, Occasion™ bathroom faucets and accessories draw inspiration from 1960s Hollywood glamour and extravagance. Fashioned after the era’s sleek dress lines and bold car designs, the Occasion™ collection reflects graceful elegance, blending classic midcentury and modern design. Customize your bathroom with the collection’s distinctive pentagonal accents, faceted bases, flowing lines, and delicate edges. This three-way single-handle bath and shower column features a single-handle control, diverter, rainhead, Statement™ multifunction handshower, hose, and handshower holder." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Occasion™" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากทองเหลือง" },
       { label: "คุณสมบัติ 2", value: "เซรามิกวาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน" },
@@ -2695,7 +2688,6 @@ export const products: Product[] = [
     name: { th: "ชุดฝาครอบและวาล์วผสมฝังกำแพงยืนอาบโมดูโล รุ่น โอเคชัน", en: "Pressure-balancing valve trim with lever handle" },
     desc: { th: "ผลิตจากโลหะ · เซรามิควาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน · วัสดุเคลือบผิวพิเศษจากโคห์เลอร์ คงทน เงางาม", en: "Unapologetically luxurious and truly unforgettable, Occasion bathroom faucets and accessories draw inspiration from 1960s Hollywood glamour and extravagance. Pair this sleek, pentagonal pressure-balancing valve trim with lever handle with a pressure-balancing valve for consistent shower temperature control that coordinates with your entire bathroom. Valve sold separately." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Modulo™" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากโลหะ" },
       { label: "คุณสมบัติ 2", value: "เซรามิควาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน" },
@@ -2729,7 +2721,6 @@ export const products: Product[] = [
     name: { th: "ชุดฝาครอบและวาลว์ผสมฝังกำแพงยืนอาบระบบเทอร์โมสแตทติก รุ่น โอเคชัน", en: "Thermostatic shower valve and trim with cross handles" },
     desc: { th: "ผลิตจากโลหะ · เซรามิควาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน · วัสดุเคลือบผิวพิเศษจากโคห์เลอร์ คงทน เงางาม", en: "Unapologetically luxurious and truly unforgettable, Occasion bathroom faucets and accessories draw inspiration from 1960s Hollywood glamour and extravagance. Pair this sleek pentagonal thermostatic shower trim with cross handles and a thermostatic valve for consistent temperature control that coordinates with your entire bathroom. Valve sold separately." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Modulo™" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากโลหะ" },
       { label: "คุณสมบัติ 2", value: "เซรามิควาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน" },
@@ -2763,7 +2754,6 @@ export const products: Product[] = [
     name: { th: "ชุดฝาครอบและวาลว์ผสมฝังกำแพงยืนอาบระบบเทอร์โมสแตทติก รุ่น โอเคชัน", en: "Thermostatic shower valve and trim with lever handles" },
     desc: { th: "ผลิตจากโลหะ · เซรามิควาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน · วัสดุเคลือบผิวพิเศษจากโคห์เลอร์ คงทน เงางาม", en: "Unapologetically luxurious and truly unforgettable, Occasion bathroom faucets and accessories draw inspiration from 1960s Hollywood glamour and extravagance. Pair this sleek pentagonal thermostatic shower trim with lever handles and a thermostatic valve for consistent temperature control that coordinates with your entire bathroom. Valve sold separately." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Modulo™" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากโลหะ" },
       { label: "คุณสมบัติ 2", value: "เซรามิควาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน" },
@@ -2797,7 +2787,6 @@ export const products: Product[] = [
     name: { th: "ชุดฝาครอบและวาลว์ผสมฝังกำแพงลงอ่างอาบน้ำและยืนอาบระบบเทอร์โมสแตทติก รุ่น โอเคชัน", en: "Thermostatic bath/shower valve and trim with cross handles" },
     desc: { th: "ผลิตจากโลหะ · พร้อมเซรามิกวาล์วกันการรั่่วซึม · วัสดุเคลือบผิวพิเศษจากโคห์เลอร์ คงทน เงางาม", en: "Unapologetically luxurious and truly unforgettable, Occasion bathroom faucets and accessories draw inspiration from 1960s Hollywood glamour and extravagance. Pair this sleek pentagonal thermostatic bath/shower trim with cross handles and a thermostatic valve for consistent temperature control that coordinates with your entire bathroom. Valve sold separately." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Modulo™" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากโลหะ" },
       { label: "คุณสมบัติ 2", value: "พร้อมเซรามิกวาล์วกันการรั่่วซึม" },
@@ -2857,7 +2846,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมอ่างล้างหน้าเซ็นเตอร์ 8\"", en: "WIDESPREAD LAVATORY FAUCET" },
     desc: { th: "แรงบันดาลใจจากสายน้ำอันบริสุทธิ์เหมือนน้ำตก ก่อให้เกิดดีไซน์เหนือจินตนาการ รวมทุกประโยชน์การใช้งานและดีไซน์ทันสมัยสไตล์ยุโรป สร้างรสนิยมส่นตัวของคุณได้ไม่ซ้ำใคร", en: "Combining a sleek profile with enhanced utility, Loure introduces an ultra modern look to your bath decor. This strikingly contemporary sink faucet offers a stately design with clean, smooth lines." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet การติดตั้งพร้อมอะไหล่บริการ คู่มือเจ้าของบ้านโดยไม่ต้องมีอะไหล่บริการ ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Loure™" },
       { label: "คุณสมบัติ 1", value: "ตัววาล์วผลิตจากทองเหลือง" },
       { label: "คุณสมบัติ 2", value: "เซรามิควาล์ว แบบหมุน 90 องศา" },
@@ -2883,7 +2871,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมลงอ่างอาบน้ำ", en: "DECK-MOUNT BATH FAUCET" },
     desc: { th: "แรงบันดาลใจจากสายน้ำอันบริสุทธิ์เหมือนน้ำตก ก่อให้เกิดดีไซน์เหนือจินตนาการ รวมทุกประโยชน์การใช้งานและดีไซน์ทันสมัยสไตล์ยุโรป สร้างรสนิยมส่นตัวของคุณได้ไม่ซ้ำใคร", en: "Combining a sleek profile with enhanced utility, Loure introduces an ultra modern look to your bath decor. This strikingly contemporary faucet offers a stately design with clean, smooth lines." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet การติดตั้งพร้อมอะไหล่บริการ ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Loure™" },
       { label: "การติดตั้ง", value: "ตั้งบนเคาน์เตอร์" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากทองเหลือง" },
@@ -3177,7 +3164,6 @@ export const products: Product[] = [
     name: { th: "ฝักบัวก้านแข็งทรงกลมขนาด 14\"", en: "Contemporary Round 14\" Rainhead With Air-Induction Technology" },
     desc: { th: "", en: "Enjoy a shower that simulates the soaking deluge of a warm summer downpour. This contemporary-style showerhead features innovative Katalyst air-induction technology, which efficiently mixes air and water to produce large water droplets and deliver a powerful spray." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Katalyst™ Air" },
       { label: "การติดตั้ง", value: "แบบติดผนัง" },
     ],
@@ -3330,7 +3316,7 @@ export const products: Product[] = [
     slug: "anthem-26350t-9",
     model: "K-26350T-9",
     category: "bath",
-    name: { th: "Anthem™ |", en: "Six-outlet recessed mechanical thermostatic valve control" },
+    name: { th: "Anthem™", en: "Six-outlet recessed mechanical thermostatic valve control" },
     desc: { th: "", en: "Thermostatic technology allows you to maintain consistent temperature and flow control for the ultimate shower experience. This sleek thermostatic valve control panel with recessed push buttons is designed for use with an Anthem six-port thermostatic valve (K-26344T). The trim plate includes a temperature control knob with integrated adjustable high-temperature limit stop as well as shower outlet activation buttons that pop out for the adjustment of water flow (up to 49.2 lpm)." },
     specs: [
       { label: "ขนาด", value: "H 103 มิลลิเมตร, W 533 มิลลิเมตร" },
@@ -3384,7 +3370,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมลงอ่างและยืนอาบแบบติดผนังพร้อมฝักบัวสายอ่อนระบบเทอร์โมสแตทติก", en: "Exposed wall-mount thermostatic bath and shower faucet" },
     desc: { th: "ผลิตจากทองเหลือง · เคลือบผิวพิเศษจากโคห์เลอร์ คงทน เงางาม · ระบบเทอร์โมสแตทติก ควบคุมอุณหภูมิแม่นยำ พร้อมปุ่มหยุดนิรภัย", en: "Inspired by technical functionality and artful design, the aleo faucet collections bring you two affordable and easy-to-control faucets that are both simple and beautiful." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Aleo™" },
       { label: "การติดตั้ง", value: "แบบติดผนัง" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากทองเหลือง" },
@@ -3591,7 +3576,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมยืนอาบพร้อมชุดฝักบัวสายอ่อนและชุดฝักบัวก้านแข็ง", en: "3-way shower column with katalyst(r) air-induction technology" },
     desc: { th: "", en: "Kumin brings easy function and sleek style into any bathroom, combining single-handle control with modern design to create an eye-catching faucet." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Kumin™" },
     ],
     finishes: [
@@ -3668,7 +3652,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบฝังครึ่งเคาน์เตอร์ ทรงสี่เหลี่ยมผืนผ้า เจาะรูเดี่ยว", en: "Rectangular Semi-recessed Lavatory with single faucet hole" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\" · พร้อมรูนํ้าล้น", en: "Features a symmetrical, deep basin and rounded edges in true minimalist fashion. Simple and smooth lines make it easy to clean." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Forefront™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -3695,7 +3678,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบฝังครึ่งเคาน์เตอร์", en: "Rectangular Semi-recessed Lavatory with 8\" widespread faucet holes" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\" · พร้อมรูนํ้าล้น", en: "Features a symmetrical, deep basin and rounded edges in true minimalist fashion. Simple and smooth lines make it easy to clean." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
       { label: "คุณสมบัติ 2", value: "แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\"" },
@@ -3721,7 +3703,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์", en: "Vessel Lavatory with single faucet hole" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\" · พร้อมรูนํ้าล้น", en: "As one of the top sellers, Parliament represents a combination of inflexibility and yielding, hardness coupled with softness. The external round curve has integrated with the internal vertical lines and well completed design." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Parliament™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -3748,7 +3729,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์", en: "Semi-recessed Lavatory with single faucet hole" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\" · พร้อมรูนํ้าล้น", en: "Square appearance with curved lines for a simple yet elegant look. Basin depth of 140 mm with overflow drain provide a more comfortable bathing experience. Offers both Semi-recessed and vessel installation types." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Parliament™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -3775,7 +3755,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบฝังครึ่งเคาน์เตอร์", en: "Semi-recessed Lavatory with 8\" widespread faucet holes" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\" · พร้อมรูนํ้าล้น", en: "Square appearance with curved lines for a simple yet elegant look. Basin depth of 140 mm with overflow drain provide a more comfortable bathing experience. Offers both Semi-recessed and vessel installation types." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Parliament™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -3828,7 +3807,6 @@ export const products: Product[] = [
     name: { th: "Vanity Lavatory with single faucet hole", en: "Vanity Lavatory with single faucet hole" },
     desc: { th: "", en: "The combination of European-style geometric vanity rim and curved basin appeals to various bathroom decor styles. Extended deck area adds convenience to daily grooming and versatility." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Urbanity™" },
       { label: "วัสดุ", value: "ไฟร์เคลย์" },
     ],
@@ -3849,7 +3827,7 @@ export const products: Product[] = [
     slug: "kohler-17652x",
     model: "K-17652X",
     category: "bath",
-    name: { th: "|", en: "" },
+    name: { th: "K-17652X", en: "K-17652X" },
     desc: { th: "", en: "" },
     specs: [
 
@@ -3871,7 +3849,7 @@ export const products: Product[] = [
     slug: "kohler-17656x",
     model: "K-17656X",
     category: "bath",
-    name: { th: "|", en: "" },
+    name: { th: "K-17656X", en: "K-17656X" },
     desc: { th: "", en: "" },
     specs: [
 
@@ -3893,7 +3871,7 @@ export const products: Product[] = [
     slug: "800-18384t",
     model: "K-18384T",
     category: "bath",
-    name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์ 800มม.", en: "" },
+    name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์ 800มม.", en: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์ 800มม." },
     desc: { th: "", en: "" },
     specs: [
 
@@ -3966,9 +3944,9 @@ export const products: Product[] = [
     name: { th: "ขารองอ่างแบบตั้งลอย", en: "Semi-pedestal Lavatory 23\"" },
     desc: { th: "การผสมผสานอย่างลงตัวระหว่างฟังค์ชั่นการใช้งานกับดีไซน์ที่สวยงาม ทันสมัย ด้วยเส้นสาย โค้งมนอันวิจิตรประณีต จึงเกิดเป็นผลิตภัณฑ์ในห้องน้ำาที่เปี่ยมด้วยคุณภาพ สะท้อนไลฟ์สไตล์ สังคมเมือง", en: "Geometric straight lines in true minimalist fashion to match varied bathroom styles." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Reach™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
+      { label: "การติดตั้ง", value: "แบบติดผนัง" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
     ],
     finishes: [
@@ -3991,7 +3969,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์ 700มม.", en: "Vanity lavatory with single faucet hole" },
     desc: { th: "ดีไซน์แบบไร้รอยต่อ สวยเรียบมีสไตล์ สามารถเข้ากับห้องน้ำแบบร่วมสมัย ตู้เฟอร์นิเจอร์สำหรับห้องน้ำรุ่นรีช ถูกออกแบบให้มีพื้นที่เก็บของขนาดใหญ่ สะดวกต่อการใช้งาน", en: "Geometric straight lines in true minimalist fashion to match varied bathroom styles. Installed on a cabinet or matching metal stand to make it a bathroom furniture solution." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Reach™" },
       { label: "วัสดุ", value: "ไฟร์เคลย์" },
       { label: "คุณสมบัติ 1", value: "ดีไซน์ทันสมัย รูปทรงเหลี่ยม สามารถเข้ากับห้องน้ำได้ทุกสไตล์" },
@@ -4018,7 +3995,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์ 900มม.", en: "Vanity Lavatory with single faucet hole" },
     desc: { th: "ด้วยการออกแบบอย่างอ่อนช้อย โดยคำนึงถึงส่วนโค้ง-เว้าของอ่างโอฟ ตัวตู้และอ่างต่อกันสนิทง่ายต่อการดูแลรักษาและทำความสะอาด", en: "This integrated vanity top and sink offers a beautifully coordinated and easy design solution to reflect your unique bathroom style. One-piece, seamless configuration simplifies cleaning." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Ove™" },
       { label: "วัสดุ", value: "ไฟร์เคลย์" },
       { label: "คุณสมบัติ 1", value: "ดีไซน์อ่อนช้อยจากตะวันออก ที่สามารถเข้ากับห้องน้ำได้ทุกสไตล์" },
@@ -4045,7 +4021,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์ 1200มม.", en: "Dual-Basin Vanity Lavatory with single faucet hole" },
     desc: { th: "ด้วยการออกแบบอย่างอ่อนช้อย โดยคำนึงถึงส่วนโค้ง-เว้าของอ่างโอฟ ตัวตู้และอ่างต่อกันสนิทง่ายต่อการดูแลรักษาและทำความสะอาด", en: "This integrated vanity top and sink offers a beautifully coordinated and easy design solution to reflect your unique bathroom style. One-piece, seamless configuration simplifies cleaning." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Ove™" },
       { label: "วัสดุ", value: "ไฟร์เคลย์" },
       { label: "คุณสมบัติ 1", value: "ดีไซน์อ่อนช้อยจากตะวันออก ที่สามารถเข้ากับห้องน้ำได้ทุกสไตล์" },
@@ -4072,7 +4047,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้า", en: "SGL HOLE PED LAV BASIN" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\" · พร้อมรูนํ้าล้น", en: "Combines the best of traditional and contemporary design for a versatile look that complements a range of bathroom styles. Coordinates with other products in the Folio collection." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Folio™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -4099,9 +4073,9 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบฝังบนเคาน์เตอร์", en: "Self-rimming Lavatory with single faucet hole" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\" · พร้อมรูนํ้าล้น", en: "With a subtle oval shape and understated design, the Pennington sink complements both contemporary and traditional bathrooms. The basin's raised rim helps keep water from splashing over the side while adding a classic design touch." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Pennington™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
+      { label: "การติดตั้ง", value: "แบบฝังบนเคาน์เตอร์" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
       { label: "คุณสมบัติ 2", value: "แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\"" },
       { label: "คุณสมบัติ 3", value: "พร้อมรูนํ้าล้น" },
@@ -4126,7 +4100,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบฝังใต้เคาน์เตอร์", en: "Under-counter Lavatory 19\"" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · พร้อมรูนํ้าล้น", en: "Caxton ® has a simple, streamlined design that's as versatile as it is attractive. This easy-to-clean sink combines the sleek look of an integrated basin with a timeless design that suits both traditional and modern bathroom decors. Caxton ® creates a s" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Caxton™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -4152,7 +4125,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบฝังใต้เคาน์เตอร์", en: "Under-counter Lavatory 21\"" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · พร้อมรูนํ้าล้น", en: "With its unique curved bottom and clean lines, Ladena ® evokes casual elegance. This spacious and distinctive sink has a smooth, glazed rim for a polished look and is versatile enough to complement traditional and modern bathrooms." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Ladena™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -4178,9 +4150,9 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบฝังบนเคาน์เตอร์", en: "Classic self-rimming lavatory with 8\" widespread faucet holes" },
     desc: { th: "ก่อกำเนิดจากการศึกษาอย่างลึกซึ้งถึงประวัติศาสตร์ การออกแบบเฟอร์นิเจอร์ และสถาปัตยกรรมทุกลวดลาย ทุกเส้นสายจึงมากมายด้วยความพิถีพิถัน พร้อมให้คุณเลือกสรรได้สองสไตล์ทั้งแบบภูมิฐาน (Stately) และแบบงานคลาสสิค (Classic)", en: "Inspired by traditional furniture and architectural elements, this sink carries the clean lines and rich detailing of the Memoirs collection. The decorative edges resemble crown molding for a classic, refined presence." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Memoirs™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
+      { label: "การติดตั้ง", value: "แบบฝังบนเคาน์เตอร์" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
       { label: "คุณสมบัติ 2", value: "แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\"" },
       { label: "คุณสมบัติ 3", value: "พร้อมรูนํ้าล้น" },
@@ -4205,7 +4177,6 @@ export const products: Product[] = [
     name: { th: "Wall-hung Lavatory 8\" widespread faucet holes", en: "WALL HUNG LAVATORY" },
     desc: { th: "", en: "The thin rimmed, soft square round shape design of Forefront is very popular. The 450mm small sized wall hung basin can perfectly fulfill the growing demand from urban apartment and condo with space saving needs, and also favored in commercial area." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Forefront™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
     ],
@@ -4229,7 +4200,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์", en: "Rectangular Vessel Lavatory W/Faucet Deck with 8\" widespread faucet holes" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\" · พร้อมรูนํ้าล้น", en: "Sleek and contemporary, the Forefront rectangular vessel-style sink features a wide, shallow basin and rounded edges in true minimalist fashion. Countertop installation ensures this sink will stand out in your bathroom as a striking focal point." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Vox™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -4256,7 +4226,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์", en: "Square Vessel Lavatory 16\"" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · พร้อมรูนํ้าล้น", en: "Sleek and contemporary, the Forefront Square vessel-style sink features a symmetrical, deep basin and rounded edges in true minimalist fashion. Countertop installation ensures this sink will stand out in your bathroom as a striking focal point." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Forefront™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -4282,7 +4251,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์", en: "Vanity Lavatory with single faucet hole" },
     desc: { th: "ความสะดวกสบายภายในห้องน้ำ เริ่มต้นด้วยอ่างล้างหน้าขนาดใหญ่ ตู้ลิ้นชักที่แบ่งสัดส่วนตรงตามความต้องการของคุณ ใช้งานง่ายและเป็นระเบียบ ให้คุณสนุกไปกับการใช้งานตู้เฟอร์นิเจอร์สไตล์มินิมอล", en: "With deep basin and extended decks on both sides, Aleutian vanities make the best use of grooming space, ensuring the tidiness and versatility of the vanity area. Sleek silhouette and gentle rim curves add ease to daily cleaning." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Aleutian™" },
       { label: "วัสดุ", value: "ไฟร์เคลย์" },
       { label: "คุณสมบัติ 1", value: "ดีไซน์ทันสมัย ให้มีพื้นที่สำหรับวางกล่องเก็บของที่ออกแบบมาเฉพาะกับตู้เฟอร์นิเจอร์ ให้สามารถใช้ในห้องน้ำได้สวยงาม" },
@@ -4309,7 +4277,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์", en: "Vanity Lavatory with with 8\" widespread faucet holes" },
     desc: { th: "ความสะดวกสบายภายในห้องน้ำ เริ่มต้นด้วยอ่างล้างหน้าขนาดใหญ่ ตู้ลิ้นชักที่แบ่งสัดส่วนตรงตามความต้องการของคุณ ใช้งานง่ายและเป็นระเบียบ ให้คุณสนุกไปกับการใช้งานตู้เฟอร์นิเจอร์สไตล์มินิมอล", en: "With deep basin and extended decks on both sides, Aleutian vanities make the best use of grooming space, ensuring the tidiness and versatility of the vanity area. Sleek silhouette and gentle rim curves add ease to daily cleaning." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Aleutian™" },
       { label: "วัสดุ", value: "ไฟร์เคลย์" },
       { label: "คุณสมบัติ 1", value: "ดีไซน์ทันสมัย ให้มีพื้นที่สำหรับวางกล่องเก็บของที่ออกแบบมาเฉพาะกับตู้เฟอร์นิเจอร์ ให้สามารถใช้ในห้องน้ำได้สวยงาม" },
@@ -4424,9 +4391,9 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบฝังบนเคาน์เตอร์", en: "SELF-RIMMING LAVATORY" },
     desc: { th: "แรงบันดาลใจจากความงามของดวงจันทร์ ซึ่งเปี่ยมไปด้วยเสน่ห์อันเป็นเอกลักษณ์ สลักไว้ด้วย ความงามของเส้นสายโค้งมนและอ่อนโยน สร้างสรรค์ห้องน้ำของคุณให้เป็นดั่งสถานที่แห่ง ความเงียบสงบและความสบาย", en: "Modern contemporary design, with smooth curves and simplicity style, easy to go with bathroom furniture. First vessel to have 600mm exterior dimension, more practical for daily use. With faucet deck design better for limited top space bathroom" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Karess™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
+      { label: "การติดตั้ง", value: "แบบฝังบนเคาน์เตอร์" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
       { label: "คุณสมบัติ 2", value: "แบบเจาะรูเดี่ยว หรือแบบเซ็นเตอร์ 8\"" },
       { label: "คุณสมบัติ 3", value: "พร้อมรูนํ้าล้น" },
@@ -4451,7 +4418,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์ แบบเจาะรูเดี่ยว", en: "TRESHAM™ TOP & BASIN LAV, 1-HOLE" },
     desc: { th: "", en: "" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Tresham™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
     ],
@@ -4475,7 +4441,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์ แบบเซ็นเตอร์ 8\"", en: "TRESHAM™ TOP & BASIN LAV, 8CC" },
     desc: { th: "", en: "" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Tresham™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
     ],
@@ -4496,7 +4461,7 @@ export const products: Product[] = [
     slug: "kohler-72449x-1",
     model: "K-72449X-1",
     category: "bath",
-    name: { th: "|", en: "" },
+    name: { th: "K-72449X-1", en: "K-72449X-1" },
     desc: { th: "", en: "" },
     specs: [
 
@@ -4574,7 +4539,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้า รุ่น ซัคคราเมนโต้", en: "1-HOLE LAV BASIN" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · แบบเจาะรูเดี่ยว · พร้อมรูนํ้าล้น", en: "The simple lines of the pedestal and basin add chic to the bathroom and appeals to a range of decors." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Sacramento™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -4601,7 +4565,6 @@ export const products: Product[] = [
     name: { th: "ขารองอ่างแบบตั้งพื้น", en: "PEDESTAL" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)", en: "The simple lines of the pedestal and basin add chic to the bathroom and appeals to a range of decors." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Sacramento™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -4626,7 +4589,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบแขวนผนัง", en: "WALL HUNG LAVATORY" },
     desc: { th: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · แบบเจาะรูเดี่ยว · พร้อมรูนํ้าล้น", en: "The simple lines of the pedestal and basin add chic to the bathroom and appeals to a range of decors." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Sacramento™" },
       { label: "วัสดุ", value: "เซรามิกประเภทวิเทรียสไชน่า" },
       { label: "คุณสมบัติ 1", value: "เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
@@ -4680,7 +4642,6 @@ export const products: Product[] = [
     name: { th: "อ่างล้างหน้าแบบติดตั้งบนเคาน์เตอร์", en: "600 Vanity Lavatory with single faucet hole" },
     desc: { th: "ลงตัวด้วยรูปลักษณ์ที่เรียบง่าย เพิ่มขนาดความลึกและความกว้างของอ่างล้างหน้าดีไซน์แบบซ่อนสะดืออ่าง ที่มาพร้อมฟังก์ชั่นการใช้งานพิเศษตะแกรงกรองเส้นผม ง่ายและสะดวกยิ่งขึ้น", en: "With extra large and deep basin and extended deck area, Flexi Space vanity makes the best use of grooming space, ensuring the tidiness and cleanliness of the vanity area. Sleek silhouette and gentle rim curves add ease to daily cleaning." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "MaxiSpace™" },
       { label: "วัสดุ", value: "ไฟร์เคลย์" },
       { label: "คุณสมบัติ 1", value: "ดีไซน์อ่างล้างหน้ากว้างที่ดูสะอาดและทำความสะอาดง่ายขึ้น" },
@@ -4788,7 +4749,6 @@ export const products: Product[] = [
     name: { th: "สุขภัณฑ์แบบสองชิ้น", en: "2PCTLT,EB W/QCQR,COMPLETE SOLUTION" },
     desc: { th: "กลิ่นอายของงานดีไซน์ร่วมสมัยที่เปี่ยมล้นด้วยเอกลักษณ์ ทั้งโถสุขภัณฑ์ อ่างล้างหน้า อ่างอาบน้ำา แบบฝัง ตลอดจนอ่างน้ำาวน บรรจงสร้างให้เซอรีฟคือชุดสวีทที่สมบูรณ์แบบอย่างแท้จริง", en: "Features a 6L flushing system · S trap: 305mm" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คุณสมบัติ 1", value: "สุขภัณฑ์เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
       { label: "คุณสมบัติ 2", value: "โถสุขภัณฑ์แบบหน้ายาว" },
       { label: "คุณสมบัติ 3", value: "ระบบชำระล้างแบบอินจีเนียม ใช้น้ำในการชำระล้าง6 ลิตร" },
@@ -4813,7 +4773,6 @@ export const products: Product[] = [
     name: { th: "สตูลรองนั่งสำหรับเด็ก", en: "Toilet Stool" },
     desc: { th: "โคห์เลอร์ออกแบบห้องน้ำให้เป็นสถานที่สำหรับสมาชิกทุกคนในครอบครัวอย่างแท้จริง ด้วยวัสดุที่เป็นมิตรต่อสิ่งแวดล้อมและการคำนึงถึงรายละเอียดต่างๆ เพื่อให้ห้องน้ำเป็นสถานที่ซึ่งปลอดภัย สะดวกสบาย สำหรับเด็กและผู้สูงอายุ มั่นใจได้ว่าทุกคนในครอบครัวจะสามารถเพลิดเพลินไปกับช่วงเวลาแห่งการผ่อนคลายได้อย่างสบายใจ", en: "Toilet stool for children is launched to further strengthen Kohler’s offering of “Family Care” solution by providing user-friendly bathroom accessories." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Family Care™" },
       { label: "คุณสมบัติ 1", value: "ตัวตู้มีดีไซน์โค้งมนปลอดภัยเหมาะสำหรับครอบครัวที่มีลูกน้อยและทุกคนในครอบครัว" },
       { label: "คุณสมบัติ 2", value: "มีที่เก็บของเป็นสัดส่วน" },
@@ -4836,10 +4795,9 @@ export const products: Product[] = [
     slug: "adair-22248k-c",
     model: "K-22248K-C",
     category: "bath",
-    name: { th: "Adair™ |", en: "Two-piece 4L Washdown Toilet with Concealed Trapway" },
+    name: { th: "Adair™", en: "Two-piece 4L Washdown Toilet with Concealed Trapway" },
     desc: { th: "", en: "Transitional design matches with most of the bathroom design styles · Glazed trapway to ensure hygiene · Concealed trapway design for easy cleaning" },
     specs: [
-      { label: "ขนาด", value: "การติดตั้งพร้อมอะไหล่บริการ" },
       { label: "คอลเลกชัน", value: "Adair™" },
     ],
     finishes: [
@@ -4862,7 +4820,6 @@ export const products: Product[] = [
     name: { th: "สุขภัณฑ์แบบสองชิ้น", en: "Two-Piece 3/4.5L Dual Flush Toilet with Quiet Close Seat" },
     desc: { th: "โถสุขภัณฑ์แบบหน้ายาว พร้อมฝารองนั่งแบบกันกระแทก · ระบบชำระล้าง Class-5 สามารถชำระของเสียได้มากกว่ามาตรฐานมอก 2-3 เท่า · ติดตั้งแบบท่อลงพื้นระยะ 305 มม.", en: "Elongated bowl with quiet close seat · Class Five+ dual fush system · 305 mm rough-in for S-trap" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Patio™" },
       { label: "คุณสมบัติ 1", value: "โถสุขภัณฑ์แบบหน้ายาว พร้อมฝารองนั่งแบบกันกระแทก" },
       { label: "คุณสมบัติ 2", value: "ระบบชำระล้าง Class-5 สามารถชำระของเสียได้มากกว่ามาตรฐานมอก 2-3 เท่า" },
@@ -4885,10 +4842,10 @@ export const products: Product[] = [
     slug: "kohler-24067k",
     model: "K-24067K",
     category: "bath",
-    name: { th: "|", en: "Two-piece compact elongated toilet with skirted trapway, dual-flush" },
+    name: { th: "K-24067K", en: "Two-piece compact elongated toilet with skirted trapway, dual-flush" },
     desc: { th: "", en: "Slim seat option is to enrich the Parliament Grande range. Its slim seat design can perfectly fit in various design styles in both residential and commercial scenarios." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet ผลการทดสอบรังสี รายการที่ตรงกัน" },
+
     ],
     finishes: [
       {
@@ -4907,10 +4864,9 @@ export const products: Product[] = [
     slug: "reach-26061k",
     model: "K-26061K",
     category: "bath",
-    name: { th: "Reach™ |", en: "Two-piece round-front toilet with skirted trapway, dual-flush" },
+    name: { th: "Reach™", en: "Two-piece round-front toilet with skirted trapway, dual-flush" },
     desc: { th: "", en: "Introduce Reach Up 2PC BTW toilet with apron skirted bowl design and compact bowl length – 610mm to meet small bathroom needs" },
     specs: [
-      { label: "ขนาด", value: "Installation Instruction" },
       { label: "คอลเลกชัน", value: "Reach™" },
     ],
     finishes: [
@@ -4933,7 +4889,6 @@ export const products: Product[] = [
     name: { th: "สุขภัณฑ์แบบสองชิ้น ใช้น้ำ 3/4.5 ลิตร รุ่น รีซ คอนซีล พร้อมฝารองนั่งแบบกันกระแทก (แบบท่อออกผนัง)", en: "Two-piece elongated toilet with concealed trapway, dual-flush" },
     desc: { th: "ดีไซน์แบบร่วมสมัย สวยงามและเข้ากับห้องน้ำได้หลากหลายสไตล์ · เคลือบผิวด้านในตลอดท่อ พร้อมด้วยระบบชำระล้างอันทรงพลัง · โถสุขภัณฑ์สามารถใช้ได้กับฝารองนั่งแบบเฟรนช์เคิร์ฟ เพื่อความสบายที่ดียิ่งขึ้น", en: "Minimal and contemporary design that easy to fit your different style of your bathroom · Fully-glazed trap-way with strong flushing ensures extraordinary flushing performance · Toilet bowl perfectly matches French Curve quiet closed seat, without compromising sitting comfort" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Reach™" },
       { label: "คุณสมบัติ 1", value: "ดีไซน์แบบร่วมสมัย สวยงามและเข้ากับห้องน้ำได้หลากหลายสไตล์" },
       { label: "คุณสมบัติ 2", value: "เคลือบผิวด้านในตลอดท่อ พร้อมด้วยระบบชำระล้างอันทรงพลัง" },
@@ -4959,7 +4914,6 @@ export const products: Product[] = [
     name: { th: "สุขภัณฑ์แบบชิ้นเดียว พร้อมระบบชำระล้างแบบอัตโนมัติ รุ่น ลีพ", en: "Smart Toilet" },
     desc: { th: "โถสุขภัณฑ์แบบหน้ายาว · ใช้น้ำ 3/4.5 ลิตร พร้อมชำระล้างอัตโนมัติ · ฝารองนั่งร้อมระบบเปิด-ปิดอัตโนมัติ", en: "" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction ผลการทดสอบรังสี" },
       { label: "คอลเลกชัน", value: "Leap™" },
       { label: "คุณสมบัติ 1", value: "โถสุขภัณฑ์แบบหน้ายาว" },
       { label: "คุณสมบัติ 2", value: "ใช้น้ำ 3/4.5 ลิตร พร้อมชำระล้างอัตโนมัติ" },
@@ -4982,10 +4936,10 @@ export const products: Product[] = [
     slug: "kohler-3466x-c",
     model: "K-3466X-C",
     category: "bath",
-    name: { th: "|", en: "CONCEALED 1PC W/QCQR SEAT" },
+    name: { th: "K-3466X-C", en: "CONCEALED 1PC W/QCQR SEAT" },
     desc: { th: "", en: "This San Raphael toilet brings the elegant contemporary style of a low-profile, one-piece toilet to your bathroom or powder room and delivers commercial-grade flushing." },
     specs: [
-      { label: "ขนาด", value: "ผลการทดสอบรังสี" },
+
     ],
     finishes: [
       {
@@ -5004,10 +4958,9 @@ export const products: Product[] = [
     slug: "aerodyne-3869x-s",
     model: "K-3869X-S",
     category: "bath",
-    name: { th: "Aerodyne™ |", en: "Skirted One-piece Dual Flush 3/4.8L Toilet with Class 5 Flushing Technology" },
+    name: { th: "Aerodyne™", en: "Skirted One-piece Dual Flush 3/4.8L Toilet with Class 5 Flushing Technology" },
     desc: { th: "", en: "" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Aerodyne™" },
     ],
     finishes: [
@@ -5030,7 +4983,6 @@ export const products: Product[] = [
     name: { th: "สุขภัณฑ์แบบสองชิ้น", en: "Two-piece elongated toilet with skirted trapway, dual-flush" },
     desc: { th: "สุขภัณฑ์เซรามิกประเภทวิเทรียสไชน่า (Vitreous china) · โถสุขภัณฑ์แบบหน้ายาว · ระบบชำระล้างแบบวอชดาวน์ ใช้น้ำในการชำระล้าง 3/4.5 ลิตร", en: "The Persuade collection captures the essence of modernity in subtle curves and clean lines. With its sleek symmetry, this two-piece Persuade Circ toilet adds style to the bathroom without sacrificing water savings. The skirted trapway installs to the floo" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คุณสมบัติ 1", value: "สุขภัณฑ์เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
       { label: "คุณสมบัติ 2", value: "โถสุขภัณฑ์แบบหน้ายาว" },
       { label: "คุณสมบัติ 3", value: "ระบบชำระล้างแบบวอชดาวน์ ใช้น้ำในการชำระล้าง 3/4.5 ลิตร" },
@@ -5052,7 +5004,7 @@ export const products: Product[] = [
     slug: "adair-5171x-c",
     model: "K-5171X-C",
     category: "bath",
-    name: { th: "Adair™ |", en: "Adair™" },
+    name: { th: "Adair™", en: "Adair™" },
     desc: { th: "", en: "" },
     specs: [
       { label: "คอลเลกชัน", value: "Adair™" },
@@ -5100,7 +5052,7 @@ export const products: Product[] = [
     slug: "cimarron-5697x-c",
     model: "K-5697X-C",
     category: "bath",
-    name: { th: "Cimarron™ |", en: "Cimarron™" },
+    name: { th: "Cimarron™", en: "Cimarron™" },
     desc: { th: "", en: "" },
     specs: [
       { label: "คอลเลกชัน", value: "Cimarron™" },
@@ -5122,10 +5074,9 @@ export const products: Product[] = [
     slug: "wellworth-72635x",
     model: "K-72635X",
     category: "bath",
-    name: { th: "Wellworth™ |", en: "Two-piece 4.2L Toilet with Class 5 Flushing Technology" },
+    name: { th: "Wellworth™", en: "Two-piece 4.2L Toilet with Class 5 Flushing Technology" },
     desc: { th: "", en: "Powerful Class 5 flushing system without splashing · Glazed trapway to ensure hygiene · S trap: 305mm" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Wellworth™" },
     ],
     finishes: [
@@ -5148,7 +5099,6 @@ export const products: Product[] = [
     name: { th: "สุขภัณฑ์แบบชิ้นเดียว", en: "One-piece elongated toilet with skirted trapway, 4.8 lpf" },
     desc: { th: "สุขภัณฑ์แบบชิ้นเดียว รุ่น ซาน ราเฟล นั่งสบายด้วยโถแบบหน้ายาว ดีไซน์โถแบบกระโปรง ดีไซน์หรูหรา ทำความสะอาดได้ง่าย", en: "Contemporary Design · Powerful Class 5 flushing system without splashing · Glazed trapway to ensure hygiene" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "San Raphael™" },
       { label: "คุณสมบัติ 1", value: "โถสุขภัณฑ์แบบหน้ายาว" },
       { label: "คุณสมบัติ 2", value: "พร้อมฝารองนั่งแบบกันกระแทก รุ่นเฟรนช์เคิร์ฟ" },
@@ -5174,7 +5124,6 @@ export const products: Product[] = [
     name: { th: "สุขภัณฑ์แบบสองชิ้น", en: "Two-piece elongated toilet with concealed trapway, dual-flush" },
     desc: { th: "การผสมผสานอย่างลงตัวระหว่างฟังค์ชั่นการใช้งานกับดีไซน์ที่สวยงาม ทันสมัย ด้วยเส้นสาย โค้งมนอันวิจิตรประณีต จึงเกิดเป็นผลิตภัณฑ์ในห้องน้ำาที่เปี่ยมด้วยคุณภาพ สะท้อนไลฟ์สไตล์ สังคมเมือง", en: "Powerful Class 5 flushing system without splashing · Skirted design for easy cleaning · Skirted bowl design with Class 5 dual flushing system (3/4.8L)" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Reach™" },
       { label: "คุณสมบัติ 1", value: "สุขภัณฑ์เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
       { label: "คุณสมบัติ 2", value: "โถสุขภัณฑ์แบบหน้ายาว" },
@@ -5200,7 +5149,6 @@ export const products: Product[] = [
     name: { th: "สุขภัณฑ์แบบชิ้นเดียว", en: "One-piece elongated toilet with skirted trapway, dual-flush" },
     desc: { th: "การผสมผสานอย่างลงตัวระหว่างฟังค์ชั่นการใช้งานกับดีไซน์ที่สวยงาม ทันสมัย ด้วยเส้นสาย โค้งมนอันวิจิตรประณีต จึงเกิดเป็นผลิตภัณฑ์ในห้องน้ำาที่เปี่ยมด้วยคุณภาพ สะท้อนไลฟ์สไตล์ สังคมเมือง", en: "Contemporary Design · Powerful Class 5 flushing system without splashing · Glazed trapway to ensure hygiene" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Reach™" },
       { label: "คุณสมบัติ 1", value: "สุขภัณฑ์เซรามิกประเภทวิเทรียสไชน่า (Vitreous china)" },
       { label: "คุณสมบัติ 2", value: "โถสุขภัณฑ์แบบหน้ายาว" },
@@ -5252,7 +5200,6 @@ export const products: Product[] = [
     name: { th: "สุขภัณฑ์แบบชิ้นเดียว พร้อมระบบชำระล้างแบบอัตโนมัติ", en: "Smart Toilet, Power Plug, S-Trap" },
     desc: { th: "ดีไซน์ : - ดีไซน์แบบโถติดผนัง และซ่อนสาย · ความสะอาด : - ก้านฉีดชำระสแตนเลส เกรด 316 วัสดุมาตรฐาน เดียวกับเครื่องมือการแพทย์ - ระบบฉีดชำระด้านหน้าด้วยรูเล็กๆ 24 รู และระบบฉีดชำระด้านหลัง - สามารถปรับอุณหภูมิน้ำ ความแรงของน้ำ และตำแหน่งก้านฉีดได้ตามต้องการ - อุณหภูมิน้ำจากก้านฉีดคงที่กว่า ร้อนไวกว่า ด้วยระบบ Inline Heater - ระบบกรองน้ำจากก้านฉีด สะอาด ไร้สิ่งสกปรก · สุขอนามัย : - ระบบฆ่าเชื้อด้วยแสง UV และน้ำ Electrolized Water - ระบบทำความสะอาดก้านฉีดอัตโนมัติ - ระบบฉีดพ่นอัตโนมัติลงบนพื้นผิวภายในโถสุขภัณฑ์ก่อนการใช้งานทุกครั้ง - ระบบฆ่าเชื้อแบคทีเรียภายในโถ ด้วย Electrolized water - ฝารองนั่งผสมสาร Anti-Bacteria อนุภาคเงิน ที่อยู่ในฝารองนั่ง จะช่วยยับยั้งการเจริญเติบโต ของเชื้อแบคทีเรีย", en: "Design: Back-to-wall design Available in hidden cord models · Cleansing: Stainless Steel 316 single wand, 24 Nozzles Front & rear wash Water Pressure adjustment Water Temperature adjustment Wand position adjustment Instant heating (inline heater) Water filter · Sanitation: E-Water+ UV Sanitizing Wand self-cleaning mode Bowl sanitizing (Premist) Bowl sanitizing (E-water) Anti-bacterial seat" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Eir™" },
       { label: "คุณสมบัติ 1", value: "ดีไซน์ : - ดีไซน์แบบโถติดผนัง และซ่อนสาย" },
       { label: "คุณสมบัติ 2", value: "ความสะอาด : - ก้านฉีดชำระสแตนเลส เกรด 316 วัสดุมาตรฐาน เดียวกับเครื่องมือการแพทย์ - ระบบฉีดชำระด้านหน้าด้วยรูเล็กๆ 24 รู และระบบฉีดชำระด้านหลัง - สามารถปรับอุณหภูมิน้ำ ความแรงของน้ำ และตำแหน่งก้านฉีดได้ตามต้องการ - อุณหภูมิน้ำจากก้านฉีดคงที่กว่า ร้อนไวกว่า ด้วยระบบ Inline Heater - ระบบกรองน้ำจากก้านฉีด สะอาด ไร้สิ่งสกปรก" },
@@ -5278,7 +5225,6 @@ export const products: Product[] = [
     name: { th: "สุขภัณฑ์แบบชิ้นเดียว พร้อมระบบชำระล้างแบบอัตโนมัติ", en: "Smart Toilet, Power Plug, S-Trap" },
     desc: { th: "ดีไซน์ : - ดีไซน์แบบโถติดผนัง และซ่อนสาย · ความสะอาด : - ก้านฉีดชำระสแตนเลส เกรด 316 วัสดุมาตรฐาน เดียวกับเครื่องมือการแพทย์ - ระบบฉีดชำระด้านหน้าด้วยรูเล็กๆ 24 รู และระบบฉีดชำระด้านหลัง - สามารถปรับอุณหภูมิน้ำ ความแรงของน้ำ และตำแหน่งก้านฉีดได้ตามต้องการ - อุณหภูมิน้ำจากก้านฉีดคงที่กว่า ร้อนไวกว่า ด้วยระบบ Inline Heater - ระบบกรองน้ำจากก้านฉีด สะอาด ไร้สิ่งสกปรก · สุขอนามัย : - ระบบฆ่าเชื้อด้วยแสง UV และน้ำ Electrolized Water - ระบบทำความสะอาดก้านฉีดอัตโนมัติ - ระบบฉีดพ่นอัตโนมัติลงบนพื้นผิวภายในโถสุขภัณฑ์ก่อนการใช้งานทุกครั้ง - ระบบฆ่าเชื้อแบคทีเรียภายในโถ ด้วย Electrolized water - ฝารองนั่งผสมสาร Anti-Bacteria อนุภาคเงิน ที่อยู่ในฝารองนั่ง จะช่วยยับยั้งการเจริญเติบโต ของเชื้อแบคทีเรีย", en: "Design: Back-to-wall design Available in hidden cord models · Cleansing: Stainless Steel 316 single wand, 24 Nozzles Front & rear wash Water Pressure adjustment Water Temperature adjustment Wand position adjustment Instant heating (inline heater) Water filter · Sanitation: E-Water+ UV Sanitizing Wand self-cleaning mode Bowl sanitizing (Premist) Bowl sanitizing (E-water) Anti-bacterial seat" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Eir™" },
       { label: "คุณสมบัติ 1", value: "ดีไซน์ : - ดีไซน์แบบโถติดผนัง และซ่อนสาย" },
       { label: "คุณสมบัติ 2", value: "ความสะอาด : - ก้านฉีดชำระสแตนเลส เกรด 316 วัสดุมาตรฐาน เดียวกับเครื่องมือการแพทย์ - ระบบฉีดชำระด้านหน้าด้วยรูเล็กๆ 24 รู และระบบฉีดชำระด้านหลัง - สามารถปรับอุณหภูมิน้ำ ความแรงของน้ำ และตำแหน่งก้านฉีดได้ตามต้องการ - อุณหภูมิน้ำจากก้านฉีดคงที่กว่า ร้อนไวกว่า ด้วยระบบ Inline Heater - ระบบกรองน้ำจากก้านฉีด สะอาด ไร้สิ่งสกปรก" },
@@ -5383,7 +5329,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมอ่างล้างจาน", en: "Single Control Kitchen Faucet" },
     desc: { th: "", en: "Combining modern style with smart design features, this Elate kitchen faucet has a distinctive shape that enhances contemporary decor. The high-arch swing spout makes way for your largest pots and pans, and the pull-out sprayhead allows for more effective cleaning and up-close tasks. At the touch of a button, the sprayhead switches from an aerated stream to a powerful spray to a convenient pause function. The ergonomic single side lever offers easy control of water temperature and pressure." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet การติดตั้งพร้อมอะไหล่บริการ ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Elate™" },
       { label: "การติดตั้ง", value: "ตั้งบนเคาน์เตอร์" },
     ],
@@ -5407,7 +5352,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกผสมอ่างล้างจานชนิดหัวฝักบัว", en: "Pull Down Kitchen Faucet" },
     desc: { th: "ผลิตจากทองเหลือง · เซรามิกวาล์วกันการรั่วซึมหมุน 1/4 รอบ รับประกันตลอดอายุการใช้งาน · สายน้ำขนาด G1/2\"", en: "Brass construction · Leak-free ceramic disc valve with lifetime warranty · Flexible G1/2\" supply hoses for easy installation" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Taut™" },
       { label: "การติดตั้ง", value: "ตั้งบนเคาน์เตอร์" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากทองเหลือง" },
@@ -5434,7 +5378,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกเดี่ยวอ่างล้างจาน", en: "Cold Water Swing Spout Kitchen Faucet" },
     desc: { th: "ผลิตจากทองเหลือง · เซรามิกวาล์วกันการรั่วซึมหมุน 1/4 รอบ รับประกันตลอดอายุการใช้งาน · สายน้ำขนาด G1/2\"", en: "Brass construction · Leak-free ceramic disc valve with lifetime warranty · Flexible G1/2\" supply hoses for easy installation" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet Installation Instruction รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Taut™" },
       { label: "การติดตั้ง", value: "ตั้งบนเคาน์เตอร์" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากทองเหลือง" },
@@ -5461,7 +5404,6 @@ export const products: Product[] = [
     name: { th: "ก๊อกเดี่ยวอ่างล้างจาน", en: "Single-handle kitchen sink faucet, cold only" },
     desc: { th: "ผลิตจากทองเหลือง · เซรามิกวาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน · วัสดุเคลือบผิวพิเศษจากโคห์เลอร์ คงทน เงางาม", en: "Kumin™ brings easy function and sleek style into any kitchen, combining single-handle control with modern design in an eye-catching faucet. The unique 360˚ rotating spout maneuvers easily around large cookware, while the side lever handle controls on/off activation and volume control. Kohler brings function and style together to create kitchen faucets that are as stunning as they are efficient." },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Kumin™" },
       { label: "คุณสมบัติ 1", value: "ผลิตจากทองเหลือง" },
       { label: "คุณสมบัติ 2", value: "เซรามิกวาล์วป้องกันการรั่วซึม รับประกันตลอดอายุการใช้งาน" },
@@ -5484,7 +5426,7 @@ export const products: Product[] = [
     slug: "kohler-8623x",
     model: "K-8623X",
     category: "kitchen",
-    name: { th: "ก๊อกผสมอ่างล้างจาน", en: "" },
+    name: { th: "ก๊อกผสมอ่างล้างจาน", en: "ก๊อกผสมอ่างล้างจาน" },
     desc: { th: "", en: "" },
     specs: [
 
@@ -5602,9 +5544,9 @@ export const products: Product[] = [
     name: { th: "อ่างล้างจานสแตนเลส 2 หลุม", en: "31\" Large/Medium Self-Rimming Kitchen Sink" },
     desc: { th: "", en: "" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Toccata™" },
       { label: "วัสดุ", value: "สแตนเลส สตีล" },
+      { label: "การติดตั้ง", value: "แบบฝังบนเคาน์เตอร์" },
     ],
     finishes: [
       {
@@ -5626,9 +5568,9 @@ export const products: Product[] = [
     name: { th: "อ่างล้างจานสแตนเลส 1 หลุมครึ่ง", en: "30\" Large/Medium Self-Rimming Kitchen Sink" },
     desc: { th: "", en: "" },
     specs: [
-      { label: "ขนาด", value: "Rough In/Spec Sheet ผลการทดสอบรังสี รายการที่ตรงกัน" },
       { label: "คอลเลกชัน", value: "Marcato™" },
       { label: "วัสดุ", value: "สแตนเลส สตีล" },
+      { label: "การติดตั้ง", value: "แบบฝังบนเคาน์เตอร์" },
     ],
     finishes: [
       {
