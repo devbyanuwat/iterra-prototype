@@ -12,7 +12,9 @@ import { lifestyleImages } from '@/lib/lifestyle.generated';
 
 // ช่องแผนที่เดิมเป็นกล่องเปล่า — ใส่ภาพหน้าร้านโชว์รูมไปก่อน
 // (ภาพ retail ใบเดียวในคลัง) ตอนขึ้นจริงค่อยแทนด้วย Google Maps embed
-const SHOWROOM_ID = 'visual-showroom-secondary-banner';
+// เดิมใช้ visual-showroom-secondary-banner ซึ่งต้นฉบับกว้างแค่ 294px ต้องขยาย 1.9 เท่า
+// ใบนี้กว้าง 982px จากหน้า /virtual-showrooms — ไม่ต้องขยายในช่อง 552px
+const SHOWROOM_ID = 'kohler-kec-bkk';
 
 /** ค้นภาพจาก id — id ผิดจะพังตอน build ไม่ใช่ตอนผู้ใช้เปิดหน้า */
 function pic(id: string) {

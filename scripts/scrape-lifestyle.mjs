@@ -34,7 +34,14 @@ if (!urlFile) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 function idFor(url) {
-  const raw = decodeURIComponent(new URL(url).pathname.split('/').pop())
+  const parts = new URL(url).pathname.split('/').filter(Boolean)
+  // Scene7 asset names are unique on their own. The kohler.co.th DAM (/binaries)
+  // has files called 2.jpg and th.jpg, so those keep their folder as well.
+  const scene7 = /scene7\.com$/.test(new URL(url).hostname)
+  const raw = decodeURIComponent(scene7 ? parts.at(-1) : parts.slice(-2).join('-')).replace(
+    /\.(jpg|jpeg|png|webp)$/i,
+    ''
+  )
   return raw
     .normalize('NFKD')
     .replace(/[–—‘’“”]/g, '-')
