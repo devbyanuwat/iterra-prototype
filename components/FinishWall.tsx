@@ -372,6 +372,13 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
                     />
                   )}
 
+                  {/* วงแหวนโฟกัส ต้องเป็น "ลูก" ไม่ใช่ box-shadow ของตัว <a> เอง
+                      เงาของ element ถูกวาดในชั้นพื้นหลังของมัน ซึ่งอยู่ใต้ลูกทุกตัวที่
+                      position:absolute — สี่ชั้นข้างบน (material/lift/product/veil)
+                      จึงกลบมันหมด QA วัดได้ 1.01–1.13:1 บนทั้ง 11 แผง คือไม่มีวงเลย
+                      ดู [data-focus-ring] ใน globals.css */}
+                  <span aria-hidden data-focus-ring />
+
                   <span className="relative z-10 flex flex-col gap-1 p-5 md:p-6">
                     {/* เดสก์ท็อป: ชื่อเฉดตั้งฉาก เพราะแผงแคบกว่าชื่อเสมอตอนไม่ active
                         แนวตั้งอ่านได้จริง ต่างจากการย่อฟอนต์จนอ่านไม่ออกหรือ truncate */}
@@ -399,27 +406,42 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
 
       {/* กำแพงหดเป็นแถบบางค้างบนสุด ทำหน้าที่นำทางต่อหลังเลื่อนผ่าน (§3)
           เดสก์ท็อปเท่านั้น: ที่ 390px กำแพงเป็นแผงเต็มความกว้าง 11 แผงที่เลื่อนผ่าน
-          อยู่แล้ว การเอาแถบมาแปะทับอีกชั้นกินความสูงที่มีจำกัดโดยไม่ได้เพิ่มอะไร */}
+          อยู่แล้ว การเอาแถบมาแปะทับอีกชั้นกินความสูงที่มีจำกัดโดยไม่ได้เพิ่มอะไร
+
+          อยู่ในสายเลย์เอาต์ปกติ ไม่ fixed และไม่ sticky
+          ของเดิมเป็น fixed จึงไม่กินที่เลย แถบเลยบังเนื้อหาราว 40px ตลอดเวลาและ
+          ตัดหัวข้อ "ให้เราช่วยสร้างครัวในฝันของคุณ" ทิ้งครึ่งบรรทัด (shots/l-footer.png)
+
+          ลอง sticky แล้วยังไม่พอ: sticky จองที่ไว้เฉพาะ "ตำแหน่งเดิม" ของมัน
+          พอเกาะขอบบนแล้วมันก็ยังลอยทับสิ่งที่เลื่อนผ่านใต้มันอยู่ดี — วัดแล้วยังทับ
+          ย่อหน้าในบล็อกจานสีอีก 5 ย่อหน้า แถบบนที่ตรึงไว้ *ต้อง* บังเนื้อหาเสมอ
+          นั่นคือธรรมชาติของมัน หน้านี้มี Nav ตรึงอยู่แล้ว 64px การเพิ่มอีก 42px
+          ทำให้เนื้อหาถูกบังรวม 106px ซึ่งมากเกินไป
+
+          จึงเลือก "คืนพื้นที่ให้หน้า": แถบกินที่ 42px ของตัวเองใต้กำแพงพอดี เลื่อนไป
+          กับหน้า และไม่ทับอะไรเลยสักพิกเซล แลกกับการที่มันไม่ตรึงค้างบนสุดอีกต่อไป
+          — ตัวนำทางที่ตรึงจริง ๆ คือ Nav ซึ่งมีอยู่แล้ว ส่วนแถบนี้ทำหน้าที่เป็น
+          "กำแพงฉบับย่อ" ที่ผู้ใช้เจอทันทีหลังเลื่อนพ้นกำแพง */}
       <div
         data-condensed-wall
-        aria-hidden={onScreen}
-        className={`fixed inset-x-0 top-[64px] z-30 hidden border-b border-line transition-[opacity,transform] duration-500 md:block ${
-          onScreen ? 'pointer-events-none -translate-y-2 opacity-0' : 'translate-y-0 opacity-100'
-        }`}
+        className="relative z-30 hidden border-y border-line bg-base md:block"
       >
         <ul className="flex h-10 w-full">
           {panels.map((p) => (
             <li key={p.code} className="relative h-full flex-1">
               <Link
                 href={`/finish/${encodeURIComponent(p.code)}/`}
-                tabIndex={onScreen ? -1 : 0}
-                className="focus-inset group block h-full w-full"
+                className="focus-inset group relative block h-full w-full"
                 style={{
                   backgroundImage: `url(${p.material})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }}
               >
+                {/* แถบนี้วางภาพวัสดุไว้บนตัว <a> เอง เงา inset จึงไม่ถูกกลบเหมือนบนกำแพง
+                    แต่ป้ายชื่อที่โผล่ตอนโฟกัสเป็น absolute และทับแถบล่างของวงแหวน
+                    ใช้ตัวเดียวกับกำแพงจะได้ไม่ต้องจำว่าที่ไหนพึ่งกลไกไหน */}
+                <span aria-hidden data-focus-ring />
                 <span className="sr-only">
                   {lang === 'th' ? p.name.th : p.name.en} — {t.finish.pieces(p.count)}
                 </span>

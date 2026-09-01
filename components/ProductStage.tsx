@@ -78,16 +78,40 @@ export default function ProductStage({
   const faded = useRef(true); // รูปปัจจุบันแสดงเต็มแล้วหรือยัง
   const timer = useRef<number | null>(null);
 
+  /**
+   * เฟรมแรกผ่านไปแล้วหรือยัง
+   *
+   * `?finish=` บนหน้าสินค้าเลือกเฉดให้ตั้งแต่ก่อน paint (ดู FinishFromQuery ใน
+   * ProductDetail) การเปลี่ยนครั้งนั้นไม่ใช่การกระทำของผู้ใช้ — มันคือการแก้ค่า
+   * เริ่มต้นให้ตรงกับเฉดที่เขาเดินทางมา ถ้าปล่อยให้ crossfade ตามปกติ ผู้ใช้จะเห็น
+   * เฉดที่ไม่ได้ขอค้างอยู่ 420ms แล้วค่อยจางไปเฉดที่ถูก ซึ่งอ่านว่าเว็บเลือกผิดแล้วแก้
+   * สลับทันทีในเฟรมนั้นแทน แล้วค่อยเปิด crossfade ให้การกดสวอตช์จริง ๆ หลังจากนั้น
+   *
+   * ประกาศ effect นี้ไว้ "หลัง" effect เปลี่ยน finish โดยตั้งใจ — effect ในคอมโพเนนต์
+   * เดียวกันรันตามลำดับที่ประกาศ รอบแรกจึงยังอ่าน ready เป็น false ได้
+   */
+  const ready = useRef(false);
+
   // เปลี่ยน finish → ดันรูปเดิมไปเป็น back แล้วรอรูปใหม่โหลด
   useEffect(() => {
     if (!selected) return;
     setFront((prev) => {
       if (prev?.key === selected.code) return prev;
-      if (prev) setBack(prev);
-      faded.current = false;
+      if (prev && ready.current) {
+        setBack(prev);
+        faded.current = false;
+      } else {
+        // ก่อนเฟรมแรก: สลับดิบ ๆ ไม่มีชั้นค้าง ไม่มี fade
+        setBack(null);
+        faded.current = true;
+      }
       return { key: selected.code, src: selected.image, src700: selected.image700 };
     });
   }, [selected]);
+
+  useEffect(() => {
+    ready.current = true;
+  }, []);
 
   // รูปใหม่พร้อมแล้ว → crossfade
   const runFade = () => {

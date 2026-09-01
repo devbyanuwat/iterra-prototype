@@ -111,6 +111,37 @@ html[lang='en'] .en-tight {
     inset 0 0 0 5px var(--focus-ring);
 }
 
+/* ── The same ring, but as a child that cannot be painted over ──────────────
+   `.focus-inset` alone was measured at 1.01–1.13:1 on all eleven wall panels —
+   i.e. no ring at all. An element's own box-shadow paints in its background
+   layer, *below* every positioned descendant. The wall panels stack four
+   `position:absolute; inset:0` children on top (material, lift, product,
+   veil), so the ring was always there and always buried. QA proved it by
+   setting the swatch layers to display:none and watching it reappear.
+
+   An inset shadow on the parent therefore cannot work for any element with
+   full-bleed positioned children. This paints the identical two stripes on a
+   dedicated last child with a z-index above them, so nothing can cover it.
+
+   Same two-stripe reasoning as before: white hugging the edge, ink outside it,
+   so one of the pair always reads — the near-white White panel (#E7E8EA) is
+   carried by the ink stripe, the near-black Matte Black one (#1F1F21) by the
+   white stripe. Both sit on the panel itself, independent of the page ground. */
+[data-focus-ring] {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow:
+    inset 0 0 0 2px #ffffff,
+    inset 0 0 0 5px var(--focus-ring);
+}
+
+.focus-inset:focus-visible [data-focus-ring] {
+  opacity: 1;
+}
+
 /* Focus ring readable on base and on white cards for every accent — see
    --focus-ring above */
 :focus-visible {

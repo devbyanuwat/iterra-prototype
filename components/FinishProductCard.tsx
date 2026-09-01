@@ -46,7 +46,15 @@ export default function FinishProductCard({ product, finish, priority = false }:
   const srcSet = srcSetFor(finish.image, finish.image700);
 
   return (
-    <Link href={`/products/${product.slug}/`} className="group block">
+    // ?finish=<code> ส่งบริบทเฉดข้ามไปหน้าสินค้า
+    //
+    // ของเดิมลิงก์เปล่า ๆ หน้าสินค้าจึงเปิดด้วย finishes[0] เสมอ QA ไล่ดูแล้วเจอว่า
+    // BRD/BRT/RGD ไปโผล่ AF ส่วน BL ไปโผล่ CP — คนกำลังดู "ทั้งห้องในเฉดดำด้าน"
+    // แล้วคลิกดูใกล้ ๆ กลับได้โครเมี่ยม ซึ่งพังทั้งแนวคิดของเว็บในคลิกเดียว
+    //
+    // ไม่ใช้ hash เพราะ hash ไปชนกับการเลื่อนไปยัง element ของเบราว์เซอร์
+    // query อ่านได้ทั้งฝั่ง client และเปิดลิงก์ตรง ๆ ก็ยังใช้ได้ ซึ่ง static export รองรับ
+    <Link href={`/products/${product.slug}/?finish=${encodeURIComponent(finish.code)}`} className="group block">
       {/* relative: ModelNumber วางตัวเองด้วย absolute inset-0 จึงต้องมี containing block
           ตัว ModelNumber ถือ overflow-clip ของมันเองไว้ (ดูหมายเหตุในไฟล์นั้น)
           การ์ดจึงไม่ต้องใส่ซ้ำ และ **ห้าม** ใส่ overflow-hidden ตรงนี้ —
