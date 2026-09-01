@@ -18,6 +18,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import BrandMark from './BrandMark';
 import { useLang } from './LangProvider';
 import type { Lang } from '@/lib/i18n';
 
@@ -66,8 +67,13 @@ export default function Nav() {
     <>
       <header className="pointer-events-none fixed inset-x-0 top-0 z-50 border-b border-line-6 bg-base/95 backdrop-blur-sm">
         <div className="flex items-center justify-between px-6 py-5 text-ink md:px-[4vw]">
-          <Link href="/" className="pointer-events-auto text-lg font-normal tracking-widest2">
-            ITERRA
+          {/* เวิร์ดมาร์กจริง ไม่ใช่ตัวอักษรที่จัด tracking เอาเอง
+              alt = 'KOHLER' เป็นชื่อที่ลิงก์กลับหน้าแรกใช้ประกาศตัว ถ้าเป็น alt=""
+              ลิงก์นี้จะไม่มีชื่อให้ screen reader อ่านเลย
+              โลโก้เป็นสีดำล้วน แถบเมนูเป็นพื้นทึบ bg-base/95 ตั้งแต่ task H จึงอยู่บน
+              #E5E5E5 เสมอ ไม่ได้ลอยอยู่บนแผงกำแพงที่โทนสีเอาแน่ไม่ได้ */}
+          <Link href="/" className="pointer-events-auto">
+            <BrandMark height={18} />
           </Link>
           <nav aria-label="เมนูหลัก" className="pointer-events-auto hidden items-center gap-8 md:flex">
             {LINKS.map((l) => (
@@ -107,7 +113,9 @@ export default function Nav() {
         aria-hidden={!open}
       >
         <div className="flex items-center justify-between px-6 py-5">
-          <span className="text-lg font-normal tracking-widest2">ITERRA</span>
+          {/* ในเมนูมือถือ โลโก้ไม่ใช่ลิงก์ (มีรายการ "หน้าแรก" อยู่ในเมนูแล้ว)
+              จึงเป็นภาพประดับ ไม่ต้องมีชื่อซ้ำให้ screen reader อ่านสองรอบ */}
+          <BrandMark height={18} alt="" />
           <button type="button" onClick={() => setOpen(false)} aria-label="ปิดเมนู" className="text-2xl font-normal">
             ×
           </button>

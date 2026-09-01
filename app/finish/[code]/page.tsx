@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!entry) return {};
   return {
     title: `ทั้งห้องในเฉด${thaiJoin(entry.name.th)} (${entry.name.en})`,
-    description: `สินค้า ${entry.count} ชิ้นในแคตตาล็อก ITERRA ที่มีผิวเคลือบ${thaiJoin(entry.name.th)} — ทุกชิ้นแสดงในเฉดนี้จริง สัมผัสของจริงได้ที่โชว์รูม`,
+    description: `สินค้า ${entry.count} ชิ้นในแคตตาล็อก KOHLER ที่มีผิวเคลือบ${thaiJoin(entry.name.th)} — ทุกชิ้นแสดงในเฉดนี้จริง สัมผัสของจริงได้ที่โชว์รูม`,
     alternates: { canonical: `/finish/${code}/` },
     openGraph: {
       title: `ทั้งห้องในเฉด${thaiJoin(entry.name.th)}`,

@@ -20,6 +20,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import BrandMark from './BrandMark';
 
 type GalleryItem = { src: string; alt: string };
 
@@ -47,11 +48,11 @@ type Props = {
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 export default function Preloader({
-  brand = 'ITERRA',
+  brand = 'KOHLER',
   tagline = 'PREMIUM KITCHEN & BATH',
   enterLabel = 'เข้าสู่โชว์รูม',
   stalledLabel = 'เข้าสู่โชว์รูม — ข้ามการโหลด',
-  storageKey = 'iterra:entered',
+  storageKey = 'kohler:entered',
   stallMs = 6000,
   onEnter,
 }: Props) {
@@ -77,7 +78,7 @@ export default function Preloader({
     }
     // ไม่ต้องเขียน attribute อะไรที่ <html> — sessionStorage เป็นแหล่งความจริงเดียว
     // และ component ก็ unmount ตัวเองอยู่แล้วเมื่อ gated เป็น false
-    // (ของเดิมเขียน data-iterra-entered ไว้ ซึ่งไม่มีใครอ่านแล้วหลังเลิกใช้ CSS กฎนั้น)
+    // (ของเดิมเขียน data-entered ไว้ ซึ่งไม่มีใครอ่านแล้วหลังเลิกใช้ CSS กฎนั้น)
     const done = () => {
       setGated(false);
       onEnter?.();
@@ -320,7 +321,10 @@ export default function Preloader({
         className="fixed inset-0 z-[100] flex flex-col justify-between bg-base px-6 py-10 text-ink md:px-[8vw] md:py-14"
       >
         <div data-pre-fade className="flex items-baseline justify-between">
-          <span className="font-display text-lg font-medium tracking-[0.3em]">{brand}</span>
+          {/* alt="" — ตัวประตูประกาศชื่อตัวเองผ่าน aria-label ของ role="dialog" อยู่แล้ว
+              ใส่ alt ซ้ำจะได้ยิน "KOHLER" สองครั้งติดกันตอนโฟกัสเข้ามา
+              ที่นี่ใหญ่กว่าเมนูได้ เพราะเป็นจอเปล่าที่มีโลโก้เป็นตัวนำ */}
+          <BrandMark height={22} alt="" />
           <span className="micro">{tagline}</span>
         </div>
 

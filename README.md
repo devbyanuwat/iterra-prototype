@@ -1,30 +1,69 @@
-# ITERRA — Prototype เว็บโชว์สินค้า (ครัว & สุขภัณฑ์พรีเมียม)
+# KOHLER — Prototype เว็บโชว์สินค้า (ครัว & สุขภัณฑ์พรีเมียม)
 
-เดโม่สำหรับนำเสนอลูกค้า — ไม่มี backend จริง · Next.js (App Router) + Tailwind + GSAP/ScrollTrigger + Lenis · static export ได้
+เดโม่สำหรับนำเสนอลูกค้า — ไม่มี backend จริง · Next.js (App Router) + Tailwind + GSAP/ScrollTrigger + Lenis · static export
+
+## เครื่องหมายการค้าและภาพ — อ่านก่อนนำไปใช้ต่อ
+
+**ทั้งภาพสินค้าและเครื่องหมายการค้าในโปรเจกต์นี้เป็นของ Kohler ใช้เพื่อการนำเสนอเท่านั้น**
+ไม่ใช่งานที่เรามีสิทธิ์ในทรัพย์สินทางปัญญา ห้ามนำ build นี้ขึ้นโดเมนสาธารณะหรือใช้ในเชิงพาณิชย์
+ก่อนได้รับอนุญาตเป็นลายลักษณ์อักษร
+
+- ภาพสินค้า 306 ใบใน `public/products/` ดึงมาจาก kohler.co.th แล้วลอกพื้นหลังออกเป็น PNG โปร่ง
+- เวิร์ดมาร์กใน `public/brand/kohler-logo.png` เป็นไฟล์ที่ลูกค้าส่งมาให้ใช้ในเดโม่นี้
+- `SITE_URL` ยังชี้ไปโดเมนสมมติโดยตั้งใจ ไม่ใช่ `kohler.co.th` ซึ่งเป็นเว็บจริงของแบรนด์ —
+  งานนี้เป็นพรอโทไทป์ฝั่งดีลเลอร์ การประกาศ canonical/JSON-LD เป็นโดเมนแบรนด์จะไม่ตรงความจริง
 
 ## รัน
+
 ```bash
 npm install
 npm run dev        # http://localhost:3000
-npm run build      # static export → โฟลเดอร์ out/
+npm run build      # static export → โฟลเดอร์ out/ (ราว 208 หน้า)
 ```
 
+## โครงเว็บ
+
+นำทางด้วย **ผิวเคลือบ ไม่ใช่หมวดสินค้า** ซึ่งเป็นแกนที่รวยที่สุดของแคตตาล็อกชุดนี้
+(สินค้า 182 ชิ้น กระจายใน 11 เฉด เฉดละ 4–74 ชิ้น) ครัว/ห้องน้ำถูกลดชั้นเป็นฟิลเตอร์รอง
+
+| route | คืออะไร |
+|---|---|
+| `/` | กำแพงผิวเคลือบ 11 แผงเต็มจอ มีสินค้าจริงในเฉดนั้นลอยอยู่ แล้วต่อด้วยชิ้นเด่น · ครัว/ห้องน้ำ · เรื่องของเรา · ตัวเลข · บทความ · โชว์รูม |
+| `/finish/[code]` | แคตตาล็อกของเฉดนั้น ทุกใบเรนเดอร์ในเฉดนั้นจริง · สลับเฉดจากแถบขอบจอโดยไม่โหลดหน้าใหม่ |
+| `/products` · `/products/[slug]` | ทางเข้าแบบเดิมสำหรับคนที่รู้ว่าจะหาอะไร |
+| `/about` · `/articles` · `/articles/[slug]` · `/contact` | เนื้อหาประกอบ |
+
 ## จุดเปลี่ยน mock → ของจริง
+
 | ไฟล์ | เปลี่ยนอะไร |
 |---|---|
-| `lib/products.ts` | สินค้า 12 ชิ้น (ชื่อ TH/EN, สเปก, หมวด) |
-| `lib/posts.ts` | บทความ 6 ชิ้น |
-| `lib/site.ts` | โดเมนจริง, ชื่อ, ที่อยู่, เบอร์ติดต่อ (มีผลกับ SEO/sitemap/JSON-LD) |
-| `lib/i18n.ts` | คำแปล TH/EN ทั้งเว็บ |
-| `components/Placeholder.tsx` | ทุกจุดที่เห็นกรอบเทา = รอภาพจริง → แทนด้วย `next/image` |
+| `lib/site.ts` | โดเมนจริง, ชื่อ, ที่อยู่, เบอร์ติดต่อ (มีผลกับ metadata/sitemap/robots/JSON-LD) |
+| `lib/products.generated.ts` | แคตตาล็อก 182 ชิ้นจาก scraper — อย่าแก้มือ ให้ generate ใหม่ |
+| `lib/posts.ts` | บทความ 6 ชิ้น (ยังไม่มีฉบับอังกฤษของเนื้อบทความ มีช่อง `bodyEn` รออยู่) |
+| `lib/i18n.ts` | คำแปล TH/EN ทั้งเว็บ + `aboutContent` ที่ยังเป็นไทยล้วน |
 | `components/ContactContent.tsx` | ต่อฟอร์มเข้า endpoint จริง + ฝัง Google Maps |
 
-## โครง motion
-- `components/SmoothScroll.tsx` — Lenis lerp 0.08 ผูก gsap.ticker
-- `components/Hero.tsx` — parallax 3 ชั้น + scale 1→1.08
-- `components/PinnedStory.tsx` — pin + scrub 3 สไลด์ (มือถือ = บล็อกธรรมดา)
-- `components/HorizontalGallery.tsx` — vertical scroll ขับการ์ดแนวนอน + perspective depth
-- `components/TiltCard.tsx` — 3D tilt ±6° + เงาขยับ
-- `components/Reveal.tsx` / `CountUp.tsx` / `ParallaxImage.tsx`
+## ระบบสี/ตัวอักษร
 
-ทุกเอฟเฟกต์ใช้ transform/opacity เท่านั้น, ปิด parallax หนักบนมือถือ, เคารพ `prefers-reduced-motion`
+ถอดค่าจาก kohler.co.th ไม่ใช่จากไซต์โชว์เคส — ดู
+`docs/superpowers/specs/2026-09-01-iterra-kohler-derived-system.md`
+(ชื่อไฟล์สเปกยังเป็นชื่อโปรเจกต์เดิมตามบันทึกประวัติ)
+
+- พื้น `#E5E5E5` · การ์ด `#FFFFFF` · ตัวอักษร `#232323` · ตัวรอง `#5D5D5D`
+- เนื้อหา 16px/400 · ป้ายกำกับ 15px/500 uppercase — **ห้ามใช้น้ำหนักต่ำกว่า 400 หรือเล็กกว่า 15px
+  กับข้อความที่ต้องอ่าน** เหลือไว้เฉพาะตัวประดับขนาดใหญ่ (`ModelNumber`)
+- `--accent` เปลี่ยนตามเฉดที่เลือก · `--focus-ring` ตรึงไว้ที่ ink เสมอ เพราะค่าที่ต้องรับประกัน
+  contrast ห้ามขับด้วยข้อมูลสินค้า
+
+## โครง motion
+
+- `components/SmoothScroll.tsx` — Lenis lerp 0.08 ผูก gsap.ticker
+- `components/Preloader.tsx` — ประตูทางเข้า แสดงสินค้าตามความคืบหน้าโหลดจริง (ไม่ใช่ timer)
+  โดยอ่าน `src` จากกำแพงที่รออยู่ข้างหลัง รูปจึงเป็นชุดเดียวกันแบบตัวต่อตัว
+- `components/FinishWall.tsx` — 11 แผง สินค้าลอยเฟสต่างกันทุกแผง · parallax รายแผงตอน scroll ·
+  hover แล้วสลับชิ้นถัดไปในเฉดนั้น · หยุดทุก timer ด้วย IntersectionObserver เมื่อพ้นจอ
+- `components/PinnedStory.tsx` — pin + scrub 3 สไลด์ (มือถือ = บล็อกธรรมดา)
+- `components/TiltCard.tsx` — 3D tilt ±6° · `Reveal` / `CountUp` / `ParallaxImage`
+
+ทุกเอฟเฟกต์ใช้ `transform`/`opacity` เท่านั้น · ปิด parallax และการสลับอัตโนมัติบนมือถือ ·
+เคารพ `prefers-reduced-motion` ทุกจุด

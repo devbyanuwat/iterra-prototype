@@ -5,9 +5,9 @@ import { finishIndex, panelScrim } from '@/components/finish-index';
 import { WALL_PANEL_PRODUCTS } from '@/components/wall-products';
 
 export const metadata: Metadata = {
-  title: 'ITERRA — อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม | Premium Kitchen & Bath',
+  title: 'KOHLER — อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม | Premium Kitchen & Bath',
   description:
-    'เลือกจากผิวเคลือบ ไม่ใช่จากหมวดสินค้า — โครม ทองแปรง โรสโกลด์ ดำด้าน และอีก 7 เฉด จากแบรนด์ชั้นนำระดับโลก สัมผัสจริงได้ที่โชว์รูม ITERRA กรุงเทพฯ',
+    'เลือกจากผิวเคลือบ ไม่ใช่จากหมวดสินค้า — โครม ทองแปรง โรสโกลด์ ดำด้าน และอีก 7 เฉด จากแบรนด์ชั้นนำระดับโลก สัมผัสจริงได้ที่โชว์รูม KOHLER กรุงเทพฯ',
   alternates: { canonical: '/' },
 };
 

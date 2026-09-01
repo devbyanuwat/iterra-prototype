@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import BrandMark from './BrandMark';
 import { useLang } from './LangProvider';
 import { CONTACT, SITE_NAME } from '@/lib/site';
 
@@ -12,7 +13,11 @@ export default function Footer() {
     <footer className="border-t border-line-6 bg-base text-ink">
       <div className="grid gap-12 px-6 py-16 md:grid-cols-3 md:px-[8vw] md:py-20">
         <div>
-          <p className="mb-4 text-lg font-normal tracking-widest2">{SITE_NAME}</p>
+          {/* เวิร์ดมาร์กเดียวกับเมนู ไม่ใช่ชื่อที่จัด tracking เอง — ไม่งั้นท้ายเว็บ
+              กับหัวเว็บจะแสดงแบรนด์คนละแบบบนหน้าจอเดียวกัน
+              (บรรทัดลิขสิทธิ์ข้างล่างยังเป็นตัวหนังสือ ตรงนั้นคือชื่อนิติบุคคลในประโยค
+              ไม่ใช่โลโก้) */}
+          <BrandMark height={20} alt={SITE_NAME} className="mb-4" />
           <p className="max-w-xs text-body-sm font-normal leading-relaxed text-dim">{t.footer.blurb}</p>
         </div>
         <nav aria-label="เมนูท้ายเว็บ">
