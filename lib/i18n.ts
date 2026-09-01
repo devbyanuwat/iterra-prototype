@@ -76,6 +76,27 @@ export const dict = {
       empty: 'ไม่พบสินค้าในหมวดนี้',
       specs: 'สเปกสินค้า',
       related: 'สินค้าใกล้เคียง',
+      onlyFinish: 'สินค้าชิ้นนี้มีเฉดเดียว',
+      inFinish: (name: string) => `ดูทุกชิ้นในเฉด${name}`,
+    },
+    // กำแพงผิวเคลือบ = หน้าแรก (spec finish-first §4.1)
+    // ห้ามมี hero heading และห้ามมี category nav บนหน้านี้ ป้ายทั้งหมดที่นี่จึงเป็น
+    // micro-caps สั้น ๆ ที่อธิบายวิธีใช้กำแพง ไม่ใช่พาดหัวโฆษณา
+    wall: {
+      label: 'กำแพงผิวเคลือบ',
+      hint: 'เลือกผิวเคลือบเพื่อเข้าชม',
+      keyHint: 'ลูกศรเดิน · Enter เข้า',
+      enter: 'เข้าชม',
+    },
+    finish: {
+      kicker: 'FINISH',
+      title: (name: string) => `ทั้งห้องในเฉด${name}`,
+      sub: (n: number) => `${n} ชิ้นในแคตตาล็อกมีเฉดนี้ — และทุกชิ้นข้างล่างนี้เรนเดอร์ในเฉดนี้จริง`,
+      pieces: (n: number) => `${n} ชิ้น`,
+      railLabel: 'สลับผิวเคลือบ',
+      backToWall: 'กลับไปกำแพงผิวเคลือบ',
+      empty: 'ไม่พบสินค้าในหมวดนี้สำหรับเฉดนี้',
+      otherFinishes: 'เฉดอื่น',
     },
     articles: {
       kicker: 'JOURNAL',
@@ -167,6 +188,25 @@ export const dict = {
       empty: 'No products in this category',
       specs: 'Specifications',
       related: 'Related pieces',
+      onlyFinish: 'Available in this finish only',
+      inFinish: (name: string) => `See everything in ${name}`,
+    },
+    wall: {
+      label: 'The finish wall',
+      hint: 'Choose a finish to enter',
+      keyHint: 'Arrows to walk · Enter to open',
+      enter: 'Enter',
+    },
+    finish: {
+      kicker: 'FINISH',
+      title: (name: string) => `The whole room in ${name}`,
+      sub: (n: number) =>
+        `${n} pieces in the catalogue carry this finish — and every one below is rendered in it.`,
+      pieces: (n: number) => `${n} pieces`,
+      railLabel: 'Switch finish',
+      backToWall: 'Back to the finish wall',
+      empty: 'No pieces in this category for this finish',
+      otherFinishes: 'Other finishes',
     },
     articles: {
       kicker: 'JOURNAL',

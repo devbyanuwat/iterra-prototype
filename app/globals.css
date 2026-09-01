@@ -44,6 +44,58 @@ body {
   color: #6e7275;
 }
 
+/* ── Thai line-height floor ────────────────────────────────────────────────
+   DM Sans carries no Thai glyphs, so every Thai heading actually renders in
+   IBM Plex Sans Thai through the fallback in tailwind.config's font stacks.
+   Plex Thai stacks vowels above the consonant and tone marks above those, so a
+   Latin-tuned ratio clips the top row and collides adjacent lines.
+
+   Measured on 'ศิลปะของครัว / ที่คู่ควรกับบ้านคุณ' at the old hero's leading-[0.92]:
+     1440px, font-size 108  → ink box overflowed 9.61px, lines collided 7.61px,
+                              clearing only at ratio 1.009 (recommended 1.069)
+     390px,  font-size 50.7 → overflow 4.86px, collision 3.36px, clears at 1.018
+                              (recommended 1.078)
+   The same string in EN collided far less (2.84 / 1.34) because Latin has no
+   stacked marks — so one tight value cannot serve both scripts.
+
+   1.08 clears both recommendations with headroom for two stacked marks. This is
+   the floor for anything that can hold Thai; use .en-tight below when a heading
+   should look tighter in English only. The oversized model number is exempt —
+   it is Latin and numeric (see components/ModelNumber.tsx). */
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.08;
+}
+
+/* Explicit opt-in for non-heading elements that can hold Thai. Also the value to
+   reach for instead of Tailwind's leading-none/tight/snug on Thai-bearing text —
+   those utilities are classes and would otherwise win over the element rule. */
+.leading-thai {
+  line-height: 1.08;
+}
+
+/* Tight display leading, English only. LangProvider writes the current language
+   onto <html lang>, so this switches live with the TH/EN toggle and never
+   applies while Thai glyphs are on screen. */
+html[lang='en'] .en-tight {
+  line-height: 0.92;
+}
+
+/* Focus ring for elements that sit flush against their neighbours, where the
+   global outline-offset would be painted over by the next panel. Two inset
+   stripes — base hugging the edge, cream outside it — so one of the two always
+   reads, whether the panel underneath is the near-white White swatch or the
+   near-black Matte Black one. Same reasoning as the double ring the finish chips
+   paint for themselves in FinishSwatches. */
+.focus-inset:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 2px #08090a,
+    inset 0 0 0 5px var(--focus-ring);
+}
+
 /* Focus ring readable on #08090A for every accent — see --focus-ring above */
 :focus-visible {
   outline: 2px solid var(--focus-ring);
