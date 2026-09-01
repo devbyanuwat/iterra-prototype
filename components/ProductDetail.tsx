@@ -30,7 +30,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
       <section className="px-6 pb-24 pt-32 md:px-[6vw] md:pt-40">
         {/* breadcrumb */}
         <nav aria-label="breadcrumb" className="micro mb-10">
-          <Link href="/products/" className="transition-colors hover:text-cream">
+          <Link href="/products/" className="transition-colors hover:text-ink">
             {t.nav.products}
           </Link>
           <span className="mx-2">/</span>
@@ -53,38 +53,38 @@ export default function ProductDetail({ slug }: { slug: string }) {
           <div>
             <Reveal>
               <p className="micro mb-3">{t.common.category[product.category]}</p>
-              <h1 className="font-display text-3xl font-extralight leading-snug tracking-wide text-cream md:text-4xl">
+              <h1 className="font-display text-3xl font-normal leading-snug tracking-wide text-ink md:text-4xl">
                 {product.name[lang]}
               </h1>
-              <p className="mt-2 text-sm font-light text-dim">
+              <p className="mt-2 text-body-sm font-normal text-dim">
                 {lang === 'th' ? product.name.en : product.name.th}
               </p>
-              <p className="mt-1 text-[11px] tracking-widest text-dim">{product.model}</p>
+              <p className="mt-1 text-label tracking-widest text-dim">{product.model}</p>
 
-              <p className="mt-6 max-w-md text-sm font-light leading-loose text-dim">
+              <p className="mt-6 max-w-md text-body-sm font-normal leading-loose text-dim">
                 {product.desc[lang]}
               </p>
-              <p className="mt-6 text-lg font-light text-cream">{product.price[lang]}</p>
+              <p className="mt-6 text-lg font-normal text-ink">{product.price[lang]}</p>
             </Reveal>
 
             {/* ผิวเคลือบ */}
             <Reveal>
               <h2 className="micro mb-4 mt-10">{t.common.finish}</h2>
               <FinishSwatches />
-              <FinishLabel className="mt-3 block text-sm font-light text-cream" />
+              <FinishLabel className="mt-3 block text-body-sm font-normal text-ink" />
             </Reveal>
 
             {/* ตารางสเปก */}
             <Reveal>
               <h2 className="micro mb-3 mt-10">{t.products.specs}</h2>
-              <table className="w-full max-w-md border-collapse text-sm font-light">
+              <table className="w-full max-w-md border-collapse text-body-sm font-normal">
                 <tbody>
                   {product.specs.map((s) => (
                     <tr key={s.label} className="border-b border-line-6">
                       <th scope="row" className="py-3 pr-6 text-left font-normal text-dim">
                         {s.label}
                       </th>
-                      <td className="py-3 text-cream">{s.value}</td>
+                      <td className="py-3 text-ink">{s.value}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -94,7 +94,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
             <Reveal>
               <Link
                 href={`/contact/?product=${product.slug}`}
-                className="mt-10 inline-block border border-line-12 px-10 py-4 text-cream transition-colors duration-300 hover:border-accent hover:text-accent"
+                className="mt-10 inline-block border border-line-12 px-10 py-4 text-ink transition-colors duration-300 hover:border-accent hover:text-accent"
               >
                 <span className="micro !text-current">{t.common.inquire}</span>
               </Link>
@@ -114,7 +114,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
       {related.length > 0 && (
         <section className="border-t border-line-6 px-6 py-24 md:px-[6vw]">
           <Reveal className="mb-12">
-            <h2 className="font-display text-2xl font-extralight tracking-wide text-cream md:text-3xl">
+            <h2 className="font-display text-2xl font-normal tracking-wide text-ink md:text-3xl">
               {t.products.related}
             </h2>
           </Reveal>

@@ -245,7 +245,7 @@ export default function Preloader({
         role="dialog"
         aria-modal="true"
         aria-label={brand}
-        className="fixed inset-0 z-[100] flex flex-col justify-between bg-base px-6 py-10 text-cream md:px-[8vw] md:py-14"
+        className="fixed inset-0 z-[100] flex flex-col justify-between bg-base px-6 py-10 text-ink md:px-[8vw] md:py-14"
       >
         <div data-pre-fade className="flex items-baseline justify-between">
           <span className="font-display text-lg font-medium tracking-[0.3em]">{brand}</span>
@@ -255,7 +255,7 @@ export default function Preloader({
         <div className="flex flex-col items-start gap-8">
           <p
             data-pre-fade
-            className="font-display text-[22vw] font-extralight leading-[0.8] tabular-nums text-cream md:text-[14vw]"
+            className="font-display text-[22vw] font-normal leading-[0.8] tabular-nums text-ink md:text-[14vw]"
             aria-live="polite"
             aria-label={`${pct} percent`}
           >
@@ -277,7 +277,7 @@ export default function Preloader({
             ref={btn}
             type="button"
             onClick={leave}
-            className="group inline-flex items-center gap-4 border border-line-12 px-8 py-4 text-cream transition-colors duration-300 hover:border-accent hover:text-accent"
+            className="group inline-flex items-center gap-4 border border-line-12 px-8 py-4 text-ink transition-colors duration-300 hover:border-accent hover:text-accent"
           >
             <span className="micro !text-current">{stalled ? stalledLabel : enterLabel}</span>
             <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">

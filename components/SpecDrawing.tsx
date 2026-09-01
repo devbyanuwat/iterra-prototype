@@ -145,28 +145,28 @@ export default function SpecDrawing({ specs, title, unit = 'มม.', className 
         />
 
         {/* เส้นต่อออกมาหาเส้นบอกระยะ */}
-        <path data-draw d={`M ${x0} ${y1} L ${x0} ${dimY + 8}`} stroke="rgba(255,255,255,0.18)" strokeWidth="1" fill="none" />
-        <path data-draw d={`M ${x1} ${y1} L ${x1} ${dimY + 8}`} stroke="rgba(255,255,255,0.18)" strokeWidth="1" fill="none" />
-        <path data-draw d={`M ${x1} ${y0} L ${dimX + 8} ${y0}`} stroke="rgba(255,255,255,0.18)" strokeWidth="1" fill="none" />
-        <path data-draw d={`M ${x1} ${y1} L ${dimX + 8} ${y1}`} stroke="rgba(255,255,255,0.18)" strokeWidth="1" fill="none" />
+        <path data-draw d={`M ${x0} ${y1} L ${x0} ${dimY + 8}`} stroke="rgba(0,0,0,0.22)" strokeWidth="1" fill="none" />
+        <path data-draw d={`M ${x1} ${y1} L ${x1} ${dimY + 8}`} stroke="rgba(0,0,0,0.22)" strokeWidth="1" fill="none" />
+        <path data-draw d={`M ${x1} ${y0} L ${dimX + 8} ${y0}`} stroke="rgba(0,0,0,0.22)" strokeWidth="1" fill="none" />
+        <path data-draw d={`M ${x1} ${y1} L ${dimX + 8} ${y1}`} stroke="rgba(0,0,0,0.22)" strokeWidth="1" fill="none" />
 
         {/* เส้นบอกระยะกว้าง */}
-        <path data-draw d={`M ${x0} ${dimY} L ${x1} ${dimY}`} stroke="#EDE9E3" strokeWidth="1" fill="none" />
-        <path data-draw d={`M ${x0} ${dimY - TICK} L ${x0} ${dimY + TICK}`} stroke="#EDE9E3" strokeWidth="1" fill="none" />
-        <path data-draw d={`M ${x1} ${dimY - TICK} L ${x1} ${dimY + TICK}`} stroke="#EDE9E3" strokeWidth="1" fill="none" />
+        <path data-draw d={`M ${x0} ${dimY} L ${x1} ${dimY}`} stroke="#232323" strokeWidth="1" fill="none" />
+        <path data-draw d={`M ${x0} ${dimY - TICK} L ${x0} ${dimY + TICK}`} stroke="#232323" strokeWidth="1" fill="none" />
+        <path data-draw d={`M ${x1} ${dimY - TICK} L ${x1} ${dimY + TICK}`} stroke="#232323" strokeWidth="1" fill="none" />
 
         {/* เส้นบอกระยะสูง */}
-        <path data-draw d={`M ${dimX} ${y0} L ${dimX} ${y1}`} stroke="#EDE9E3" strokeWidth="1" fill="none" />
-        <path data-draw d={`M ${dimX - TICK} ${y0} L ${dimX + TICK} ${y0}`} stroke="#EDE9E3" strokeWidth="1" fill="none" />
-        <path data-draw d={`M ${dimX - TICK} ${y1} L ${dimX + TICK} ${y1}`} stroke="#EDE9E3" strokeWidth="1" fill="none" />
+        <path data-draw d={`M ${dimX} ${y0} L ${dimX} ${y1}`} stroke="#232323" strokeWidth="1" fill="none" />
+        <path data-draw d={`M ${dimX - TICK} ${y0} L ${dimX + TICK} ${y0}`} stroke="#232323" strokeWidth="1" fill="none" />
+        <path data-draw d={`M ${dimX - TICK} ${y1} L ${dimX + TICK} ${y1}`} stroke="#232323" strokeWidth="1" fill="none" />
 
         <text
           data-draw-label
           x={(x0 + x1) / 2}
           y={dimY + 20}
           textAnchor="middle"
-          fill="#EDE9E3"
-          fontSize="12"
+          fill="#232323"
+          fontSize="15"
         >
           {dims.w} {unit}
         </text>
@@ -175,8 +175,8 @@ export default function SpecDrawing({ specs, title, unit = 'มม.', className 
           x={dimX + 16}
           y={(y0 + y1) / 2}
           dominantBaseline="middle"
-          fill="#EDE9E3"
-          fontSize="12"
+          fill="#232323"
+          fontSize="15"
         >
           {dims.h} {unit}
         </text>
@@ -185,16 +185,16 @@ export default function SpecDrawing({ specs, title, unit = 'มม.', className 
       <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-3">
         <div>
           <dt className="micro">WIDTH</dt>
-          <dd className="mt-1 text-sm font-light text-cream">{dims.w} {unit}</dd>
+          <dd className="mt-1 text-body-sm font-normal text-ink">{dims.w} {unit}</dd>
         </div>
         <div>
           <dt className="micro">HEIGHT</dt>
-          <dd className="mt-1 text-sm font-light text-cream">{dims.h} {unit}</dd>
+          <dd className="mt-1 text-body-sm font-normal text-ink">{dims.h} {unit}</dd>
         </div>
         {dims.d ? (
           <div>
             <dt className="micro">DEPTH</dt>
-            <dd className="mt-1 text-sm font-light text-cream">{dims.d} {unit}</dd>
+            <dd className="mt-1 text-body-sm font-normal text-ink">{dims.d} {unit}</dd>
           </div>
         ) : null}
       </dl>

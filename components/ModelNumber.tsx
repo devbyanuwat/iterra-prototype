@@ -1,6 +1,7 @@
 // เลขรุ่นยักษ์ที่เป็นเลย์เอาต์ ไม่ใช่ของประดับ (spec finish-first §4.3)
 //
-// ยืมท่าจาก nickho-motorsports: เลขรุ่นเซ็ต 300–420px `#FFFFFF` 6% วางหลังสินค้า
+// ยืมท่าจาก nickho-motorsports: เลขรุ่นเซ็ต 300–420px ink 7% วางหลังสินค้า
+// (ธีมสว่างแล้ว ขาว 6% บนการ์ดขาวคือหายไปเฉย ๆ จึงพลิกเป็น ink บาง ๆ แทน)
 // และ **ตัดขอบเฟรม** — bounding box ต้องล้นออกนอก container จริง ไม่ใช่ตัวใหญ่จัดกลาง
 // ถ้ามันพอดีเฟรม แปลว่าทำผิด (AC ข้อ 6 วัดด้วย getBoundingClientRect)
 //
@@ -55,8 +56,12 @@ export default function ModelNumber({ model, variant = 'card', className = '' }:
           [variant === 'card' ? 'bottom' : 'top']: '-0.22em',
         }}
         className={[
+          // The one place a sub-400 weight survives the retheme: 300-420px,
+          // aria-hidden, and painted at 6% — it is a watermark behind the
+          // product, not text anyone reads, so the weight floor in spec §3.2
+          // does not apply to it.
           'absolute whitespace-nowrap font-display font-extralight leading-none tabular-nums',
-          'tracking-[-0.03em] text-[rgba(255,255,255,0.06)]',
+          'tracking-[-0.03em] text-[rgba(35,35,35,0.07)]',
         ].join(' ')}
       >
         {model}

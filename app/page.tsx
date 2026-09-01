@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import FinishWall, { type WallPanel } from '@/components/FinishWall';
+import HomeContent from '@/components/home/HomeContent';
 import { finishIndex, panelScrim } from '@/components/finish-index';
 
 export const metadata: Metadata = {
@@ -21,5 +22,14 @@ export default function HomePage() {
     scrim: panelScrim(f.accent),
   }));
 
-  return <FinishWall panels={panels} />;
+  // กำแพงยังเป็นจอแรกและยังเป็นตัวนำทางหลักตาม finish-first §4.1 — HomeContent
+  // ต่อท้ายเท่านั้น ไม่มีอะไรในนั้นเด่นแข่งกับกำแพงในจอแรก (§4.3 ยังบังคับอยู่)
+  // เหตุผลที่ต้องมีของต่อท้าย: หน้าแรกจอเดียวคือข้อร้องเรียนข้อที่สามของลูกค้า
+  // สเปก 2026-09-01 §3.3 ตั้งเป้าไว้ที่ ≥ 3.5 จอ
+  return (
+    <>
+      <FinishWall panels={panels} />
+      <HomeContent />
+    </>
+  );
 }

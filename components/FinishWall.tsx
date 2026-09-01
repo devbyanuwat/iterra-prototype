@@ -119,7 +119,11 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
                 onBlur={() => setActive((cur) => (cur === i ? null : cur))}
                 onMouseEnter={() => setActive(i)}
                 onMouseLeave={() => setActive((cur) => (cur === i ? null : cur))}
-                className="group relative flex h-full w-full flex-col justify-end outline-offset-[-4px]"
+                // .focus-inset, not the global outline: the ring has to read on
+                // both the near-white `0` panel and the near-black `BL` one, and
+                // a single ink outline is 1.02:1 on Matte Black — invisible on
+                // exactly the panel the scrim solver already flagged (AC 4).
+                className="focus-inset group relative flex h-full w-full flex-col justify-end"
               >
                 {/* สนามวัสดุ: swatch ขยายเต็มแผง ไม่ใช่ chip
                     ขยาย 1.06 ตอน active เพื่อให้วัสดุ "ขยับ" ไม่ใช่แค่ช่องกว้างขึ้น */}
@@ -135,8 +139,9 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
                   }}
                 />
 
-                {/* lift: แผงที่มืดจนจมกับพื้น #08090A ถูกยกขึ้นให้เห็นเป็นวัตถุ
-                    แผงสว่างได้ liftAlpha = 0 จึงไม่มี layer นี้เลย */}
+                {/* lift: ชั้น ink บาง ๆ ทาแผงที่จมกับพื้น #E5E5E5 ให้เห็นเป็นวัตถุ
+                    ธีมสว่างพลิกทิศ — ตัวที่จมคือแผงขาว (`0`) ไม่ใช่ Matte Black
+                    แผงมืดจึงได้ liftAlpha = 0 และไม่มี layer นี้เลย */}
                 {p.scrim.lift !== 'none' && (
                   <span
                     aria-hidden
@@ -145,7 +150,7 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
                   />
                 )}
 
-                {/* veil: ชั้นมืดใต้ป้าย ทึบเต็มที่ตั้งแต่ 74% ลงไป
+                {/* veil: ชั้นสีพื้นใต้ป้าย ทึบเต็มที่ตั้งแต่ 74% ลงไป
                     ป้ายจึงนั่งบน alpha เต็มเสมอ ไม่ใช่บนช่วงไล่ที่ contrast ยังไม่ถึง */}
                 {p.scrim.veil !== 'none' && (
                   <span
@@ -159,12 +164,17 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
                   {/* เดสก์ท็อป: ชื่อเฉดตั้งฉาก เพราะแผงแคบกว่าชื่อเสมอตอนไม่ active
                       แนวตั้งอ่านได้จริง ต่างจากการย่อฟอนต์จนอ่านไม่ออกหรือ truncate */}
                   <span
-                    className="font-display text-[11px] font-medium uppercase tracking-widest2 md:[writing-mode:vertical-rl] md:group-hover:[writing-mode:horizontal-tb] md:group-focus-visible:[writing-mode:horizontal-tb]"
+                    className="font-display text-label font-semibold uppercase tracking-widest2 md:[writing-mode:vertical-rl] md:group-hover:[writing-mode:horizontal-tb] md:group-focus-visible:[writing-mode:horizontal-tb]"
                     style={{ color: p.scrim.ink }}
                   >
                     {lang === 'th' ? p.name.th : p.name.en}
                   </span>
-                  <span className="micro" style={{ color: p.scrim.ink, opacity: 0.62 }}>
+                  {/* เคยเป็น opacity 0.62 ซึ่งเป็นค่าที่จูนไว้ตอนตัวอักษรเป็นครีมบนพื้นดำ
+                      solver รับประกัน contrast ไว้ที่ ink "เต็มค่า" เท่านั้น (LABEL_TARGET = 7)
+                      พอหรี่เหลือ 0.62 การรับประกันนั้นหลุดทันที — วัดได้ 4.11:1
+                      ลำดับสายตาย้ายไปอยู่ที่น้ำหนัก (ชื่อ 600 / จำนวน 500) แทนความจาง
+                      แบบนั้นไม่แลกกับ contrast */}
+                  <span className="micro" style={{ color: p.scrim.ink }}>
                     {t.finish.pieces(p.count)}
                   </span>
                 </span>

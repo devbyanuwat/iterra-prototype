@@ -18,7 +18,13 @@ const config: Config = {
         base: '#E5E5E5',
         surface: '#FFFFFF',
         ink: '#232323',
-        dim: '#666666',
+        // สเปก §3.1 วัด #666666 มาจาก kohler.co.th ซึ่งถูก แต่ของเขาวางตัวรองไว้
+        // บน "การ์ดขาว" เป็นหลัก — #666 บน #FFFFFF ได้ 5.74:1 สบาย ๆ
+        // ของเราวางบนพื้น #E5E5E5 ซึ่งให้ 4.51:1 ผ่าน AC ข้อ 3 (≥4.5) แค่ 0.01
+        // วัดจริงในเบราว์เซอร์เจอ 4.49 ตอน Reveal ยัง tween ค้างที่ opacity .99
+        // ลอกค่าสีมาโดยไม่คิดว่าพื้นหลังต่างกันคือความผิดพลาดแบบเดียวกับที่ทำให้
+        // ต้องรื้อรอบนี้ตั้งแต่แรก จึงเข้มขึ้นเป็น #5D5D5D = 5.22:1 บนพื้น base
+        dim: '#5D5D5D',
         line: {
           DEFAULT: 'rgba(0,0,0,0.10)',
           6: 'rgba(0,0,0,0.06)',
@@ -26,18 +32,16 @@ const config: Config = {
         },
         // Driven by the --accent custom property; tweened on swatch change.
         accent: 'var(--accent)',
-
-        // DEPRECATED alias. `cream` meant light type on a dark page; there are
-        // ~100 `text-cream` call sites and pointing it at ink keeps them
-        // readable through the retheme instead of leaving pale text on a pale
-        // page. Migrate to `ink`, then delete this.
-        cream: '#232323',
       },
       fontSize: {
         // Floors from spec §3.2 — nothing readable goes below 15px or under
         // weight 400. Kohler runs body at 16-17px/400; ours was 13-14px/300,
         // which is the whole of "ตัวเล็กและบางอ่านยาก".
-        label: ['13px', { lineHeight: '1.3', letterSpacing: '0.12em' }],
+        // 15px, not the 13px in spec §3.2. The spec's own AC 1 is measured
+        // ("no readable text below 15px") and a label is read, so the two
+        // clash. AC 1 is the gate that gets checked, so it wins; 0.12em
+        // tracking carries the label voice on its own.
+        label: ['15px', { lineHeight: '1.3', letterSpacing: '0.12em' }],
         body: ['16px', { lineHeight: '1.6' }],
         'body-sm': ['15px', { lineHeight: '1.6' }],
         card: ['24px', { lineHeight: '1.25' }],

@@ -19,10 +19,10 @@ export default function ArticlesContent() {
       <section className="px-6 pb-14 pt-36 md:px-[8vw] md:pb-20 md:pt-44">
         <Reveal>
           <p className="mb-4 micro">{t.articles.kicker}</p>
-          <h1 className="font-display text-4xl font-extralight tracking-wide text-cream md:text-5xl">
+          <h1 className="font-display text-4xl font-normal tracking-wide text-ink md:text-5xl">
             {t.nav.articles}
           </h1>
-          <p className="mt-4 max-w-lg text-sm font-light leading-relaxed text-dim">
+          <p className="mt-4 max-w-lg text-body-sm font-normal leading-relaxed text-dim">
             {pick(articlesIntro, lang)}
           </p>
         </Reveal>
@@ -46,10 +46,10 @@ export default function ArticlesContent() {
                     day: 'numeric',
                   })}
                 </p>
-                <h2 className="mt-2 text-lg font-light leading-snug tracking-wide text-cream">
+                <h2 className="mt-2 text-lg font-normal leading-snug tracking-wide text-ink">
                   {post.title[lang]}
                 </h2>
-                <p className="mt-2 text-[13px] font-light leading-relaxed text-dim">
+                <p className="mt-2 text-body-sm font-normal leading-relaxed text-dim">
                   {post.excerpt[lang]}
                 </p>
                 <span className="mt-4 inline-block micro underline-offset-8 group-hover:underline">

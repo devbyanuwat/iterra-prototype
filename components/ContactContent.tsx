@@ -35,8 +35,8 @@ export default function ContactContent() {
       <section className="px-6 pb-28 pt-36 md:px-[8vw] md:pt-44">
         <Reveal>
           <p className="mb-4 micro">CONTACT</p>
-          <h1 className="font-display text-4xl font-extralight tracking-wide text-cream md:text-5xl">{t.contact.title}</h1>
-          <p className="mt-4 text-sm font-light text-dim">{t.contact.sub}</p>
+          <h1 className="font-display text-4xl font-normal tracking-wide text-ink md:text-5xl">{t.contact.title}</h1>
+          <p className="mt-4 text-body-sm font-normal text-dim">{t.contact.sub}</p>
         </Reveal>
 
         <div className="mt-16 grid gap-16 lg:grid-cols-2 lg:gap-[6vw]">
@@ -51,7 +51,7 @@ export default function ContactContent() {
                   id="name"
                   name="name"
                   required
-                  className="w-full border-b border-line-12 bg-transparent py-3 text-sm font-light text-cream outline-none transition-colors focus:border-accent"
+                  className="w-full border-b border-line-12 bg-transparent py-3 text-body-sm font-normal text-ink outline-none transition-colors focus:border-accent"
                 />
               </div>
               <div>
@@ -62,7 +62,7 @@ export default function ContactContent() {
                   id="email"
                   name="email"
                   required
-                  className="w-full border-b border-line-12 bg-transparent py-3 text-sm font-light text-cream outline-none transition-colors focus:border-accent"
+                  className="w-full border-b border-line-12 bg-transparent py-3 text-body-sm font-normal text-ink outline-none transition-colors focus:border-accent"
                 />
               </div>
               <div>
@@ -74,10 +74,10 @@ export default function ContactContent() {
                   name="interest"
                   value={interest}
                   onChange={(e) => setInterest(e.target.value)}
-                  className="w-full border-b border-line-12 bg-transparent py-3 text-sm font-light text-cream outline-none focus:border-accent"
+                  className="w-full border-b border-line-12 bg-transparent py-3 text-body-sm font-normal text-ink outline-none focus:border-accent"
                 >
-                  <option value="kitchen" className="bg-surface text-cream">{t.common.category.kitchen}</option>
-                  <option value="bath" className="bg-surface text-cream">{t.common.category.bath}</option>
+                  <option value="kitchen" className="bg-surface text-ink">{t.common.category.kitchen}</option>
+                  <option value="bath" className="bg-surface text-ink">{t.common.category.bath}</option>
                 </select>
               </div>
               <div>
@@ -88,12 +88,12 @@ export default function ContactContent() {
                   id="message"
                   name="message"
                   rows={5}
-                  className="w-full resize-none border-b border-line-12 bg-transparent py-3 text-sm font-light text-cream outline-none transition-colors focus:border-accent"
+                  className="w-full resize-none border-b border-line-12 bg-transparent py-3 text-body-sm font-normal text-ink outline-none transition-colors focus:border-accent"
                 />
               </div>
               <button
                 type="submit"
-                className="border border-line-12 px-10 py-4 text-[11px] uppercase tracking-widest2 text-cream transition-colors duration-300 hover:border-accent hover:text-accent"
+                className="border border-line-12 px-10 py-4 text-label uppercase tracking-widest2 text-ink transition-colors duration-300 hover:border-accent hover:text-accent"
               >
                 {t.contact.send}
               </button>
@@ -102,7 +102,7 @@ export default function ContactContent() {
 
           {/* ข้อมูล + แผนที่ */}
           <Reveal delay={0.15}>
-            <address className="mb-8 space-y-2.5 text-sm font-light not-italic leading-relaxed text-dim">
+            <address className="mb-8 space-y-2.5 text-body-sm font-normal not-italic leading-relaxed text-dim">
               <p>{CONTACT.address_th}</p>
               <p>{CONTACT.phone} · LINE {CONTACT.line}</p>
               <p>{CONTACT.email}</p>
@@ -118,7 +118,7 @@ export default function ContactContent() {
       <div
         role="status"
         aria-live="polite"
-        className={`fixed bottom-8 left-1/2 z-[70] w-[calc(100%-3rem)] max-w-md -translate-x-1/2 border border-line-12 bg-surface px-6 py-4 text-center text-[13px] font-light text-cream shadow-2xl transition-all duration-500 ${
+        className={`fixed bottom-8 left-1/2 z-[70] w-[calc(100%-3rem)] max-w-md -translate-x-1/2 border border-line-12 bg-surface px-6 py-4 text-center text-body-sm font-normal text-ink shadow-2xl transition-all duration-500 ${
           toast ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-6 opacity-0'
         }`}
       >

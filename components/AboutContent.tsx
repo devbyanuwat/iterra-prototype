@@ -21,7 +21,7 @@ export default function AboutContent() {
       <section className="px-6 pb-16 pt-36 md:px-[8vw] md:pb-24 md:pt-44">
         <Reveal>
           <p className="mb-4 micro">{pick(aboutContent.kicker, lang)}</p>
-          <h1 className="max-w-3xl whitespace-pre-line font-display text-4xl font-extralight leading-[1.2] tracking-wide text-cream md:text-6xl">
+          <h1 className="max-w-3xl whitespace-pre-line font-display text-4xl font-normal leading-[1.2] tracking-wide text-ink md:text-6xl">
             {pick(aboutContent.title, lang)}
           </h1>
         </Reveal>
@@ -45,10 +45,10 @@ export default function AboutContent() {
             </Reveal>
             <Reveal delay={0.15}>
               <p className="mb-4 micro">{pick(s.kicker, lang)}</p>
-              <h2 className="mb-5 font-display text-3xl font-extralight leading-snug tracking-wide text-cream md:text-4xl">
+              <h2 className="mb-5 font-display text-3xl font-normal leading-snug tracking-wide text-ink md:text-4xl">
                 {pick(s.title, lang)}
               </h2>
-              <p className="max-w-md text-sm font-light leading-loose text-dim">{pick(s.body, lang)}</p>
+              <p className="max-w-md text-body-sm font-normal leading-loose text-dim">{pick(s.body, lang)}</p>
             </Reveal>
           </section>
         ))}

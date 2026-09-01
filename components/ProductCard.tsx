@@ -52,8 +52,8 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <div className="px-1 pb-2 pt-4">
           <p className="micro">{t.common.category[product.category]}</p>
-          <h3 className="mt-1.5 text-[1rem] font-light tracking-wide text-cream">{product.name[lang]}</h3>
-          <p className="mt-1 text-[12px] text-dim">{product.price[lang]}</p>
+          <h3 className="mt-1.5 text-[1rem] font-normal tracking-wide text-ink">{product.name[lang]}</h3>
+          <p className="mt-1 text-body-sm text-dim">{product.price[lang]}</p>
 
           {/* สวอตช์ย่อ — เฉพาะเมื่อมีให้เลือกจริง */}
           {product.finishes.length > 1 && (
@@ -65,7 +65,7 @@ export default function ProductCard({ product }: { product: Product }) {
                   style={{ background: f.accent }}
                 />
               ))}
-              {extraFinishes > 0 && <span className="text-[10px] text-dim">+{extraFinishes}</span>}
+              {extraFinishes > 0 && <span className="text-label text-dim">+{extraFinishes}</span>}
             </div>
           )}
           {/* จุดสีเป็นภาพล้วน — บอกจำนวนเฉดเป็นข้อความให้ screen reader แทน */}

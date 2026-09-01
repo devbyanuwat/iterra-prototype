@@ -127,23 +127,23 @@ export default function HorizontalGallery({ items }: Props) {
         <div className="mt-4 flex items-baseline justify-between gap-3">
           <div>
             <p className="micro">{t.common.category[p.category]}</p>
-            <h3 className="mt-1 text-[1rem] font-light tracking-wide text-cream">{p.name[lang]}</h3>
+            <h3 className="mt-1 text-[1rem] font-normal tracking-wide text-ink">{p.name[lang]}</h3>
           </div>
-          {meta ? <span className="whitespace-nowrap text-[11px] text-dim">{meta}</span> : null}
+          {meta ? <span className="whitespace-nowrap text-label text-dim">{meta}</span> : null}
         </div>
       </Link>
     );
   };
 
   return (
-    <section aria-label={t.home.featuredTitle} className="bg-base text-cream">
+    <section aria-label={t.home.featuredTitle} className="bg-base text-ink">
       {/* ── เดสก์ท็อป: pinned horizontal ── */}
       <div ref={root} className="hidden md:block">
         <div className="flex h-screen flex-col justify-center overflow-hidden">
           <div className="px-[8vw] pb-10">
             <p className="micro mb-3">{t.home.featuredKicker}</p>
             <div className="flex items-end justify-between">
-              <h2 className="font-display text-3xl font-extralight tracking-wide lg:text-4xl">
+              <h2 className="font-display text-3xl font-normal tracking-wide lg:text-4xl">
                 {t.home.featuredTitle}
               </h2>
               <p className="micro">{t.home.featuredHint}</p>
@@ -172,7 +172,7 @@ export default function HorizontalGallery({ items }: Props) {
       <div className="py-16 md:hidden">
         <div className="mb-8 px-6">
           <p className="micro mb-2">{t.home.featuredKicker}</p>
-          <h2 className="font-display text-2xl font-extralight tracking-wide">{t.home.featuredTitle}</h2>
+          <h2 className="font-display text-2xl font-normal tracking-wide">{t.home.featuredTitle}</h2>
         </div>
         <div className="snap-gallery flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4">
           {items.map((p) => (

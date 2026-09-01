@@ -34,7 +34,7 @@ export default function ArticleContent({ slug }: { slug: string }) {
               day: 'numeric',
             })}
           </p>
-          <h1 className="font-display text-3xl font-extralight leading-snug tracking-wide text-cream md:text-5xl md:leading-[1.25]">
+          <h1 className="font-display text-3xl font-normal leading-snug tracking-wide text-ink md:text-5xl md:leading-[1.25]">
             {post.title[lang]}
           </h1>
         </Reveal>
@@ -48,7 +48,7 @@ export default function ArticleContent({ slug }: { slug: string }) {
         {body.map((para, i) => (
           <div key={i}>
             <Reveal y={24}>
-              <p className="mb-8 text-[15px] font-light leading-loose text-dim">{para}</p>
+              <p className="mb-8 text-[15px] font-normal leading-loose text-dim">{para}</p>
             </Reveal>
             {IMAGE_AFTER.has(i) && (
               <Reveal className="mb-10">

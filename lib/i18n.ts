@@ -40,6 +40,22 @@ export const dict = {
       featuredKicker: 'FEATURED COLLECTION',
       featuredTitle: 'สินค้าเด่นประจำฤดูกาล',
       featuredHint: 'เลื่อนลงเพื่อชมสินค้า — แนวนอน',
+      // ── บล็อกใหม่ของหน้าแรก (สเปก 2026-09-01 §3.3) ──
+      topFinishKicker: 'IN STOCK, IN DEPTH',
+      topFinishTitle: 'ชิ้นเด่นจากสามเฉดที่เรามีลึกที่สุด',
+      // ไม่บวกจำนวนสามเฉดเข้าด้วยกัน: สินค้าชิ้นเดียวอยู่ได้หลายเฉด ผลบวกจึงนับซ้ำ
+      // (74+68+40 = 182 ซึ่งบังเอิญเท่ากับจำนวนสินค้าทั้งแคตตาล็อกพอดี อ่านแล้วเข้าใจผิดทันที)
+      topFinishSub: (names: string) =>
+        `${names} — สามเฉดที่เรามีของลึกที่สุด ทุกภาพข้างล่างเรนเดอร์ในเฉดของตัวเองจริง ไม่ใช่เฉดแรกของสินค้า`,
+      catCount: (n: number) => `${n} รายการ`,
+      paletteKicker: 'THE FULL PALETTE',
+      paletteTitle: 'สิบเอ็ดเฉดที่เราสต็อกจริง',
+      paletteSub: 'ทุกเฉดบนกำแพงหน้าแรกมีของอยู่ในโชว์รูม ไม่ใช่แค่ในแคตตาล็อก',
+      showroomKicker: 'SHOWROOM',
+      showroomAddressLabel: 'ที่อยู่',
+      showroomHoursLabel: 'เวลาทำการ',
+      showroomPhoneLabel: 'โทรศัพท์',
+      showroomHours: 'เปิดทุกวัน 10:00 – 19:00 น.',
       storyKicker: 'OUR STORY',
       storySlides: [
         {
@@ -152,6 +168,19 @@ export const dict = {
       featuredKicker: 'FEATURED COLLECTION',
       featuredTitle: 'This Season’s Highlights',
       featuredHint: 'Keep scrolling — the gallery moves sideways',
+      topFinishKicker: 'IN STOCK, IN DEPTH',
+      topFinishTitle: 'Highlights from our three deepest finishes',
+      topFinishSub: (names: string) =>
+        `${names} — the three finishes we stock deepest. Every frame below is rendered in its own finish, not in the product’s first one.`,
+      catCount: (n: number) => `${n} pieces`,
+      paletteKicker: 'THE FULL PALETTE',
+      paletteTitle: 'The eleven finishes we actually stock',
+      paletteSub: 'Every finish on the wall upstairs is on the showroom floor, not just in the catalogue.',
+      showroomKicker: 'SHOWROOM',
+      showroomAddressLabel: 'Address',
+      showroomHoursLabel: 'Opening hours',
+      showroomPhoneLabel: 'Phone',
+      showroomHours: 'Open daily 10:00 – 19:00',
       storyKicker: 'OUR STORY',
       storySlides: [
         {

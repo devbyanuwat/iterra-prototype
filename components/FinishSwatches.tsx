@@ -109,10 +109,11 @@ export default function FinishSwatches({ className = '', label, size = 44 }: Pro
             className={[
               'relative shrink-0 overflow-hidden rounded-full transition-transform duration-300',
               'hover:scale-110',
-              // วงแหวนสองชั้นตอนโฟกัส: เส้นดำชิดขอบชิปกันชิปขาวกลืนกับวงนอก
+              // วงแหวนสองชั้นตอนโฟกัส: ขาวชิดขอบชิป แล้ว ink วงนอก
+              // ชิปดำด้านกลืนกับ ink วงนอกก็ยังเห็นวงขาวชั้นใน และชิปขาวกลับกัน
               'focus-visible:outline-none',
-              'focus-visible:shadow-[0_0_0_2px_#08090A,0_0_0_4px_#EDE9E3]',
-              isOn ? 'ring-2 ring-cream ring-offset-2 ring-offset-base' : 'ring-1 ring-line-12',
+              'focus-visible:shadow-[0_0_0_2px_#FFFFFF,0_0_0_4px_#232323]',
+              isOn ? 'ring-2 ring-ink ring-offset-2 ring-offset-base' : 'ring-1 ring-line-12',
             ].join(' ')}
           >
             <Image

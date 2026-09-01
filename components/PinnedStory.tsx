@@ -104,7 +104,7 @@ export default function PinnedStory({ slides, kicker, images = [] }: Props) {
   }, [signature]);
 
   return (
-    <section className="bg-base text-cream">
+    <section className="bg-base text-ink">
       {/* ── เดสก์ท็อป: pinned ── */}
       <div ref={root} className="relative hidden md:block">
         <div className="flex h-screen items-stretch overflow-hidden">
@@ -127,10 +127,10 @@ export default function PinnedStory({ slides, kicker, images = [] }: Props) {
                   <p className="micro mb-4">
                     {storyKicker} — 0{i + 1}
                   </p>
-                  <h2 className="mb-5 font-display text-3xl font-extralight tracking-wide lg:text-4xl">
+                  <h2 className="mb-5 font-display text-3xl font-normal tracking-wide lg:text-4xl">
                     {s.title}
                   </h2>
-                  <p className="max-w-md text-sm font-light leading-relaxed text-dim">{s.body}</p>
+                  <p className="max-w-md text-body-sm font-normal leading-relaxed text-dim">{s.body}</p>
                 </div>
               ))}
             </div>
@@ -146,10 +146,10 @@ export default function PinnedStory({ slides, kicker, images = [] }: Props) {
             <p className="micro mb-2">
               {storyKicker} — 0{i + 1}
             </p>
-            <SplitReveal as="h2" className="mb-3 font-display text-2xl font-extralight tracking-wide">
+            <SplitReveal as="h2" className="mb-3 font-display text-2xl font-normal tracking-wide">
               {s.title}
             </SplitReveal>
-            <p className="text-sm font-light leading-relaxed text-dim">{s.body}</p>
+            <p className="text-body-sm font-normal leading-relaxed text-dim">{s.body}</p>
           </div>
         ))}
       </div>

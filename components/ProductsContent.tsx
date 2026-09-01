@@ -28,8 +28,8 @@ export default function ProductsContent() {
       <section className="px-6 pb-12 pt-36 md:px-[8vw] md:pb-16 md:pt-44">
         <Reveal>
           <p className="mb-4 micro">{t.products.kicker}</p>
-          <h1 className="font-display text-4xl font-extralight tracking-wide text-cream md:text-5xl">{t.products.title}</h1>
-          <p className="mt-4 max-w-lg text-sm font-light leading-relaxed text-dim">
+          <h1 className="font-display text-4xl font-normal tracking-wide text-ink md:text-5xl">{t.products.title}</h1>
+          <p className="mt-4 max-w-lg text-body-sm font-normal leading-relaxed text-dim">
             {t.products.sub(products.length)}
           </p>
         </Reveal>
@@ -41,10 +41,10 @@ export default function ProductsContent() {
               type="button"
               onClick={() => setFilter(f)}
               aria-pressed={filter === f}
-              className={`border px-5 py-2 text-[11px] uppercase tracking-widest2 transition-colors duration-300 ${
+              className={`border px-5 py-2 text-label uppercase tracking-widest2 transition-colors duration-300 ${
                 filter === f
-                  ? 'border-cream bg-cream text-[#08090A]'
-                  : 'border-line-12 text-dim hover:border-cream hover:text-cream'
+                  ? 'border-ink bg-ink text-surface'
+                  : 'border-line-12 text-dim hover:border-ink hover:text-ink'
               }`}
             >
               {t.common.category[f]}
@@ -55,7 +55,7 @@ export default function ProductsContent() {
 
       <section className="px-6 pb-28 md:px-[8vw]">
         {list.length === 0 ? (
-          <p className="py-20 text-center text-sm text-dim">{t.products.empty}</p>
+          <p className="py-20 text-center text-body-sm text-dim">{t.products.empty}</p>
         ) : (
           <div className="grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3" key={filter}>
             {list.map((p, i) => (

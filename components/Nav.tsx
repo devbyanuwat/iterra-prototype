@@ -1,7 +1,19 @@
 'use client';
 
 // เมนูหลัก + ปุ่มสลับภาษา TH/EN (ทำงานจริงผ่าน LangProvider)
-// ใช้ mix-blend-difference ให้ตัวหนังสืออ่านออกบนทุกพื้นหลัง (ลุคโชว์รูม)
+//
+// เคยเป็น `mix-blend-difference` + text-white เพื่อให้ลอยอยู่บนพื้นอะไรก็อ่านออก
+// ซึ่งไม่จริง: difference คืนค่า |backdrop − 255| พื้นโทนกลางจึงให้ตัวอักษรโทนกลาง
+// วัดบนกำแพงจริง (canvas อ่านพิกเซลแถบบนของแต่ละแผง):
+//   Vibrant Brushed Titanium  152,148,146 → ตัวอักษร 103,107,109 = **1.79:1**
+//   Vibrant Brushed Rose Gold 202,168,149 → 3.51:1
+//   Vibrant Rose Gold         197,173,159 → 3.85:1
+// ธีมมืดเดิมซ่อนปัญหานี้ไว้เพราะหน้าแรกไม่ได้เอาแผงโทนกลางมาไว้ใต้เมนู
+// ธีมสว่างเอากำแพงขึ้นเป็นจอแรก เมนูจึงลอยอยู่บนสามแผงนั้นตรง ๆ
+//
+// แก้ด้วยการให้เมนูมีพื้นของตัวเอง (แบบเดียวกับ kohler.co.th) — ink บน base
+// คงที่ 13.2:1 ทุกหน้า ทุกแผง ไม่ขึ้นกับว่าอะไรอยู่ข้างหลัง
+// กำแพงเผื่อที่ให้แถบนี้อยู่แล้ว (FinishWall วาง header ของตัวเองที่ top-[64px])
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -24,8 +36,10 @@ function LangSwitch({ className = '' }: { className?: string }) {
       type="button"
       onClick={() => setLang(code)}
       aria-pressed={lang === code}
-      className={`px-1.5 py-0.5 text-[11px] uppercase tracking-widest transition-opacity ${
-        lang === code ? 'opacity-100 underline underline-offset-4' : 'opacity-50 hover:opacity-80'
+      // 0.5 คือ ink บน base = 3.2:1 อ่านไม่ผ่านเกณฑ์ AC ข้อ 3 (ต้อง ≥ 4.5:1)
+      // 0.8 ให้ 7.04:1 และตัวที่เลือกอยู่ยังแยกออกด้วยขีดใต้ ไม่ได้พึ่งความจางอย่างเดียว
+      className={`px-1.5 py-0.5 text-label uppercase tracking-widest transition-opacity ${
+        lang === code ? 'opacity-100 underline underline-offset-4' : 'opacity-80 hover:opacity-100'
       }`}
     >
       {code}
@@ -34,7 +48,10 @@ function LangSwitch({ className = '' }: { className?: string }) {
   return (
     <div className={`flex items-center ${className}`}>
       <Btn code="th" />
-      <span className="opacity-40">/</span>
+      {/* ตัวคั่นล้วน ๆ screen reader ได้ยินปุ่มสองปุ่มอยู่แล้วไม่ต้องได้ยิน "/" */}
+      <span aria-hidden className="opacity-40">
+        /
+      </span>
       <Btn code="en" />
     </div>
   );
@@ -47,9 +64,9 @@ export default function Nav() {
 
   return (
     <>
-      <header className="pointer-events-none fixed inset-x-0 top-0 z-50 mix-blend-difference">
-        <div className="flex items-center justify-between px-6 py-5 text-white md:px-[4vw]">
-          <Link href="/" className="pointer-events-auto text-lg font-light tracking-widest2">
+      <header className="pointer-events-none fixed inset-x-0 top-0 z-50 border-b border-line-6 bg-base/95 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-6 py-5 text-ink md:px-[4vw]">
+          <Link href="/" className="pointer-events-auto text-lg font-normal tracking-widest2">
             ITERRA
           </Link>
           <nav aria-label="เมนูหลัก" className="pointer-events-auto hidden items-center gap-8 md:flex">
@@ -57,8 +74,9 @@ export default function Nav() {
               <Link
                 key={l.href}
                 href={l.href}
-                className={`text-[11px] uppercase tracking-widest2 transition-opacity ${
-                  pathname === l.href ? 'opacity-100 underline underline-offset-8' : 'opacity-60 hover:opacity-100'
+                className={`text-label uppercase tracking-widest2 transition-opacity ${
+                  // เหตุผลเดียวกับ LangSwitch: 0.6 = 3.88:1 ตกเกณฑ์ · 0.8 = 7.04:1
+                  pathname === l.href ? 'opacity-100 underline underline-offset-8' : 'opacity-80 hover:opacity-100'
                 }`}
               >
                 {t.nav[l.key]}
@@ -74,8 +92,8 @@ export default function Nav() {
               aria-label="เปิดเมนู"
               className="flex h-8 w-8 flex-col items-center justify-center gap-1.5"
             >
-              <span className="block h-px w-6 bg-white" />
-              <span className="block h-px w-6 bg-white" />
+              <span className="block h-px w-6 bg-ink" />
+              <span className="block h-px w-6 bg-ink" />
             </button>
           </div>
         </div>
@@ -83,14 +101,14 @@ export default function Nav() {
 
       {/* เมนูมือถือแบบเต็มจอ */}
       <div
-        className={`fixed inset-0 z-[60] flex flex-col bg-base text-cream transition-transform duration-500 md:hidden ${
+        className={`fixed inset-0 z-[60] flex flex-col bg-base text-ink transition-transform duration-500 md:hidden ${
           open ? 'translate-y-0' : '-translate-y-full'
         }`}
         aria-hidden={!open}
       >
         <div className="flex items-center justify-between px-6 py-5">
-          <span className="text-lg font-light tracking-widest2">ITERRA</span>
-          <button type="button" onClick={() => setOpen(false)} aria-label="ปิดเมนู" className="text-2xl font-extralight">
+          <span className="text-lg font-normal tracking-widest2">ITERRA</span>
+          <button type="button" onClick={() => setOpen(false)} aria-label="ปิดเมนู" className="text-2xl font-normal">
             ×
           </button>
         </div>
@@ -100,7 +118,7 @@ export default function Nav() {
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="text-2xl font-extralight tracking-wide"
+              className="text-2xl font-normal tracking-wide"
               style={{ transitionDelay: `${i * 40}ms` }}
             >
               {t.nav[l.key]}

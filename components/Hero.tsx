@@ -110,7 +110,7 @@ export default function Hero({
   return (
     <section
       ref={root}
-      className="relative flex h-[100svh] min-h-[560px] flex-col justify-end overflow-hidden bg-base text-cream"
+      className="relative flex h-[100svh] min-h-[560px] flex-col justify-end overflow-hidden bg-base text-ink"
       style={accent ? ({ '--accent': accent } as React.CSSProperties) : undefined}
     >
       {/* spotlight: แสงในห้องมืด รับสีจาก --accent */}
@@ -152,14 +152,14 @@ export default function Hero({
           trigger="mount"
           mask={false}
           data-hero-title
-          className="mb-6 max-w-[16ch] origin-left whitespace-pre-line font-display text-[13vw] font-extralight leading-[0.92] text-cream will-change-transform md:text-[7.5vw]"
+          className="mb-6 max-w-[16ch] origin-left whitespace-pre-line font-display text-[13vw] font-normal leading-[0.92] text-ink will-change-transform md:text-[7.5vw]"
         >
           {heroTitle}
         </SplitReveal>
 
         <p
           data-hero-fade
-          className="mb-10 max-w-xl text-sm font-light leading-relaxed text-dim md:text-[1rem]"
+          className="mb-10 max-w-xl text-body-sm font-normal leading-relaxed text-dim md:text-[1rem]"
         >
           {heroSub}
         </p>
@@ -167,7 +167,7 @@ export default function Hero({
         <div data-hero-fade>
           <Link
             href={ctaHref}
-            className="inline-block border border-line-12 px-9 py-3.5 text-cream transition-colors duration-300 hover:border-accent hover:text-accent"
+            className="inline-block border border-line-12 px-9 py-3.5 text-ink transition-colors duration-300 hover:border-accent hover:text-accent"
           >
             <span className="micro !text-current">{heroCta}</span>
           </Link>
