@@ -10,17 +10,22 @@
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { aboutContent, pick } from '@/lib/i18n';
-import { lifestyleImages } from '@/lib/lifestyle.generated';
+import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle.generated';
 
 // ภาพจริงจากคลัง lifestyle — เลือกให้ตรงกับเนื้อหาแต่ละหัวข้อ
 // เรียงตาม aboutContent.sections: จุดเริ่มต้น / วิธีคัดสรร / โชว์รูม / งานช่าง
 const HERO_ID = 'aaa80571-1800x800';
 const SECTION_IDS = [
-  '02-handshower', // ต่อน้ำเข้าทุกก๊อก เปิดให้ลองก่อนซื้อ
+  // เดิมเป็น 02-handshower ซึ่งกว้าง 461px แต่ช่องกว้าง 552px — ต้องขยายภาพ
+  'malleco-article-banner-968x544', // ต่อน้ำเข้าทุกก๊อก เปิดให้ลองก่อนซื้อ
   'aleutian-02', // เกณฑ์เดียว: บ้านเราใช้เองได้ไหม
   'aaa68094-rgb', // โชว์รูมจัดเป็นห้องจริง
   'kss-thai-web-secondary-banner', // ทีมช่างของเราเอง
 ];
+
+// ความกว้างจริงของช่องที่ 1440 ใช้เลือก rendition ไม่ให้ภาพถูกขยาย
+const HERO_SLOT = 1193;
+const SECTION_SLOT = 552;
 
 /** ค้นภาพจาก id — id ผิดจะพังตอน build ไม่ใช่ตอนผู้ใช้เปิดหน้า */
 function pic(id: string) {
@@ -46,14 +51,14 @@ export default function AboutContent() {
       </section>
 
       <Reveal className="px-6 md:px-[8vw]">
-        {/* ภาพเปิดหน้ากว้างเต็มคอลัมน์เนื้อหา (~1195px) จึงใช้ไฟล์ 1800 */}
+        {/* ภาพเปิดหน้ากว้างเต็มคอลัมน์เนื้อหา — ขอ rendition ที่คลุม 1193px */}
         <div
           className="overflow-hidden border border-line-6 bg-surface"
           style={{ aspectRatio: `${hero.width} / ${hero.height}` }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
           <img
-            src={hero.src.w1800}
+            src={lifestyleSrc(hero, HERO_SLOT, 2)}
             alt={hero.alt[lang]}
             width={hero.width}
             height={hero.height}
@@ -82,7 +87,7 @@ export default function AboutContent() {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
                 <img
-                  src={image.src.w900}
+                  src={lifestyleSrc(image, SECTION_SLOT, 2)}
                   alt={image.alt[lang]}
                   width={image.width}
                   height={image.height}

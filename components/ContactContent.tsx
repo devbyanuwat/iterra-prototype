@@ -8,13 +8,14 @@ import { useEffect, useRef, useState } from 'react';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { CONTACT } from '@/lib/site';
-import { lifestyleImages } from '@/lib/lifestyle.generated';
+import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle.generated';
 
 // ช่องแผนที่เดิมเป็นกล่องเปล่า — ใส่ภาพหน้าร้านโชว์รูมไปก่อน
 // (ภาพ retail ใบเดียวในคลัง) ตอนขึ้นจริงค่อยแทนด้วย Google Maps embed
-// เดิมใช้ visual-showroom-secondary-banner ซึ่งต้นฉบับกว้างแค่ 294px ต้องขยาย 1.9 เท่า
-// ใบนี้กว้าง 982px จากหน้า /virtual-showrooms — ไม่ต้องขยายในช่อง 552px
-const SHOWROOM_ID = 'kohler-kec-bkk';
+// เดิมใช้ visual-showroom-secondary-banner (294px) แล้ว kohler-kec-bkk (982px)
+// ใบนี้กว้าง 1800px — คลุมช่อง 552px ได้ทั้ง dpr 1 และ dpr 2
+const SHOWROOM_ID = 'kohler-bkk-kec-banner';
+const SHOWROOM_SLOT = 552;
 
 /** ค้นภาพจาก id — id ผิดจะพังตอน build ไม่ใช่ตอนผู้ใช้เปิดหน้า */
 function pic(id: string) {
@@ -131,7 +132,7 @@ export default function ContactContent() {
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
               <img
-                src={showroom.src.w900}
+                src={lifestyleSrc(showroom, SHOWROOM_SLOT, 2)}
                 alt={showroom.alt[lang]}
                 width={showroom.width}
                 height={showroom.height}

@@ -3,9 +3,10 @@
 // scripts/scrape-lifestyle.mjs. Cut-out product shots were dropped on purpose;
 // the product grid already carries those.
 //
-// width/height describe the file at src.w1800, after any white banner padding
-// was trimmed off, so a few assets are narrower than 1800px. src.w900 is the
-// same crop at min(900, width).
+// width/height/maxWidth are the asset's real pixels after any white banner
+// padding was trimmed off. Nothing is ever upscaled, so an asset only has the
+// renditions listed in `sources` — a 460px source has exactly one file, not a
+// fake 1800. Ask canFill() before putting an asset in a slot.
 
 export type LifestyleCategory =
   | 'room'
@@ -17,13 +18,21 @@ export type LifestyleCategory =
 
 export type LifestyleSpace = 'bath' | 'kitchen' | 'other'
 
+export type LifestyleRendition = { width: number; height: number; src: string }
+
 export type LifestyleImage = {
   id: string
-  src: { w1800: string; w900: string }
+  /** every rendition that exists on disk, largest first */
+  sources: LifestyleRendition[]
+  /** full = the largest rendition; w900 = the largest one at or below 900px */
+  src: { full: string; w900: string }
+  /** native pixels — nothing larger than this exists */
   width: number
   height: number
   /** width / height, rounded to 3dp — pick a crop with this. */
   aspect: number
+  /** largest CSS width this asset can fill without being upscaled */
+  maxWidth: number
   category: LifestyleCategory
   space: LifestyleSpace
   alt: { th: string; en: string }
@@ -32,10 +41,14 @@ export type LifestyleImage = {
 export const lifestyleImages: LifestyleImage[] = [
   {
     id: '01-poise-3880',
-    src: { w1800: '/lifestyle/1800/01-poise-3880.webp', w900: '/lifestyle/900/01-poise-3880.webp' },
+    sources: [
+      { width: 462, height: 353, src: '/lifestyle/01-poise-3880-462.webp' },
+    ],
+    src: { full: '/lifestyle/01-poise-3880-462.webp', w900: '/lifestyle/01-poise-3880-462.webp' },
     width: 462,
     height: 353,
     aspect: 1.309,
+    maxWidth: 462,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -45,10 +58,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: '02-handshower',
-    src: { w1800: '/lifestyle/1800/02-handshower.webp', w900: '/lifestyle/900/02-handshower.webp' },
+    sources: [
+      { width: 461, height: 353, src: '/lifestyle/02-handshower-461.webp' },
+    ],
+    src: { full: '/lifestyle/02-handshower-461.webp', w900: '/lifestyle/02-handshower-461.webp' },
     width: 461,
     height: 353,
     aspect: 1.306,
+    maxWidth: 461,
     category: 'people',
     space: 'bath',
     alt: {
@@ -58,10 +75,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: '02-stainless-steel',
-    src: { w1800: '/lifestyle/1800/02-stainless-steel.webp', w900: '/lifestyle/900/02-stainless-steel.webp' },
+    sources: [
+      { width: 460, height: 352, src: '/lifestyle/02-stainless-steel-460.webp' },
+    ],
+    src: { full: '/lifestyle/02-stainless-steel-460.webp', w900: '/lifestyle/02-stainless-steel-460.webp' },
     width: 460,
     height: 352,
     aspect: 1.307,
+    maxWidth: 460,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -71,10 +92,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: '03-under-mount',
-    src: { w1800: '/lifestyle/1800/03-under-mount.webp', w900: '/lifestyle/900/03-under-mount.webp' },
+    sources: [
+      { width: 461, height: 353, src: '/lifestyle/03-under-mount-461.webp' },
+    ],
+    src: { full: '/lifestyle/03-under-mount-461.webp', w900: '/lifestyle/03-under-mount-461.webp' },
     width: 461,
     height: 353,
     aspect: 1.306,
+    maxWidth: 461,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -84,10 +109,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: '05-shower-doors',
-    src: { w1800: '/lifestyle/1800/05-shower-doors.webp', w900: '/lifestyle/900/05-shower-doors.webp' },
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/05-shower-doors-460.webp' },
+    ],
+    src: { full: '/lifestyle/05-shower-doors-460.webp', w900: '/lifestyle/05-shower-doors-460.webp' },
     width: 460,
     height: 353,
     aspect: 1.303,
+    maxWidth: 460,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -97,10 +126,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: '2022-most-innovative-bathroom-products-moxie-numi-gcs-secondary-banner-290-x-232',
-    src: { w1800: '/lifestyle/1800/2022-most-innovative-bathroom-products-moxie-numi-gcs-secondary-banner-290-x-232.webp', w900: '/lifestyle/900/2022-most-innovative-bathroom-products-moxie-numi-gcs-secondary-banner-290-x-232.webp' },
+    sources: [
+      { width: 608, height: 484, src: '/lifestyle/2022-most-innovative-bathroom-products-moxie-numi-gcs-secondary-banner-290-x-232-608.webp' },
+    ],
+    src: { full: '/lifestyle/2022-most-innovative-bathroom-products-moxie-numi-gcs-secondary-banner-290-x-232-608.webp', w900: '/lifestyle/2022-most-innovative-bathroom-products-moxie-numi-gcs-secondary-banner-290-x-232-608.webp' },
     width: 608,
     height: 484,
     aspect: 1.256,
+    maxWidth: 608,
     category: 'people',
     space: 'bath',
     alt: {
@@ -110,10 +143,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aaa01705-43',
-    src: { w1800: '/lifestyle/1800/aaa01705-43.webp', w900: '/lifestyle/900/aaa01705-43.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/aaa01705-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/aaa01705-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/aaa01705-43-1800.webp', w900: '/lifestyle/aaa01705-43-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -123,10 +161,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aaa60312-rgb',
-    src: { w1800: '/lifestyle/1800/aaa60312-rgb.webp', w900: '/lifestyle/900/aaa60312-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1198, src: '/lifestyle/aaa60312-rgb-1800.webp' },
+      { width: 900, height: 599, src: '/lifestyle/aaa60312-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/aaa60312-rgb-1800.webp', w900: '/lifestyle/aaa60312-rgb-900.webp' },
     width: 1800,
     height: 1198,
     aspect: 1.503,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -136,10 +179,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aaa68056-rgb',
-    src: { w1800: '/lifestyle/1800/aaa68056-rgb.webp', w900: '/lifestyle/900/aaa68056-rgb.webp' },
+    sources: [
+      { width: 1800, height: 2062, src: '/lifestyle/aaa68056-rgb-1800.webp' },
+      { width: 900, height: 1031, src: '/lifestyle/aaa68056-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/aaa68056-rgb-1800.webp', w900: '/lifestyle/aaa68056-rgb-900.webp' },
     width: 1800,
     height: 2062,
     aspect: 0.873,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -149,10 +197,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aaa68094-rgb',
-    src: { w1800: '/lifestyle/1800/aaa68094-rgb.webp', w900: '/lifestyle/900/aaa68094-rgb.webp' },
+    sources: [
+      { width: 1800, height: 2399, src: '/lifestyle/aaa68094-rgb-1800.webp' },
+      { width: 900, height: 1200, src: '/lifestyle/aaa68094-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/aaa68094-rgb-1800.webp', w900: '/lifestyle/aaa68094-rgb-900.webp' },
     width: 1800,
     height: 2399,
     aspect: 0.75,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -162,10 +215,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aaa80571-1800x800',
-    src: { w1800: '/lifestyle/1800/aaa80571-1800x800.webp', w900: '/lifestyle/900/aaa80571-1800x800.webp' },
+    sources: [
+      { width: 1800, height: 800, src: '/lifestyle/aaa80571-1800x800-1800.webp' },
+      { width: 900, height: 400, src: '/lifestyle/aaa80571-1800x800-900.webp' },
+    ],
+    src: { full: '/lifestyle/aaa80571-1800x800-1800.webp', w900: '/lifestyle/aaa80571-1800x800-900.webp' },
     width: 1800,
     height: 800,
     aspect: 2.25,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -175,10 +233,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aaa88333-rgb',
-    src: { w1800: '/lifestyle/1800/aaa88333-rgb.webp', w900: '/lifestyle/900/aaa88333-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1351, src: '/lifestyle/aaa88333-rgb-1800.webp' },
+      { width: 900, height: 676, src: '/lifestyle/aaa88333-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/aaa88333-rgb-1800.webp', w900: '/lifestyle/aaa88333-rgb-900.webp' },
     width: 1800,
     height: 1351,
     aspect: 1.332,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -188,10 +251,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aab06665',
-    src: { w1800: '/lifestyle/1800/aab06665.webp', w900: '/lifestyle/900/aab06665.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/aab06665-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/aab06665-900.webp' },
+    ],
+    src: { full: '/lifestyle/aab06665-1800.webp', w900: '/lifestyle/aab06665-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -201,10 +269,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aab14759',
-    src: { w1800: '/lifestyle/1800/aab14759.webp', w900: '/lifestyle/900/aab14759.webp' },
+    sources: [
+      { width: 1800, height: 1313, src: '/lifestyle/aab14759-1800.webp' },
+      { width: 900, height: 657, src: '/lifestyle/aab14759-900.webp' },
+    ],
+    src: { full: '/lifestyle/aab14759-1800.webp', w900: '/lifestyle/aab14759-900.webp' },
     width: 1800,
     height: 1313,
     aspect: 1.371,
+    maxWidth: 1800,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -214,10 +287,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aab15367-rgb',
-    src: { w1800: '/lifestyle/1800/aab15367-rgb.webp', w900: '/lifestyle/900/aab15367-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1351, src: '/lifestyle/aab15367-rgb-1800.webp' },
+      { width: 900, height: 676, src: '/lifestyle/aab15367-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/aab15367-rgb-1800.webp', w900: '/lifestyle/aab15367-rgb-900.webp' },
     width: 1800,
     height: 1351,
     aspect: 1.332,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -227,10 +305,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aab18535-43',
-    src: { w1800: '/lifestyle/1800/aab18535-43.webp', w900: '/lifestyle/900/aab18535-43.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/aab18535-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/aab18535-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/aab18535-43-1800.webp', w900: '/lifestyle/aab18535-43-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -240,10 +323,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aab27241',
-    src: { w1800: '/lifestyle/1800/aab27241.webp', w900: '/lifestyle/900/aab27241.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/aab27241-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/aab27241-900.webp' },
+    ],
+    src: { full: '/lifestyle/aab27241-1800.webp', w900: '/lifestyle/aab27241-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -253,10 +341,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aab27241-rgb2',
-    src: { w1800: '/lifestyle/1800/aab27241-rgb2.webp', w900: '/lifestyle/900/aab27241-rgb2.webp' },
+    sources: [
+      { width: 1800, height: 1165, src: '/lifestyle/aab27241-rgb2-1800.webp' },
+      { width: 900, height: 583, src: '/lifestyle/aab27241-rgb2-900.webp' },
+    ],
+    src: { full: '/lifestyle/aab27241-rgb2-1800.webp', w900: '/lifestyle/aab27241-rgb2-900.webp' },
     width: 1800,
     height: 1165,
     aspect: 1.545,
+    maxWidth: 1800,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -266,10 +359,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aab39432',
-    src: { w1800: '/lifestyle/1800/aab39432.webp', w900: '/lifestyle/900/aab39432.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/aab39432-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/aab39432-900.webp' },
+    ],
+    src: { full: '/lifestyle/aab39432-1800.webp', w900: '/lifestyle/aab39432-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -279,10 +377,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'acrylic',
-    src: { w1800: '/lifestyle/1800/acrylic.webp', w900: '/lifestyle/900/acrylic.webp' },
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/acrylic-460.webp' },
+    ],
+    src: { full: '/lifestyle/acrylic-460.webp', w900: '/lifestyle/acrylic-460.webp' },
     width: 460,
     height: 353,
     aspect: 1.303,
+    maxWidth: 460,
     category: 'room',
     space: 'bath',
     alt: {
@@ -292,10 +394,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aleo-shower-column-97821',
-    src: { w1800: '/lifestyle/1800/aleo-shower-column-97821.webp', w900: '/lifestyle/900/aleo-shower-column-97821.webp' },
+    sources: [
+      { width: 461, height: 353, src: '/lifestyle/aleo-shower-column-97821-461.webp' },
+    ],
+    src: { full: '/lifestyle/aleo-shower-column-97821-461.webp', w900: '/lifestyle/aleo-shower-column-97821-461.webp' },
     width: 461,
     height: 353,
     aspect: 1.306,
+    maxWidth: 461,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -305,10 +411,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aleutian-01',
-    src: { w1800: '/lifestyle/1800/aleutian-01.webp', w900: '/lifestyle/900/aleutian-01.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/aleutian-01-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/aleutian-01-900.webp' },
+    ],
+    src: { full: '/lifestyle/aleutian-01-1800.webp', w900: '/lifestyle/aleutian-01-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'people',
     space: 'bath',
     alt: {
@@ -318,10 +429,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'aleutian-02',
-    src: { w1800: '/lifestyle/1800/aleutian-02.webp', w900: '/lifestyle/900/aleutian-02.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/aleutian-02-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/aleutian-02-900.webp' },
+    ],
+    src: { full: '/lifestyle/aleutian-02-1800.webp', w900: '/lifestyle/aleutian-02-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'people',
     space: 'bath',
     alt: {
@@ -331,10 +447,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'bancroft-01',
-    src: { w1800: '/lifestyle/1800/bancroft-01.webp', w900: '/lifestyle/900/bancroft-01.webp' },
+    sources: [
+      { width: 1800, height: 1309, src: '/lifestyle/bancroft-01-1800.webp' },
+      { width: 900, height: 655, src: '/lifestyle/bancroft-01-900.webp' },
+    ],
+    src: { full: '/lifestyle/bancroft-01-1800.webp', w900: '/lifestyle/bancroft-01-900.webp' },
     width: 1800,
     height: 1309,
     aspect: 1.375,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -344,10 +465,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'bancroft-02',
-    src: { w1800: '/lifestyle/1800/bancroft-02.webp', w900: '/lifestyle/900/bancroft-02.webp' },
+    sources: [
+      { width: 1600, height: 2405, src: '/lifestyle/bancroft-02-1600.webp' },
+      { width: 900, height: 1353, src: '/lifestyle/bancroft-02-900.webp' },
+    ],
+    src: { full: '/lifestyle/bancroft-02-1600.webp', w900: '/lifestyle/bancroft-02-900.webp' },
     width: 1600,
     height: 2405,
     aspect: 0.665,
+    maxWidth: 1600,
     category: 'room',
     space: 'bath',
     alt: {
@@ -357,10 +483,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'bancroft-03',
-    src: { w1800: '/lifestyle/1800/bancroft-03.webp', w900: '/lifestyle/900/bancroft-03.webp' },
+    sources: [
+      { width: 1800, height: 1352, src: '/lifestyle/bancroft-03-1800.webp' },
+      { width: 900, height: 676, src: '/lifestyle/bancroft-03-900.webp' },
+    ],
+    src: { full: '/lifestyle/bancroft-03-1800.webp', w900: '/lifestyle/bancroft-03-900.webp' },
     width: 1800,
     height: 1352,
     aspect: 1.331,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -370,10 +501,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'bathtub',
-    src: { w1800: '/lifestyle/1800/bathtub.webp', w900: '/lifestyle/900/bathtub.webp' },
+    sources: [
+      { width: 801, height: 533, src: '/lifestyle/bathtub-801.webp' },
+    ],
+    src: { full: '/lifestyle/bathtub-801.webp', w900: '/lifestyle/bathtub-801.webp' },
     width: 801,
     height: 533,
     aspect: 1.503,
+    maxWidth: 801,
     category: 'room',
     space: 'bath',
     alt: {
@@ -383,10 +518,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'bbb18895-43',
-    src: { w1800: '/lifestyle/1800/bbb18895-43.webp', w900: '/lifestyle/900/bbb18895-43.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/bbb18895-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/bbb18895-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/bbb18895-43-1800.webp', w900: '/lifestyle/bbb18895-43-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -396,10 +536,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'boonthavorn-ratchada',
-    src: { w1800: '/lifestyle/1800/boonthavorn-ratchada.webp', w900: '/lifestyle/900/boonthavorn-ratchada.webp' },
+    sources: [
+      { width: 980, height: 490, src: '/lifestyle/boonthavorn-ratchada-980.webp' },
+    ],
+    src: { full: '/lifestyle/boonthavorn-ratchada-980.webp', w900: '/lifestyle/boonthavorn-ratchada-980.webp' },
     width: 980,
     height: 490,
     aspect: 2,
+    maxWidth: 980,
     category: 'retail',
     space: 'other',
     alt: {
@@ -409,10 +553,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'brazn-landing-page-secondary-banner-460x353',
-    src: { w1800: '/lifestyle/1800/brazn-landing-page-secondary-banner-460x353.webp', w900: '/lifestyle/900/brazn-landing-page-secondary-banner-460x353.webp' },
+    sources: [
+      { width: 961, height: 736, src: '/lifestyle/brazn-landing-page-secondary-banner-460x353-961.webp' },
+    ],
+    src: { full: '/lifestyle/brazn-landing-page-secondary-banner-460x353-961.webp', w900: '/lifestyle/brazn-landing-page-secondary-banner-460x353-961.webp' },
     width: 961,
     height: 736,
     aspect: 1.306,
+    maxWidth: 961,
     category: 'room',
     space: 'bath',
     alt: {
@@ -422,10 +570,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'capri-by-fraser-brisbane-00',
-    src: { w1800: '/lifestyle/1800/capri-by-fraser-brisbane-00.webp', w900: '/lifestyle/900/capri-by-fraser-brisbane-00.webp' },
+    sources: [
+      { width: 1280, height: 764, src: '/lifestyle/capri-by-fraser-brisbane-00-1280.webp' },
+      { width: 900, height: 537, src: '/lifestyle/capri-by-fraser-brisbane-00-900.webp' },
+    ],
+    src: { full: '/lifestyle/capri-by-fraser-brisbane-00-1280.webp', w900: '/lifestyle/capri-by-fraser-brisbane-00-900.webp' },
     width: 1280,
     height: 764,
     aspect: 1.675,
+    maxWidth: 1280,
     category: 'project',
     space: 'bath',
     alt: {
@@ -435,10 +588,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'ccc12361-43',
-    src: { w1800: '/lifestyle/1800/ccc12361-43.webp', w900: '/lifestyle/900/ccc12361-43.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/ccc12361-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/ccc12361-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/ccc12361-43-1800.webp', w900: '/lifestyle/ccc12361-43-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -448,10 +606,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'ccc16658',
-    src: { w1800: '/lifestyle/1800/ccc16658.webp', w900: '/lifestyle/900/ccc16658.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/ccc16658-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/ccc16658-900.webp' },
+    ],
+    src: { full: '/lifestyle/ccc16658-1800.webp', w900: '/lifestyle/ccc16658-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -461,10 +624,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'classical',
-    src: { w1800: '/lifestyle/1800/classical.webp', w900: '/lifestyle/900/classical.webp' },
+    sources: [
+      { width: 462, height: 353, src: '/lifestyle/classical-462.webp' },
+    ],
+    src: { full: '/lifestyle/classical-462.webp', w900: '/lifestyle/classical-462.webp' },
     width: 462,
     height: 353,
     aspect: 1.309,
+    maxWidth: 462,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -474,10 +641,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'contemporary-kitchen-style',
-    src: { w1800: '/lifestyle/1800/contemporary-kitchen-style.webp', w900: '/lifestyle/900/contemporary-kitchen-style.webp' },
+    sources: [
+      { width: 462, height: 353, src: '/lifestyle/contemporary-kitchen-style-462.webp' },
+    ],
+    src: { full: '/lifestyle/contemporary-kitchen-style-462.webp', w900: '/lifestyle/contemporary-kitchen-style-462.webp' },
     width: 462,
     height: 353,
     aspect: 1.309,
+    maxWidth: 462,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -487,10 +658,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'crown-towers-perth-00',
-    src: { w1800: '/lifestyle/1800/crown-towers-perth-00.webp', w900: '/lifestyle/900/crown-towers-perth-00.webp' },
+    sources: [
+      { width: 1602, height: 900, src: '/lifestyle/crown-towers-perth-00-1602.webp' },
+      { width: 900, height: 506, src: '/lifestyle/crown-towers-perth-00-900.webp' },
+    ],
+    src: { full: '/lifestyle/crown-towers-perth-00-1602.webp', w900: '/lifestyle/crown-towers-perth-00-900.webp' },
     width: 1602,
     height: 900,
     aspect: 1.78,
+    maxWidth: 1602,
     category: 'project',
     space: 'bath',
     alt: {
@@ -500,10 +676,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'exhale',
-    src: { w1800: '/lifestyle/1800/exhale.webp', w900: '/lifestyle/900/exhale.webp' },
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/exhale-460.webp' },
+    ],
+    src: { full: '/lifestyle/exhale-460.webp', w900: '/lifestyle/exhale-460.webp' },
     width: 460,
     height: 353,
     aspect: 1.303,
+    maxWidth: 460,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -513,10 +693,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'flc-luxury-resort-quinhon-00',
-    src: { w1800: '/lifestyle/1800/flc-luxury-resort-quinhon-00.webp', w900: '/lifestyle/900/flc-luxury-resort-quinhon-00.webp' },
+    sources: [
+      { width: 960, height: 462, src: '/lifestyle/flc-luxury-resort-quinhon-00-960.webp' },
+    ],
+    src: { full: '/lifestyle/flc-luxury-resort-quinhon-00-960.webp', w900: '/lifestyle/flc-luxury-resort-quinhon-00-960.webp' },
     width: 960,
     height: 462,
     aspect: 2.078,
+    maxWidth: 960,
     category: 'project',
     space: 'bath',
     alt: {
@@ -526,10 +710,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'forefront-01',
-    src: { w1800: '/lifestyle/1800/forefront-01.webp', w900: '/lifestyle/900/forefront-01.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/forefront-01-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/forefront-01-900.webp' },
+    ],
+    src: { full: '/lifestyle/forefront-01-1800.webp', w900: '/lifestyle/forefront-01-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -539,10 +728,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'forefront-02',
-    src: { w1800: '/lifestyle/1800/forefront-02.webp', w900: '/lifestyle/900/forefront-02.webp' },
+    sources: [
+      { width: 1800, height: 1474, src: '/lifestyle/forefront-02-1800.webp' },
+      { width: 900, height: 737, src: '/lifestyle/forefront-02-900.webp' },
+    ],
+    src: { full: '/lifestyle/forefront-02-1800.webp', w900: '/lifestyle/forefront-02-900.webp' },
     width: 1800,
     height: 1474,
     aspect: 1.221,
+    maxWidth: 1800,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -552,10 +746,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'forefront-03',
-    src: { w1800: '/lifestyle/1800/forefront-03.webp', w900: '/lifestyle/900/forefront-03.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/forefront-03-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/forefront-03-900.webp' },
+    ],
+    src: { full: '/lifestyle/forefront-03-1800.webp', w900: '/lifestyle/forefront-03-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -565,10 +764,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'fullerton-article-output-banner',
-    src: { w1800: '/lifestyle/1800/fullerton-article-output-banner.webp', w900: '/lifestyle/900/fullerton-article-output-banner.webp' },
+    sources: [
+      { width: 853, height: 540, src: '/lifestyle/fullerton-article-output-banner-853.webp' },
+    ],
+    src: { full: '/lifestyle/fullerton-article-output-banner-853.webp', w900: '/lifestyle/fullerton-article-output-banner-853.webp' },
     width: 853,
     height: 540,
     aspect: 1.58,
+    maxWidth: 853,
     category: 'project',
     space: 'other',
     alt: {
@@ -578,10 +781,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'gcs-aae09079-rgb-980x551px',
-    src: { w1800: '/lifestyle/1800/gcs-aae09079-rgb-980x551px.webp', w900: '/lifestyle/900/gcs-aae09079-rgb-980x551px.webp' },
+    sources: [
+      { width: 982, height: 551, src: '/lifestyle/gcs-aae09079-rgb-980x551px-982.webp' },
+    ],
+    src: { full: '/lifestyle/gcs-aae09079-rgb-980x551px-982.webp', w900: '/lifestyle/gcs-aae09079-rgb-980x551px-982.webp' },
     width: 982,
     height: 551,
     aspect: 1.782,
+    maxWidth: 982,
     category: 'people',
     space: 'bath',
     alt: {
@@ -591,10 +798,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'hotel-des-arts-hochiminh-00',
-    src: { w1800: '/lifestyle/1800/hotel-des-arts-hochiminh-00.webp', w900: '/lifestyle/900/hotel-des-arts-hochiminh-00.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/hotel-des-arts-hochiminh-00-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/hotel-des-arts-hochiminh-00-900.webp' },
+    ],
+    src: { full: '/lifestyle/hotel-des-arts-hochiminh-00-1800.webp', w900: '/lifestyle/hotel-des-arts-hochiminh-00-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'project',
     space: 'bath',
     alt: {
@@ -604,10 +816,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'hotel-indigo-bangkok-00',
-    src: { w1800: '/lifestyle/1800/hotel-indigo-bangkok-00.webp', w900: '/lifestyle/900/hotel-indigo-bangkok-00.webp' },
+    sources: [
+      { width: 1800, height: 1201, src: '/lifestyle/hotel-indigo-bangkok-00-1800.webp' },
+      { width: 900, height: 601, src: '/lifestyle/hotel-indigo-bangkok-00-900.webp' },
+    ],
+    src: { full: '/lifestyle/hotel-indigo-bangkok-00-1800.webp', w900: '/lifestyle/hotel-indigo-bangkok-00-900.webp' },
     width: 1800,
     height: 1201,
     aspect: 1.499,
+    maxWidth: 1800,
     category: 'project',
     space: 'bath',
     alt: {
@@ -617,10 +834,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'karess-01',
-    src: { w1800: '/lifestyle/1800/karess-01.webp', w900: '/lifestyle/900/karess-01.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/karess-01-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/karess-01-900.webp' },
+    ],
+    src: { full: '/lifestyle/karess-01-1800.webp', w900: '/lifestyle/karess-01-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'people',
     space: 'bath',
     alt: {
@@ -630,10 +852,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'karess-02',
-    src: { w1800: '/lifestyle/1800/karess-02.webp', w900: '/lifestyle/900/karess-02.webp' },
+    sources: [
+      { width: 1800, height: 2373, src: '/lifestyle/karess-02-1800.webp' },
+      { width: 900, height: 1187, src: '/lifestyle/karess-02-900.webp' },
+    ],
+    src: { full: '/lifestyle/karess-02-1800.webp', w900: '/lifestyle/karess-02-900.webp' },
     width: 1800,
     height: 2373,
     aspect: 0.759,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -643,10 +870,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'karess-03',
-    src: { w1800: '/lifestyle/1800/karess-03.webp', w900: '/lifestyle/900/karess-03.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/karess-03-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/karess-03-900.webp' },
+    ],
+    src: { full: '/lifestyle/karess-03-1800.webp', w900: '/lifestyle/karess-03-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'people',
     space: 'bath',
     alt: {
@@ -656,10 +888,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'katalyst-air-4',
-    src: { w1800: '/lifestyle/1800/katalyst-air-4.webp', w900: '/lifestyle/900/katalyst-air-4.webp' },
+    sources: [
+      { width: 888, height: 617, src: '/lifestyle/katalyst-air-4-888.webp' },
+    ],
+    src: { full: '/lifestyle/katalyst-air-4-888.webp', w900: '/lifestyle/katalyst-air-4-888.webp' },
     width: 888,
     height: 617,
     aspect: 1.439,
+    maxWidth: 888,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -669,10 +905,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'katalyst-air-katalyst-air-updated-kv',
-    src: { w1800: '/lifestyle/1800/katalyst-air-katalyst-air-updated-kv.webp', w900: '/lifestyle/900/katalyst-air-katalyst-air-updated-kv.webp' },
+    sources: [
+      { width: 1000, height: 449, src: '/lifestyle/katalyst-air-katalyst-air-updated-kv-1000.webp' },
+    ],
+    src: { full: '/lifestyle/katalyst-air-katalyst-air-updated-kv-1000.webp', w900: '/lifestyle/katalyst-air-katalyst-air-updated-kv-1000.webp' },
     width: 1000,
     height: 449,
     aspect: 2.227,
+    maxWidth: 1000,
     category: 'people',
     space: 'bath',
     alt: {
@@ -682,10 +922,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'katalyst-air-katalyst-air-video',
-    src: { w1800: '/lifestyle/1800/katalyst-air-katalyst-air-video.webp', w900: '/lifestyle/900/katalyst-air-katalyst-air-video.webp' },
+    sources: [
+      { width: 888, height: 617, src: '/lifestyle/katalyst-air-katalyst-air-video-888.webp' },
+    ],
+    src: { full: '/lifestyle/katalyst-air-katalyst-air-video-888.webp', w900: '/lifestyle/katalyst-air-katalyst-air-video-888.webp' },
     width: 888,
     height: 617,
     aspect: 1.439,
+    maxWidth: 888,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -695,10 +939,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kitchen-faucets-category',
-    src: { w1800: '/lifestyle/1800/kitchen-faucets-category.webp', w900: '/lifestyle/900/kitchen-faucets-category.webp' },
+    sources: [
+      { width: 1800, height: 604, src: '/lifestyle/kitchen-faucets-category-1800.webp' },
+      { width: 900, height: 302, src: '/lifestyle/kitchen-faucets-category-900.webp' },
+    ],
+    src: { full: '/lifestyle/kitchen-faucets-category-1800.webp', w900: '/lifestyle/kitchen-faucets-category-900.webp' },
     width: 1800,
     height: 604,
     aspect: 2.98,
+    maxWidth: 1800,
     category: 'people',
     space: 'kitchen',
     alt: {
@@ -708,10 +957,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kitchen-sinks-category',
-    src: { w1800: '/lifestyle/1800/kitchen-sinks-category.webp', w900: '/lifestyle/900/kitchen-sinks-category.webp' },
+    sources: [
+      { width: 1800, height: 604, src: '/lifestyle/kitchen-sinks-category-1800.webp' },
+      { width: 900, height: 302, src: '/lifestyle/kitchen-sinks-category-900.webp' },
+    ],
+    src: { full: '/lifestyle/kitchen-sinks-category-1800.webp', w900: '/lifestyle/kitchen-sinks-category-900.webp' },
     width: 1800,
     height: 604,
     aspect: 2.98,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -721,10 +975,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kitchen-sinks-category-15',
-    src: { w1800: '/lifestyle/1800/kitchen-sinks-category-15.webp', w900: '/lifestyle/900/kitchen-sinks-category-15.webp' },
+    sources: [
+      { width: 1800, height: 604, src: '/lifestyle/kitchen-sinks-category-15-1800.webp' },
+      { width: 900, height: 302, src: '/lifestyle/kitchen-sinks-category-15-900.webp' },
+    ],
+    src: { full: '/lifestyle/kitchen-sinks-category-15-1800.webp', w900: '/lifestyle/kitchen-sinks-category-15-900.webp' },
     width: 1800,
     height: 604,
     aspect: 2.98,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -734,10 +993,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kohler-bkk-kec-banner',
-    src: { w1800: '/lifestyle/1800/kohler-bkk-kec-banner.webp', w900: '/lifestyle/900/kohler-bkk-kec-banner.webp' },
+    sources: [
+      { width: 1800, height: 591, src: '/lifestyle/kohler-bkk-kec-banner-1800.webp' },
+      { width: 900, height: 296, src: '/lifestyle/kohler-bkk-kec-banner-900.webp' },
+    ],
+    src: { full: '/lifestyle/kohler-bkk-kec-banner-1800.webp', w900: '/lifestyle/kohler-bkk-kec-banner-900.webp' },
     width: 1800,
     height: 591,
     aspect: 3.046,
+    maxWidth: 1800,
     category: 'retail',
     space: 'other',
     alt: {
@@ -747,10 +1011,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kohler-kec-bkk',
-    src: { w1800: '/lifestyle/1800/kohler-kec-bkk.webp', w900: '/lifestyle/900/kohler-kec-bkk.webp' },
+    sources: [
+      { width: 982, height: 490, src: '/lifestyle/kohler-kec-bkk-982.webp' },
+    ],
+    src: { full: '/lifestyle/kohler-kec-bkk-982.webp', w900: '/lifestyle/kohler-kec-bkk-982.webp' },
     width: 982,
     height: 490,
     aspect: 2.004,
+    maxWidth: 982,
     category: 'retail',
     space: 'other',
     alt: {
@@ -760,10 +1028,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kohler-room4-interactive-lightmix-460-x-353-03-reduse-noise',
-    src: { w1800: '/lifestyle/1800/kohler-room4-interactive-lightmix-460-x-353-03-reduse-noise.webp', w900: '/lifestyle/900/kohler-room4-interactive-lightmix-460-x-353-03-reduse-noise.webp' },
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/kohler-room4-interactive-lightmix-460-x-353-03-reduse-noise-460.webp' },
+    ],
+    src: { full: '/lifestyle/kohler-room4-interactive-lightmix-460-x-353-03-reduse-noise-460.webp', w900: '/lifestyle/kohler-room4-interactive-lightmix-460-x-353-03-reduse-noise-460.webp' },
     width: 460,
     height: 353,
     aspect: 1.303,
+    maxWidth: 460,
     category: 'room',
     space: 'bath',
     alt: {
@@ -773,10 +1045,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kohler-service-solution-website-primary-banner-2021',
-    src: { w1800: '/lifestyle/1800/kohler-service-solution-website-primary-banner-2021.webp', w900: '/lifestyle/900/kohler-service-solution-website-primary-banner-2021.webp' },
+    sources: [
+      { width: 1800, height: 604, src: '/lifestyle/kohler-service-solution-website-primary-banner-2021-1800.webp' },
+      { width: 900, height: 302, src: '/lifestyle/kohler-service-solution-website-primary-banner-2021-900.webp' },
+    ],
+    src: { full: '/lifestyle/kohler-service-solution-website-primary-banner-2021-1800.webp', w900: '/lifestyle/kohler-service-solution-website-primary-banner-2021-900.webp' },
     width: 1800,
     height: 604,
     aspect: 2.98,
+    maxWidth: 1800,
     category: 'promo',
     space: 'bath',
     alt: {
@@ -786,10 +1063,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kohlerhome-leap-apac-webbanner-main-desktop-1905x640',
-    src: { w1800: '/lifestyle/1800/kohlerhome-leap-apac-webbanner-main-desktop-1905x640.webp', w900: '/lifestyle/900/kohlerhome-leap-apac-webbanner-main-desktop-1905x640.webp' },
-    width: 1800,
-    height: 605,
-    aspect: 2.975,
+    sources: [
+      { width: 1800, height: 605, src: '/lifestyle/kohlerhome-leap-apac-webbanner-main-desktop-1905x640-1800.webp' },
+      { width: 900, height: 302, src: '/lifestyle/kohlerhome-leap-apac-webbanner-main-desktop-1905x640-900.webp' },
+    ],
+    src: { full: '/lifestyle/kohlerhome-leap-apac-webbanner-main-desktop-1905x640-1800.webp', w900: '/lifestyle/kohlerhome-leap-apac-webbanner-main-desktop-1905x640-900.webp' },
+    width: 1905,
+    height: 640,
+    aspect: 2.977,
+    maxWidth: 1905,
     category: 'promo',
     space: 'bath',
     alt: {
@@ -799,10 +1081,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kohlerhome-milan2026-banner-1905x640',
-    src: { w1800: '/lifestyle/1800/kohlerhome-milan2026-banner-1905x640.webp', w900: '/lifestyle/900/kohlerhome-milan2026-banner-1905x640.webp' },
-    width: 1800,
-    height: 605,
-    aspect: 2.975,
+    sources: [
+      { width: 1800, height: 605, src: '/lifestyle/kohlerhome-milan2026-banner-1905x640-1800.webp' },
+      { width: 900, height: 302, src: '/lifestyle/kohlerhome-milan2026-banner-1905x640-900.webp' },
+    ],
+    src: { full: '/lifestyle/kohlerhome-milan2026-banner-1905x640-1800.webp', w900: '/lifestyle/kohlerhome-milan2026-banner-1905x640-900.webp' },
+    width: 1905,
+    height: 640,
+    aspect: 2.977,
+    maxWidth: 1905,
     category: 'promo',
     space: 'other',
     alt: {
@@ -812,10 +1099,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kohlerhome-milan2026-banner-600x800',
-    src: { w1800: '/lifestyle/1800/kohlerhome-milan2026-banner-600x800.webp', w900: '/lifestyle/900/kohlerhome-milan2026-banner-600x800.webp' },
+    sources: [
+      { width: 600, height: 800, src: '/lifestyle/kohlerhome-milan2026-banner-600x800-600.webp' },
+    ],
+    src: { full: '/lifestyle/kohlerhome-milan2026-banner-600x800-600.webp', w900: '/lifestyle/kohlerhome-milan2026-banner-600x800-600.webp' },
     width: 600,
     height: 800,
     aspect: 0.75,
+    maxWidth: 600,
     category: 'promo',
     space: 'other',
     alt: {
@@ -825,10 +1116,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kohlerhome-website-mobile-banner-kohler-the-immersive-showcase-w1250xh1667px-20260122',
-    src: { w1800: '/lifestyle/1800/kohlerhome-website-mobile-banner-kohler-the-immersive-showcase-w1250xh1667px-20260122.webp', w900: '/lifestyle/900/kohlerhome-website-mobile-banner-kohler-the-immersive-showcase-w1250xh1667px-20260122.webp' },
+    sources: [
+      { width: 600, height: 800, src: '/lifestyle/kohlerhome-website-mobile-banner-kohler-the-immersive-showcase-w1250xh1667px-20260122-600.webp' },
+    ],
+    src: { full: '/lifestyle/kohlerhome-website-mobile-banner-kohler-the-immersive-showcase-w1250xh1667px-20260122-600.webp', w900: '/lifestyle/kohlerhome-website-mobile-banner-kohler-the-immersive-showcase-w1250xh1667px-20260122-600.webp' },
     width: 600,
     height: 800,
     aspect: 0.75,
+    maxWidth: 600,
     category: 'promo',
     space: 'bath',
     alt: {
@@ -838,10 +1133,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'kss-thai-web-secondary-banner',
-    src: { w1800: '/lifestyle/1800/kss-thai-web-secondary-banner.webp', w900: '/lifestyle/900/kss-thai-web-secondary-banner.webp' },
+    sources: [
+      { width: 620, height: 474, src: '/lifestyle/kss-thai-web-secondary-banner-620.webp' },
+    ],
+    src: { full: '/lifestyle/kss-thai-web-secondary-banner-620.webp', w900: '/lifestyle/kss-thai-web-secondary-banner-620.webp' },
     width: 620,
     height: 474,
     aspect: 1.308,
+    maxWidth: 620,
     category: 'people',
     space: 'bath',
     alt: {
@@ -851,10 +1150,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'lithoscat',
-    src: { w1800: '/lifestyle/1800/lithoscat.webp', w900: '/lifestyle/900/lithoscat.webp' },
+    sources: [
+      { width: 463, height: 353, src: '/lifestyle/lithoscat-463.webp' },
+    ],
+    src: { full: '/lifestyle/lithoscat-463.webp', w900: '/lifestyle/lithoscat-463.webp' },
     width: 463,
     height: 353,
     aspect: 1.312,
+    maxWidth: 463,
     category: 'room',
     space: 'bath',
     alt: {
@@ -864,10 +1167,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'malleco-article-banner-968x544',
-    src: { w1800: '/lifestyle/1800/malleco-article-banner-968x544.webp', w900: '/lifestyle/900/malleco-article-banner-968x544.webp' },
+    sources: [
+      { width: 1800, height: 1012, src: '/lifestyle/malleco-article-banner-968x544-1800.webp' },
+      { width: 900, height: 506, src: '/lifestyle/malleco-article-banner-968x544-900.webp' },
+    ],
+    src: { full: '/lifestyle/malleco-article-banner-968x544-1800.webp', w900: '/lifestyle/malleco-article-banner-968x544-900.webp' },
     width: 1800,
     height: 1012,
     aspect: 1.779,
+    maxWidth: 1800,
     category: 'people',
     space: 'kitchen',
     alt: {
@@ -877,10 +1185,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'malleco-article-image-400x255-01',
-    src: { w1800: '/lifestyle/1800/malleco-article-image-400x255-01.webp', w900: '/lifestyle/900/malleco-article-image-400x255-01.webp' },
+    sources: [
+      { width: 802, height: 510, src: '/lifestyle/malleco-article-image-400x255-01-802.webp' },
+    ],
+    src: { full: '/lifestyle/malleco-article-image-400x255-01-802.webp', w900: '/lifestyle/malleco-article-image-400x255-01-802.webp' },
     width: 802,
     height: 510,
     aspect: 1.573,
+    maxWidth: 802,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -890,10 +1202,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'malleco-article-image-400x255-03-1',
-    src: { w1800: '/lifestyle/1800/malleco-article-image-400x255-03-1.webp', w900: '/lifestyle/900/malleco-article-image-400x255-03-1.webp' },
+    sources: [
+      { width: 401, height: 255, src: '/lifestyle/malleco-article-image-400x255-03-1-401.webp' },
+    ],
+    src: { full: '/lifestyle/malleco-article-image-400x255-03-1-401.webp', w900: '/lifestyle/malleco-article-image-400x255-03-1-401.webp' },
     width: 401,
     height: 255,
     aspect: 1.573,
+    maxWidth: 401,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -903,10 +1219,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'malleco-article-image-400x255-04',
-    src: { w1800: '/lifestyle/1800/malleco-article-image-400x255-04.webp', w900: '/lifestyle/900/malleco-article-image-400x255-04.webp' },
+    sources: [
+      { width: 801, height: 510, src: '/lifestyle/malleco-article-image-400x255-04-801.webp' },
+    ],
+    src: { full: '/lifestyle/malleco-article-image-400x255-04-801.webp', w900: '/lifestyle/malleco-article-image-400x255-04-801.webp' },
     width: 801,
     height: 510,
     aspect: 1.571,
+    maxWidth: 801,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -916,10 +1236,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'malleco-article-image-400x255-05',
-    src: { w1800: '/lifestyle/1800/malleco-article-image-400x255-05.webp', w900: '/lifestyle/900/malleco-article-image-400x255-05.webp' },
+    sources: [
+      { width: 800, height: 510, src: '/lifestyle/malleco-article-image-400x255-05-800.webp' },
+    ],
+    src: { full: '/lifestyle/malleco-article-image-400x255-05-800.webp', w900: '/lifestyle/malleco-article-image-400x255-05-800.webp' },
     width: 800,
     height: 510,
     aspect: 1.569,
+    maxWidth: 800,
     category: 'people',
     space: 'kitchen',
     alt: {
@@ -929,10 +1253,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'malleco-article-image-400x255-06',
-    src: { w1800: '/lifestyle/1800/malleco-article-image-400x255-06.webp', w900: '/lifestyle/900/malleco-article-image-400x255-06.webp' },
+    sources: [
+      { width: 803, height: 510, src: '/lifestyle/malleco-article-image-400x255-06-803.webp' },
+    ],
+    src: { full: '/lifestyle/malleco-article-image-400x255-06-803.webp', w900: '/lifestyle/malleco-article-image-400x255-06-803.webp' },
     width: 803,
     height: 510,
     aspect: 1.575,
+    maxWidth: 803,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -942,10 +1270,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'malleco-article-image-460x353-01',
-    src: { w1800: '/lifestyle/1800/malleco-article-image-460x353-01.webp', w900: '/lifestyle/900/malleco-article-image-460x353-01.webp' },
+    sources: [
+      { width: 1800, height: 1382, src: '/lifestyle/malleco-article-image-460x353-01-1800.webp' },
+      { width: 900, height: 691, src: '/lifestyle/malleco-article-image-460x353-01-900.webp' },
+    ],
+    src: { full: '/lifestyle/malleco-article-image-460x353-01-1800.webp', w900: '/lifestyle/malleco-article-image-460x353-01-900.webp' },
     width: 1800,
     height: 1382,
     aspect: 1.302,
+    maxWidth: 1800,
     category: 'people',
     space: 'kitchen',
     alt: {
@@ -955,10 +1288,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'maxispace-01',
-    src: { w1800: '/lifestyle/1800/maxispace-01.webp', w900: '/lifestyle/900/maxispace-01.webp' },
+    sources: [
+      { width: 1800, height: 1252, src: '/lifestyle/maxispace-01-1800.webp' },
+      { width: 900, height: 626, src: '/lifestyle/maxispace-01-900.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-01-1800.webp', w900: '/lifestyle/maxispace-01-900.webp' },
     width: 1800,
     height: 1252,
     aspect: 1.438,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -968,10 +1306,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'maxispace-03a',
-    src: { w1800: '/lifestyle/1800/maxispace-03a.webp', w900: '/lifestyle/900/maxispace-03a.webp' },
+    sources: [
+      { width: 1800, height: 1349, src: '/lifestyle/maxispace-03a-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/maxispace-03a-900.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-03a-1800.webp', w900: '/lifestyle/maxispace-03a-900.webp' },
     width: 1800,
     height: 1349,
     aspect: 1.334,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -981,10 +1324,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'maxispace-03b',
-    src: { w1800: '/lifestyle/1800/maxispace-03b.webp', w900: '/lifestyle/900/maxispace-03b.webp' },
+    sources: [
+      { width: 1800, height: 1362, src: '/lifestyle/maxispace-03b-1800.webp' },
+      { width: 900, height: 681, src: '/lifestyle/maxispace-03b-900.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-03b-1800.webp', w900: '/lifestyle/maxispace-03b-900.webp' },
     width: 1800,
     height: 1362,
     aspect: 1.322,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -994,10 +1342,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'maxispace-secondary-banner-290x232',
-    src: { w1800: '/lifestyle/1800/maxispace-secondary-banner-290x232.webp', w900: '/lifestyle/900/maxispace-secondary-banner-290x232.webp' },
+    sources: [
+      { width: 600, height: 482, src: '/lifestyle/maxispace-secondary-banner-290x232-600.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-secondary-banner-290x232-600.webp', w900: '/lifestyle/maxispace-secondary-banner-290x232-600.webp' },
     width: 600,
     height: 482,
     aspect: 1.245,
+    maxWidth: 600,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1007,10 +1359,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'modulo-bath-and-shower-trim-78024',
-    src: { w1800: '/lifestyle/1800/modulo-bath-and-shower-trim-78024.webp', w900: '/lifestyle/900/modulo-bath-and-shower-trim-78024.webp' },
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/modulo-bath-and-shower-trim-78024-460.webp' },
+    ],
+    src: { full: '/lifestyle/modulo-bath-and-shower-trim-78024-460.webp', w900: '/lifestyle/modulo-bath-and-shower-trim-78024-460.webp' },
     width: 460,
     height: 353,
     aspect: 1.303,
+    maxWidth: 460,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -1020,10 +1376,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'moxie-secondary-banner-460x353',
-    src: { w1800: '/lifestyle/1800/moxie-secondary-banner-460x353.webp', w900: '/lifestyle/900/moxie-secondary-banner-460x353.webp' },
+    sources: [
+      { width: 920, height: 706, src: '/lifestyle/moxie-secondary-banner-460x353-920.webp' },
+    ],
+    src: { full: '/lifestyle/moxie-secondary-banner-460x353-920.webp', w900: '/lifestyle/moxie-secondary-banner-460x353-920.webp' },
     width: 920,
     height: 706,
     aspect: 1.303,
+    maxWidth: 920,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -1033,10 +1393,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'mulu-marriott-resort-spa-sarawak-00',
-    src: { w1800: '/lifestyle/1800/mulu-marriott-resort-spa-sarawak-00.webp', w900: '/lifestyle/900/mulu-marriott-resort-spa-sarawak-00.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/mulu-marriott-resort-spa-sarawak-00-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/mulu-marriott-resort-spa-sarawak-00-900.webp' },
+    ],
+    src: { full: '/lifestyle/mulu-marriott-resort-spa-sarawak-00-1800.webp', w900: '/lifestyle/mulu-marriott-resort-spa-sarawak-00-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'project',
     space: 'bath',
     alt: {
@@ -1046,10 +1411,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'new-mobile-webbannersg-04',
-    src: { w1800: '/lifestyle/1800/new-mobile-webbannersg-04.webp', w900: '/lifestyle/900/new-mobile-webbannersg-04.webp' },
+    sources: [
+      { width: 600, height: 800, src: '/lifestyle/new-mobile-webbannersg-04-600.webp' },
+    ],
+    src: { full: '/lifestyle/new-mobile-webbannersg-04-600.webp', w900: '/lifestyle/new-mobile-webbannersg-04-600.webp' },
     width: 600,
     height: 800,
     aspect: 0.75,
+    maxWidth: 600,
     category: 'promo',
     space: 'bath',
     alt: {
@@ -1059,10 +1428,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'new-mobile-webbannerth-04',
-    src: { w1800: '/lifestyle/1800/new-mobile-webbannerth-04.webp', w900: '/lifestyle/900/new-mobile-webbannerth-04.webp' },
+    sources: [
+      { width: 600, height: 800, src: '/lifestyle/new-mobile-webbannerth-04-600.webp' },
+    ],
+    src: { full: '/lifestyle/new-mobile-webbannerth-04-600.webp', w900: '/lifestyle/new-mobile-webbannerth-04-600.webp' },
     width: 600,
     height: 800,
     aspect: 0.75,
+    maxWidth: 600,
     category: 'promo',
     space: 'bath',
     alt: {
@@ -1072,10 +1445,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'ove-01',
-    src: { w1800: '/lifestyle/1800/ove-01.webp', w900: '/lifestyle/900/ove-01.webp' },
+    sources: [
+      { width: 1800, height: 1713, src: '/lifestyle/ove-01-1800.webp' },
+      { width: 900, height: 857, src: '/lifestyle/ove-01-900.webp' },
+    ],
+    src: { full: '/lifestyle/ove-01-1800.webp', w900: '/lifestyle/ove-01-900.webp' },
     width: 1800,
     height: 1713,
     aspect: 1.051,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1085,10 +1463,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'ove-02',
-    src: { w1800: '/lifestyle/1800/ove-02.webp', w900: '/lifestyle/900/ove-02.webp' },
+    sources: [
+      { width: 1800, height: 2411, src: '/lifestyle/ove-02-1800.webp' },
+      { width: 900, height: 1206, src: '/lifestyle/ove-02-900.webp' },
+    ],
+    src: { full: '/lifestyle/ove-02-1800.webp', w900: '/lifestyle/ove-02-900.webp' },
     width: 1800,
     height: 2411,
     aspect: 0.747,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1098,10 +1481,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'pedestal-2',
-    src: { w1800: '/lifestyle/1800/pedestal-2.webp', w900: '/lifestyle/900/pedestal-2.webp' },
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/pedestal-2-460.webp' },
+    ],
+    src: { full: '/lifestyle/pedestal-2-460.webp', w900: '/lifestyle/pedestal-2-460.webp' },
     width: 460,
     height: 353,
     aspect: 1.303,
+    maxWidth: 460,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -1111,10 +1498,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'portrait-01',
-    src: { w1800: '/lifestyle/1800/portrait-01.webp', w900: '/lifestyle/900/portrait-01.webp' },
+    sources: [
+      { width: 1800, height: 1714, src: '/lifestyle/portrait-01-1800.webp' },
+      { width: 900, height: 857, src: '/lifestyle/portrait-01-900.webp' },
+    ],
+    src: { full: '/lifestyle/portrait-01-1800.webp', w900: '/lifestyle/portrait-01-900.webp' },
     width: 1800,
     height: 1714,
     aspect: 1.05,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1124,10 +1516,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'portrait-02',
-    src: { w1800: '/lifestyle/1800/portrait-02.webp', w900: '/lifestyle/900/portrait-02.webp' },
+    sources: [
+      { width: 1800, height: 1669, src: '/lifestyle/portrait-02-1800.webp' },
+      { width: 900, height: 835, src: '/lifestyle/portrait-02-900.webp' },
+    ],
+    src: { full: '/lifestyle/portrait-02-1800.webp', w900: '/lifestyle/portrait-02-900.webp' },
     width: 1800,
     height: 1669,
     aspect: 1.078,
+    maxWidth: 1800,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -1137,10 +1534,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'prologue',
-    src: { w1800: '/lifestyle/1800/prologue.webp', w900: '/lifestyle/900/prologue.webp' },
+    sources: [
+      { width: 461, height: 353, src: '/lifestyle/prologue-461.webp' },
+    ],
+    src: { full: '/lifestyle/prologue-461.webp', w900: '/lifestyle/prologue-461.webp' },
     width: 461,
     height: 353,
     aspect: 1.306,
+    maxWidth: 461,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1150,10 +1551,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'rectangle-square',
-    src: { w1800: '/lifestyle/1800/rectangle-square.webp', w900: '/lifestyle/900/rectangle-square.webp' },
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/rectangle-square-460.webp' },
+    ],
+    src: { full: '/lifestyle/rectangle-square-460.webp', w900: '/lifestyle/rectangle-square-460.webp' },
     width: 460,
     height: 353,
     aspect: 1.303,
+    maxWidth: 460,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -1163,10 +1568,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'rev-360-new-webbanner-1905x640',
-    src: { w1800: '/lifestyle/1800/rev-360-new-webbanner-1905x640.webp', w900: '/lifestyle/900/rev-360-new-webbanner-1905x640.webp' },
+    sources: [
+      { width: 1800, height: 605, src: '/lifestyle/rev-360-new-webbanner-1905x640-1800.webp' },
+      { width: 900, height: 303, src: '/lifestyle/rev-360-new-webbanner-1905x640-900.webp' },
+    ],
+    src: { full: '/lifestyle/rev-360-new-webbanner-1905x640-1800.webp', w900: '/lifestyle/rev-360-new-webbanner-1905x640-900.webp' },
     width: 1800,
     height: 605,
     aspect: 2.975,
+    maxWidth: 1800,
     category: 'promo',
     space: 'bath',
     alt: {
@@ -1176,10 +1586,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'rev-360-webbanner-600x800',
-    src: { w1800: '/lifestyle/1800/rev-360-webbanner-600x800.webp', w900: '/lifestyle/900/rev-360-webbanner-600x800.webp' },
+    sources: [
+      { width: 1253, height: 1667, src: '/lifestyle/rev-360-webbanner-600x800-1253.webp' },
+      { width: 900, height: 1197, src: '/lifestyle/rev-360-webbanner-600x800-900.webp' },
+    ],
+    src: { full: '/lifestyle/rev-360-webbanner-600x800-1253.webp', w900: '/lifestyle/rev-360-webbanner-600x800-900.webp' },
     width: 1253,
     height: 1667,
     aspect: 0.752,
+    maxWidth: 1253,
     category: 'promo',
     space: 'bath',
     alt: {
@@ -1189,10 +1604,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'secandary-banner-rev360',
-    src: { w1800: '/lifestyle/1800/secandary-banner-rev360.webp', w900: '/lifestyle/900/secandary-banner-rev360.webp' },
+    sources: [
+      { width: 921, height: 706, src: '/lifestyle/secandary-banner-rev360-921.webp' },
+    ],
+    src: { full: '/lifestyle/secandary-banner-rev360-921.webp', w900: '/lifestyle/secandary-banner-rev360-921.webp' },
     width: 921,
     height: 706,
     aspect: 1.305,
+    maxWidth: 921,
     category: 'people',
     space: 'bath',
     alt: {
@@ -1202,10 +1621,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'seconarybanner-statement-suit',
-    src: { w1800: '/lifestyle/1800/seconarybanner-statement-suit.webp', w900: '/lifestyle/900/seconarybanner-statement-suit.webp' },
+    sources: [
+      { width: 960, height: 736, src: '/lifestyle/seconarybanner-statement-suit-960.webp' },
+    ],
+    src: { full: '/lifestyle/seconarybanner-statement-suit-960.webp', w900: '/lifestyle/seconarybanner-statement-suit-960.webp' },
     width: 960,
     height: 736,
     aspect: 1.304,
+    maxWidth: 960,
     category: 'promo',
     space: 'other',
     alt: {
@@ -1215,10 +1638,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'self-rimming',
-    src: { w1800: '/lifestyle/1800/self-rimming.webp', w900: '/lifestyle/900/self-rimming.webp' },
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/self-rimming-460.webp' },
+    ],
+    src: { full: '/lifestyle/self-rimming-460.webp', w900: '/lifestyle/self-rimming-460.webp' },
     width: 460,
     height: 353,
     aspect: 1.303,
+    maxWidth: 460,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -1228,10 +1655,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'shopping-guide-faucet-innovation',
-    src: { w1800: '/lifestyle/1800/shopping-guide-faucet-innovation.webp', w900: '/lifestyle/900/shopping-guide-faucet-innovation.webp' },
+    sources: [
+      { width: 1800, height: 604, src: '/lifestyle/shopping-guide-faucet-innovation-1800.webp' },
+      { width: 900, height: 302, src: '/lifestyle/shopping-guide-faucet-innovation-900.webp' },
+    ],
+    src: { full: '/lifestyle/shopping-guide-faucet-innovation-1800.webp', w900: '/lifestyle/shopping-guide-faucet-innovation-900.webp' },
     width: 1800,
     height: 604,
     aspect: 2.98,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1241,10 +1673,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'shopping-guide-kitchen-faucet',
-    src: { w1800: '/lifestyle/1800/shopping-guide-kitchen-faucet.webp', w900: '/lifestyle/900/shopping-guide-kitchen-faucet.webp' },
+    sources: [
+      { width: 1800, height: 604, src: '/lifestyle/shopping-guide-kitchen-faucet-1800.webp' },
+      { width: 900, height: 302, src: '/lifestyle/shopping-guide-kitchen-faucet-900.webp' },
+    ],
+    src: { full: '/lifestyle/shopping-guide-kitchen-faucet-1800.webp', w900: '/lifestyle/shopping-guide-kitchen-faucet-900.webp' },
     width: 1800,
     height: 604,
     aspect: 2.98,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1254,10 +1691,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'sofitel-bali-nusa-dua-beach-resort-bali-00',
-    src: { w1800: '/lifestyle/1800/sofitel-bali-nusa-dua-beach-resort-bali-00.webp', w900: '/lifestyle/900/sofitel-bali-nusa-dua-beach-resort-bali-00.webp' },
+    sources: [
+      { width: 902, height: 600, src: '/lifestyle/sofitel-bali-nusa-dua-beach-resort-bali-00-902.webp' },
+    ],
+    src: { full: '/lifestyle/sofitel-bali-nusa-dua-beach-resort-bali-00-902.webp', w900: '/lifestyle/sofitel-bali-nusa-dua-beach-resort-bali-00-902.webp' },
     width: 902,
     height: 600,
     aspect: 1.503,
+    maxWidth: 902,
     category: 'project',
     space: 'bath',
     alt: {
@@ -1267,10 +1708,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'solaire-resort-casino-manila-00',
-    src: { w1800: '/lifestyle/1800/solaire-resort-casino-manila-00.webp', w900: '/lifestyle/900/solaire-resort-casino-manila-00.webp' },
+    sources: [
+      { width: 1002, height: 690, src: '/lifestyle/solaire-resort-casino-manila-00-1002.webp' },
+    ],
+    src: { full: '/lifestyle/solaire-resort-casino-manila-00-1002.webp', w900: '/lifestyle/solaire-resort-casino-manila-00-1002.webp' },
     width: 1002,
     height: 690,
     aspect: 1.452,
+    maxWidth: 1002,
     category: 'project',
     space: 'bath',
     alt: {
@@ -1280,10 +1725,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'taut-kitchen-faucet',
-    src: { w1800: '/lifestyle/1800/taut-kitchen-faucet.webp', w900: '/lifestyle/900/taut-kitchen-faucet.webp' },
+    sources: [
+      { width: 664, height: 510, src: '/lifestyle/taut-kitchen-faucet-664.webp' },
+    ],
+    src: { full: '/lifestyle/taut-kitchen-faucet-664.webp', w900: '/lifestyle/taut-kitchen-faucet-664.webp' },
     width: 664,
     height: 510,
     aspect: 1.302,
+    maxWidth: 664,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1293,10 +1742,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'th-mobile-banner-updated-new',
-    src: { w1800: '/lifestyle/1800/th-mobile-banner-updated-new.webp', w900: '/lifestyle/900/th-mobile-banner-updated-new.webp' },
+    sources: [
+      { width: 601, height: 800, src: '/lifestyle/th-mobile-banner-updated-new-601.webp' },
+    ],
+    src: { full: '/lifestyle/th-mobile-banner-updated-new-601.webp', w900: '/lifestyle/th-mobile-banner-updated-new-601.webp' },
     width: 601,
     height: 800,
     aspect: 0.751,
+    maxWidth: 601,
     category: 'promo',
     space: 'other',
     alt: {
@@ -1306,10 +1759,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'the-grand-ho-tram-strip-bariavungtau-00',
-    src: { w1800: '/lifestyle/1800/the-grand-ho-tram-strip-bariavungtau-00.webp', w900: '/lifestyle/900/the-grand-ho-tram-strip-bariavungtau-00.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/the-grand-ho-tram-strip-bariavungtau-00-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/the-grand-ho-tram-strip-bariavungtau-00-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-grand-ho-tram-strip-bariavungtau-00-1800.webp', w900: '/lifestyle/the-grand-ho-tram-strip-bariavungtau-00-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'project',
     space: 'bath',
     alt: {
@@ -1319,10 +1777,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'the-lin-taichung-02',
-    src: { w1800: '/lifestyle/1800/the-lin-taichung-02.webp', w900: '/lifestyle/900/the-lin-taichung-02.webp' },
+    sources: [
+      { width: 1800, height: 1202, src: '/lifestyle/the-lin-taichung-02-1800.webp' },
+      { width: 900, height: 601, src: '/lifestyle/the-lin-taichung-02-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-02-1800.webp', w900: '/lifestyle/the-lin-taichung-02-900.webp' },
     width: 1800,
     height: 1202,
     aspect: 1.498,
+    maxWidth: 1800,
     category: 'project',
     space: 'bath',
     alt: {
@@ -1332,10 +1795,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'transitional-kitchen-style',
-    src: { w1800: '/lifestyle/1800/transitional-kitchen-style.webp', w900: '/lifestyle/900/transitional-kitchen-style.webp' },
+    sources: [
+      { width: 461, height: 353, src: '/lifestyle/transitional-kitchen-style-461.webp' },
+    ],
+    src: { full: '/lifestyle/transitional-kitchen-style-461.webp', w900: '/lifestyle/transitional-kitchen-style-461.webp' },
     width: 461,
     height: 353,
     aspect: 1.306,
+    maxWidth: 461,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -1345,10 +1812,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'unique',
-    src: { w1800: '/lifestyle/1800/unique.webp', w900: '/lifestyle/900/unique.webp' },
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/unique-460.webp' },
+    ],
+    src: { full: '/lifestyle/unique-460.webp', w900: '/lifestyle/unique-460.webp' },
     width: 460,
     height: 353,
     aspect: 1.303,
+    maxWidth: 460,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -1358,10 +1829,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'urbanity-shower-column-23861',
-    src: { w1800: '/lifestyle/1800/urbanity-shower-column-23861.webp', w900: '/lifestyle/900/urbanity-shower-column-23861.webp' },
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/urbanity-shower-column-23861-460.webp' },
+    ],
+    src: { full: '/lifestyle/urbanity-shower-column-23861-460.webp', w900: '/lifestyle/urbanity-shower-column-23861-460.webp' },
     width: 460,
     height: 353,
     aspect: 1.303,
+    maxWidth: 460,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -1371,10 +1846,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'vanity',
-    src: { w1800: '/lifestyle/1800/vanity.webp', w900: '/lifestyle/900/vanity.webp' },
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/vanity-460.webp' },
+    ],
+    src: { full: '/lifestyle/vanity-460.webp', w900: '/lifestyle/vanity-460.webp' },
     width: 460,
     height: 353,
     aspect: 1.303,
+    maxWidth: 460,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -1384,10 +1863,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'visual-showroom-secondary-banner',
-    src: { w1800: '/lifestyle/1800/visual-showroom-secondary-banner.webp', w900: '/lifestyle/900/visual-showroom-secondary-banner.webp' },
+    sources: [
+      { width: 294, height: 223, src: '/lifestyle/visual-showroom-secondary-banner-294.webp' },
+    ],
+    src: { full: '/lifestyle/visual-showroom-secondary-banner-294.webp', w900: '/lifestyle/visual-showroom-secondary-banner-294.webp' },
     width: 294,
     height: 223,
     aspect: 1.318,
+    maxWidth: 294,
     category: 'retail',
     space: 'other',
     alt: {
@@ -1397,10 +1880,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'website-banner-selling-points',
-    src: { w1800: '/lifestyle/1800/website-banner-selling-points.webp', w900: '/lifestyle/900/website-banner-selling-points.webp' },
+    sources: [
+      { width: 1800, height: 605, src: '/lifestyle/website-banner-selling-points-1800.webp' },
+      { width: 900, height: 303, src: '/lifestyle/website-banner-selling-points-900.webp' },
+    ],
+    src: { full: '/lifestyle/website-banner-selling-points-1800.webp', w900: '/lifestyle/website-banner-selling-points-900.webp' },
     width: 1800,
     height: 605,
     aspect: 2.975,
+    maxWidth: 1800,
     category: 'promo',
     space: 'other',
     alt: {
@@ -1410,10 +1898,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa08069-rgb',
-    src: { w1800: '/lifestyle/1800/zaa08069-rgb.webp', w900: '/lifestyle/900/zaa08069-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1478, src: '/lifestyle/zaa08069-rgb-1800.webp' },
+      { width: 900, height: 739, src: '/lifestyle/zaa08069-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa08069-rgb-1800.webp', w900: '/lifestyle/zaa08069-rgb-900.webp' },
     width: 1800,
     height: 1478,
     aspect: 1.218,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1423,10 +1916,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa08191-rgb',
-    src: { w1800: '/lifestyle/1800/zaa08191-rgb.webp', w900: '/lifestyle/900/zaa08191-rgb.webp' },
+    sources: [
+      { width: 1800, height: 2399, src: '/lifestyle/zaa08191-rgb-1800.webp' },
+      { width: 900, height: 1200, src: '/lifestyle/zaa08191-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa08191-rgb-1800.webp', w900: '/lifestyle/zaa08191-rgb-900.webp' },
     width: 1800,
     height: 2399,
     aspect: 0.75,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1436,10 +1934,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa08493',
-    src: { w1800: '/lifestyle/1800/zaa08493.webp', w900: '/lifestyle/900/zaa08493.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zaa08493-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zaa08493-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa08493-1800.webp', w900: '/lifestyle/zaa08493-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -1449,10 +1952,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa19202-43',
-    src: { w1800: '/lifestyle/1800/zaa19202-43.webp', w900: '/lifestyle/900/zaa19202-43.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zaa19202-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zaa19202-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa19202-43-1800.webp', w900: '/lifestyle/zaa19202-43-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'people',
     space: 'bath',
     alt: {
@@ -1462,10 +1970,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa19767-43',
-    src: { w1800: '/lifestyle/1800/zaa19767-43.webp', w900: '/lifestyle/900/zaa19767-43.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zaa19767-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zaa19767-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa19767-43-1800.webp', w900: '/lifestyle/zaa19767-43-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -1475,10 +1988,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa49024',
-    src: { w1800: '/lifestyle/1800/zaa49024.webp', w900: '/lifestyle/900/zaa49024.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zaa49024-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zaa49024-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa49024-1800.webp', w900: '/lifestyle/zaa49024-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1488,10 +2006,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa49059',
-    src: { w1800: '/lifestyle/1800/zaa49059.webp', w900: '/lifestyle/900/zaa49059.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zaa49059-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zaa49059-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa49059-1800.webp', w900: '/lifestyle/zaa49059-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1501,10 +2024,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa49176',
-    src: { w1800: '/lifestyle/1800/zaa49176.webp', w900: '/lifestyle/900/zaa49176.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zaa49176-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zaa49176-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa49176-1800.webp', w900: '/lifestyle/zaa49176-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1514,10 +2042,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa88794-rgb',
-    src: { w1800: '/lifestyle/1800/zaa88794-rgb.webp', w900: '/lifestyle/900/zaa88794-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1410, src: '/lifestyle/zaa88794-rgb-1800.webp' },
+      { width: 900, height: 705, src: '/lifestyle/zaa88794-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa88794-rgb-1800.webp', w900: '/lifestyle/zaa88794-rgb-900.webp' },
     width: 1800,
     height: 1410,
     aspect: 1.277,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1527,10 +2060,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa88796-rgb',
-    src: { w1800: '/lifestyle/1800/zaa88796-rgb.webp', w900: '/lifestyle/900/zaa88796-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1386, src: '/lifestyle/zaa88796-rgb-1800.webp' },
+      { width: 900, height: 693, src: '/lifestyle/zaa88796-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa88796-rgb-1800.webp', w900: '/lifestyle/zaa88796-rgb-900.webp' },
     width: 1800,
     height: 1386,
     aspect: 1.299,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1540,10 +2078,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa90068-rgb',
-    src: { w1800: '/lifestyle/1800/zaa90068-rgb.webp', w900: '/lifestyle/900/zaa90068-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1351, src: '/lifestyle/zaa90068-rgb-1800.webp' },
+      { width: 900, height: 676, src: '/lifestyle/zaa90068-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa90068-rgb-1800.webp', w900: '/lifestyle/zaa90068-rgb-900.webp' },
     width: 1800,
     height: 1351,
     aspect: 1.332,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1553,10 +2096,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa98109',
-    src: { w1800: '/lifestyle/1800/zaa98109.webp', w900: '/lifestyle/900/zaa98109.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zaa98109-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zaa98109-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa98109-1800.webp', w900: '/lifestyle/zaa98109-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -1566,10 +2114,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zaa99845-rgb',
-    src: { w1800: '/lifestyle/1800/zaa99845-rgb.webp', w900: '/lifestyle/900/zaa99845-rgb.webp' },
+    sources: [
+      { width: 1800, height: 2002, src: '/lifestyle/zaa99845-rgb-1800.webp' },
+      { width: 900, height: 1001, src: '/lifestyle/zaa99845-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa99845-rgb-1800.webp', w900: '/lifestyle/zaa99845-rgb-900.webp' },
     width: 1800,
     height: 2002,
     aspect: 0.899,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1579,10 +2132,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab21360-rgb',
-    src: { w1800: '/lifestyle/1800/zab21360-rgb.webp', w900: '/lifestyle/900/zab21360-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1304, src: '/lifestyle/zab21360-rgb-1800.webp' },
+      { width: 900, height: 652, src: '/lifestyle/zab21360-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab21360-rgb-1800.webp', w900: '/lifestyle/zab21360-rgb-900.webp' },
     width: 1800,
     height: 1304,
     aspect: 1.38,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1592,10 +2150,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab27056-rgb',
-    src: { w1800: '/lifestyle/1800/zab27056-rgb.webp', w900: '/lifestyle/900/zab27056-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab27056-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab27056-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab27056-rgb-1800.webp', w900: '/lifestyle/zab27056-rgb-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1605,10 +2168,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab27997-rgb',
-    src: { w1800: '/lifestyle/1800/zab27997-rgb.webp', w900: '/lifestyle/900/zab27997-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab27997-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab27997-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab27997-rgb-1800.webp', w900: '/lifestyle/zab27997-rgb-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1618,10 +2186,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab28128-rgb',
-    src: { w1800: '/lifestyle/1800/zab28128-rgb.webp', w900: '/lifestyle/900/zab28128-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab28128-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab28128-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab28128-rgb-1800.webp', w900: '/lifestyle/zab28128-rgb-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1631,10 +2204,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab31995-rgb',
-    src: { w1800: '/lifestyle/1800/zab31995-rgb.webp', w900: '/lifestyle/900/zab31995-rgb.webp' },
+    sources: [
+      { width: 1800, height: 2285, src: '/lifestyle/zab31995-rgb-1800.webp' },
+      { width: 900, height: 1143, src: '/lifestyle/zab31995-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab31995-rgb-1800.webp', w900: '/lifestyle/zab31995-rgb-900.webp' },
     width: 1800,
     height: 2285,
     aspect: 0.788,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1644,10 +2222,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab37177-rgb',
-    src: { w1800: '/lifestyle/1800/zab37177-rgb.webp', w900: '/lifestyle/900/zab37177-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1592, src: '/lifestyle/zab37177-rgb-1800.webp' },
+      { width: 900, height: 796, src: '/lifestyle/zab37177-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab37177-rgb-1800.webp', w900: '/lifestyle/zab37177-rgb-900.webp' },
     width: 1800,
     height: 1592,
     aspect: 1.131,
+    maxWidth: 1800,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -1657,10 +2240,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab42431-rgb',
-    src: { w1800: '/lifestyle/1800/zab42431-rgb.webp', w900: '/lifestyle/900/zab42431-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zab42431-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zab42431-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab42431-rgb-1800.webp', w900: '/lifestyle/zab42431-rgb-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1670,10 +2258,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab44801-rgb',
-    src: { w1800: '/lifestyle/1800/zab44801-rgb.webp', w900: '/lifestyle/900/zab44801-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zab44801-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zab44801-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab44801-rgb-1800.webp', w900: '/lifestyle/zab44801-rgb-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1683,10 +2276,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab57943-rgb',
-    src: { w1800: '/lifestyle/1800/zab57943-rgb.webp', w900: '/lifestyle/900/zab57943-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab57943-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab57943-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab57943-rgb-1800.webp', w900: '/lifestyle/zab57943-rgb-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1696,10 +2294,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab59998-1800x800-hollywoodhills',
-    src: { w1800: '/lifestyle/1800/zab59998-1800x800-hollywoodhills.webp', w900: '/lifestyle/900/zab59998-1800x800-hollywoodhills.webp' },
+    sources: [
+      { width: 1800, height: 800, src: '/lifestyle/zab59998-1800x800-hollywoodhills-1800.webp' },
+      { width: 900, height: 400, src: '/lifestyle/zab59998-1800x800-hollywoodhills-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab59998-1800x800-hollywoodhills-1800.webp', w900: '/lifestyle/zab59998-1800x800-hollywoodhills-900.webp' },
     width: 1800,
     height: 800,
     aspect: 2.25,
+    maxWidth: 1800,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -1709,10 +2312,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab60076-rgb',
-    src: { w1800: '/lifestyle/1800/zab60076-rgb.webp', w900: '/lifestyle/900/zab60076-rgb.webp' },
+    sources: [
+      { width: 1800, height: 900, src: '/lifestyle/zab60076-rgb-1800.webp' },
+      { width: 900, height: 450, src: '/lifestyle/zab60076-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab60076-rgb-1800.webp', w900: '/lifestyle/zab60076-rgb-900.webp' },
     width: 1800,
     height: 900,
     aspect: 2,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1722,10 +2330,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab64028-1800x800',
-    src: { w1800: '/lifestyle/1800/zab64028-1800x800.webp', w900: '/lifestyle/900/zab64028-1800x800.webp' },
+    sources: [
+      { width: 1800, height: 800, src: '/lifestyle/zab64028-1800x800-1800.webp' },
+      { width: 900, height: 400, src: '/lifestyle/zab64028-1800x800-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab64028-1800x800-1800.webp', w900: '/lifestyle/zab64028-1800x800-900.webp' },
     width: 1800,
     height: 800,
     aspect: 2.25,
+    maxWidth: 1800,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -1735,10 +2348,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab64051-rgb',
-    src: { w1800: '/lifestyle/1800/zab64051-rgb.webp', w900: '/lifestyle/900/zab64051-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zab64051-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zab64051-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab64051-rgb-1800.webp', w900: '/lifestyle/zab64051-rgb-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1748,10 +2366,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab65968-rgb',
-    src: { w1800: '/lifestyle/1800/zab65968-rgb.webp', w900: '/lifestyle/900/zab65968-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1238, src: '/lifestyle/zab65968-rgb-1800.webp' },
+      { width: 900, height: 619, src: '/lifestyle/zab65968-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab65968-rgb-1800.webp', w900: '/lifestyle/zab65968-rgb-900.webp' },
     width: 1800,
     height: 1238,
     aspect: 1.454,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1761,10 +2384,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab68492-rgb',
-    src: { w1800: '/lifestyle/1800/zab68492-rgb.webp', w900: '/lifestyle/900/zab68492-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1081, src: '/lifestyle/zab68492-rgb-1800.webp' },
+      { width: 900, height: 541, src: '/lifestyle/zab68492-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab68492-rgb-1800.webp', w900: '/lifestyle/zab68492-rgb-900.webp' },
     width: 1800,
     height: 1081,
     aspect: 1.665,
+    maxWidth: 1800,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -1774,10 +2402,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab79741-rgb',
-    src: { w1800: '/lifestyle/1800/zab79741-rgb.webp', w900: '/lifestyle/900/zab79741-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zab79741-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zab79741-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab79741-rgb-1800.webp', w900: '/lifestyle/zab79741-rgb-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1787,10 +2420,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab79771-rgb',
-    src: { w1800: '/lifestyle/1800/zab79771-rgb.webp', w900: '/lifestyle/900/zab79771-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zab79771-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zab79771-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab79771-rgb-1800.webp', w900: '/lifestyle/zab79771-rgb-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1800,10 +2438,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab82163-rgb',
-    src: { w1800: '/lifestyle/1800/zab82163-rgb.webp', w900: '/lifestyle/900/zab82163-rgb.webp' },
+    sources: [
+      { width: 1800, height: 2401, src: '/lifestyle/zab82163-rgb-1800.webp' },
+      { width: 900, height: 1201, src: '/lifestyle/zab82163-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab82163-rgb-1800.webp', w900: '/lifestyle/zab82163-rgb-900.webp' },
     width: 1800,
     height: 2401,
     aspect: 0.75,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1813,10 +2456,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab82168-rgb',
-    src: { w1800: '/lifestyle/1800/zab82168-rgb.webp', w900: '/lifestyle/900/zab82168-rgb.webp' },
+    sources: [
+      { width: 1800, height: 2401, src: '/lifestyle/zab82168-rgb-1800.webp' },
+      { width: 900, height: 1201, src: '/lifestyle/zab82168-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab82168-rgb-1800.webp', w900: '/lifestyle/zab82168-rgb-900.webp' },
     width: 1800,
     height: 2401,
     aspect: 0.75,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1826,10 +2474,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab82176-rgb',
-    src: { w1800: '/lifestyle/1800/zab82176-rgb.webp', w900: '/lifestyle/900/zab82176-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab82176-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab82176-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab82176-rgb-1800.webp', w900: '/lifestyle/zab82176-rgb-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -1839,10 +2492,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab85993-rgb',
-    src: { w1800: '/lifestyle/1800/zab85993-rgb.webp', w900: '/lifestyle/900/zab85993-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab85993-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab85993-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab85993-rgb-1800.webp', w900: '/lifestyle/zab85993-rgb-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1852,10 +2510,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab86207-rgb',
-    src: { w1800: '/lifestyle/1800/zab86207-rgb.webp', w900: '/lifestyle/900/zab86207-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab86207-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab86207-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab86207-rgb-1800.webp', w900: '/lifestyle/zab86207-rgb-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1865,10 +2528,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab86829-1800x800',
-    src: { w1800: '/lifestyle/1800/zab86829-1800x800.webp', w900: '/lifestyle/900/zab86829-1800x800.webp' },
+    sources: [
+      { width: 1800, height: 800, src: '/lifestyle/zab86829-1800x800-1800.webp' },
+      { width: 900, height: 400, src: '/lifestyle/zab86829-1800x800-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab86829-1800x800-1800.webp', w900: '/lifestyle/zab86829-1800x800-900.webp' },
     width: 1800,
     height: 800,
     aspect: 2.25,
+    maxWidth: 1800,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -1878,10 +2546,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab91996-rgb',
-    src: { w1800: '/lifestyle/1800/zab91996-rgb.webp', w900: '/lifestyle/900/zab91996-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1239, src: '/lifestyle/zab91996-rgb-1800.webp' },
+      { width: 900, height: 620, src: '/lifestyle/zab91996-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab91996-rgb-1800.webp', w900: '/lifestyle/zab91996-rgb-900.webp' },
     width: 1800,
     height: 1239,
     aspect: 1.453,
+    maxWidth: 1800,
     category: 'room',
     space: 'kitchen',
     alt: {
@@ -1891,10 +2564,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab95042-rgb',
-    src: { w1800: '/lifestyle/1800/zab95042-rgb.webp', w900: '/lifestyle/900/zab95042-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1251, src: '/lifestyle/zab95042-rgb-1800.webp' },
+      { width: 900, height: 626, src: '/lifestyle/zab95042-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab95042-rgb-1800.webp', w900: '/lifestyle/zab95042-rgb-900.webp' },
     width: 1800,
     height: 1251,
     aspect: 1.439,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1904,10 +2582,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab95711-rgb',
-    src: { w1800: '/lifestyle/1800/zab95711-rgb.webp', w900: '/lifestyle/900/zab95711-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1518, src: '/lifestyle/zab95711-rgb-1800.webp' },
+      { width: 900, height: 759, src: '/lifestyle/zab95711-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab95711-rgb-1800.webp', w900: '/lifestyle/zab95711-rgb-900.webp' },
     width: 1800,
     height: 1518,
     aspect: 1.186,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1917,10 +2600,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zab97592-rgb',
-    src: { w1800: '/lifestyle/1800/zab97592-rgb.webp', w900: '/lifestyle/900/zab97592-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zab97592-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zab97592-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab97592-rgb-1800.webp', w900: '/lifestyle/zab97592-rgb-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1930,10 +2618,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac00286-rgb',
-    src: { w1800: '/lifestyle/1800/zac00286-rgb.webp', w900: '/lifestyle/900/zac00286-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1264, src: '/lifestyle/zac00286-rgb-1800.webp' },
+      { width: 900, height: 632, src: '/lifestyle/zac00286-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac00286-rgb-1800.webp', w900: '/lifestyle/zac00286-rgb-900.webp' },
     width: 1800,
     height: 1264,
     aspect: 1.424,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1943,10 +2636,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac00363-rgb',
-    src: { w1800: '/lifestyle/1800/zac00363-rgb.webp', w900: '/lifestyle/900/zac00363-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zac00363-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zac00363-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac00363-rgb-1800.webp', w900: '/lifestyle/zac00363-rgb-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -1956,10 +2654,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac01390-rgb',
-    src: { w1800: '/lifestyle/1800/zac01390-rgb.webp', w900: '/lifestyle/900/zac01390-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1381, src: '/lifestyle/zac01390-rgb-1800.webp' },
+      { width: 900, height: 691, src: '/lifestyle/zac01390-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac01390-rgb-1800.webp', w900: '/lifestyle/zac01390-rgb-900.webp' },
     width: 1800,
     height: 1381,
     aspect: 1.303,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1969,10 +2672,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac01424-rgb',
-    src: { w1800: '/lifestyle/1800/zac01424-rgb.webp', w900: '/lifestyle/900/zac01424-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1217, src: '/lifestyle/zac01424-rgb-1800.webp' },
+      { width: 900, height: 609, src: '/lifestyle/zac01424-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac01424-rgb-1800.webp', w900: '/lifestyle/zac01424-rgb-900.webp' },
     width: 1800,
     height: 1217,
     aspect: 1.479,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1982,10 +2690,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac01571-rgb',
-    src: { w1800: '/lifestyle/1800/zac01571-rgb.webp', w900: '/lifestyle/900/zac01571-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1334, src: '/lifestyle/zac01571-rgb-1800.webp' },
+      { width: 900, height: 667, src: '/lifestyle/zac01571-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac01571-rgb-1800.webp', w900: '/lifestyle/zac01571-rgb-900.webp' },
     width: 1800,
     height: 1334,
     aspect: 1.349,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -1995,10 +2708,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac01577-rgb',
-    src: { w1800: '/lifestyle/1800/zac01577-rgb.webp', w900: '/lifestyle/900/zac01577-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1514, src: '/lifestyle/zac01577-rgb-1800.webp' },
+      { width: 900, height: 757, src: '/lifestyle/zac01577-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac01577-rgb-1800.webp', w900: '/lifestyle/zac01577-rgb-900.webp' },
     width: 1800,
     height: 1514,
     aspect: 1.189,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -2008,10 +2726,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac02157-rgb',
-    src: { w1800: '/lifestyle/1800/zac02157-rgb.webp', w900: '/lifestyle/900/zac02157-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zac02157-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zac02157-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac02157-rgb-1800.webp', w900: '/lifestyle/zac02157-rgb-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -2021,10 +2744,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac02254-rgb',
-    src: { w1800: '/lifestyle/1800/zac02254-rgb.webp', w900: '/lifestyle/900/zac02254-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zac02254-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zac02254-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac02254-rgb-1800.webp', w900: '/lifestyle/zac02254-rgb-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -2034,10 +2762,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac02930-rgb',
-    src: { w1800: '/lifestyle/1800/zac02930-rgb.webp', w900: '/lifestyle/900/zac02930-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zac02930-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zac02930-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac02930-rgb-1800.webp', w900: '/lifestyle/zac02930-rgb-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'people',
     space: 'kitchen',
     alt: {
@@ -2047,10 +2780,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac06644-rgb',
-    src: { w1800: '/lifestyle/1800/zac06644-rgb.webp', w900: '/lifestyle/900/zac06644-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1390, src: '/lifestyle/zac06644-rgb-1800.webp' },
+      { width: 900, height: 695, src: '/lifestyle/zac06644-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac06644-rgb-1800.webp', w900: '/lifestyle/zac06644-rgb-900.webp' },
     width: 1800,
     height: 1390,
     aspect: 1.295,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -2060,10 +2798,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac09774-rgb',
-    src: { w1800: '/lifestyle/1800/zac09774-rgb.webp', w900: '/lifestyle/900/zac09774-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zac09774-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zac09774-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac09774-rgb-1800.webp', w900: '/lifestyle/zac09774-rgb-900.webp' },
     width: 1800,
     height: 1200,
     aspect: 1.5,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -2073,10 +2816,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac11288-rgb',
-    src: { w1800: '/lifestyle/1800/zac11288-rgb.webp', w900: '/lifestyle/900/zac11288-rgb.webp' },
+    sources: [
+      { width: 1600, height: 2400, src: '/lifestyle/zac11288-rgb-1600.webp' },
+      { width: 900, height: 1350, src: '/lifestyle/zac11288-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac11288-rgb-1600.webp', w900: '/lifestyle/zac11288-rgb-900.webp' },
     width: 1600,
     height: 2400,
     aspect: 0.667,
+    maxWidth: 1600,
     category: 'people',
     space: 'bath',
     alt: {
@@ -2086,10 +2834,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac15295-rgb',
-    src: { w1800: '/lifestyle/1800/zac15295-rgb.webp', w900: '/lifestyle/900/zac15295-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1646, src: '/lifestyle/zac15295-rgb-1800.webp' },
+      { width: 900, height: 823, src: '/lifestyle/zac15295-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac15295-rgb-1800.webp', w900: '/lifestyle/zac15295-rgb-900.webp' },
     width: 1800,
     height: 1646,
     aspect: 1.094,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -2099,10 +2852,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac16296-rgb',
-    src: { w1800: '/lifestyle/1800/zac16296-rgb.webp', w900: '/lifestyle/900/zac16296-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1355, src: '/lifestyle/zac16296-rgb-1800.webp' },
+      { width: 900, height: 678, src: '/lifestyle/zac16296-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac16296-rgb-1800.webp', w900: '/lifestyle/zac16296-rgb-900.webp' },
     width: 1800,
     height: 1355,
     aspect: 1.328,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -2112,10 +2870,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac17332-rgb',
-    src: { w1800: '/lifestyle/1800/zac17332-rgb.webp', w900: '/lifestyle/900/zac17332-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zac17332-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zac17332-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac17332-rgb-1800.webp', w900: '/lifestyle/zac17332-rgb-900.webp' },
     width: 1800,
     height: 1350,
     aspect: 1.333,
+    maxWidth: 1800,
     category: 'room',
     space: 'bath',
     alt: {
@@ -2125,10 +2888,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac17358-rgb',
-    src: { w1800: '/lifestyle/1800/zac17358-rgb.webp', w900: '/lifestyle/900/zac17358-rgb.webp' },
+    sources: [
+      { width: 1800, height: 2401, src: '/lifestyle/zac17358-rgb-1800.webp' },
+      { width: 900, height: 1201, src: '/lifestyle/zac17358-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac17358-rgb-1800.webp', w900: '/lifestyle/zac17358-rgb-900.webp' },
     width: 1800,
     height: 2401,
     aspect: 0.75,
+    maxWidth: 1800,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -2138,10 +2906,15 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac17365-rgb',
-    src: { w1800: '/lifestyle/1800/zac17365-rgb.webp', w900: '/lifestyle/900/zac17365-rgb.webp' },
+    sources: [
+      { width: 1800, height: 1411, src: '/lifestyle/zac17365-rgb-1800.webp' },
+      { width: 900, height: 706, src: '/lifestyle/zac17365-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac17365-rgb-1800.webp', w900: '/lifestyle/zac17365-rgb-900.webp' },
     width: 1800,
     height: 1411,
     aspect: 1.276,
+    maxWidth: 1800,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -2151,10 +2924,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac24119-rgb',
-    src: { w1800: '/lifestyle/1800/zac24119-rgb.webp', w900: '/lifestyle/900/zac24119-rgb.webp' },
+    sources: [
+      { width: 617, height: 422, src: '/lifestyle/zac24119-rgb-617.webp' },
+    ],
+    src: { full: '/lifestyle/zac24119-rgb-617.webp', w900: '/lifestyle/zac24119-rgb-617.webp' },
     width: 617,
     height: 422,
     aspect: 1.462,
+    maxWidth: 617,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -2164,10 +2941,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac24120-rgb',
-    src: { w1800: '/lifestyle/1800/zac24120-rgb.webp', w900: '/lifestyle/900/zac24120-rgb.webp' },
+    sources: [
+      { width: 617, height: 422, src: '/lifestyle/zac24120-rgb-617.webp' },
+    ],
+    src: { full: '/lifestyle/zac24120-rgb-617.webp', w900: '/lifestyle/zac24120-rgb-617.webp' },
     width: 617,
     height: 422,
     aspect: 1.462,
+    maxWidth: 617,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -2177,10 +2958,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac24121-rgb',
-    src: { w1800: '/lifestyle/1800/zac24121-rgb.webp', w900: '/lifestyle/900/zac24121-rgb.webp' },
+    sources: [
+      { width: 614, height: 422, src: '/lifestyle/zac24121-rgb-614.webp' },
+    ],
+    src: { full: '/lifestyle/zac24121-rgb-614.webp', w900: '/lifestyle/zac24121-rgb-614.webp' },
     width: 614,
     height: 422,
     aspect: 1.455,
+    maxWidth: 614,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -2190,10 +2975,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac24122-rgb',
-    src: { w1800: '/lifestyle/1800/zac24122-rgb.webp', w900: '/lifestyle/900/zac24122-rgb.webp' },
+    sources: [
+      { width: 614, height: 422, src: '/lifestyle/zac24122-rgb-614.webp' },
+    ],
+    src: { full: '/lifestyle/zac24122-rgb-614.webp', w900: '/lifestyle/zac24122-rgb-614.webp' },
     width: 614,
     height: 422,
     aspect: 1.455,
+    maxWidth: 614,
     category: 'detail',
     space: 'bath',
     alt: {
@@ -2203,10 +2992,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac24123-rgb',
-    src: { w1800: '/lifestyle/1800/zac24123-rgb.webp', w900: '/lifestyle/900/zac24123-rgb.webp' },
+    sources: [
+      { width: 614, height: 422, src: '/lifestyle/zac24123-rgb-614.webp' },
+    ],
+    src: { full: '/lifestyle/zac24123-rgb-614.webp', w900: '/lifestyle/zac24123-rgb-614.webp' },
     width: 614,
     height: 422,
     aspect: 1.455,
+    maxWidth: 614,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -2216,10 +3009,14 @@ export const lifestyleImages: LifestyleImage[] = [
   },
   {
     id: 'zac24124-rgb',
-    src: { w1800: '/lifestyle/1800/zac24124-rgb.webp', w900: '/lifestyle/900/zac24124-rgb.webp' },
+    sources: [
+      { width: 615, height: 422, src: '/lifestyle/zac24124-rgb-615.webp' },
+    ],
+    src: { full: '/lifestyle/zac24124-rgb-615.webp', w900: '/lifestyle/zac24124-rgb-615.webp' },
     width: 615,
     height: 422,
     aspect: 1.457,
+    maxWidth: 615,
     category: 'detail',
     space: 'kitchen',
     alt: {
@@ -2231,3 +3028,14 @@ export const lifestyleImages: LifestyleImage[] = [
 
 export const lifestyleByCategory = (category: LifestyleCategory): LifestyleImage[] =>
   lifestyleImages.filter((image) => image.category === category)
+
+/** Can this asset fill a slot of cssWidth at this device pixel ratio? */
+export const canFill = (image: LifestyleImage, cssWidth: number, dpr = 1): boolean =>
+  image.maxWidth >= cssWidth * dpr
+
+/** Smallest rendition that covers the slot; the largest one when none does. */
+export const lifestyleSrc = (image: LifestyleImage, cssWidth: number, dpr = 1): string => {
+  const needed = cssWidth * dpr
+  const covering = [...image.sources].reverse().find((s) => s.width >= needed)
+  return (covering ?? image.sources[0]).src
+}

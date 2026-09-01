@@ -8,7 +8,10 @@ import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { posts } from '@/lib/posts';
 import { articlesIntro, pick } from '@/lib/i18n';
-import { lifestyleImages } from '@/lib/lifestyle.generated';
+import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle.generated';
+
+// ความกว้างจริงของการ์ดที่ 1440 ใช้เลือก rendition ไม่ให้ภาพถูกขยาย
+const CARD_SLOT = 370;
 
 /** ค้นภาพจาก id — id ผิดจะพังตอน build ไม่ใช่ตอนผู้ใช้เปิดหน้า */
 function pic(id: string) {
@@ -49,7 +52,7 @@ export default function ArticlesContent() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
                     <img
-                      src={cover.src.w900}
+                      src={lifestyleSrc(cover, CARD_SLOT, 2)}
                       alt={cover.alt[lang]}
                       width={cover.width}
                       height={cover.height}

@@ -8,10 +8,14 @@ import Link from 'next/link';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { getPost } from '@/lib/posts';
-import { lifestyleImages, type LifestyleImage } from '@/lib/lifestyle.generated';
+import { lifestyleImages, lifestyleSrc, type LifestyleImage } from '@/lib/lifestyle.generated';
 
 // แทรกภาพหลังย่อหน้าที่ 2 และ 4 — ภาพมาจาก post.bodyIds ตามลำดับ
 const IMAGE_AFTER = [1, 3];
+
+// ความกว้างจริงของช่องที่ 1440 ใช้เลือก rendition ไม่ให้ภาพถูกขยาย
+const HERO_SLOT = 894;
+const BODY_SLOT = 670;
 
 /** ค้นภาพจาก id — id ผิดจะพังตอน build ไม่ใช่ตอนผู้ใช้เปิดหน้า */
 function pic(id: string) {
@@ -21,7 +25,7 @@ function pic(id: string) {
 }
 
 /** กรอบภาพตามสัดส่วนจริงของไฟล์ — กันภาพกระโดดตอนโหลด */
-function Figure({ image, alt }: { image: LifestyleImage; alt: string }) {
+function Figure({ image, alt, slot }: { image: LifestyleImage; alt: string; slot: number }) {
   return (
     <div
       className="overflow-hidden border border-line-6 bg-surface"
@@ -29,7 +33,7 @@ function Figure({ image, alt }: { image: LifestyleImage; alt: string }) {
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
       <img
-        src={image.src.w900}
+        src={lifestyleSrc(image, slot, 2)}
         alt={alt}
         width={image.width}
         height={image.height}
@@ -71,7 +75,7 @@ export default function ArticleContent({ slug }: { slug: string }) {
       </div>
 
       <Reveal className="mx-auto mt-12 max-w-4xl">
-        <Figure image={hero} alt={hero.alt[lang]} />
+        <Figure image={hero} alt={hero.alt[lang]} slot={HERO_SLOT} />
       </Reveal>
 
       <div className="mx-auto mt-14 max-w-2xl">
@@ -85,6 +89,7 @@ export default function ArticleContent({ slug }: { slug: string }) {
                 <Figure
                   image={bodyImages[IMAGE_AFTER.indexOf(i)]}
                   alt={bodyImages[IMAGE_AFTER.indexOf(i)].alt[lang]}
+                  slot={BODY_SLOT}
                 />
               </Reveal>
             )}

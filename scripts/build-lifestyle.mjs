@@ -18,16 +18,32 @@
  * 3. Alt text. Both languages are written per image from what is actually in
  *    the frame; the asset codes (zab82163_rgb) carry no meaning on their own.
  *
+ * Renditions are never upscaled. An earlier version wrote a 1800 and a 900 for
+ * every asset, so 46 sources narrower than 900px ended up with two files
+ * holding identical pixels and data claiming an 1800 that did not exist. Now
+ * each asset gets renditions only at widths it can actually fill, the files are
+ * named for their real width, and the entry records maxWidth so a layout can
+ * ask "can this fill a 670px slot" instead of finding out by looking soft.
+ *
  * Usage: node scripts/build-lifestyle.mjs [cacheDir]
  */
-import { mkdir, readFile, writeFile, stat, rm } from 'node:fs/promises'
+import { mkdir, readFile, writeFile, stat, rm, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import sharp from 'sharp'
 
 const ROOT = path.resolve(import.meta.dirname, '..')
 const OUT_DIR = path.join(ROOT, 'public', 'lifestyle')
 const TS_OUT = path.join(ROOT, 'lib', 'lifestyle.generated.ts')
-const WIDTHS = [1800, 900]
+
+/**
+ * Widths to emit for a source that is `native` px wide.
+ * The top rendition is the source itself (capped at 1800); a 900 step is only
+ * added when it is meaningfully smaller than the top one.
+ */
+function renditionWidths(native) {
+  const top = Math.min(native, 1800)
+  return top >= 1200 ? [top, 900] : [top]
+}
 
 /** Cut-outs / studio product shots. Kept out of the site on purpose. */
 const DROPPED = {
@@ -276,14 +292,14 @@ async function main() {
     process.exit(1)
   }
 
-  for (const w of WIDTHS) await mkdir(path.join(OUT_DIR, String(w)), { recursive: true })
-
-  // Cut-outs may have been written by an earlier scrape run; take them back out.
-  for (const id of Object.keys(DROPPED)) {
-    for (const w of WIDTHS) await rm(path.join(OUT_DIR, String(w), `${id}.webp`), { force: true })
-  }
+  await mkdir(OUT_DIR, { recursive: true })
+  // The old layout put every asset in public/lifestyle/1800 and /900, which is
+  // what produced the duplicate pixels. Renditions are now flat and named for
+  // their real width, so the old folders go.
+  for (const legacy of ['1800', '900']) await rm(path.join(OUT_DIR, legacy), { recursive: true, force: true })
 
   const entries = []
+  const wanted = new Set()
   for (const id of Object.keys(CATALOG)) {
     const rec = byId.get(id)
     if (!rec) {
@@ -293,25 +309,31 @@ async function main() {
     const src = await readFile(path.join(cacheDir, `${id}.jpg`))
     const photo = await trimmed(src)
 
-    const dims = {}
-    for (const w of WIDTHS) {
-      const file = path.join(OUT_DIR, String(w), `${id}.webp`)
+    const sources = []
+    for (const w of renditionWidths(photo.width)) {
+      const name = `${id}-${w}.webp`
+      const file = path.join(OUT_DIR, name)
       const out = await sharp(photo.buf)
+        // withoutEnlargement is a belt-and-braces guard; renditionWidths never
+        // asks for a width the source cannot fill.
         .resize({ width: w, withoutEnlargement: true })
-        .webp({ quality: w === 1800 ? 78 : 74, effort: 5 })
+        .webp({ quality: w >= 1200 ? 78 : 74, effort: 5 })
         .toFile(file)
-      dims[w] = out
       const s = await stat(file)
       if (s.size === 0) throw new Error(`${id}: zero-byte output at ${w}`)
+      if (out.width > photo.width) throw new Error(`${id}: rendition ${out.width} exceeds source ${photo.width}`)
+      sources.push({ width: out.width, height: out.height, src: `/lifestyle/${name}` })
+      wanted.add(name)
     }
+    sources.sort((a, b) => b.width - a.width)
 
     const [category, space, en, th] = CATALOG[id]
     entries.push({
       id,
-      src: { w1800: `/lifestyle/1800/${id}.webp`, w900: `/lifestyle/900/${id}.webp` },
-      width: dims[1800].width,
-      height: dims[1800].height,
-      aspect: Math.round((dims[1800].width / dims[1800].height) * 1000) / 1000,
+      sources,
+      width: photo.width,
+      height: photo.height,
+      aspect: Math.round((photo.width / photo.height) * 1000) / 1000,
       category,
       space,
       alt: { th, en },
@@ -319,16 +341,31 @@ async function main() {
     })
   }
 
+  // Sweep anything left behind by an earlier run (dropped assets, renamed ids).
+  for (const name of await readdir(OUT_DIR)) {
+    if (name.endsWith('.webp') && !wanted.has(name)) await rm(path.join(OUT_DIR, name), { force: true })
+  }
+
   entries.sort((a, b) => a.id.localeCompare(b.id))
 
+  /** The rendition a consumer gets from src.w900: the largest one at or below 900. */
+  const under900 = (e) => e.sources.find((s) => s.width <= 900) ?? e.sources.at(-1)
+
   const body = entries
-    .map(
-      (e) => `  {
+    .map((e) => {
+      const renditions = e.sources
+        .map((s) => `      { width: ${s.width}, height: ${s.height}, src: '${s.src}' },`)
+        .join('\n')
+      return `  {
     id: '${e.id}',
-    src: { w1800: '${e.src.w1800}', w900: '${e.src.w900}' },
+    sources: [
+${renditions}
+    ],
+    src: { full: '${e.sources[0].src}', w900: '${under900(e).src}' },
     width: ${e.width},
     height: ${e.height},
     aspect: ${e.aspect},
+    maxWidth: ${e.width},
     category: '${e.category}',
     space: '${e.space}',
     alt: {
@@ -336,7 +373,7 @@ async function main() {
       en: '${e.alt.en.replace(/'/g, "\\'")}',
     },
   },`
-    )
+    })
     .join('\n')
 
   const ts = `// Generated by scripts/build-lifestyle.mjs — do not edit by hand.
@@ -344,9 +381,10 @@ async function main() {
 // scripts/scrape-lifestyle.mjs. Cut-out product shots were dropped on purpose;
 // the product grid already carries those.
 //
-// width/height describe the file at src.w1800, after any white banner padding
-// was trimmed off, so a few assets are narrower than 1800px. src.w900 is the
-// same crop at min(900, width).
+// width/height/maxWidth are the asset's real pixels after any white banner
+// padding was trimmed off. Nothing is ever upscaled, so an asset only has the
+// renditions listed in \`sources\` — a 460px source has exactly one file, not a
+// fake 1800. Ask canFill() before putting an asset in a slot.
 
 export type LifestyleCategory =
   | 'room'
@@ -358,13 +396,21 @@ export type LifestyleCategory =
 
 export type LifestyleSpace = 'bath' | 'kitchen' | 'other'
 
+export type LifestyleRendition = { width: number; height: number; src: string }
+
 export type LifestyleImage = {
   id: string
-  src: { w1800: string; w900: string }
+  /** every rendition that exists on disk, largest first */
+  sources: LifestyleRendition[]
+  /** full = the largest rendition; w900 = the largest one at or below 900px */
+  src: { full: string; w900: string }
+  /** native pixels — nothing larger than this exists */
   width: number
   height: number
   /** width / height, rounded to 3dp — pick a crop with this. */
   aspect: number
+  /** largest CSS width this asset can fill without being upscaled */
+  maxWidth: number
   category: LifestyleCategory
   space: LifestyleSpace
   alt: { th: string; en: string }
@@ -376,6 +422,17 @@ ${body}
 
 export const lifestyleByCategory = (category: LifestyleCategory): LifestyleImage[] =>
   lifestyleImages.filter((image) => image.category === category)
+
+/** Can this asset fill a slot of cssWidth at this device pixel ratio? */
+export const canFill = (image: LifestyleImage, cssWidth: number, dpr = 1): boolean =>
+  image.maxWidth >= cssWidth * dpr
+
+/** Smallest rendition that covers the slot; the largest one when none does. */
+export const lifestyleSrc = (image: LifestyleImage, cssWidth: number, dpr = 1): string => {
+  const needed = cssWidth * dpr
+  const covering = [...image.sources].reverse().find((s) => s.width >= needed)
+  return (covering ?? image.sources[0]).src
+}
 `
 
   await writeFile(TS_OUT, ts)
