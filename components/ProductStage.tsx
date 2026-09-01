@@ -193,7 +193,10 @@ export default function ProductStage({
           loading={priority ? 'eager' : 'lazy'}
           onLoad={runFade}
           onError={runFade}
-          className="h-full w-full object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.65)]"
+          // เงาเดิมเป็น 0_40px_80px rgba(0,0,0,.65) ซึ่งจูนไว้ตอนเวทีอยู่บนพื้น #08090A
+          // บนพื้น #E5E5E5 ค่านั้นไม่ใช่เงาแต่เป็นก้อนดำใต้สินค้า — เบาลงเป็น 16%
+          // (สเปก 2026-09-01 ความเสี่ยงข้อ 2 อนุญาตให้ใส่เงาด้วย CSS ได้ ไม่ใช่เงาที่อบมากับรูป)
+          className="h-full w-full object-contain drop-shadow-[0_24px_44px_rgba(0,0,0,0.16)]"
         />
       </div>
     </div>

@@ -134,7 +134,7 @@ export default function Hero({
           <img
             src={image}
             alt={imageAlt}
-            className="h-full w-full object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.65)]"
+            className="h-full w-full object-contain drop-shadow-[0_24px_44px_rgba(0,0,0,0.16)]"
           />
         ) : (
           <div className="h-full w-full rounded-sm border border-line-12 bg-surface/40" aria-hidden />

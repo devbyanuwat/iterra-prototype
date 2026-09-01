@@ -109,7 +109,10 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
                 ref={(el) => {
                   refs.current[i] = el;
                 }}
-                href={`/finish/${encodeURIComponent(p.code)}`}
+                // ต้องมี trailing slash: next.config ตั้ง trailingSlash: true และ
+                // static export เขียนไฟล์เป็น out/finish/<code>/index.html
+                // ลิงก์ที่ไม่มี slash จะ 404 บน static host เหมือนทุกลิงก์อื่นในเว็บนี้
+                href={`/finish/${encodeURIComponent(p.code)}/`}
                 tabIndex={roving === i ? 0 : -1}
                 onKeyDown={(e) => onKeyDown(e, i)}
                 onFocus={() => {

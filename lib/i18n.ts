@@ -5,6 +5,16 @@
 
 export type Lang = 'th' | 'en';
 
+/**
+ * ต่อชื่อเข้ากับข้อความไทย โดยเว้นวรรคให้เฉพาะเมื่อชื่อขึ้นต้นด้วยอักษรละติน
+ *
+ * ไทยไม่เว้นวรรคระหว่างคำ 'เฉด' + 'ดำด้าน' จึงต้องเป็น 'เฉดดำด้าน' ติดกัน
+ * แต่ชื่อเฉด 5 จาก 11 ตัวยังเป็นละติน (Vibrant Brushed Moderne Brass ฯลฯ)
+ * ซึ่งพอชนกับไทยตรง ๆ จะได้ 'เฉดVibrant Brushed…' อ่านสะดุดและดูเหมือนพิมพ์ตก
+ * เป็นกฎของภาษา ไม่ใช่ของ component จึงอยู่คู่กับสตริงที่นี่
+ */
+export const thaiJoin = (name: string) => (/^[฀-๿]/.test(name) ? '' : ' ') + name;
+
 export const dict = {
   th: {
     nav: {
@@ -93,7 +103,7 @@ export const dict = {
       specs: 'สเปกสินค้า',
       related: 'สินค้าใกล้เคียง',
       onlyFinish: 'สินค้าชิ้นนี้มีเฉดเดียว',
-      inFinish: (name: string) => `ดูทุกชิ้นในเฉด${name}`,
+      inFinish: (name: string) => `ดูทุกชิ้นในเฉด${thaiJoin(name)}`,
     },
     // กำแพงผิวเคลือบ = หน้าแรก (spec finish-first §4.1)
     // ห้ามมี hero heading และห้ามมี category nav บนหน้านี้ ป้ายทั้งหมดที่นี่จึงเป็น
@@ -106,7 +116,7 @@ export const dict = {
     },
     finish: {
       kicker: 'FINISH',
-      title: (name: string) => `ทั้งห้องในเฉด${name}`,
+      title: (name: string) => `ทั้งห้องในเฉด${thaiJoin(name)}`,
       sub: (n: number) => `${n} ชิ้นในแคตตาล็อกมีเฉดนี้ — และทุกชิ้นข้างล่างนี้เรนเดอร์ในเฉดนี้จริง`,
       pieces: (n: number) => `${n} ชิ้น`,
       railLabel: 'สลับผิวเคลือบ',

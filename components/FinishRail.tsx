@@ -1,0 +1,166 @@
+'use client';
+
+// แถบสลับเฉดที่ติดขอบจอ (spec finish-first §4.2)
+//
+// ต้องเป็น <a href> จริง ไม่ใช่ <button>: หน้าเฉดทั้ง 11 หน้ามีอยู่จริงใน static export
+// ทำเป็นปุ่มจะทำให้ครอว์เลอร์มองไม่เห็นเส้นทางระหว่างเฉด และ middle-click / เปิดแท็บใหม่
+// ก็จะพัง ผู้เรียกจึงดัก onClick แล้ว preventDefault เพื่อสลับแบบไม่โหลดหน้า (AC 5)
+// ส่วนคลิกที่มี modifier ปล่อยผ่านให้เบราว์เซอร์จัดการตามปกติ
+//
+// roving tabindex เหมือน FinishWall กับ FinishSwatches — ทั้งเว็บใช้รูปแบบเดียวกัน
+// ผู้ใช้คีย์บอร์ดจึงเจอพฤติกรรมเดิมทุกที่ที่มีแถวสวอตช์
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useLang } from './LangProvider';
+import type { FinishEntry } from './finish-index';
+
+type Props = {
+  entries: FinishEntry[];
+  activeCode: string;
+  /** คืน true เมื่อรับงานไปทำเองแล้ว (ผู้เรียกจะ preventDefault ให้) */
+  onSelect: (code: string) => void;
+};
+
+export default function FinishRail({ entries, activeCode, onSelect }: Props) {
+  const { lang, t } = useLang();
+  const activeIndex = Math.max(
+    0,
+    entries.findIndex((e) => e.code === activeCode),
+  );
+  const [roving, setRoving] = useState(activeIndex);
+  const refs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const listRef = useRef<HTMLUListElement>(null);
+
+  // เฉดที่ active เปลี่ยนจากที่อื่น (ปุ่ม back ของเบราว์เซอร์) — roving ต้องตามไปด้วย
+  // ไม่งั้นกด Tab เข้าแถบแล้วโฟกัสไปตกที่เฉดก่อนหน้า
+  useEffect(() => {
+    setRoving(activeIndex);
+  }, [activeIndex]);
+
+  // เลื่อนแถบให้เห็นเฉดที่เลือกอยู่
+  //
+  // บนมือถือแถบเป็นแนวนอนกว้างเกินจอ ที่ 390px เห็นได้ราว 7 จาก 11 เฉด เฉดอย่าง
+  // Matte Black หรือ Bronze จึงอยู่นอกจอตั้งแต่เปิดหน้า ผู้ใช้เห็นแถบสวอตช์ที่
+  // ไม่มีตัวไหนถูกเลือกเลย ทั้งที่กำลังดูหน้าเฉดนั้นอยู่
+  //
+  // ตั้ง scrollLeft เองแทน scrollIntoView: scrollIntoView เลื่อน ancestor ที่เลื่อนได้
+  // ทุกชั้นรวมถึงตัวหน้า คนที่เพิ่งเปิดหน้าจะถูกดีดออกจากหัวเรื่องทันทีที่ hydrate จบ
+  useEffect(() => {
+    const list = listRef.current;
+    const item = refs.current[activeIndex];
+    if (!list || !item) return;
+    // เดสก์ท็อปเป็นแถบตั้งที่เห็นครบ 11 อยู่แล้ว ไม่มีอะไรต้องเลื่อน
+    if (list.scrollWidth <= list.clientWidth) return;
+    list.scrollLeft = Math.max(0, item.offsetLeft - (list.clientWidth - item.offsetWidth) / 2);
+  }, [activeIndex]);
+
+  const focusAt = useCallback((i: number) => {
+    const n = refs.current.length;
+    if (!n) return;
+    const next = ((i % n) + n) % n;
+    setRoving(next);
+    refs.current[next]?.focus();
+  }, []);
+
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent, i: number) => {
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'ArrowDown':
+          e.preventDefault();
+          focusAt(i + 1);
+          break;
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          e.preventDefault();
+          focusAt(i - 1);
+          break;
+        case 'Home':
+          e.preventDefault();
+          focusAt(0);
+          break;
+        case 'End':
+          e.preventDefault();
+          focusAt(refs.current.length - 1);
+          break;
+      }
+    },
+    [focusAt],
+  );
+
+  const handleClick = (e: React.MouseEvent, code: string) => {
+    // ctrl/cmd/shift/คลิกกลาง = ผู้ใช้ตั้งใจเปิดแท็บใหม่ อย่าไปขวาง
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    onSelect(code);
+  };
+
+  return (
+    <nav
+      aria-label={t.finish.railLabel}
+      // มือถือ: แถบนอนติดขอบล่าง เลื่อนในตัวเอง (overflow-x-auto สร้าง scroll
+      // container ของตัวเอง จึงไม่ดัน scrollWidth ของหน้า — AC 8)
+      // เดสก์ท็อป: แถบตั้งติดขอบขวา จัดกลางแนวตั้ง
+      className={[
+        'fixed inset-x-0 bottom-0 z-40 border-t border-line bg-base/95 backdrop-blur-sm',
+        'md:inset-x-auto md:bottom-auto md:right-0 md:top-1/2 md:-translate-y-1/2',
+        'md:border-y md:border-l md:border-t md:bg-base/90',
+      ].join(' ')}
+    >
+      <ul
+        ref={listRef}
+        className="snap-gallery flex gap-2 overflow-x-auto px-3 py-3 md:flex-col md:overflow-visible md:px-2.5 md:py-3"
+      >
+        {entries.map((e, i) => {
+          const isOn = e.code === activeCode;
+          const name = e.name[lang];
+          return (
+            <li key={e.code} className="shrink-0">
+              <Link
+                ref={(el) => {
+                  refs.current[i] = el;
+                }}
+                href={`/finish/${encodeURIComponent(e.code)}/`}
+                tabIndex={roving === i ? 0 : -1}
+                onKeyDown={(ev) => onKeyDown(ev, i)}
+                onFocus={() => setRoving(i)}
+                onClick={(ev) => handleClick(ev, e.code)}
+                aria-current={isOn ? 'page' : undefined}
+                title={`${name} · ${t.finish.pieces(e.count)}`}
+                className="group flex items-center gap-2.5 rounded-full p-1 md:p-1"
+              >
+                {/* วงแหวนสองชั้นตอนโฟกัส เหตุผลเดียวกับ FinishSwatches:
+                    ขาวชิดขอบชิป ink วงนอก — ชิปขาวกับชิปดำจึงเห็นคนละวง */}
+                <span
+                  className={[
+                    'block h-9 w-9 shrink-0 overflow-hidden rounded-full ring-offset-2 ring-offset-base transition-transform duration-300',
+                    'group-hover:scale-110',
+                    'group-focus-visible:shadow-[0_0_0_2px_#FFFFFF,0_0_0_4px_#232323]',
+                    isOn ? 'ring-2 ring-ink' : 'ring-1 ring-line-12',
+                  ].join(' ')}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element -- static export, ไฟล์วัสดุ local */}
+                  <img
+                    src={e.swatch}
+                    alt=""
+                    width={36}
+                    height={36}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                </span>
+                {/* ชื่อเฉดต้องอ่านออกด้วยเสียง ไม่ใช่มีแต่ title ที่ต้องรอ tooltip
+                    (ปัญหาเดียวกับที่ FinishSwatches เคยมี) */}
+                <span className="sr-only">
+                  {name} — {t.finish.pieces(e.count)}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
