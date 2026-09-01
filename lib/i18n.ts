@@ -24,6 +24,7 @@ export const dict = {
       articles: 'บทความ',
       contact: 'ติดต่อเรา',
       showroom: 'นัดชมโชว์รูม',
+      gallery: 'แกลเลอรี',
     },
     common: {
       inquire: 'สอบถามสินค้านี้',
@@ -124,6 +125,24 @@ export const dict = {
       empty: 'ไม่พบสินค้าในหมวดนี้สำหรับเฉดนี้',
       otherFinishes: 'เฉดอื่น',
     },
+    // ประตูเข้า + สนามภาพเชิงลึก (spec 2026-09-01-kohler-depth-field)
+    gate: {
+      fieldLabel: 'สนามภาพสินค้าและห้องตัวอย่าง',
+    },
+    gallery: {
+      kicker: 'GALLERY',
+      title: 'สนามภาพเชิงลึก',
+      sub: (n: number) =>
+        `${n} ชิ้นลอยอยู่ในสนาม เลื่อนเมาส์เพื่อเดินดู คลิกเพื่อเปิดชิ้นนั้นในเฉดที่กำลังมองอยู่`,
+      fieldLabel: 'สนามภาพสินค้า',
+      hint: 'เลื่อนเมาส์เพื่อเดินดูสนาม',
+      keyHint: 'Tab ไล่ทีละชิ้น · Enter เปิด',
+      toIndex: 'มุมมองดัชนี',
+      toField: 'มุมมองสนาม',
+      indexLabel: 'ดัชนีสินค้าในสนาม',
+      indexHint: 'สนาม 3 มิติหาของเฉพาะเจาะจงไม่ได้ — รายการนี้คือของชุดเดียวกันแบบค้นได้',
+      viewAll: 'ดูแคตตาล็อกทั้งหมด',
+    },
     articles: {
       kicker: 'JOURNAL',
     },
@@ -152,6 +171,7 @@ export const dict = {
       articles: 'Journal',
       contact: 'Contact',
       showroom: 'Book a Visit',
+      gallery: 'Gallery',
     },
     common: {
       inquire: 'Inquire about this piece',
@@ -246,6 +266,23 @@ export const dict = {
       backToWall: 'Back to the finish wall',
       empty: 'No pieces in this category for this finish',
       otherFinishes: 'Other finishes',
+    },
+    gate: {
+      fieldLabel: 'A field of product and room photography',
+    },
+    gallery: {
+      kicker: 'GALLERY',
+      title: 'The depth field',
+      sub: (n: number) =>
+        `${n} pieces suspended in space. Move the mouse to walk through them; click one to open it in the finish you are looking at.`,
+      fieldLabel: 'A field of product photography',
+      hint: 'Move the mouse to walk the field',
+      keyHint: 'Tab piece by piece · Enter to open',
+      toIndex: 'Index view',
+      toField: 'Field view',
+      indexLabel: 'Index of the pieces in the field',
+      indexHint: 'A 3D field cannot be searched — this is the same set, in a list you can scan.',
+      viewAll: 'See the whole catalogue',
     },
     articles: {
       kicker: 'JOURNAL',

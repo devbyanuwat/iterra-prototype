@@ -3,6 +3,7 @@ import FinishWall, { type WallPanel } from '@/components/FinishWall';
 import HomeContent from '@/components/home/HomeContent';
 import { finishIndex, panelScrim } from '@/components/finish-index';
 import { WALL_PANEL_PRODUCTS } from '@/components/wall-products';
+import { DEPTH_SEED_ID, entryPlanes } from '@/components/depth-field';
 
 export const metadata: Metadata = {
   title: 'KOHLER — อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม | Premium Kitchen & Bath',
@@ -36,6 +37,23 @@ export default function HomePage() {
   // สเปก 2026-09-01 §3.3 ตั้งเป้าไว้ที่ ≥ 3.5 จอ
   return (
     <>
+      {/* ชุดระนาบของประตูเข้า (spec depth-field §4.1)
+          Preloader อยู่ใน app/layout.tsx จึงอยู่ทุกหน้า ถ้ามัน import ชุดข้อมูลนี้เอง
+          /about กับ /contact ต้องโหลดแคตตาล็อก 424KB + คลังไลฟ์สไตล์เพื่อโชว์หน้าโหลด
+          ซึ่งย้อนแย้งในตัวเอง — หน้าแรกซึ่งเป็น server component จึงคำนวณให้แล้วฝาก
+          ไว้ใน HTML ที่ static export ส่งมา อ่านได้ตั้งแต่ก่อน hydrate
+          หน้าที่ไม่มี seed ก็ไม่มีสนาม ซึ่งถูกแล้ว: สนามมีไว้โฆษณาหน้าถัดไป
+
+          replace('<') — JSON ที่มี "</script>" อยู่ในข้อมูลจะปิดแท็กกลางคัน
+          ชื่อสินค้าไทยไม่มี '<' อยู่แล้ว แต่ค่านี้มาจากข้อมูลที่ถูก generate ใหม่ได้
+          และการรับประกันที่พึ่ง "ข้อมูลคงไม่มีอักขระนั้น" ไม่ใช่การรับประกัน */}
+      <script
+        id={DEPTH_SEED_ID}
+        type="application/json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(entryPlanes()).replace(/</g, '\\u003c'),
+        }}
+      />
       <FinishWall panels={panels} />
       <HomeContent />
     </>

@@ -1,16 +1,21 @@
 'use client';
 
-// Entry gate: แกลเลอรีสินค้า + เปอร์เซ็นต์จริง + ปุ่ม "เข้าสู่โชว์รูม"
+// Entry gate: สนามภาพเชิงลึก + เปอร์เซ็นต์จริง + ปุ่ม "เข้าสู่โชว์รูม"
 //
 // ลูกค้าถามว่าหน้านี้มีไว้ทำไม ซึ่งเป็นคำถามที่ถูก: ของเดิมเป็นเลข 100% โดด ๆ
 // บนพื้นเปล่า ไม่ได้ขายอะไร เป็นแค่ประตูที่ต้องกดผ่าน
 // (spec 2026-09-01-products-as-motion §2) ตอนนี้เลขลดชั้นเป็นตัวเล็กมุมล่าง
 // และของที่เต็มจอคือสินค้าจริงพื้นโปร่ง ซึ่งเป็นทรัพย์สินที่ดีที่สุดของงานนี้
 //
+// รอบนี้แกลเลอรีแบนถูกแทนด้วย **สนามภาพเชิงลึก** ตาม spec depth-field §4.1:
+// กล้องอยู่ "ข้างนอก" สนามแล้วซูมเข้าตามความคืบหน้าการโหลดจริง โหลดครบแล้วกล้อง
+// หยุด เลื่อนเมาส์เดินดูสนามได้ ระนาบเป็นสินค้าพื้นโปร่งปนกับรูปห้องจากคลังไลฟ์สไตล์
+//
 // เปอร์เซ็นต์ผูกกับสถานะโหลดจริง ไม่ใช่ timer ปลอม:
 //   readyState interactive 20% · complete 15% · document.fonts.ready 25% · รูปที่ decode แล้ว 40%
 // ตัวเลขวิ่งเข้าหาค่าจริงแบบ tween จึงไม่กระตุก แต่ไม่เคยแซงสถานะจริง
-// สินค้าชิ้นที่ n โผล่เมื่อค่านี้ถึง n/total — ผูกกับการโหลดจริง ไม่ใช่ setTimeout
+// ระนาบที่ n โผล่เมื่อค่านี้ถึง n/total และกล้องซูมตามค่าเดียวกัน — ผูกกับการโหลดจริง
+// ไม่ใช่ setTimeout
 //
 // ห้ามขังผู้ใช้: ปุ่มเข้ากดได้ตั้งแต่วินาทีแรกไม่ว่าโหลดถึงไหน และมี watchdog
 // ถ้าค้างเกิน stallMs จะดัน 100% พร้อมเปลี่ยนข้อความบอกว่าข้ามได้
@@ -21,17 +26,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import BrandMark from './BrandMark';
-
-type GalleryItem = { src: string; alt: string };
+import DepthField, { useFieldMode } from './DepthField';
+import { useLang } from './LangProvider';
+import type { FieldPlane } from './depth-field';
 
 /**
- * เลื่อนลงทีละชิ้นให้แกลเลอรีดูเหมือนของวางบนโต๊ะ ไม่ใช่ตาราง (§2)
- * ค่าคงที่ ไม่สุ่ม — สุ่มแล้วเลย์เอาต์เปลี่ยนทุกครั้งที่ re-render และ SSR ไม่ตรงกับ client
+ * id ของ <script type="application/json"> ที่ app/page.tsx ฝากชุดระนาบไว้
+ *
+ * เขียนสตริงซ้ำแทนการ import ค่าคงที่จาก components/depth-field.ts โดยตั้งใจ:
+ * ไฟล์นั้น import ทั้งแคตตาล็อก (424KB) และคลังไลฟ์สไตล์ ส่วน Preloader อยู่ใน
+ * layout จึงอยู่ทุกหน้า — /about กับ /contact ไม่ควรต้องโหลดแคตตาล็อกเพื่อโชว์
+ * หน้าโหลด นี่คือเหตุผลเดียวกับที่รุ่นก่อนอ่าน src ออกจาก DOM ของกำแพง
+ * และเป็นสัญญาข้าม DOM แบบเดียวกับ selector `[data-wall-panel]` ที่ไฟล์นี้เคยถือ
  */
-const NUDGE = [0, 30, 10, 44, 4, 34, 18, 52, 8, 38, 22, 48, 14, 28];
-
-/** ขนาดต่างกันเล็กน้อยด้วยเหตุผลเดียวกัน — ของบนโต๊ะไม่ได้สูงเท่ากันหมด */
-const SCALE = [1, 0.86, 0.94, 0.8, 1, 0.88, 0.92, 0.82, 0.96, 0.86, 0.9, 0.84, 0.94, 0.88];
+const SEED_ID = 'depth-field-seed';
 
 type Props = {
   brand?: string;
@@ -61,8 +69,11 @@ export default function Preloader({
   const [gated, setGated] = useState(true);
   const [pct, setPct] = useState(0);
   const [stalled, setStalled] = useState(false);
-  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [planes, setPlanes] = useState<FieldPlane[]>([]);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const { t, lang } = useLang();
+  // เดสก์ท็อป + ไม่ใช่ reduced-motion เท่านั้นถึงจะได้สนาม 3D (§5 ข้อ 3–4)
+  const fieldMode = useFieldMode();
 
   const root = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
@@ -111,48 +122,29 @@ export default function Preloader({
     }
   }, [storageKey]);
 
-  // ── แกลเลอรี: อ่านรูปที่ "หน้าถัดไป" กำลังจะใช้ ออกมาจาก DOM ของหน้านั้นเอง ──
+  // ── สนาม: อ่านชุดระนาบที่หน้านั้นฝากไว้ใน HTML ──────────────────────────
   //
-  // AC ข้อ 2 บังคับว่ารูปในแกลเลอรีต้องเป็นชุดที่หน้าถัดไปใช้อยู่แล้ว ไม่งั้นหน้าโหลด
-  // กลายเป็นตัวเพิ่มงานโหลด ซึ่งย้อนแย้งในตัวเอง
+  // §5 ข้อ 6 บังคับว่ารูปในสนามต้องเป็นไฟล์ที่หน้าอื่นใช้อยู่แล้ว และเป็น variant
+  // 700/900 ไม่ใช่ 1400/1800 — คนที่รับประกันข้อนี้คือ components/depth-field.ts
+  // ซึ่งประกอบชุดจาก WALL_PANEL_PRODUCTS (ของบนกำแพงที่รออยู่หลังประตูนี้เอง)
+  // กับคลังไลฟ์สไตล์ที่ /about และ /articles ใช้อยู่
   //
-  // วิธีที่รับประกันได้จริงคืออ่าน src ออกมาจากกำแพงที่เรนเดอร์รออยู่หลังประตูแล้ว
-  // (markup ของกำแพงอยู่ใน HTML ที่ static export ส่งมา ไม่ได้รอ JS) URL จึงตรงกัน
-  // แบบตัวต่อตัวโดยนิยาม ไม่ใช่โดยข้อตกลงที่อาจเพี้ยนทีหลัง
+  // มันมาถึงที่นี่ทาง <script type="application/json"> ไม่ใช่ทาง import:
+  // ดูเหตุผลที่ SEED_ID ด้านบน · JSON อยู่ใน HTML ที่ static export ส่งมา
+  // จึงอ่านได้ตั้งแต่ก่อน hydrate ไม่ต้องรอเฟรมถัดไปเหมือนตอนอ่านจาก DOM ของกำแพง
   //
-  // ทางเลือกที่ไม่เอา: import ชุดข้อมูลสินค้ามาคำนวณเอง — Preloader อยู่ใน layout
-  // จึงอยู่ทุกหน้า การ import lib/products (424KB) เข้ามาแปลว่า /about กับ /contact
-  // ต้องโหลดแคตตาล็อกทั้งก้อนเพื่อโชว์หน้าโหลด ซึ่งย้อนแย้งเหมือนกันแค่คนละทาง
-  //
-  // หน้าที่ไม่มีกำแพง (เช่น /about) จะได้อาร์เรย์ว่างและประตูกลับไปเป็นแบบเดิม
-  // ถูกต้องแล้ว: แกลเลอรีมีไว้โฆษณาหน้าถัดไป และมีแค่หน้าแรกที่มีของให้โฆษณา
+  // หน้าที่ไม่มี seed (เช่น /about) จะได้อาร์เรย์ว่างและประตูเหลือแค่ตัวหนังสือ
+  // ถูกต้องแล้ว: สนามมีไว้โฆษณาหน้าถัดไป และมีแค่หน้าแรกที่มีของให้โฆษณา
   useEffect(() => {
     if (!gated) return;
-    let alive = true;
-
-    const read = () => {
-      if (!alive) return;
-      const found = Array.from(
-        document.querySelectorAll<HTMLImageElement>('[data-wall-panel] img[data-panel-front]'),
-      );
-      const seen = new Set<string>();
-      const items: GalleryItem[] = [];
-      for (const img of found) {
-        const src = img.getAttribute('src');
-        if (!src || seen.has(src)) continue;
-        seen.add(src);
-        items.push({ src, alt: img.getAttribute('alt') ?? '' });
-      }
-      if (items.length) setGallery(items);
-    };
-
-    read();
-    // เผื่อจังหวะที่ hydrate ยังไม่วางแผงครบ อ่านซ้ำอีกเฟรมหนึ่ง
-    const raf = requestAnimationFrame(read);
-    return () => {
-      alive = false;
-      cancelAnimationFrame(raf);
-    };
+    const node = document.getElementById(SEED_ID);
+    if (!node?.textContent) return;
+    try {
+      const parsed: unknown = JSON.parse(node.textContent);
+      if (Array.isArray(parsed) && parsed.length) setPlanes(parsed as FieldPlane[]);
+    } catch {
+      // JSON เสียไม่ควรทำให้ประตูพัง — ปุ่มเข้ายังต้องกดได้ ซึ่งเป็นกติกาข้อแรก
+    }
   }, [gated]);
 
   // reduced-motion ใช้ทั้งใน effect และตอน render จึงเก็บเป็น state
@@ -318,71 +310,102 @@ export default function Preloader({
         role="dialog"
         aria-modal="true"
         aria-label={brand}
-        className="fixed inset-0 z-[100] flex flex-col justify-between bg-base px-6 py-10 text-ink md:px-[8vw] md:py-14"
+        className="fixed inset-0 z-[100] bg-base text-ink"
       >
-        <div data-pre-fade className="flex items-baseline justify-between">
-          {/* alt="" — ตัวประตูประกาศชื่อตัวเองผ่าน aria-label ของ role="dialog" อยู่แล้ว
-              ใส่ alt ซ้ำจะได้ยิน "KOHLER" สองครั้งติดกันตอนโฟกัสเข้ามา
-              ที่นี่ใหญ่กว่าเมนูได้ เพราะเป็นจอเปล่าที่มีโลโก้เป็นตัวนำ */}
-          <BrandMark height={22} alt="" />
-          <span className="micro">{tagline}</span>
-        </div>
-
-        {/* แกลเลอรี: สินค้าลอยเข้ามาทีละชิ้นตามความคืบหน้าจริง
-            ช่องถูกจองไว้ครบตั้งแต่แรกและเปลี่ยนแค่ opacity/transform — ถ้าใช้การ
-            เพิ่ม node ทีละใบ เลย์เอาต์จะขยับทุกครั้งที่มีชิ้นใหม่ อ่านเป็นหน้ากระตุก
-            ไม่ใช่ของถูกวางลงบนโต๊ะ */}
-        {gallery.length > 0 && (
-          <ul
-            data-preloader-gallery
-            className="grid grid-cols-4 items-end gap-x-4 gap-y-3 sm:grid-cols-6 md:gap-x-8 lg:grid-cols-6"
-          >
-            {gallery.map((item, i) => {
-              // ชิ้นที่ n ปรากฏเมื่อโหลดถึง n/total (§2) — ผูกกับ pct ที่มาจาก
-              // readyState/fonts/images ไม่ใช่ timer
-              const revealed = i < Math.round((pct / 100) * gallery.length);
-              return (
-                <li
-                  key={item.src}
-                  data-gallery-item
-                  data-revealed={revealed ? '' : undefined}
-                  style={{
-                    marginTop: NUDGE[i % NUDGE.length],
-                    opacity: revealed ? 1 : 0,
-                    transform: revealed ? 'none' : 'translateY(16px) scale(0.96)',
-                    // reduced-motion: ขึ้นพร้อมกันหมด ไม่มี stagger ไม่มีลอย (§2)
-                    transition: reducedMotion
-                      ? 'none'
-                      : 'opacity 620ms ease-out, transform 620ms cubic-bezier(0.22,1,0.36,1)',
-                    // หน่วงกันเป็นชั้น — จำเป็นตอน pct กระโดดทีเดียวหลายสิบเปอร์เซ็นต์
-                    // แล้วหลายชิ้นถูกเปิดพร้อมกัน ถ้าไม่มีค่านี้จะขึ้นพรึบเดียว
-                    transitionDelay: reducedMotion ? '0ms' : `${(i % 4) * 70}ms`,
-                  }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element -- static export, ไฟล์เดียวกับที่กำแพงใช้ */}
-                  <img
-                    src={item.src}
-                    alt={item.alt}
-                    decoding="async"
-                    className="mx-auto w-full object-contain"
-                    style={{
-                      // ขั้นต่ำ 64px: ที่ 390px ช่องกริดกว้างราว 78px ถ้าปล่อยตาม vw
-                      // ล้วนจะได้สินค้าสูง 43px ซึ่งอ่านเป็นไอคอน ไม่ใช่ของจริง
-                      height: `calc(clamp(64px, 13vw, 148px) * ${SCALE[i % SCALE.length]})`,
-                      // เซรามิกขาวบนพื้น #E5E5E5 แทบไม่มีขอบให้ตาจับ เงาอ่อน ๆ ทำให้
-                      // ของ "วางอยู่บนโต๊ะ" ไม่ใช่ลอยจมพื้น · drop-shadow เดินตาม
-                      // อัลฟาของ PNG จึงได้เงาตามรูปทรงจริง ไม่ใช่กล่องสี่เหลี่ยม
-                      filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.18))',
-                    }}
-                  />
-                </li>
-              );
-            })}
-          </ul>
+        {/* สนาม: กล้องอยู่ข้างนอกแล้วซูมเข้าตาม pct จริง (§4.1)
+            อยู่ข้างหลังตัวหนังสือทั้งหมด และ pointer-events ถูกปิดในตัว
+            component — ปุ่มเข้าต้องกดได้ตั้งแต่วินาทีแรกเสมอ ไม่มีระนาบไหน
+            มาบังการกดได้ */}
+        {fieldMode && planes.length > 0 && (
+          <>
+            <DepthField
+              planes={planes}
+              progress={pct / 100}
+              revealByProgress
+              label={t.gate.fieldLabel}
+              className="absolute inset-0"
+            />
+            {/* scrim: ตัวหนังสือของประตูอยู่ขอบบนกับขอบล่าง ระนาบที่ลอยผ่านตรงนั้น
+                ทำให้ micro-caps อ่านไม่ออกเป็นช่วง ๆ ค่าคงที่ของพื้น #E5E5E5
+                ทาทับสองขอบจึงรับประกันคอนทราสต์เท่ากับพื้นเปล่า ไม่ขึ้นกับว่า
+                ระนาบไหนลอยมาอยู่หลัง (เหตุผลเดียวกับ veil ของกำแพง) */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0"
+              style={{
+                backgroundImage:
+                  'linear-gradient(to bottom, rgba(229,229,229,0.94) 0%, rgba(229,229,229,0.16) 17%, rgba(229,229,229,0.16) 76%, rgba(229,229,229,0.96) 100%)',
+              }}
+            />
+          </>
         )}
 
-        <div data-pre-fade className="flex items-end justify-between gap-6">
-          <div className="flex flex-col gap-4">
+        <div className="relative z-10 flex h-full flex-col justify-between gap-6 px-6 py-10 md:px-[8vw] md:py-14">
+          <div data-pre-fade className="flex items-baseline justify-between">
+            {/* alt="" — ตัวประตูประกาศชื่อตัวเองผ่าน aria-label ของ role="dialog" อยู่แล้ว
+                ใส่ alt ซ้ำจะได้ยิน "KOHLER" สองครั้งติดกันตอนโฟกัสเข้ามา
+                ที่นี่ใหญ่กว่าเมนูได้ เพราะเป็นจอเปล่าที่มีโลโก้เป็นตัวนำ */}
+            <BrandMark height={22} alt="" />
+            <span className="micro">{tagline}</span>
+          </div>
+
+          {/* มือถือและ reduced-motion: กริดนิ่ง ไม่มีเปอร์สเปกทีฟ ไม่มี transform
+              (§5 ข้อ 3–4 — และ "ไม่จำลอง 3D ด้วยการเอียงเครื่อง" คือเหตุผลที่ที่นี่
+              ไม่มี deviceorientation อยู่เลย)
+              กล่องเลื่อนได้เอง เพราะประตูล็อกการเลื่อนของหน้าไว้ทั้งหน้า และ
+              40 ระนาบไม่มีทางลงจอ 390px ได้หมดในหน้าจอเดียว */}
+          {!fieldMode && planes.length > 0 && (
+            <ul
+              data-preloader-gallery
+              data-lenis-prevent
+              // 4 คอลัมน์ ไม่ใช่ 3: ระนาบห้องถูกแทรกทุก ๆ ชิ้นที่ 3 ในอาร์เรย์
+              // (ดู entryPlanes) กริด 3 คอลัมน์จึงดันห้องทั้ง 12 ใบไปเรียงเป็น
+              // คอลัมน์ขวาสุดคอลัมน์เดียว — วัดเจอตอนถ่ายที่ 390px
+              className="grid min-h-0 flex-1 grid-cols-4 content-start items-center gap-x-4 gap-y-5 overflow-y-auto sm:grid-cols-6"
+            >
+              {planes.map((plane, i) => {
+                // ชิ้นที่ n ปรากฏเมื่อโหลดถึง n/total — ผูกกับ pct ที่มาจาก
+                // readyState/fonts/images ไม่ใช่ timer
+                // reduced-motion ขึ้นครบทันที: §5 ข้อ 3 สั่ง "กริดนิ่งทันที"
+                const revealed = reducedMotion || i < Math.round((pct / 100) * planes.length);
+                return (
+                  <li
+                    key={plane.id}
+                    data-gallery-item
+                    data-revealed={revealed ? '' : undefined}
+                    style={{
+                      opacity: revealed ? 1 : 0,
+                      transition: reducedMotion ? 'none' : 'opacity 620ms ease-out',
+                      transitionDelay: reducedMotion ? '0ms' : `${(i % 4) * 70}ms`,
+                    }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- static export, ไฟล์เดียวกับที่หน้าอื่นใช้ */}
+                    <img
+                      src={plane.src}
+                      alt={plane.alt[lang]}
+                      loading={i < 9 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      className={
+                        plane.kind === 'room'
+                          ? 'h-[clamp(60px,14vw,120px)] w-full object-cover'
+                          : 'mx-auto h-[clamp(60px,14vw,120px)] w-full object-contain'
+                      }
+                      style={
+                        plane.kind === 'room'
+                          ? undefined
+                          : // เซรามิกขาวบนพื้น #E5E5E5 แทบไม่มีขอบให้ตาจับ
+                            // drop-shadow เดินตามอัลฟาของ PNG จึงได้เงาตามรูปทรงจริง
+                            { filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.18))' }
+                      }
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          <div data-pre-fade className="flex items-end justify-between gap-6">
+            <div className="flex flex-col gap-4">
             {/* ปุ่มมาก่อนเลข: กดได้ตั้งแต่วินาทีแรกเสมอ ไม่ผูกกับ pct เลย
                 กติกานี้มีมาตั้งแต่วันแรกของ preloader — ห้ามขังผู้ใช้ */}
             <button
@@ -419,7 +442,8 @@ export default function Preloader({
               </span>
             </div>
           </div>
-          <span className="micro hidden md:block">ESC</span>
+            <span className="micro hidden md:block">ESC</span>
+          </div>
         </div>
       </div>
     </>
