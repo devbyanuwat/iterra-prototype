@@ -8,9 +8,23 @@ import { useEffect, useRef, useState } from 'react';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { CONTACT } from '@/lib/site';
+import { lifestyleImages } from '@/lib/lifestyle.generated';
+
+// ช่องแผนที่เดิมเป็นกล่องเปล่า — ใส่ภาพหน้าร้านโชว์รูมไปก่อน
+// (ภาพ retail ใบเดียวในคลัง) ตอนขึ้นจริงค่อยแทนด้วย Google Maps embed
+const SHOWROOM_ID = 'visual-showroom-secondary-banner';
+
+/** ค้นภาพจาก id — id ผิดจะพังตอน build ไม่ใช่ตอนผู้ใช้เปิดหน้า */
+function pic(id: string) {
+  const found = lifestyleImages.find((image) => image.id === id);
+  if (!found) throw new Error(`unknown lifestyle image: ${id}`);
+  return found;
+}
+
+const showroom = pic(SHOWROOM_ID);
 
 export default function ContactContent() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [toast, setToast] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [interest, setInterest] = useState('kitchen');
@@ -108,8 +122,22 @@ export default function ContactContent() {
               <p>{CONTACT.email}</p>
               <p>{CONTACT.hours_th}</p>
             </address>
-            {/* แผนที่: ฝัง Google Maps embed ตรงนี้ตอนขึ้นจริง */}
-            <div className="aspect-video w-full border border-line-6 bg-surface" aria-hidden />
+            {/* ภาพหน้าร้าน: ฝัง Google Maps embed แทนที่ตรงนี้ตอนขึ้นจริง */}
+            <div
+              className="w-full overflow-hidden border border-line-6 bg-surface"
+              style={{ aspectRatio: `${showroom.width} / ${showroom.height}` }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
+              <img
+                src={showroom.src.w900}
+                alt={showroom.alt[lang]}
+                width={showroom.width}
+                height={showroom.height}
+                className="h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           </Reveal>
         </div>
       </section>

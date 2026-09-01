@@ -6,12 +6,40 @@
 
 import Link from 'next/link';
 import Reveal from './Reveal';
-import ParallaxImage from './ParallaxImage';
 import { useLang } from './LangProvider';
 import { getPost } from '@/lib/posts';
+import { lifestyleImages, type LifestyleImage } from '@/lib/lifestyle.generated';
 
-// แทรกภาพ parallax หลังย่อหน้าที่ 2 และ 4 (ยังไม่มีภาพบทความจริง — กรอบตาม token)
-const IMAGE_AFTER = new Set([1, 3]);
+// แทรกภาพหลังย่อหน้าที่ 2 และ 4 — ภาพมาจาก post.bodyIds ตามลำดับ
+const IMAGE_AFTER = [1, 3];
+
+/** ค้นภาพจาก id — id ผิดจะพังตอน build ไม่ใช่ตอนผู้ใช้เปิดหน้า */
+function pic(id: string) {
+  const found = lifestyleImages.find((image) => image.id === id);
+  if (!found) throw new Error(`unknown lifestyle image: ${id}`);
+  return found;
+}
+
+/** กรอบภาพตามสัดส่วนจริงของไฟล์ — กันภาพกระโดดตอนโหลด */
+function Figure({ image, alt }: { image: LifestyleImage; alt: string }) {
+  return (
+    <div
+      className="overflow-hidden border border-line-6 bg-surface"
+      style={{ aspectRatio: `${image.width} / ${image.height}` }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
+      <img
+        src={image.src.w900}
+        alt={alt}
+        width={image.width}
+        height={image.height}
+        className="h-full w-full object-cover"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  );
+}
 
 export default function ArticleContent({ slug }: { slug: string }) {
   const { lang, t } = useLang();
@@ -21,6 +49,8 @@ export default function ArticleContent({ slug }: { slug: string }) {
   const locale = lang === 'th' ? 'th-TH' : 'en-GB';
   const tag = lang === 'en' ? (post.tagEn ?? post.tag) : post.tag;
   const body = lang === 'en' ? (post.bodyEn ?? post.body) : post.body;
+  const hero = pic(post.heroId);
+  const bodyImages = post.bodyIds.map(pic);
 
   return (
     <article className="px-6 pb-28 pt-36 md:pt-44">
@@ -41,7 +71,7 @@ export default function ArticleContent({ slug }: { slug: string }) {
       </div>
 
       <Reveal className="mx-auto mt-12 max-w-4xl">
-        <ParallaxImage ratio="16/9" speed={-6} />
+        <Figure image={hero} alt={hero.alt[lang]} />
       </Reveal>
 
       <div className="mx-auto mt-14 max-w-2xl">
@@ -50,9 +80,12 @@ export default function ArticleContent({ slug }: { slug: string }) {
             <Reveal y={24}>
               <p className="mb-8 text-[15px] font-normal leading-loose text-dim">{para}</p>
             </Reveal>
-            {IMAGE_AFTER.has(i) && (
+            {IMAGE_AFTER.includes(i) && (
               <Reveal className="mb-10">
-                <ParallaxImage ratio="3/2" speed={i % 2 ? 6 : -6} />
+                <Figure
+                  image={bodyImages[IMAGE_AFTER.indexOf(i)]}
+                  alt={bodyImages[IMAGE_AFTER.indexOf(i)].alt[lang]}
+                />
               </Reveal>
             )}
           </div>

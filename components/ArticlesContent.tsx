@@ -5,10 +5,17 @@
 
 import Link from 'next/link';
 import Reveal from './Reveal';
-import ParallaxImage from './ParallaxImage';
 import { useLang } from './LangProvider';
 import { posts } from '@/lib/posts';
 import { articlesIntro, pick } from '@/lib/i18n';
+import { lifestyleImages } from '@/lib/lifestyle.generated';
+
+/** ค้นภาพจาก id — id ผิดจะพังตอน build ไม่ใช่ตอนผู้ใช้เปิดหน้า */
+function pic(id: string) {
+  const found = lifestyleImages.find((image) => image.id === id);
+  if (!found) throw new Error(`unknown lifestyle image: ${id}`);
+  return found;
+}
 
 export default function ArticlesContent() {
   const { lang, t } = useLang();
@@ -30,12 +37,26 @@ export default function ArticlesContent() {
 
       <section className="px-6 pb-28 md:px-[8vw]">
         <div className="grid gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post, i) => (
+          {posts.map((post, i) => {
+            const cover = pic(post.coverId);
+            return (
             <Reveal key={post.slug} delay={(i % 3) * 0.12} y={30}>
               <Link href={`/articles/${post.slug}/`} className="group block">
-                <div className="overflow-hidden">
-                  <div className="transition-transform duration-700 ease-out group-hover:scale-105">
-                    <ParallaxImage ratio="16/9" speed={i % 2 ? 5 : -5} sizes="(max-width: 768px) 100vw, 30vw" />
+                <div className="overflow-hidden border border-line-6 bg-surface">
+                  <div
+                    className="transition-transform duration-700 ease-out group-hover:scale-105"
+                    style={{ aspectRatio: `${cover.width} / ${cover.height}` }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
+                    <img
+                      src={cover.src.w900}
+                      alt={cover.alt[lang]}
+                      width={cover.width}
+                      height={cover.height}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
                 </div>
                 <p className="mt-5 micro">
@@ -57,7 +78,8 @@ export default function ArticlesContent() {
                 </span>
               </Link>
             </Reveal>
-          ))}
+            );
+          })}
         </div>
       </section>
     </>
