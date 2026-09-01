@@ -11,3 +11,6 @@ next-env.d.ts
 # Next 16 สร้าง 2 ไฟล์นี้ให้อัตโนมัติทุกครั้งที่รัน dev
 AGENTS.md
 CLAUDE.md
+
+# Playwright MCP scratch output — tool artefact, never part of the project
+.playwright-mcp/
