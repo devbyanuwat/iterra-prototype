@@ -140,9 +140,13 @@ export default function FinishRail({ entries, activeCode, onSelect }: Props) {
                     isOn ? 'ring-2 ring-ink' : 'ring-1 ring-line-12',
                   ].join(' ')}
                 >
+                  {/* material ไม่ใช่ swatch — chip 88px ของรหัส NA เป็นตัวอักษร "NA"
+                      บนพื้นขาว (placeholder ของ Kohler แปลว่า not applicable) ไม่ใช่วัสดุ
+                      แถบนี้จึงต้องใช้ไฟล์ชุดเดียวกับกำแพง ไม่งั้นแถบมีปุ่มที่เขียนว่า NA
+                      อยู่ปุ่มหนึ่งท่ามกลางวัสดุจริง 10 ปุ่ม */}
                   {/* eslint-disable-next-line @next/next/no-img-element -- static export, ไฟล์วัสดุ local */}
                   <img
-                    src={e.swatch}
+                    src={e.material}
                     alt=""
                     width={36}
                     height={36}

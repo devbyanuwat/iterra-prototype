@@ -117,7 +117,10 @@ export default function FinishSwatches({ className = '', label, size = 44 }: Pro
             ].join(' ')}
           >
             <Image
-              src={f.swatch}
+              // ไฟล์วัสดุ ไม่ใช่ f.swatch — chip 88px ของรหัส NA ที่ Kohler ให้มา
+              // เป็นตัวอักษร "NA" บนพื้นขาว (not applicable) ไม่ใช่สแตนเลสอย่างที่
+              // ข้อมูลเราเรียก สินค้า 6 ชิ้นที่มีเฉดนี้จึงเคยได้ปุ่มที่เขียนว่า NA
+              src={`/finishes/${f.code}.webp`}
               alt=""
               width={size}
               height={size}
