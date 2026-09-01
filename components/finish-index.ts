@@ -10,9 +10,11 @@
 
 import { products, type Finish, type Product } from '@/lib/products';
 
-/** ฐานสีของหน้า (tokens §2) — ใช้คำนวณว่าแผงเฉดหนึ่ง ๆ จมหายกับพื้นหรือไม่ */
-const BASE = '#08090A';
-const CREAM = '#EDE9E3';
+/** ฐานสีของหน้า — ใช้คำนวณว่าแผงเฉดหนึ่ง ๆ จมหายกับพื้นหรือไม่
+ *  พื้นเปลี่ยนเป็น #E5E5E5 แล้ว ทิศทางจึงพลิก: แผงขาวคือตัวที่จมพื้น
+ *  แผงดำแยกตัวเองได้สบาย — solver คำนวณสองทางอยู่แล้วจึงพลิกตามเอง */
+const BASE = '#E5E5E5';
+const INK = '#232323';
 
 /**
  * จำนวนสินค้าต่อเฉดตามสเปก §3 — นับจากข้อมูลจริง 182 ตัว
@@ -210,14 +212,16 @@ const PANEL_VS_PAGE_TARGET = 1.6;
 export function panelScrim(accent: string): PanelScrim {
   const lum = luminance(accent);
 
-  const veilAlpha = solveAlpha(accent, BASE, CREAM, LABEL_TARGET);
+  const veilAlpha = solveAlpha(accent, BASE, INK, LABEL_TARGET);
   const veiled = blend(BASE, accent, veilAlpha);
 
-  // แผงมืดกว่าพื้นเกือบเท่ากัน (BL 1.21:1) ต้องถูกยกขึ้นให้เห็นเป็นวัตถุ
+  // แผงที่ contrast กับพื้นต่ำเกินต้องถูกดันให้เห็นเป็นวัตถุ
+  // บนพื้นสว่างตัวที่มีปัญหาคือแผงขาว (`0`) ไม่ใช่ Matte Black แล้ว — สูตรเดิม
+  // ใช้ได้ทั้งสองทางเพราะวัด contrastRatio ไม่ได้เทียบว่าใครสว่างกว่า
   let liftAlpha = 0;
   if (contrastRatio(accent, BASE) < PANEL_VS_PAGE_TARGET) {
     for (let a = 0.02; a <= 0.3; a += 0.01) {
-      if (contrastRatio(blend(CREAM, accent, a), BASE) >= PANEL_VS_PAGE_TARGET) {
+      if (contrastRatio(blend(INK, accent, a), BASE) >= PANEL_VS_PAGE_TARGET) {
         liftAlpha = Math.round(a * 100) / 100;
         break;
       }
@@ -225,25 +229,27 @@ export function panelScrim(accent: string): PanelScrim {
     if (!liftAlpha) liftAlpha = 0.3;
   }
 
-  // ขอบ: แผงที่สว่างแยกตัวเองได้อยู่แล้ว แผงมืดต้องการเส้นช่วย
-  const edgeAlpha = Math.round(Math.max(0.06, Math.min(0.28, 0.28 - lum * 0.5)) * 100) / 100;
+  // ขอบ: แผงมืดแยกตัวเองได้บนพื้นสว่าง แผงสว่างต้องการเส้นช่วย — กลับทางจากธีมเดิม
+  const edgeAlpha = Math.round(Math.max(0.06, Math.min(0.28, 0.06 + lum * 0.32)) * 100) / 100;
 
+  // veil/lift ใช้สีของธีมสว่าง: veil = พื้น #E5E5E5 ทาทับให้ ink อ่านออก
+  // lift = ink ทาบาง ๆ ให้แผงสว่างแยกจากพื้น (ธีมเดิมกลับกันทั้งคู่)
   return {
     lum,
-    ink: CREAM,
+    ink: INK,
     veilAlpha,
     veil:
       veilAlpha === 0
         ? 'none'
-        : `linear-gradient(to bottom, rgba(8,9,10,0) 0%, rgba(8,9,10,${(veilAlpha * 0.45).toFixed(
+        : `linear-gradient(to bottom, rgba(229,229,229,0) 0%, rgba(229,229,229,${(
+            veilAlpha * 0.45
+          ).toFixed(2)}) 52%, rgba(229,229,229,${veilAlpha.toFixed(
             2,
-          )}) 52%, rgba(8,9,10,${veilAlpha.toFixed(2)}) 74%, rgba(8,9,10,${veilAlpha.toFixed(
-            2,
-          )}) 100%)`,
+          )}) 74%, rgba(229,229,229,${veilAlpha.toFixed(2)}) 100%)`,
     liftAlpha,
-    lift: liftAlpha === 0 ? 'none' : `rgba(237,233,227,${liftAlpha.toFixed(2)})`,
-    edge: `rgba(255,255,255,${edgeAlpha.toFixed(2)})`,
-    labelContrast: Math.round(contrastRatio(veiled, CREAM) * 100) / 100,
+    lift: liftAlpha === 0 ? 'none' : `rgba(35,35,35,${liftAlpha.toFixed(2)})`,
+    edge: `rgba(0,0,0,${edgeAlpha.toFixed(2)})`,
+    labelContrast: Math.round(contrastRatio(veiled, INK) * 100) / 100,
   };
 }
 
