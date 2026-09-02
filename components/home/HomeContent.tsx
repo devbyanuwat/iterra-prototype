@@ -266,15 +266,23 @@ function Stats() {
       </Reveal>
       <dl className="grid grid-cols-2 gap-10 md:grid-cols-4">
         {t.home.stats.map((s, i) => (
-          <Reveal key={s.label} delay={i * 0.1} y={20}>
-            <div className="text-center">
-              {/* ตัวเลขใหญ่ 48–60px แต่ยังเป็นน้ำหนัก 400 ไม่ใช่ 200 — สเปก §3.2
-                  ยกเว้นน้ำหนักบางไว้ให้ตัวประดับล้วนอย่าง ModelNumber เท่านั้น */}
-              <dd className="font-display text-5xl font-normal text-ink md:text-6xl">
-                <CountUp to={s.value} suffix={s.suffix} />
-              </dd>
-              <dt className="micro mt-3">{s.label}</dt>
-            </div>
+          // <dt> ต้องมาก่อน <dd> ใน DOM (axe: dlitem) เดิมสลับกันอยู่จึงตก
+          // definition-list ทุกครั้งที่รัน Lighthouse — พลิกกลับด้วย
+          // flex-col-reverse ตัวเลขจึงยังอยู่บนป้ายเหมือนเดิม
+          // และ dt/dd ต้องเป็นลูกตรงของ div ที่เป็นลูกตรงของ <dl> — Reveal
+          // เรนเดอร์ div ตัวนั้นเอง ไม่มี div ซ้อนคั่นอีกชั้น
+          <Reveal
+            key={s.label}
+            delay={i * 0.1}
+            y={20}
+            className="flex flex-col-reverse text-center"
+          >
+            <dt className="micro mt-3">{s.label}</dt>
+            {/* ตัวเลขใหญ่ 48–60px แต่ยังเป็นน้ำหนัก 400 ไม่ใช่ 200 — สเปก §3.2
+                ยกเว้นน้ำหนักบางไว้ให้ตัวประดับล้วนอย่าง ModelNumber เท่านั้น */}
+            <dd className="font-display text-5xl font-normal text-ink md:text-6xl">
+              <CountUp to={s.value} suffix={s.suffix} />
+            </dd>
           </Reveal>
         ))}
       </dl>

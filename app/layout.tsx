@@ -7,6 +7,7 @@ import SmoothScroll from '@/components/SmoothScroll';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import JsonLd from '@/components/JsonLd';
+import { LANG_HIDE_ATTR, LANG_STORAGE_KEY } from '@/lib/i18n';
 import { CONTACT, SITE_NAME, SITE_TAGLINE_EN, SITE_TAGLINE_TH, SITE_URL } from '@/lib/site';
 
 // Display + micro-caps. Variable — opsz ปรับรูปตัวอักษรตามขนาดที่ใช้จริง
@@ -68,9 +69,24 @@ const organizationJsonLd = {
   },
 };
 
+// ทำงานก่อนหน้าจอวาดครั้งแรก: ถ้าเคยเลือกอังกฤษไว้ ให้แก้ <html lang> ทันที
+// แล้วซ่อน body ไว้จนกว่า LangProvider จะสลับข้อความเสร็จ (ดูคอมเมนต์ในไฟล์นั้น)
+// timeout เป็นวาล์วนิรภัย เผื่อ JS พังกลางทางจะได้ไม่เหลือหน้าเปล่า
+const RESTORE_LANG = `try{if(localStorage.getItem('${LANG_STORAGE_KEY}')==='en'){
+document.documentElement.lang='en';
+var s=document.createElement('style');
+s.setAttribute('${LANG_HIDE_ATTR}','');
+s.textContent='body{visibility:hidden}';
+document.head.appendChild(s);
+setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s)},2000);}}catch(e){}`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="th" className={`${dmSans.variable} ${plexThai.variable}`}>
+    // สคริปต์ข้างล่างแก้ lang ก่อน hydrate — บอก React ว่า attribute นี้ต่างได้
+    <html lang="th" suppressHydrationWarning className={`${dmSans.variable} ${plexThai.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: RESTORE_LANG }} />
+      </head>
       <body>
         <LangProvider>
           {/* Entry gate อยู่ใน layout ไม่ใช่ในหน้าใดหน้าหนึ่ง — layout ไม่ถูก

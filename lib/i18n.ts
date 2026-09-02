@@ -161,6 +161,8 @@ export const dict = {
       nav: 'เมนู',
       contact: 'ติดต่อ',
       rights: 'สงวนลิขสิทธิ์',
+      // เวลาทำการเคยอ่านจาก CONTACT.hours_th ตรง ๆ ท้ายเว็บจึงเป็นไทยค้างตอนสลับ EN
+      hours: 'เปิดทุกวัน 10:00 – 19:00 น.',
     },
   },
   en: {
@@ -302,11 +304,19 @@ export const dict = {
       nav: 'Menu',
       contact: 'Contact',
       rights: 'All rights reserved',
+      hours: 'Open daily 10:00 – 19:00',
     },
   },
 };
 
 export type Dict = (typeof dict)['th'];
+
+// ── การจำภาษาที่เลือก ──
+// อยู่ในไฟล์นี้เพราะทั้ง app/layout.tsx (server) และ LangProvider (client) ต้องใช้
+// ถ้าประกาศไว้ใน LangProvider ซึ่งเป็น 'use client' ฝั่ง server จะได้ตัวแทน
+// (client reference) มาแทนค่าจริง แล้วสคริปต์ก่อนวาดจะฝังสตริงผิดลงไปใน HTML
+export const LANG_STORAGE_KEY = 'kohler:lang';
+export const LANG_HIDE_ATTR = 'data-lang-restore';
 
 
 // ── เนื้อหาที่ยังไม่มีฉบับภาษาอังกฤษ ──
