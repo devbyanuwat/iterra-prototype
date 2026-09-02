@@ -48,6 +48,12 @@ const dictSource = {
       contact: 'ติดต่อเรา',
       showroom: 'นัดชมโชว์รูม',
       gallery: 'แกลเลอรี',
+      guides: 'คู่มือเลือกซื้อ',
+      ideas: 'ไอเดีย',
+      palette: 'สีและผิวเคลือบ',
+      collections: 'คอลเลกชัน',
+      stores: 'ร้านค้า',
+      info: 'ข้อมูลและบริการ',
     },
     // ป้ายที่มีแต่ screen reader ได้ยิน เคยฮาร์ดโค้ดไทยไว้ใน Nav/Footer
     // ตอนที่เอกสารเป็นไทยเสมอมันก็พอถูก แต่ตอนนี้ HTML ที่ export เป็นอังกฤษ
@@ -194,6 +200,87 @@ const dictSource = {
       indexHint: 'สนาม 3 มิติหาของเฉพาะเจาะจงไม่ได้ — รายการนี้คือของชุดเดียวกันแบบค้นได้',
       viewAll: 'ดูแคตตาล็อกทั้งหมด',
     },
+    // ── /palette และ /collections (task C2) ──
+    // สองชุดนี้มาจาก lib/palette.generated.ts และ lib/collections.generated.ts
+    // ซึ่งเก็บมาจาก /colorpalette และ /Collections ของ kohler.co.th
+    palette: {
+      kicker: 'COLOURS & FINISHES',
+      title: 'สีและผิวเคลือบทั้งหมด',
+      sub: (groups: number, finishes: number) =>
+        `${groups} หมวดอ้างอิง รวม ${finishes} สีและผิวเคลือบ — ชุดเดียวกับที่ทั้งเว็บนี้ใช้เรียกชื่อเฉด`,
+      groupsLabel: 'หมวดอ้างอิง',
+      finishesIn: (n: number) => `${n} เฉดในหมวดนี้`,
+      stockedTitle: 'สิบเอ็ดเฉดที่เรามีของจริง',
+      stockedSub:
+        'หน้าอ้างอิงข้างบนเป็นจานสีทั้งหมดของ KOHLER ส่วนข้างล่างนี้คือเฉดที่อยู่ในแคตตาล็อกของเราจริง กดเพื่อดูทั้งห้องในเฉดนั้น',
+      inStock: (n: number) => `มีในแคตตาล็อก ${n} ชิ้น`,
+      seeFinish: 'ดูทั้งห้องในเฉดนี้',
+      notStocked: 'เฉดอ้างอิง — ยังไม่มีในแคตตาล็อกของเรา',
+      backToIndex: 'กลับไปหน้าสีและผิวเคลือบ',
+      sourceNote: 'หน้าอ้างอิงชุดนี้ต้นทางมีเฉพาะภาษาอังกฤษ ทั้งใน URL ไทยและอังกฤษ',
+    },
+    collections: {
+      kicker: 'COLLECTIONS',
+      title: 'คอลเลกชัน',
+      sub: (n: number) => `${n} คอลเลกชันจากหน้ารวมของ KOHLER`,
+      lead: 'เลือกทั้งห้องให้เป็นภาษาเดียวกัน — คอลเลกชันหนึ่งคือชุดที่ออกแบบมาให้อยู่ด้วยกัน',
+      inCatalogue: (n: number) => `มีในแคตตาล็อกของเรา ${n} ชิ้น`,
+      noPage: 'ต้นทางไม่มีหน้าของคอลเลกชันนี้แล้ว',
+      noPageLong:
+        'การ์ดใบนี้ยังอยู่บนหน้ารวมของ KOHLER แต่ลิงก์ที่มันชี้ไปตอบ 404 เราจึงเก็บการ์ดไว้ตามจริงและไม่สร้างหน้าปลอมขึ้นมาแทน',
+      noProducts: 'ยังไม่มีชิ้นไหนของคอลเลกชันนี้ในแคตตาล็อกของเรา',
+      sourceLabel: 'ลิงก์เดิมที่ต้นทาง',
+    },
+    // ── ร้านค้า (task C3) ──
+    // ข้อมูลตัวแทนจำหน่ายเป็นภาษาไทยล้วนที่ต้นทาง (ดู storeSource.englishNote)
+    // ป้ายรอบ ๆ จึงแปลได้ แต่ชื่อร้านกับที่อยู่แปลไม่ได้ ต้องประกาศ lang="th" แทน
+    stores: {
+      kicker: 'WHERE TO BUY',
+      title: 'ร้านที่มีของจริงให้จับ',
+      sub: (n: number) => `ตัวแทนจำหน่าย KOHLER ${n} แห่งในเขตกรุงเทพฯ และปริมณฑล`,
+      kecLabel: 'KOHLER EXPERIENCE CENTER',
+      kecNote: 'โชว์รูมของแบรนด์เอง เป็นที่เดียวในรายการนี้ที่ประกาศเวลาทำการไว้',
+      dealers: 'ตัวแทนจำหน่าย',
+      phone: 'โทร',
+      hours: 'เวลาทำการ',
+      map: 'เปิดในแผนที่',
+      mapAria: (name: string) => `เปิด ${name} ใน Google Maps`,
+      noPhone: 'ต้นทางไม่ได้ให้เบอร์โทรไว้',
+      count: (n: number) => `${n} แห่ง`,
+      // ข้อจำกัดของข้อมูล พูดไว้บนหน้าเลย ไม่ใช่ซ่อนในโค้ด
+      limitTitle: 'ข้อมูลชุดนี้ครอบคลุมแค่ไหน',
+      limitCap:
+        'ต้นทางเรียงตามระยะห่างจากพิกัดกรุงเทพฯ ที่ตั้งไว้ แล้วตัดที่ 50 ราย และไม่มีปุ่มขอเพิ่ม นี่จึงไม่ใช่รายชื่อทั้งประเทศ',
+      limitLang: 'ชื่อร้านและที่อยู่เป็นภาษาไทยล้วนที่ต้นทาง ไม่มีฉบับภาษาอังกฤษให้ดึง',
+      limitFields:
+        'ต้นทางให้มาแค่ ชื่อ ที่อยู่ เบอร์โทร และพิกัด ไม่มีอีเมล เว็บไซต์ รูปร้าน หรือประเภทร้าน และมีเวลาทำการเพียงแห่งเดียว',
+      source: 'ที่มาของข้อมูล',
+    },
+    // ── หน้าข้อมูล (task C3) ──
+    info: {
+      kicker: 'INFORMATION',
+      title: 'ข้อมูลและบริการ',
+      sub: 'คู่มือดูแลรักษา การรับประกัน แคตตาล็อก ข่าว และเรื่องขององค์กร — ยกมาจาก kohler.co.th',
+      readPage: 'อ่านหน้านี้',
+      backToIndex: 'กลับไปหน้าข้อมูลทั้งหมด',
+      downloads: 'ดาวน์โหลด',
+      downloadPdf: 'เปิดไฟล์ PDF',
+      pressTitle: 'ข่าวประชาสัมพันธ์',
+      pressCount: (n: number) => `${n} รายการ`,
+      readOnSource: 'อ่านต้นฉบับที่ kohler.co.th',
+      sourceNote: 'เนื้อหาและภาพทั้งหมดเป็นของ KOHLER',
+      // หน้า /faq ของต้นทางว่างจริง ๆ — ไม่แต่งคำถามคำตอบขึ้นมาเอง
+      stubBadge: 'ต้นทางยังไม่มีเนื้อหา',
+      // ป้ายสั้นสำหรับท้ายเว็บและการ์ดในดัชนี — stubTitle เป็นทั้งประโยค ยาวเกินคอลัมน์
+      faqShort: 'คำถามที่พบบ่อย',
+      stubTitle: 'หน้าคำถามที่พบบ่อยของ KOHLER ยังว่างอยู่',
+      stubBody:
+        'หน้า /faq ของ kohler.co.th มีอยู่จริงทั้งสองภาษา แต่ยังไม่มีคำถามหรือคำตอบอยู่ในนั้นเลย — หัวข้อเดียวบนหน้าคือคำว่า "Empty" เราจึงไม่แต่งคำถามคำตอบขึ้นมาเอง',
+      stubWhere: 'คำตอบที่มีอยู่จริงอยู่ที่หน้าเหล่านี้',
+      stubAsk: 'ถามเราโดยตรง',
+      // /kohler-service-solution ไม่มี <h1> และไม่มีหัวข้อเลยที่ต้นทาง
+      untitled: 'บริการหลังการขาย',
+    },
     articles: {
       kicker: 'JOURNAL',
       // บทความทั้งหมดเป็นของ KOHLER คัดลอกมาทั้งข้อความและภาพ ไม่ได้เขียนเอง
@@ -201,6 +288,53 @@ const dictSource = {
       source: 'ต้นฉบับที่ kohler.co.th',
       sourceNote: 'บทความและภาพทั้งหมดเป็นของ KOHLER',
     },
+    // คู่มือเลือกซื้อ (task C1) — ข้อมูลอยู่ใน lib/guides.generated.ts ซึ่งไม่มีชื่อ
+    // ของคู่มือติดมาด้วย มีแต่ slug ชื่อทั้งสิบสามจึงอยู่ที่นี่ ไม่ใช่เดาจาก slug
+    // ตอน render (ภาษาไทยเดาจาก slug ไม่ได้อยู่แล้ว)
+    guides: {
+      kicker: 'SHOPPING GUIDES',
+      title: 'คู่มือเลือกซื้อ',
+      intro: (n: number) => `คู่มือเลือกซื้อ ${n} ชุด ยกมาจาก kohler.co.th ทั้งหมด ไม่ได้เรียบเรียงใหม่`,
+      sections: (n: number) => `${n} หมวด`,
+      options: (n: number) => `${n} ตัวเลือก`,
+      // ป้ายกำกับบล็อกที่ฉบับอังกฤษของต้นทางไม่มี — ดู enAvailable ในไฟล์ข้อมูล
+      thaiOnly: 'ไทยเท่านั้น',
+      gapNote: (missing: number, total: number) =>
+        `${missing} จาก ${total} บล็อกในหน้านี้ไม่มีในฉบับภาษาอังกฤษของต้นทาง ระบบจึงแสดงข้อความไทยพร้อมป้ายกำกับ`,
+      fullEn: 'ทุกบล็อกในหน้านี้มีทั้งไทยและอังกฤษที่ต้นทาง',
+      enCoverage: (withEn: number, total: number) => `อังกฤษ ${withEn}/${total} บล็อก`,
+      // ตัวเลือกในคู่มือเป็นภาพอ้างอิง ไม่ใช่ตัวกรองของเว็บนี้ — ลิงก์ต้นทางของมัน
+      // ชี้ไปที่ kohler.co.th ซึ่งเป็นคนละแคตตาล็อกกับที่เราสต็อกจริง
+      referenceNote: 'ตัวเลือกทั้งหมดเป็นภาพอ้างอิงจากคู่มือต้นฉบับ ไม่ใช่ตัวกรองสินค้าของเว็บนี้',
+      browse: 'ดูของที่เรามีจริง',
+    },
+    ideas: {
+      kicker: 'IDEAS',
+      title: 'ไอเดียแต่งห้อง',
+      intro: (n: number) =>
+        `ไอเดีย ${n} ชุดจาก kohler.co.th — เรื่องไหนที่เรามีบทความอยู่แล้วจะพาไปอ่านในเว็บนี้ ที่เหลือลิงก์ไปต้นฉบับ`,
+      stories: (n: number) => `${n} เรื่อง`,
+      readHere: 'อ่านบทความ',
+      names: {
+        bathroom: 'ไอเดียห้องน้ำ',
+        kitchen: 'ไอเดียห้องครัว',
+      } as Record<string, string>,
+    },
+    guideNames: {
+      'bathroom-accessories': 'อุปกรณ์เสริมห้องน้ำ',
+      'bathroom-faucets': 'ก๊อกน้ำห้องน้ำ',
+      'bathroom-furniture': 'เฟอร์นิเจอร์ห้องน้ำ',
+      bathtubs: 'อ่างอาบน้ำ',
+      'bidet-seat': 'ฝารองนั่งอัตโนมัติ',
+      commercial: 'สินค้าสำหรับโครงการ',
+      'kitchen-faucets': 'ก๊อกน้ำห้องครัว',
+      'kitchen-sinks': 'อ่างล้างจาน',
+      lavatories: 'อ่างล้างหน้า',
+      'mirrored-cabinets': 'ตู้กระจกเงา',
+      mirrors: 'กระจกเงา',
+      showering: 'ฝักบัวและระบบอาบน้ำ',
+      toilets: 'สุขภัณฑ์',
+    } as Record<string, string>,
     video: {
       play: 'เล่นวิดีโอ',
       // ประกาศก่อนกด ไม่ใช่หลังกด — หน้านี้ตั้งใจไม่ติดต่อ YouTube จนกว่าจะกด
@@ -234,6 +368,12 @@ const dictSource = {
       contact: 'Contact',
       showroom: 'Book a Visit',
       gallery: 'Gallery',
+      guides: 'Guides',
+      ideas: 'Ideas',
+      palette: 'Colours & Finishes',
+      collections: 'Collections',
+      stores: 'Where to buy',
+      info: 'Information',
     },
     a11y: {
       menuMain: 'Main menu',
@@ -364,11 +504,123 @@ const dictSource = {
       indexHint: 'A 3D field cannot be searched — this is the same set, in a list you can scan.',
       viewAll: 'See the whole catalogue',
     },
+    palette: {
+      kicker: 'COLOURS & FINISHES',
+      title: 'Every colour and finish',
+      sub: (groups: number, finishes: number) =>
+        `${groups} reference groups, ${finishes} colours and finishes — the same set this whole site names its finishes from.`,
+      groupsLabel: 'Reference groups',
+      finishesIn: (n: number) => `${n} in this group`,
+      stockedTitle: 'The eleven finishes we actually stock',
+      stockedSub:
+        'The reference pages above are KOHLER’s full palette. These are the finishes in our own catalogue — open one to see the whole room in it.',
+      inStock: (n: number) => `${n} pieces in the catalogue`,
+      seeFinish: 'See the whole room in this finish',
+      notStocked: 'Reference finish — not in our catalogue',
+      backToIndex: 'Back to colours & finishes',
+      sourceNote: 'The source publishes this reference in English only, at both the Thai and English URLs.',
+    },
+    collections: {
+      kicker: 'COLLECTIONS',
+      title: 'Collections',
+      sub: (n: number) => `${n} collections from KOHLER’s own index`,
+      lead: 'A collection is a set designed to live together — one language for the whole room.',
+      inCatalogue: (n: number) => `${n} pieces in our catalogue`,
+      noPage: 'The source no longer has a page for this collection',
+      noPageLong:
+        'The card is still on KOHLER’s index, but the link behind it answers 404. We keep the card as it is and do not invent a page to replace it.',
+      noProducts: 'None of this collection is in our catalogue yet',
+      sourceLabel: 'Original link',
+    },
+    stores: {
+      kicker: 'WHERE TO BUY',
+      title: 'Where you can actually touch one',
+      sub: (n: number) => `${n} KOHLER dealers across Bangkok and the surrounding provinces`,
+      kecLabel: 'KOHLER EXPERIENCE CENTER',
+      kecNote: 'The brand’s own showroom, and the only entry in this list that publishes its hours',
+      dealers: 'Dealers',
+      phone: 'Phone',
+      hours: 'Hours',
+      map: 'Open in Maps',
+      mapAria: (name: string) => `Open ${name} in Google Maps`,
+      noPhone: 'The source lists no phone number',
+      count: (n: number) => `${n} branches`,
+      limitTitle: 'What this list does and does not cover',
+      limitCap:
+        'The source ranks dealers by distance from one fixed Bangkok coordinate and stops at 50, with no control to ask for more. This is not the national list.',
+      limitLang: 'Dealer names and addresses are Thai-only at source. There is no English version to pull.',
+      limitFields:
+        'The source carries name, address, phone and coordinates — no email, no website, no photograph, no store type, and opening hours for exactly one branch.',
+      source: 'Where this came from',
+    },
+    info: {
+      kicker: 'INFORMATION',
+      title: 'Information & service',
+      sub: 'Care, warranty, catalogues, press and the corporate pages — taken from kohler.co.th',
+      readPage: 'Read this page',
+      backToIndex: 'All information pages',
+      downloads: 'Downloads',
+      downloadPdf: 'Open the PDF',
+      pressTitle: 'News and press releases',
+      pressCount: (n: number) => `${n} items`,
+      readOnSource: 'Read the original on kohler.co.th',
+      sourceNote: 'Every page and image here is KOHLER’s',
+      stubBadge: 'Empty at source',
+      faqShort: 'Frequently asked questions',
+      stubTitle: 'KOHLER’s FAQ page has nothing in it yet',
+      stubBody:
+        'kohler.co.th/faq is live in both languages and carries no questions and no answers — its only heading is the literal word “Empty”. So we have not written any, because inventing an FAQ and putting it under their name would be inventing what the brand says.',
+      stubWhere: 'The answers that do exist are on these pages',
+      stubAsk: 'Ask us directly',
+      untitled: 'Service solutions',
+    },
     articles: {
       kicker: 'JOURNAL',
       source: 'Original on kohler.co.th',
       sourceNote: 'Every article and image here is KOHLER’s',
     },
+    guides: {
+      kicker: 'SHOPPING GUIDES',
+      title: 'Shopping guides',
+      intro: (n: number) => `${n} shopping guides, taken from kohler.co.th — not rewritten by us.`,
+      sections: (n: number) => `${n} sections`,
+      options: (n: number) => `${n} options`,
+      thaiOnly: 'Thai only',
+      gapNote: (missing: number, total: number) =>
+        `${missing} of ${total} blocks on this guide have no English at source. They are shown in Thai and marked.`,
+      fullEn: 'Every block on this guide exists in both languages at source.',
+      enCoverage: (withEn: number, total: number) => `${withEn}/${total} blocks in English`,
+      referenceNote:
+        'These options are reference imagery from the original guide, not filters on this site.',
+      browse: 'See what we actually stock',
+    },
+    ideas: {
+      kicker: 'IDEAS',
+      title: 'Ideas',
+      intro: (n: number) =>
+        `${n} idea hubs from kohler.co.th — where we hold the article it opens here, otherwise it links to the original.`,
+      stories: (n: number) => `${n} stories`,
+      readHere: 'Read the article',
+      names: {
+        bathroom: 'Bathroom ideas',
+        kitchen: 'Kitchen ideas',
+      } as Record<string, string>,
+    },
+    guideNames: {
+      'bathroom-accessories': 'Bathroom accessories',
+      'bathroom-faucets': 'Bathroom faucets',
+      'bathroom-furniture': 'Bathroom furniture',
+      bathtubs: 'Bathtubs',
+      'bidet-seat': 'Bidet seats',
+      commercial: 'Commercial',
+      'kitchen-faucets': 'Kitchen faucets',
+      'kitchen-sinks': 'Kitchen sinks',
+      lavatories: 'Lavatories',
+      'mirrored-cabinets': 'Mirrored cabinets',
+      mirrors: 'Mirrors',
+      showering: 'Showering',
+      toilets: 'Toilets',
+    } as Record<string, string>,
     video: {
       play: 'Play video',
       source: 'PLAYS FROM YOUTUBE',

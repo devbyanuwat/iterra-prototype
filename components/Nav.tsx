@@ -26,8 +26,23 @@ const LINKS = [
   { href: '/', key: 'home' },
   { href: '/about/', key: 'about' },
   { href: '/products/', key: 'products' },
+  // จานสีอยู่ติดกับสินค้าเพราะมันคือ "อีกด้าน" ของเรื่องเดียวกัน: หน้าเฉดบอกว่า
+  // เรามีอะไรในสีนั้น หน้าจานสีบอกว่าสีนั้นคืออะไร และเป็นทางที่หน้า /finish
+  // เดินกลับมาหาหน้าอ้างอิงได้จากทุกหน้าของเว็บ
+  { href: '/palette/', key: 'palette' },
+  { href: '/collections/', key: 'collections' },
   { href: '/gallery/', key: 'gallery' },
   { href: '/articles/', key: 'articles' },
+  // task C1 — คู่มือเลือกซื้อกับไอเดียอยู่ติดกับบทความ เพราะทั้งสามคือของอ่าน
+  // ชุดเดียวกันจาก kohler.co.th ต่างกันแค่รูปแบบ: บทความคือเรื่องยาว ไอเดียคือ
+  // ชุดเรื่องที่ต้นทางจัดไว้ให้ ส่วนคู่มือคือวิธีเลือกของทีละหมวด
+  { href: '/guides/', key: 'guides' },
+  { href: '/ideas/', key: 'ideas' },
+  // task C3 — ร้านค้าอยู่ในเมนูหลัก ไม่ใช่ท้ายเว็บ ทั้งที่หน้าข้อมูลอีกเก้าหน้า
+  // อยู่ท้ายเว็บ เพราะมันตอบคนละคำถาม: เก้าหน้านั้นคือ "อ่านเพิ่ม" ส่วนหน้านี้คือ
+  // "แล้วจะไปดูของจริงได้ที่ไหน" ซึ่งเป็นปลายทางของทั้งเว็บ และเป็นหน้าที่ลูกค้า
+  // ทักมาเองว่าหายไป วางไว้ติดกับติดต่อเราเพราะเป็นความตั้งใจเดียวกัน
+  { href: '/stores/', key: 'stores' },
   { href: '/contact/', key: 'contact' },
 ] as const;
 
@@ -79,7 +94,22 @@ export default function Nav() {
           <Link href="/" className="pointer-events-auto">
             <BrandMark height={18} />
           </Link>
-          <nav aria-label={t.a11y.menuMain} className="pointer-events-auto hidden items-center gap-8 md:flex">
+          {/* gap-4 และ lg: ไม่ใช่ gap-8 กับ md: — เมนูโตเป็นสิบเอ็ดรายการแล้ว
+              (palette/collections/stores จาก task C2–C3 และ guides/ideas จาก C1)
+              วัดที่ 1440 ภาษาอังกฤษ: ตัวอักษรของลิงก์ทั้งสิบเอ็ด + ปุ่มภาษา รวม
+              1014px ส่วนที่ว่างระหว่างเวิร์ดมาร์กกับขอบขวามี 1241px
+                gap-8 → 1014 + 11×32 = 1366  เกิน 125px
+                gap-6 → 1278                 เกิน 37px  (ป้ายยาวถูกหักสองบรรทัด)
+                gap-5 → 1234                 พอดี เหลือ 7px — ยังชนเวิร์ดมาร์กด้วยตา
+                gap-4 → 1190                 เหลือ 51px ให้เวิร์ดมาร์กหายใจ
+              เหลือ 7px คือ "พอดีจริง ๆ" ไม่ใช่ "สบาย" — ป้ายใหม่อีกอันเดียวก็หัก
+              บรรทัดอีก และเมื่อดูด้วยตา เมนูก็ไปติดเวิร์ดมาร์กอยู่ดี จึงเลือก gap-4
+              เมนูสิบเอ็ดรายการเกินความกว้างของแถวเดียวไปแล้วโดยธรรมชาติ
+              การจัดกลุ่มเมนูเป็นการตัดสินใจของงานออกแบบ ไม่ใช่ของ task ใด task หนึ่ง
+              (บันทึกไว้ใน scratchpad/task-c1.md)
+              ส่วน lg: แทน md: เพราะที่ 768–1023 แถวเดียวใส่ไม่ลงในทุกกรณี — ช่วงนั้น
+              ใช้เมนูเต็มจอซึ่งมีลิงก์ครบชุดเดียวกันอยู่แล้ว */}
+          <nav aria-label={t.a11y.menuMain} className="pointer-events-auto hidden items-center gap-4 lg:flex">
             {LINKS.map((l) => (
               <Link
                 key={l.href}
@@ -94,7 +124,7 @@ export default function Nav() {
             ))}
             <LangSwitch />
           </nav>
-          <div className="pointer-events-auto flex items-center gap-4 md:hidden">
+          <div className="pointer-events-auto flex items-center gap-4 lg:hidden">
             <LangSwitch />
             <button
               type="button"
@@ -111,7 +141,7 @@ export default function Nav() {
 
       {/* เมนูมือถือแบบเต็มจอ */}
       <div
-        className={`fixed inset-0 z-[60] flex flex-col bg-base text-ink transition-transform duration-500 md:hidden ${
+        className={`fixed inset-0 z-[60] flex flex-col bg-base text-ink transition-transform duration-500 lg:hidden ${
           open ? 'translate-y-0' : '-translate-y-full'
         }`}
         aria-hidden={!open}
