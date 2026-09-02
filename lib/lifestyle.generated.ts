@@ -125,6 +125,23 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: '2022-most-innovative-bathroom-products-moxie-numi-gcs-hero-banner-968-x-544-2',
+    sources: [
+      { width: 968, height: 544, src: '/lifestyle/2022-most-innovative-bathroom-products-moxie-numi-gcs-hero-banner-968-x-544-2-968.webp' },
+    ],
+    src: { full: '/lifestyle/2022-most-innovative-bathroom-products-moxie-numi-gcs-hero-banner-968-x-544-2-968.webp', w900: '/lifestyle/2022-most-innovative-bathroom-products-moxie-numi-gcs-hero-banner-968-x-544-2-968.webp' },
+    width: 968,
+    height: 544,
+    aspect: 1.779,
+    maxWidth: 968,
+    category: 'people',
+    space: 'bath',
+    alt: {
+      th: 'ผู้หญิงในห้องอาบน้ำผนังหินอ่อนที่มองเห็นวิวภูเขา',
+      en: 'A woman in a marble shower room with a mountain view',
+    },
+  },
+  {
     id: '2022-most-innovative-bathroom-products-moxie-numi-gcs-secondary-banner-290-x-232',
     sources: [
       { width: 608, height: 484, src: '/lifestyle/2022-most-innovative-bathroom-products-moxie-numi-gcs-secondary-banner-290-x-232-608.webp' },
@@ -139,6 +156,57 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'ผู้หญิงกำลังปรับแผงควบคุมฝักบัวดิจิทัลในห้องอาบน้ำผนังหิน',
       en: 'A woman adjusting a digital shower control in a stone shower',
+    },
+  },
+  {
+    id: '35-classic',
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/35-classic-460.webp' },
+    ],
+    src: { full: '/lifestyle/35-classic-460.webp', w900: '/lifestyle/35-classic-460.webp' },
+    width: 460,
+    height: 353,
+    aspect: 1.303,
+    maxWidth: 460,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำสไตล์คลาสสิกพร้อมอ่างอาบน้ำลอยตัวและห้องอาบน้ำโทนเข้ม',
+      en: 'Classic bathroom with a freestanding bath and a dark shower',
+    },
+  },
+  {
+    id: '36-comtemporary',
+    sources: [
+      { width: 461, height: 353, src: '/lifestyle/36-comtemporary-461.webp' },
+    ],
+    src: { full: '/lifestyle/36-comtemporary-461.webp', w900: '/lifestyle/36-comtemporary-461.webp' },
+    width: 461,
+    height: 353,
+    aspect: 1.306,
+    maxWidth: 461,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำสไตล์โมเดิร์นพร้อมผนังโค้งเป็นจุดเด่น',
+      en: 'Contemporary bathroom with a curved feature wall',
+    },
+  },
+  {
+    id: '37-transitional',
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/37-transitional-460.webp' },
+    ],
+    src: { full: '/lifestyle/37-transitional-460.webp', w900: '/lifestyle/37-transitional-460.webp' },
+    width: 460,
+    height: 353,
+    aspect: 1.303,
+    maxWidth: 460,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำสไตล์ทรานซิชันนัลโทนสีนวลอ่อน',
+      en: 'Transitional bathroom in soft neutral tones',
     },
   },
   {
@@ -178,6 +246,24 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'aaa68050-43',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/aaa68050-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/aaa68050-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/aaa68050-43-1800.webp', w900: '/lifestyle/aaa68050-43-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'อ่างล้างหน้าแบบคอนโซลเข้ามุมหน้าผนังไม้บุสีเทาอมฟ้า',
+      en: 'Corner console basin against blue-grey panelling',
+    },
+  },
+  {
     id: 'aaa68056-rgb',
     sources: [
       { width: 1800, height: 2062, src: '/lifestyle/aaa68056-rgb-1800.webp' },
@@ -211,6 +297,24 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'ห้องน้ำพร้อมอ่างอาบน้ำแบบฝัง โคมระย้า และผนังไม้บุสีเขียว',
       en: 'Bathroom with a drop-in bath, chandelier and green panelling',
+    },
+  },
+  {
+    id: 'aaa75014-43',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/aaa75014-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/aaa75014-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/aaa75014-43-1800.webp', w900: '/lifestyle/aaa75014-43-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'อ่างล้างหน้าแก้วสีเข้มพร้อมก๊อกที่กำลังปล่อยน้ำ',
+      en: 'Dark glass vessel basin with a running faucet',
     },
   },
   {
@@ -517,6 +621,23 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'bathtub-faucet',
+    sources: [
+      { width: 460, height: 353, src: '/lifestyle/bathtub-faucet-460.webp' },
+    ],
+    src: { full: '/lifestyle/bathtub-faucet-460.webp', w900: '/lifestyle/bathtub-faucet-460.webp' },
+    width: 460,
+    height: 353,
+    aspect: 1.303,
+    maxWidth: 460,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'อ่างอาบน้ำลอยตัวพร้อมก๊อกตั้งพื้น',
+      en: 'Freestanding bath with a floor-mounted faucet',
+    },
+  },
+  {
     id: 'bbb18895-43',
     sources: [
       { width: 1800, height: 1350, src: '/lifestyle/bbb18895-43-1800.webp' },
@@ -675,6 +796,24 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'crown-towers-perth-01',
+    sources: [
+      { width: 1600, height: 900, src: '/lifestyle/crown-towers-perth-01-1600.webp' },
+      { width: 900, height: 506, src: '/lifestyle/crown-towers-perth-01-900.webp' },
+    ],
+    src: { full: '/lifestyle/crown-towers-perth-01-1600.webp', w900: '/lifestyle/crown-towers-perth-01-900.webp' },
+    width: 1600,
+    height: 900,
+    aspect: 1.778,
+    maxWidth: 1600,
+    category: 'project',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำในห้องสวีทพร้อมกระจกทรงกลมที่ Crown Towers เพิร์ท',
+      en: 'Suite bathroom with ring mirrors at Crown Towers, Perth',
+    },
+  },
+  {
     id: 'exhale',
     sources: [
       { width: 460, height: 353, src: '/lifestyle/exhale-460.webp' },
@@ -689,6 +828,23 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'ฝักบัว Exhale ติดตั้งบนผนังกระเบื้องหินสีเข้ม',
       en: 'Exhale showerhead mounted on dark stone tile',
+    },
+  },
+  {
+    id: 'fachon-hotel-tokyo-japan-article-output-banner-updated-size-307x204',
+    sources: [
+      { width: 309, height: 204, src: '/lifestyle/fachon-hotel-tokyo-japan-article-output-banner-updated-size-307x204-309.webp' },
+    ],
+    src: { full: '/lifestyle/fachon-hotel-tokyo-japan-article-output-banner-updated-size-307x204-309.webp', w900: '/lifestyle/fachon-hotel-tokyo-japan-article-output-banner-updated-size-307x204-309.webp' },
+    width: 309,
+    height: 204,
+    aspect: 1.515,
+    maxWidth: 309,
+    category: 'project',
+    space: 'other',
+    alt: {
+      th: 'โรงแรม Fauchon L’Hôtel โตเกียว ในเวลากลางคืน',
+      en: 'Fauchon L’Hôtel, Tokyo, lit at night',
     },
   },
   {
@@ -830,6 +986,23 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'ห้องน้ำกรุกระเบื้องสีเหลืองพร้อมอ่างล้างหน้าสีทองที่ Hotel Indigo กรุงเทพฯ',
       en: 'Yellow-tiled bathroom with gold basins at Hotel Indigo, Bangkok',
+    },
+  },
+  {
+    id: 'intercontinental-khao-yai-thailand-article-output-banner-updated-size-307x204',
+    sources: [
+      { width: 308, height: 204, src: '/lifestyle/intercontinental-khao-yai-thailand-article-output-banner-updated-size-307x204-308.webp' },
+    ],
+    src: { full: '/lifestyle/intercontinental-khao-yai-thailand-article-output-banner-updated-size-307x204-308.webp', w900: '/lifestyle/intercontinental-khao-yai-thailand-article-output-banner-updated-size-307x204-308.webp' },
+    width: 308,
+    height: 204,
+    aspect: 1.51,
+    maxWidth: 308,
+    category: 'project',
+    space: 'other',
+    alt: {
+      th: 'รีสอร์ต InterContinental เขาใหญ่ มองจากสวน',
+      en: 'InterContinental Khao Yai Resort seen from the garden',
     },
   },
   {
@@ -989,6 +1162,23 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'ภาพมุมสูงของอ่างล้างจานพร้อมผัก เขียง และช้อนส้อม',
       en: 'Overhead view of a sink with produce, a board and cutlery',
+    },
+  },
+  {
+    id: 'kohler-23022005-jakarta-st-regis-indonesia-article-output-banner-updated-size-307x204',
+    sources: [
+      { width: 309, height: 204, src: '/lifestyle/kohler-23022005-jakarta-st-regis-indonesia-article-output-banner-updated-size-307x204-309.webp' },
+    ],
+    src: { full: '/lifestyle/kohler-23022005-jakarta-st-regis-indonesia-article-output-banner-updated-size-307x204-309.webp', w900: '/lifestyle/kohler-23022005-jakarta-st-regis-indonesia-article-output-banner-updated-size-307x204-309.webp' },
+    width: 309,
+    height: 204,
+    aspect: 1.515,
+    maxWidth: 309,
+    category: 'project',
+    space: 'other',
+    alt: {
+      th: 'อาคารโรงแรม St. Regis จาการ์ตา เหนือเส้นขอบฟ้าเมือง',
+      en: 'The St. Regis Jakarta tower above the city',
     },
   },
   {
@@ -1341,6 +1531,160 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'maxispace-article-sub-component-400x255-01',
+    sources: [
+      { width: 800, height: 510, src: '/lifestyle/maxispace-article-sub-component-400x255-01-800.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-article-sub-component-400x255-01-800.webp', w900: '/lifestyle/maxispace-article-sub-component-400x255-01-800.webp' },
+    width: 800,
+    height: 510,
+    aspect: 1.569,
+    maxWidth: 800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำขนาดกะทัดรัดพร้อมซุ้มโค้งสีชมพูและตู้กระจก',
+      en: 'Compact bathroom with a pink arch and a mirror cabinet',
+    },
+  },
+  {
+    id: 'maxispace-article-sub-component-400x255-02',
+    sources: [
+      { width: 801, height: 510, src: '/lifestyle/maxispace-article-sub-component-400x255-02-801.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-article-sub-component-400x255-02-801.webp', w900: '/lifestyle/maxispace-article-sub-component-400x255-02-801.webp' },
+    width: 801,
+    height: 510,
+    aspect: 1.571,
+    maxWidth: 801,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'ลิ้นชักตู้อ่างล้างหน้าพร้อมถาดจัดเก็บเครื่องสำอาง',
+      en: 'Vanity drawer fitted with a cosmetics organiser',
+    },
+  },
+  {
+    id: 'maxispace-article-sub-component-400x255-03',
+    sources: [
+      { width: 802, height: 510, src: '/lifestyle/maxispace-article-sub-component-400x255-03-802.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-article-sub-component-400x255-03-802.webp', w900: '/lifestyle/maxispace-article-sub-component-400x255-03-802.webp' },
+    width: 802,
+    height: 510,
+    aspect: 1.573,
+    maxWidth: 802,
+    category: 'people',
+    space: 'other',
+    alt: {
+      th: 'ผู้หญิงนั่งอ่านหนังสือข้างหน้าต่างที่เต็มไปด้วยต้นไม้',
+      en: 'A woman reading beside a window full of plants',
+    },
+  },
+  {
+    id: 'maxispace-article-sub-component-400x255-04',
+    sources: [
+      { width: 800, height: 510, src: '/lifestyle/maxispace-article-sub-component-400x255-04-800.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-article-sub-component-400x255-04-800.webp', w900: '/lifestyle/maxispace-article-sub-component-400x255-04-800.webp' },
+    width: 800,
+    height: 510,
+    aspect: 1.569,
+    maxWidth: 800,
+    category: 'promo',
+    space: 'bath',
+    alt: {
+      th: 'ภาพโฆษณาความทนทานของตู้กระจกพร้อมตรา 50,000 รอบ',
+      en: 'Mirror cabinet durability claim with a 50,000-cycle badge',
+    },
+  },
+  {
+    id: 'maxispace-article-sub-component-400x255-05',
+    sources: [
+      { width: 801, height: 510, src: '/lifestyle/maxispace-article-sub-component-400x255-05-801.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-article-sub-component-400x255-05-801.webp', w900: '/lifestyle/maxispace-article-sub-component-400x255-05-801.webp' },
+    width: 801,
+    height: 510,
+    aspect: 1.571,
+    maxWidth: 801,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'ชั้นเลื่อนของตู้อ่างล้างหน้าที่วางขวดน้ำหอม',
+      en: 'Pull-out vanity shelf holding a perfume bottle',
+    },
+  },
+  {
+    id: 'maxispace-hero-banner-968x544',
+    sources: [
+      { width: 1800, height: 1012, src: '/lifestyle/maxispace-hero-banner-968x544-1800.webp' },
+      { width: 900, height: 506, src: '/lifestyle/maxispace-hero-banner-968x544-900.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-hero-banner-968x544-1800.webp', w900: '/lifestyle/maxispace-hero-banner-968x544-900.webp' },
+    width: 1800,
+    height: 1012,
+    aspect: 1.779,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำโทนชมพูตัดเขียวพร้อมตู้กระจกที่เปิดอยู่',
+      en: 'Pink and green bathroom with the mirror cabinet standing open',
+    },
+  },
+  {
+    id: 'maxispace-rolling-carousel-400x300-01',
+    sources: [
+      { width: 801, height: 600, src: '/lifestyle/maxispace-rolling-carousel-400x300-01-801.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-rolling-carousel-400x300-01-801.webp', w900: '/lifestyle/maxispace-rolling-carousel-400x300-01-801.webp' },
+    width: 801,
+    height: 600,
+    aspect: 1.335,
+    maxWidth: 801,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'ลิ้นชักตู้อ่างล้างหน้าที่เปิดอยู่ข้างอ่างแบบแขวนผนัง',
+      en: 'Vanity drawer open beside a wall-hung basin',
+    },
+  },
+  {
+    id: 'maxispace-rolling-carousel-400x300-02',
+    sources: [
+      { width: 802, height: 600, src: '/lifestyle/maxispace-rolling-carousel-400x300-02-802.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-rolling-carousel-400x300-02-802.webp', w900: '/lifestyle/maxispace-rolling-carousel-400x300-02-802.webp' },
+    width: 802,
+    height: 600,
+    aspect: 1.337,
+    maxWidth: 802,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'ถาดเลื่อนบนตู้อ่างล้างหน้าหน้าบานไม้',
+      en: 'Pull-out tray on a wood-fronted vanity',
+    },
+  },
+  {
+    id: 'maxispace-rolling-carousel-400x300-03',
+    sources: [
+      { width: 800, height: 600, src: '/lifestyle/maxispace-rolling-carousel-400x300-03-800.webp' },
+    ],
+    src: { full: '/lifestyle/maxispace-rolling-carousel-400x300-03-800.webp', w900: '/lifestyle/maxispace-rolling-carousel-400x300-03-800.webp' },
+    width: 800,
+    height: 600,
+    aspect: 1.333,
+    maxWidth: 800,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'ภายในตู้กระจกที่จัดของใช้ในห้องน้ำไว้เต็ม',
+      en: 'Mirror cabinet interior stocked with toiletries',
+    },
+  },
+  {
     id: 'maxispace-secondary-banner-290x232',
     sources: [
       { width: 600, height: 482, src: '/lifestyle/maxispace-secondary-banner-290x232-600.webp' },
@@ -1372,6 +1716,23 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'ชุดวาล์วอ่างและฝักบัว Modulo สีดำบนผนังกระเบื้องสีเทา',
       en: 'Black Modulo bath and shower trim on grey tile',
+    },
+  },
+  {
+    id: 'mongolia-mara6871',
+    sources: [
+      { width: 968, height: 544, src: '/lifestyle/mongolia-mara6871-968.webp' },
+    ],
+    src: { full: '/lifestyle/mongolia-mara6871-968.webp', w900: '/lifestyle/mongolia-mara6871-968.webp' },
+    width: 968,
+    height: 544,
+    aspect: 1.779,
+    maxWidth: 968,
+    category: 'project',
+    space: 'bath',
+    alt: {
+      th: 'แถวอ่างล้างหน้าในห้องน้ำโรงแรม Shangri-La อูลานบาตอร์',
+      en: 'Row of basins in a hotel washroom at Shangri-La, Ulaanbaatar',
     },
   },
   {
@@ -1441,6 +1802,23 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'แบนเนอร์แคมเปญ Kohler Service Solutions ภาษาไทย',
       en: 'Kohler Service Solutions campaign banner in Thai',
+    },
+  },
+  {
+    id: 'oval-round',
+    sources: [
+      { width: 461, height: 353, src: '/lifestyle/oval-round-461.webp' },
+    ],
+    src: { full: '/lifestyle/oval-round-461.webp', w900: '/lifestyle/oval-round-461.webp' },
+    width: 461,
+    height: 353,
+    aspect: 1.306,
+    maxWidth: 461,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'อ่างล้างหน้าทรงกลมวางบนเคาน์เตอร์ไม้',
+      en: 'Round vessel basin on a wooden counter',
     },
   },
   {
@@ -1794,6 +2172,204 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'the-lin-taichung-03',
+    sources: [
+      { width: 1800, height: 1202, src: '/lifestyle/the-lin-taichung-03-1800.webp' },
+      { width: 900, height: 601, src: '/lifestyle/the-lin-taichung-03-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-03-1800.webp', w900: '/lifestyle/the-lin-taichung-03-900.webp' },
+    width: 1800,
+    height: 1202,
+    aspect: 1.498,
+    maxWidth: 1800,
+    category: 'project',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำในห้องสวีทพร้อมอ่างน้ำวนที่โรงแรม The Lin ไถจง',
+      en: 'Suite bathroom with a whirlpool bath at The Lin, Taichung',
+    },
+  },
+  {
+    id: 'the-lin-taichung-04',
+    sources: [
+      { width: 1800, height: 1210, src: '/lifestyle/the-lin-taichung-04-1800.webp' },
+      { width: 900, height: 605, src: '/lifestyle/the-lin-taichung-04-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-04-1800.webp', w900: '/lifestyle/the-lin-taichung-04-900.webp' },
+    width: 1800,
+    height: 1210,
+    aspect: 1.488,
+    maxWidth: 1800,
+    category: 'project',
+    space: 'bath',
+    alt: {
+      th: 'เคาน์เตอร์อ่างล้างหน้าหินโอนิกซ์พร้อมวิวเมืองที่ The Lin ไถจง',
+      en: 'Onyx vanity with a city view at The Lin, Taichung',
+    },
+  },
+  {
+    id: 'the-lin-taichung-06',
+    sources: [
+      { width: 1800, height: 1069, src: '/lifestyle/the-lin-taichung-06-1800.webp' },
+      { width: 900, height: 535, src: '/lifestyle/the-lin-taichung-06-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-06-1800.webp', w900: '/lifestyle/the-lin-taichung-06-900.webp' },
+    width: 1800,
+    height: 1069,
+    aspect: 1.684,
+    maxWidth: 1800,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'แผงควบคุมฝักบัวดิจิทัลฝังในผนังหินโอนิกซ์',
+      en: 'Digital shower control set into an onyx wall',
+    },
+  },
+  {
+    id: 'the-lin-taichung-10',
+    sources: [
+      { width: 1800, height: 1201, src: '/lifestyle/the-lin-taichung-10-1800.webp' },
+      { width: 900, height: 601, src: '/lifestyle/the-lin-taichung-10-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-10-1800.webp', w900: '/lifestyle/the-lin-taichung-10-900.webp' },
+    width: 1800,
+    height: 1201,
+    aspect: 1.499,
+    maxWidth: 1800,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'อ่างล้างหน้าแบบฝังใต้เคาน์เตอร์และก๊อกสามชิ้นบนหินอ่อนลายสวย',
+      en: 'Undermount basin and widespread faucet on figured marble',
+    },
+  },
+  {
+    id: 'the-lin-taichung-11',
+    sources: [
+      { width: 1800, height: 1090, src: '/lifestyle/the-lin-taichung-11-1800.webp' },
+      { width: 900, height: 545, src: '/lifestyle/the-lin-taichung-11-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-11-1800.webp', w900: '/lifestyle/the-lin-taichung-11-900.webp' },
+    width: 1800,
+    height: 1090,
+    aspect: 1.651,
+    maxWidth: 1800,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'ก๊อกลงอ่างและผ้าเช็ดตัวพับบนขอบอ่างหินอ่อน',
+      en: 'Bath filler and folded towel on a marble deck',
+    },
+  },
+  {
+    id: 'the-lin-taichung-13',
+    sources: [
+      { width: 1800, height: 1202, src: '/lifestyle/the-lin-taichung-13-1800.webp' },
+      { width: 900, height: 601, src: '/lifestyle/the-lin-taichung-13-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-13-1800.webp', w900: '/lifestyle/the-lin-taichung-13-900.webp' },
+    width: 1800,
+    height: 1202,
+    aspect: 1.498,
+    maxWidth: 1800,
+    category: 'project',
+    space: 'bath',
+    alt: {
+      th: 'อ่างล้างหน้าคู่ในห้องน้ำโรงแรมโทนสีทอง',
+      en: 'Twin vanities in a gold-toned hotel bathroom',
+    },
+  },
+  {
+    id: 'the-lin-taichung-15',
+    sources: [
+      { width: 1800, height: 1202, src: '/lifestyle/the-lin-taichung-15-1800.webp' },
+      { width: 900, height: 601, src: '/lifestyle/the-lin-taichung-15-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-15-1800.webp', w900: '/lifestyle/the-lin-taichung-15-900.webp' },
+    width: 1800,
+    height: 1202,
+    aspect: 1.498,
+    maxWidth: 1800,
+    category: 'project',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำโรงแรมพร้อมห้องอาบน้ำและอ่างอาบน้ำ',
+      en: 'Hotel bathroom with a walk-in shower and a bath',
+    },
+  },
+  {
+    id: 'the-lin-taichung-17',
+    sources: [
+      { width: 1800, height: 1202, src: '/lifestyle/the-lin-taichung-17-1800.webp' },
+      { width: 900, height: 601, src: '/lifestyle/the-lin-taichung-17-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-17-1800.webp', w900: '/lifestyle/the-lin-taichung-17-900.webp' },
+    width: 1800,
+    height: 1202,
+    aspect: 1.498,
+    maxWidth: 1800,
+    category: 'project',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำโรงแรมกรุหินอ่อนพร้อมภาพศิลปะกรอบรูป',
+      en: 'Marble hotel bathroom with framed artwork',
+    },
+  },
+  {
+    id: 'the-lin-taichung-18',
+    sources: [
+      { width: 1800, height: 987, src: '/lifestyle/the-lin-taichung-18-1800.webp' },
+      { width: 900, height: 494, src: '/lifestyle/the-lin-taichung-18-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-18-1800.webp', w900: '/lifestyle/the-lin-taichung-18-900.webp' },
+    width: 1800,
+    height: 987,
+    aspect: 1.824,
+    maxWidth: 1800,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'อ่างล้างหน้าและผ้าเช็ดตัวบนเคาน์เตอร์หินอ่อนสีทอง',
+      en: 'Basin and towels on a golden marble counter',
+    },
+  },
+  {
+    id: 'the-lin-taichung-21',
+    sources: [
+      { width: 1800, height: 1202, src: '/lifestyle/the-lin-taichung-21-1800.webp' },
+      { width: 900, height: 601, src: '/lifestyle/the-lin-taichung-21-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-21-1800.webp', w900: '/lifestyle/the-lin-taichung-21-900.webp' },
+    width: 1800,
+    height: 1202,
+    aspect: 1.498,
+    maxWidth: 1800,
+    category: 'project',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำสาธารณะพร้อมเคาน์เตอร์อ่างยาวจากหิน',
+      en: 'Public washroom with a stone trough counter',
+    },
+  },
+  {
+    id: 'the-lin-taichung-22',
+    sources: [
+      { width: 1800, height: 1202, src: '/lifestyle/the-lin-taichung-22-1800.webp' },
+      { width: 900, height: 601, src: '/lifestyle/the-lin-taichung-22-900.webp' },
+    ],
+    src: { full: '/lifestyle/the-lin-taichung-22-1800.webp', w900: '/lifestyle/the-lin-taichung-22-900.webp' },
+    width: 1800,
+    height: 1202,
+    aspect: 1.498,
+    maxWidth: 1800,
+    category: 'project',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำสาธารณะกรุผนังหินอ่อน',
+      en: 'Marble-lined public washroom',
+    },
+  },
+  {
     id: 'transitional-kitchen-style',
     sources: [
       { width: 461, height: 353, src: '/lifestyle/transitional-kitchen-style-461.webp' },
@@ -1951,6 +2527,24 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'zaa19138-43',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zaa19138-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zaa19138-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa19138-43-1800.webp', w900: '/lifestyle/zaa19138-43-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'people',
+    space: 'bath',
+    alt: {
+      th: 'มือรองน้ำใต้ก๊อกสีทองผิวปัดที่กำลังไหล',
+      en: 'A hand under a running brushed gold faucet',
+    },
+  },
+  {
     id: 'zaa19202-43',
     sources: [
       { width: 1800, height: 1350, src: '/lifestyle/zaa19202-43-1800.webp' },
@@ -1984,6 +2578,24 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'อ่างล้างหน้าแบบวางบนเคาน์เตอร์และก๊อกสีทองหน้าผนังไม้',
       en: 'Vessel basin and gold faucet against a wood-panelled wall',
+    },
+  },
+  {
+    id: 'zaa24582-43',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zaa24582-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zaa24582-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa24582-43-1800.webp', w900: '/lifestyle/zaa24582-43-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'อ่างอาบน้ำแบบฝังผนังใต้หน้าต่างบานเกล็ดในห้องโทนอุ่น',
+      en: 'Alcove bath below shuttered windows in a warm room',
     },
   },
   {
@@ -2041,6 +2653,24 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'zaa66175-43',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zaa66175-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zaa66175-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa66175-43-1800.webp', w900: '/lifestyle/zaa66175-43-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'อ่างล้างหน้าแบบคอนโซลบนผนังกระเบื้องสีเทาพร้อมตะเกียงเทียน',
+      en: 'Console basin on grey tile with candle lanterns',
+    },
+  },
+  {
     id: 'zaa88794-rgb',
     sources: [
       { width: 1800, height: 1410, src: '/lifestyle/zaa88794-rgb-1800.webp' },
@@ -2074,6 +2704,24 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'ห้องน้ำโทนสีชมพูพร้อมสุขภัณฑ์ข้างอ่างอาบน้ำ',
       en: 'Pink bathroom with a toilet beside a bath',
+    },
+  },
+  {
+    id: 'zaa88818-43',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zaa88818-43-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zaa88818-43-900.webp' },
+    ],
+    src: { full: '/lifestyle/zaa88818-43-1800.webp', w900: '/lifestyle/zaa88818-43-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'อ่างอาบน้ำแบบฝังผนังหน้ากระเบื้องหินชนวนสีเข้ม',
+      en: 'Alcove bath against dark slate tile',
     },
   },
   {
@@ -2128,6 +2776,24 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'ห้องน้ำโทนสีเทาพร้อมอ่างล้างหน้าขาตั้งและสุขภัณฑ์',
       en: 'Grey bathroom with a pedestal basin and a toilet',
+    },
+  },
+  {
+    id: 'zab20818-rgb',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab20818-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab20818-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab20818-rgb-1800.webp', w900: '/lifestyle/zab20818-rgb-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ตู้อ่างล้างหน้าไม้แบบลอยในห้องน้ำสีขาวทั้งห้อง',
+      en: 'Floating wood vanity in an all-white bathroom',
     },
   },
   {
@@ -2203,6 +2869,42 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'zab29178-rgb',
+    sources: [
+      { width: 1800, height: 1191, src: '/lifestyle/zab29178-rgb-1800.webp' },
+      { width: 900, height: 596, src: '/lifestyle/zab29178-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab29178-rgb-1800.webp', w900: '/lifestyle/zab29178-rgb-900.webp' },
+    width: 1800,
+    height: 1191,
+    aspect: 1.511,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำหินอ่อนสีดำพร้อมอ่างอาบน้ำลอยตัวและห้องอาบน้ำกระจก',
+      en: 'Black marble bathroom with a freestanding bath and a glass shower',
+    },
+  },
+  {
+    id: 'zab29400-rgb',
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zab29400-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zab29400-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab29400-rgb-1800.webp', w900: '/lifestyle/zab29400-rgb-900.webp' },
+    width: 1800,
+    height: 1200,
+    aspect: 1.5,
+    maxWidth: 1800,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'ที่กดสบู่และชุดโกนหนวดบนถาดข้างอ่างอาบน้ำ',
+      en: 'Soap dispenser and shaving kit on a tray beside a bath',
+    },
+  },
+  {
     id: 'zab31995-rgb',
     sources: [
       { width: 1800, height: 2285, src: '/lifestyle/zab31995-rgb-1800.webp' },
@@ -2257,6 +2959,24 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'zab43938-rgb',
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zab43938-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zab43938-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab43938-rgb-1800.webp', w900: '/lifestyle/zab43938-rgb-900.webp' },
+    width: 1800,
+    height: 1200,
+    aspect: 1.5,
+    maxWidth: 1800,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'ตู้อ่างล้างหน้าคู่ที่เปิดลิ้นชักจัดเก็บออกมา',
+      en: 'Double vanity with the storage drawers pulled open',
+    },
+  },
+  {
     id: 'zab44801-rgb',
     sources: [
       { width: 1800, height: 1200, src: '/lifestyle/zab44801-rgb-1800.webp' },
@@ -2275,6 +2995,42 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'zab49013-1800x800',
+    sources: [
+      { width: 1800, height: 800, src: '/lifestyle/zab49013-1800x800-1800.webp' },
+      { width: 900, height: 400, src: '/lifestyle/zab49013-1800x800-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab49013-1800x800-1800.webp', w900: '/lifestyle/zab49013-1800x800-900.webp' },
+    width: 1800,
+    height: 800,
+    aspect: 2.25,
+    maxWidth: 1800,
+    category: 'people',
+    space: 'bath',
+    alt: {
+      th: 'ผู้หญิงสระผมใต้ฝักบัวคู่ในห้องอาบน้ำผนังหินสีเข้ม',
+      en: 'A woman rinsing her hair under twin showerheads on dark stone',
+    },
+  },
+  {
+    id: 'zab54900-rgb',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab54900-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab54900-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab54900-rgb-1800.webp', w900: '/lifestyle/zab54900-rgb-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำสีขาวพร้อมตู้อ่างล้างหน้าแบบแขวนและสุขภัณฑ์ชิ้นเดียว',
+      en: 'White bathroom with a wall-hung vanity and a one-piece toilet',
+    },
+  },
+  {
     id: 'zab57943-rgb',
     sources: [
       { width: 1800, height: 1350, src: '/lifestyle/zab57943-rgb-1800.webp' },
@@ -2290,6 +3046,60 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'ก๊อกน้ำและอ่างล้างจานแบบฝังใต้เคาน์เตอร์ริมหน้าต่าง',
       en: 'Kitchen faucet and undermount sink at a window',
+    },
+  },
+  {
+    id: 'zab58476-1800x800',
+    sources: [
+      { width: 1800, height: 800, src: '/lifestyle/zab58476-1800x800-1800.webp' },
+      { width: 900, height: 400, src: '/lifestyle/zab58476-1800x800-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab58476-1800x800-1800.webp', w900: '/lifestyle/zab58476-1800x800-900.webp' },
+    width: 1800,
+    height: 800,
+    aspect: 2.25,
+    maxWidth: 1800,
+    category: 'people',
+    space: 'bath',
+    alt: {
+      th: 'แผงควบคุมฝักบัวดิจิทัลข้างมือที่กำลังรับสายน้ำ',
+      en: 'Digital shower control beside a hand under the spray',
+    },
+  },
+  {
+    id: 'zab59846-rgb',
+    sources: [
+      { width: 1800, height: 2584, src: '/lifestyle/zab59846-rgb-1800.webp' },
+      { width: 900, height: 1292, src: '/lifestyle/zab59846-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab59846-rgb-1800.webp', w900: '/lifestyle/zab59846-rgb-900.webp' },
+    width: 1800,
+    height: 2584,
+    aspect: 0.697,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำสไตล์คอทเทจพร้อมตู้ไม้ใต้หน้าต่างจั่ว',
+      en: 'Cottage bathroom with a wood vanity under a gable window',
+    },
+  },
+  {
+    id: 'zab59902-rgb',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab59902-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab59902-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab59902-rgb-1800.webp', w900: '/lifestyle/zab59902-rgb-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'สุขภัณฑ์แขวนผนังสีดำหน้าผนังไม้บุสีขาว',
+      en: 'Black wall-hung toilet against white panelling',
     },
   },
   {
@@ -2401,6 +3211,60 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'zab69202-rgb',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab69202-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab69202-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab69202-rgb-1800.webp', w900: '/lifestyle/zab69202-rgb-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'ตู้กระจกที่เปิดอยู่ข้างโคมไฟติดผนัง',
+      en: 'Mirror cabinet standing open beside a wall sconce',
+    },
+  },
+  {
+    id: 'zab75303-rgb',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab75303-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab75303-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab75303-rgb-1800.webp', w900: '/lifestyle/zab75303-rgb-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ตู้อ่างล้างหน้าไม้สีเทาและสุขภัณฑ์ในห้องน้ำแสงนุ่ม',
+      en: 'Grey wood vanity and toilet in a soft-lit bathroom',
+    },
+  },
+  {
+    id: 'zab76750-rgb',
+    sources: [
+      { width: 1800, height: 1350, src: '/lifestyle/zab76750-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zab76750-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab76750-rgb-1800.webp', w900: '/lifestyle/zab76750-rgb-900.webp' },
+    width: 1800,
+    height: 1350,
+    aspect: 1.333,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำผนังไม้บุสีเขียวพร้อมอ่างอาบน้ำและประตูกระจก',
+      en: 'Green panelled bathroom with a bath and shower doors',
+    },
+  },
+  {
     id: 'zab79741-rgb',
     sources: [
       { width: 1800, height: 1200, src: '/lifestyle/zab79741-rgb-1800.webp' },
@@ -2434,6 +3298,24 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'เคาน์เตอร์ครัวพร้อมบรูสเก็ตต้าข้างอ่างสเตนเลส',
       en: 'Kitchen counter with bruschetta beside a stainless sink',
+    },
+  },
+  {
+    id: 'zab80599-rgb',
+    sources: [
+      { width: 1600, height: 2510, src: '/lifestyle/zab80599-rgb-1600.webp' },
+      { width: 900, height: 1412, src: '/lifestyle/zab80599-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab80599-rgb-1600.webp', w900: '/lifestyle/zab80599-rgb-900.webp' },
+    width: 1600,
+    height: 2510,
+    aspect: 0.637,
+    maxWidth: 1600,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'อ่างล้างหน้าทรงเหลี่ยมบนตู้ลอยสีเข้ม',
+      en: 'Square vessel basin on a dark floating vanity',
     },
   },
   {
@@ -2491,6 +3373,24 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'zab85571-1800x800-gleaminggoldalternative',
+    sources: [
+      { width: 1800, height: 800, src: '/lifestyle/zab85571-1800x800-gleaminggoldalternative-1800.webp' },
+      { width: 900, height: 400, src: '/lifestyle/zab85571-1800x800-gleaminggoldalternative-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab85571-1800x800-gleaminggoldalternative-1800.webp', w900: '/lifestyle/zab85571-1800x800-gleaminggoldalternative-900.webp' },
+    width: 1800,
+    height: 800,
+    aspect: 2.25,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'อ่างล้างหน้าขาตั้งในห้องผนังไม้บุแสงโทนทองอุ่น',
+      en: 'Pedestal basin in a panelled room lit in warm gold',
+    },
+  },
+  {
     id: 'zab85993-rgb',
     sources: [
       { width: 1800, height: 1350, src: '/lifestyle/zab85993-rgb-1800.webp' },
@@ -2542,6 +3442,24 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'ครัวโทนสีฟ้าอ่อนรับแสงจากช่องแสงบนหลังคา',
       en: 'Pale blue kitchen lit by a skylight',
+    },
+  },
+  {
+    id: 'zab91774-rgb',
+    sources: [
+      { width: 1800, height: 1194, src: '/lifestyle/zab91774-rgb-1800.webp' },
+      { width: 900, height: 597, src: '/lifestyle/zab91774-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zab91774-rgb-1800.webp', w900: '/lifestyle/zab91774-rgb-900.webp' },
+    width: 1800,
+    height: 1194,
+    aspect: 1.508,
+    maxWidth: 1800,
+    category: 'detail',
+    space: 'bath',
+    alt: {
+      th: 'ฝักบัวที่กำลังปล่อยน้ำหน้าผนังกระเบื้องสีขาว',
+      en: 'Showerhead running against white tile',
     },
   },
   {
@@ -2797,6 +3715,42 @@ export const lifestyleImages: LifestyleImage[] = [
     },
   },
   {
+    id: 'zac08754-rgb',
+    sources: [
+      { width: 1800, height: 1349, src: '/lifestyle/zac08754-rgb-1800.webp' },
+      { width: 900, height: 675, src: '/lifestyle/zac08754-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac08754-rgb-1800.webp', w900: '/lifestyle/zac08754-rgb-900.webp' },
+    width: 1800,
+    height: 1349,
+    aspect: 1.334,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'สุขภัณฑ์อัจฉริยะพร้อมไฟกลางคืนหน้าผนังโมเสก',
+      en: 'Night-lit smart toilet against a mosaic wall',
+    },
+  },
+  {
+    id: 'zac09270-rgb',
+    sources: [
+      { width: 1800, height: 1200, src: '/lifestyle/zac09270-rgb-1800.webp' },
+      { width: 900, height: 600, src: '/lifestyle/zac09270-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac09270-rgb-1800.webp', w900: '/lifestyle/zac09270-rgb-900.webp' },
+    width: 1800,
+    height: 1200,
+    aspect: 1.5,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำโทนสีเทาพร้อมประตูอาบน้ำกระจกบานเลื่อน',
+      en: 'Grey bathroom with a sliding glass shower door',
+    },
+  },
+  {
     id: 'zac09774-rgb',
     sources: [
       { width: 1800, height: 1200, src: '/lifestyle/zac09774-rgb-1800.webp' },
@@ -2830,6 +3784,24 @@ export const lifestyleImages: LifestyleImage[] = [
     alt: {
       th: 'ผู้หญิงกำลังเดินเข้าหากระจกมีไฟในห้องน้ำโทนมืด',
       en: 'A woman walking towards a lit mirror in a dark bathroom',
+    },
+  },
+  {
+    id: 'zac14993-rgb',
+    sources: [
+      { width: 1800, height: 1079, src: '/lifestyle/zac14993-rgb-1800.webp' },
+      { width: 900, height: 540, src: '/lifestyle/zac14993-rgb-900.webp' },
+    ],
+    src: { full: '/lifestyle/zac14993-rgb-1800.webp', w900: '/lifestyle/zac14993-rgb-900.webp' },
+    width: 1800,
+    height: 1079,
+    aspect: 1.668,
+    maxWidth: 1800,
+    category: 'room',
+    space: 'bath',
+    alt: {
+      th: 'ห้องน้ำสีขาวผนังกระเบื้องหกเหลี่ยมพร้อมอ่างอาบน้ำ',
+      en: 'White bathroom with a hexagon-tiled wall and a bath',
     },
   },
   {

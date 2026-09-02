@@ -81,13 +81,39 @@ function productHalo(lum: number): string {
     : `drop-shadow(0 8px 20px rgba(0,0,0,${a}))`;
 }
 
-export default function FinishWall({ panels }: { panels: WallPanel[] }) {
+type FinishWallProps = {
+  panels: WallPanel[];
+  /**
+   * 'link'   — แผงพาไปหน้า /finish/[code] (พฤติกรรมเดิมสมัยกำแพงเป็นหน้าแรก)
+   * 'filter' — แผงเป็นปุ่มกรองของหน้า /products ไม่เปลี่ยนหน้า
+   *
+   * ลูกค้าบอกว่ากำแพงไม่สวยพอจะเป็นประตูหน้าบ้าน และมันทำหน้าที่ผิด — การเลือก
+   * เฉดคือการ "กรอง" ไม่ใช่ทางเข้า กำแพงจึงย้ายมาอยู่หัวหน้าสินค้าในโหมดนี้
+   */
+  mode?: 'link' | 'filter';
+  /** รหัสเฉดที่ถูกเลือกอยู่ (โหมด filter) */
+  selected?: string | null;
+  onSelect?: (code: string) => void;
+  /** 'screen' = เต็มจอเหมือนเดิม · 'band' = แถบเตี้ยสำหรับวางเหนือกริดสินค้า */
+  height?: 'screen' | 'band';
+};
+
+export default function FinishWall({
+  panels,
+  mode = 'link',
+  selected = null,
+  onSelect,
+  height = 'screen',
+}: FinishWallProps) {
   const { t, lang } = useLang();
+  const isFilter = mode === 'filter';
+  // แผงเป็น <a> หรือ <button> แล้วแต่โหมด — โครงข้างในเหมือนกันทุกพิกเซล
+  const PanelTag = (isFilter ? 'button' : Link) as React.ElementType;
   const [active, setActive] = useState<number | null>(null);
   // roving tabindex: มี anchor เดียวที่ tab เข้าถึงได้ ลูกศรย้ายโฟกัสภายในกำแพง
   // รูปแบบเดียวกับ FinishSwatches เพื่อให้ผู้ใช้คีย์บอร์ดเจอพฤติกรรมเดิมทั้งเว็บ
   const [roving, setRoving] = useState(0);
-  const refs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const refs = useRef<(HTMLElement | null)[]>([]);
 
   const section = useRef<HTMLElement>(null);
   const driftRefs = useRef<(HTMLSpanElement | null)[]>([]);
@@ -248,15 +274,20 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
         // มือถือ: ปล่อยให้หน้าเลื่อนเอง ไม่สร้าง scroll container ซ้อน
         // (เวอร์ชันแรกใส่ overflow-y-auto ที่ ul แล้วได้ scrollbar ของตัวเอง
         //  กินความกว้างไป 31px แผงจึงไม่เต็มจอและมีแถบสว่างค้างขอบขวา)
-        className="relative min-h-[560px] w-full overflow-clip md:h-[100svh]"
+        className={`relative w-full overflow-clip ${height === 'band' ? 'min-h-[420px] md:h-[58svh]' : 'min-h-[560px] md:h-[100svh]'}`}
       >
         {/* ป้ายบอกวิธีใช้ — micro-caps สั้น ๆ ไม่ใช่พาดหัวโฆษณา ตาม §4.1
             วางใต้ Nav ที่ layout เรนเดอร์ทับอยู่ (สูง ~64px) ไม่ใช่ที่ top-0
             ไม่งั้นข้อความชนโลโก้และเมนู ซึ่งเกิดขึ้นจริงในรอบแรก */}
-        <header className="pointer-events-none absolute inset-x-0 top-[64px] z-20 flex items-center justify-between px-6 py-4 md:px-10">
-          <span className="micro">{t.wall.hint}</span>
-          <span className="micro hidden md:inline">{t.wall.keyHint}</span>
-        </header>
+        {/* โหมด filter: หน้า /products เขียนหัวข้อและวิธีใช้ไว้เหนือกำแพงเองแล้ว
+            และคำใบ้เดิม ("ENTER เข้า") ก็ผิดความจริงในโหมดนี้ — Enter สลับตัวกรอง
+            ไม่ได้พาไปไหน จึงไม่แสดงแถบนี้ซ้ำ */}
+        {!isFilter && (
+          <header className="pointer-events-none absolute inset-x-0 top-[64px] z-20 flex items-center justify-between px-6 py-4 md:px-10">
+            <span className="micro">{t.wall.hint}</span>
+            <span className="micro hidden md:inline">{t.wall.keyHint}</span>
+          </header>
+        )}
 
         {/* เดสก์ท็อป: แถวเดียว 11 แผงเต็มจอ · มือถือ: ซ้อนแนวตั้ง แผงละ ~1/3 จอ (§4.1) */}
         <ul className="flex w-full flex-col md:h-full md:flex-row">
@@ -278,16 +309,27 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
                   borderInlineEnd: `1px solid ${p.scrim.edge}`,
                 }}
               >
-                <Link
-                  ref={(el) => {
+                {/* โหมด filter ใช้ <button> ไม่ใช่ <a>: มันไม่พาไปไหน มันสลับตัวกรอง
+                    ของหน้าเดียวกัน ปุ่มจึงเป็นความหมายที่ถูกต้องและได้ aria-pressed
+                    มาให้ฟรี — ส่วน roving tabindex กับลูกศรใช้ตัวเดียวกันทั้งสองโหมด */}
+                <PanelTag
+                  ref={(el: HTMLElement | null) => {
                     refs.current[i] = el;
                   }}
-                  // ต้องมี trailing slash: next.config ตั้ง trailingSlash: true และ
-                  // static export เขียนไฟล์เป็น out/finish/<code>/index.html
-                  // ลิงก์ที่ไม่มี slash จะ 404 บน static host เหมือนทุกลิงก์อื่นในเว็บนี้
-                  href={`/finish/${encodeURIComponent(p.code)}/`}
+                  {...(isFilter
+                    ? {
+                        type: 'button' as const,
+                        'aria-pressed': selected === p.code,
+                        onClick: () => onSelect?.(p.code),
+                      }
+                    : {
+                        // ต้องมี trailing slash: next.config ตั้ง trailingSlash: true และ
+                        // static export เขียนไฟล์เป็น out/finish/<code>/index.html
+                        // ลิงก์ที่ไม่มี slash จะ 404 บน static host เหมือนทุกลิงก์อื่นในเว็บนี้
+                        href: `/finish/${encodeURIComponent(p.code)}/`,
+                      })}
                   tabIndex={roving === i ? 0 : -1}
-                  onKeyDown={(e) => onKeyDown(e, i)}
+                  onKeyDown={(e: React.KeyboardEvent) => onKeyDown(e, i)}
                   onFocus={() => {
                     setRoving(i);
                     setActive(i);
@@ -299,7 +341,9 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
                   // both the near-white `0` panel and the near-black `BL` one, and
                   // a single ink outline is 1.02:1 on Matte Black — invisible on
                   // exactly the panel the scrim solver already flagged (AC 4).
-                  className="focus-inset group relative flex h-full w-full flex-col justify-end"
+                  className={`focus-inset group relative flex h-full w-full flex-col justify-end text-start ${
+                    selected === p.code ? 'ring-2 ring-inset ring-ink' : ''
+                  }`}
                 >
                   {/* สนามวัสดุ: swatch ขยายเต็มแผง ไม่ใช่ chip
                       ขยาย 1.06 ตอน active เพื่อให้วัสดุ "ขยับ" ไม่ใช่แค่ช่องกว้างขึ้น */}
@@ -397,7 +441,7 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
                       {t.finish.pieces(p.count)}
                     </span>
                   </span>
-                </Link>
+                </PanelTag>
               </li>
             );
           })}
@@ -422,6 +466,12 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
           กับหน้า และไม่ทับอะไรเลยสักพิกเซล แลกกับการที่มันไม่ตรึงค้างบนสุดอีกต่อไป
           — ตัวนำทางที่ตรึงจริง ๆ คือ Nav ซึ่งมีอยู่แล้ว ส่วนแถบนี้ทำหน้าที่เป็น
           "กำแพงฉบับย่อ" ที่ผู้ใช้เจอทันทีหลังเลื่อนพ้นกำแพง */}
+      {/* แถบย่อเป็นตัวนำทางต่อจากกำแพงเต็มจอ — ในโหมด filter กำแพงเตี้ยอยู่แล้ว
+          และอยู่ติดกับกริดที่มันกรอง การซ้ำอีกแถบไม่ได้เพิ่มอะไรนอกจากความสูง */}
+      {!isFilter && (
+      <>
+      {/* หมายเหตุ: ใช้เงื่อนไขเรนเดอร์ ไม่ใช่ attribute `hidden` — คลาส md:block
+          ของ Tailwind ชนะ display:none ที่มากับ attribute แถบจึงยังโผล่บนเดสก์ท็อป */}
       <div
         data-condensed-wall
         className="relative z-30 hidden border-y border-line bg-base md:block"
@@ -458,6 +508,8 @@ export default function FinishWall({ panels }: { panels: WallPanel[] }) {
           ))}
         </ul>
       </div>
+      </>
+      )}
     </>
   );
 }

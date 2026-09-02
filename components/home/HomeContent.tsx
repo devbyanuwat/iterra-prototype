@@ -354,21 +354,29 @@ function ShowroomBlock() {
           <h2 className="font-display text-section font-normal text-ink">{t.home.paletteTitle}</h2>
           <p className="mt-4 text-body text-dim">{t.home.paletteSub}</p>
         </Reveal>
+        {/* เคยเป็นแถบวัสดุเฉย ๆ ไม่ใช่ลิงก์ เพราะตัวนำทางด้วยเฉดคือกำแพงบนหัวหน้า
+            กำแพงย้ายไป /products แล้ว บล็อกนี้จึงรับหน้าที่นั้นแทน: แต่ละเฉดพาไป
+            กริดสินค้าที่กรองเฉดนั้นไว้ จำนวนยังมาจาก finishIndex ตัวเดียวกับกำแพง */}
         <ul className="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6">
           {finishIndex.map((f) => (
             <li key={f.code}>
-              <div className="overflow-hidden border border-line-6 bg-surface">
-                {/* eslint-disable-next-line @next/next/no-img-element -- static export, ไฟล์วัสดุ local */}
-                <img
-                  src={f.material}
-                  alt={f.name[lang]}
-                  loading="lazy"
-                  decoding="async"
-                  className="aspect-square w-full object-cover"
-                />
-              </div>
-              <p className="mt-2 text-body-sm text-ink">{f.name[lang]}</p>
-              <p className="text-body-sm text-dim">{t.finish.pieces(f.count)}</p>
+              <Link
+                href={`/products/?finish=${encodeURIComponent(f.code)}`}
+                className="focus-inset group block"
+              >
+                <div className="overflow-hidden border border-line-6 bg-surface">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- static export, ไฟล์วัสดุ local */}
+                  <img
+                    src={f.material}
+                    alt={f.name[lang]}
+                    loading="lazy"
+                    decoding="async"
+                    className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <p className="mt-2 text-body-sm text-ink">{f.name[lang]}</p>
+                <p className="text-body-sm text-dim">{t.finish.pieces(f.count)}</p>
+              </Link>
             </li>
           ))}
         </ul>

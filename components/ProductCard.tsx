@@ -9,13 +9,37 @@
 import Link from 'next/link';
 import TiltCard from './TiltCard';
 import { useLang } from './LangProvider';
-import type { Product } from '@/lib/products';
 
 const MAX_DOTS = 5;
 
-export default function ProductCard({ product }: { product: Product }) {
+/**
+ * รูปร่างขั้นต่ำที่การ์ดต้องใช้ ไม่ผูกกับ `Product` เต็มก้อน
+ *
+ * หน้า /products ส่งข้อมูลย่อที่ server เตรียมไว้ (ไม่มี specs/desc/images) ส่วน
+ * "สินค้าใกล้เคียง" ยังส่ง Product เต็ม ๆ มา — ทั้งคู่ผ่าน type นี้ได้เพราะ
+ * TypeScript เทียบโครงสร้าง ไม่ใช่ชื่อ type
+ */
+export type CardProduct = {
+  slug: string;
+  category: 'kitchen' | 'bath';
+  name: { th: string; en: string };
+  price: { th: string; en: string };
+  finishes: { code: string; accent: string; image: string; image700: string }[];
+};
+
+export default function ProductCard({
+  product,
+  compact = false,
+  finishCode,
+}: {
+  product: CardProduct;
+  /** กริดแบบแน่น: ตัดราคาและจุดสวอตช์ออก เหลือรูปกับชื่อ */
+  compact?: boolean;
+  /** เฉดที่กริดกำลังกรองอยู่ — การ์ดต้องเรนเดอร์ในเฉดนั้น ไม่ใช่เฉดแรกของสินค้า */
+  finishCode?: string;
+}) {
   const { lang, t } = useLang();
-  const finish = product.finishes[0];
+  const finish = (finishCode && product.finishes.find((f) => f.code === finishCode)) || product.finishes[0];
   const extraFinishes = product.finishes.length - MAX_DOTS;
 
   return (
@@ -50,13 +74,13 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
         </div>
 
-        <div className="px-1 pb-2 pt-4">
+        <div className={compact ? 'px-1 pb-2 pt-3' : 'px-1 pb-2 pt-4'}>
           <p className="micro">{t.common.category[product.category]}</p>
           <h3 className="mt-1.5 text-[1rem] font-normal tracking-wide text-ink">{product.name[lang]}</h3>
-          <p className="mt-1 text-body-sm text-dim">{product.price[lang]}</p>
+          {!compact && <p className="mt-1 text-body-sm text-dim">{product.price[lang]}</p>}
 
           {/* สวอตช์ย่อ — เฉพาะเมื่อมีให้เลือกจริง */}
-          {product.finishes.length > 1 && (
+          {!compact && product.finishes.length > 1 && (
             <div className="mt-3 flex items-center gap-1.5" aria-hidden>
               {product.finishes.slice(0, MAX_DOTS).map((f) => (
                 <span
