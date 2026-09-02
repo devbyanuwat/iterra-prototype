@@ -24,8 +24,24 @@ const SECTION_IDS = [
 ];
 
 // ความกว้างจริงของช่องที่ 1440 ใช้เลือก rendition ไม่ให้ภาพถูกขยาย
-const HERO_SLOT = 1193;
-const SECTION_SLOT = 552;
+//
+// เพดานคือคลังภาพ ไม่ใช่เลย์เอาต์: Scene7 ตอบสูงสุด 1800px และทั้งคลัง 205 ใบ
+// ไม่มีใบไหนกว้างเกินนั้น ช่องกว้าง 1193 จึงต้องการ 2386 ที่จอ 2x ซึ่งไม่มีทางได้
+// ย่อช่องลงให้ 1800 คลุมได้จริงที่ 2x แทนการยืดภาพ — ภาพเบลอเสียหายกว่าภาพเล็กลง
+const HERO_SLOT = 900;
+
+/**
+ * ช่องของแต่ละ section คิดจากภาพที่มันใช้ ไม่ใช่ค่าคงที่ค่าเดียว
+ *
+ * `kss-thai-web-secondary-banner` กว้างจริง 620px และเป็นภาพงานบริการใบเดียว
+ * ในคลังที่ไม่มีตัวหนังสือโฆษณาอบมาในรูป จะสลับใบอื่นก็ไม่มีให้สลับ
+ * ช่องของมันจึงต้องเล็กลงเหลือ 310 ส่วนใบอื่นที่มี 1800 ยังได้ 552 เท่าเดิม
+ */
+const SECTION_SLOT_MAX = 552;
+function sectionSlot(maxWidth: number | undefined): number {
+  if (!maxWidth) return SECTION_SLOT_MAX;
+  return Math.min(SECTION_SLOT_MAX, Math.floor(maxWidth / 2));
+}
 
 /** ค้นภาพจาก id — id ผิดจะพังตอน build ไม่ใช่ตอนผู้ใช้เปิดหน้า */
 function pic(id: string) {
@@ -44,14 +60,14 @@ export default function AboutContent() {
  <section className="px-6 pb-16 pt-36 md:px-[8vw] md:pb-24 md:pt-44">
  <Reveal>
  <p className="mb-4 micro">{pick(aboutContent.kicker, lang)}</p>
- <h1 className="max-w-3xl whitespace-pre-line font-display text-section font-normal leading-[1.2] tracking-wide text-ink text-hero">
+ <h1 className="max-w-3xl whitespace-pre-line font-display text-hero font-normal leading-[1.2] tracking-wide text-ink">
  {pick(aboutContent.title, lang)}
  </h1>
  </Reveal>
  </section>
 
  <Reveal className="px-6 md:px-[8vw]">
- {/* ภาพเปิดหน้ากว้างเต็มคอลัมน์เนื้อหา — ขอ rendition ที่คลุม 1193px */}
+ {/* ภาพเปิดหน้า — ขอ rendition ที่คลุม HERO_SLOT ที่ 2x */}
  <div
  className="overflow-hidden border border-line-6 bg-surface"
  style={{ aspectRatio: `${hero.width} / ${hero.height}` }}
@@ -87,7 +103,7 @@ export default function AboutContent() {
  >
  {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
  <img
- src={lifestyleSrc(image, SECTION_SLOT, 2)}
+ src={lifestyleSrc(image, sectionSlot(image.maxWidth), 2)}
  alt={image.alt[lang]}
  width={image.width}
  height={image.height}
@@ -99,7 +115,7 @@ export default function AboutContent() {
  </Reveal>
  <Reveal delay={0.15}>
  <p className="mb-4 micro">{pick(s.kicker, lang)}</p>
- <h2 className="mb-5 font-display text-section font-normal tracking-wide text-ink text-section">
+ <h2 className="mb-5 font-display text-section font-normal tracking-wide text-ink">
  {pick(s.title, lang)}
  </h2>
  <p className="max-w-md text-body-sm font-normal leading-loose text-dim">{pick(s.body, lang)}</p>

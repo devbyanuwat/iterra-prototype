@@ -133,7 +133,7 @@ export default function ProductsContent({
  <section className="px-6 pb-10 pt-36 md:px-[8vw] md:pb-12 md:pt-44">
  <Reveal>
  <p className="mb-4 micro">{t.products.kicker}</p>
- <h1 className="font-display text-section font-normal tracking-wide text-ink text-section">
+ <h1 className="font-display text-section font-normal tracking-wide text-ink">
  {t.products.title}
  </h1>
  <p className="mt-4 max-w-lg text-body-sm font-normal leading-relaxed text-dim">

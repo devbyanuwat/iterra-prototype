@@ -143,7 +143,7 @@ export default function HorizontalGallery({ items }: Props) {
  <div className="px-[8vw] pb-10">
  <p className="micro mb-3">{t.home.featuredKicker}</p>
  <div className="flex items-end justify-between">
- <h2 className="font-display text-section font-normal tracking-wide text-section">
+ <h2 className="font-display text-section font-normal tracking-wide">
  {t.home.featuredTitle}
  </h2>
  <p className="micro">{t.home.featuredHint}</p>

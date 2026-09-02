@@ -127,7 +127,7 @@ export default function PinnedStory({ slides, kicker, images = [] }: Props) {
  <p className="micro mb-4">
  {storyKicker} — 0{i + 1}
  </p>
- <h2 className="mb-5 font-display text-section font-normal tracking-wide text-section">
+ <h2 className="mb-5 font-display text-section font-normal tracking-wide">
  {s.title}
  </h2>
  <p className="max-w-md text-body-sm font-normal leading-relaxed text-dim">{s.body}</p>

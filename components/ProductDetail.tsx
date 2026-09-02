@@ -180,7 +180,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
  <div>
  <Reveal>
  <p className="micro mb-3">{t.common.category[product.category]}</p>
- <h1 className="font-display text-section font-normal tracking-wide text-ink text-section">
+ <h1 className="font-display text-section font-normal tracking-wide text-ink">
  {product.name[lang]}
  </h1>
  <p className="mt-2 text-body-sm font-normal text-dim">

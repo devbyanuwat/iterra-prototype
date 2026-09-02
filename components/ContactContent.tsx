@@ -52,7 +52,7 @@ export default function ContactContent() {
  <section className="px-6 pb-28 pt-36 md:px-[8vw] md:pt-44">
  <Reveal>
  <p className="mb-4 micro">CONTACT</p>
- <h1 className="font-display text-section font-normal tracking-wide text-ink text-section">{t.contact.title}</h1>
+ <h1 className="font-display text-section font-normal tracking-wide text-ink">{t.contact.title}</h1>
  <p className="mt-4 text-body-sm font-normal text-dim">{t.contact.sub}</p>
  </Reveal>
 
