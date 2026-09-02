@@ -24,6 +24,8 @@ import CountUp from '@/components/CountUp';
 import PinnedStory from '@/components/PinnedStory';
 import ParallaxImage from '@/components/ParallaxImage';
 import { useLang } from '@/components/LangProvider';
+import Foreign from '@/components/Foreign';
+import { postTitle } from '@/lib/i18n';
 import { finishIndex, finishOf } from '@/components/finish-index';
 import FieldEntry from './FieldEntry';
 import { roomById } from './rooms';
@@ -357,7 +359,10 @@ function LatestPosts() {
       </Reveal>
 
       <div className="mx-auto grid max-w-6xl gap-x-10 gap-y-12 md:grid-cols-12">
-        {LATEST.map(({ post, cover }, i) => (
+        {LATEST.map(({ post, cover }, i) => {
+          // พาดหัวอังกฤษจาก postTitle() คำโปรยยังเป็นไทยตามต้นฉบับ จึงติดป้าย
+          const head = postTitle(post, lang);
+          return (
           <Reveal
             key={post.slug}
             delay={i * 0.12}
@@ -375,8 +380,11 @@ function LatestPosts() {
                   />
                 </div>
               </div>
+              {/* task E1 — post.tagEn มีอยู่ในข้อมูลตั้งแต่ต้น และ ArticlesContent
+                  ก็เลือกตามภาษาอยู่แล้ว มีแต่การ์ดชุดนี้ที่อ่าน post.tag ตรง ๆ
+                  หมวดหมู่จึงเป็นไทยค้างอยู่บนหน้าแรกฉบับอังกฤษ */}
               <p className="micro mt-5">
-                {post.tag} ·{' '}
+                {lang === 'en' ? post.tagEn : post.tag} ·{' '}
                 {new Date(post.date).toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-GB', {
                   year: 'numeric',
                   month: 'short',
@@ -387,13 +395,17 @@ function LatestPosts() {
                 className={`mt-2 font-normal text-ink ${
                   i === 0 ? 'font-display text-[clamp(24px,2.6vw,36px)] leading-thai' : 'text-card'
                 }`}
+                lang={head.lang}
               >
-                {post.title[lang]}
+                {head.text}
               </h3>
-              <p className="mt-3 text-body-sm leading-relaxed text-dim">{post.excerpt[lang]}</p>
+              <p className="mt-3 text-body-sm leading-relaxed text-dim">
+                <Foreign>{post.excerpt[lang]}</Foreign>
+              </p>
             </Link>
           </Reveal>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

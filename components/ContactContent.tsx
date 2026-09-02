@@ -120,10 +120,14 @@ export default function ContactContent() {
  {/* ข้อมูล + แผนที่ */}
  <Reveal delay={0.15}>
  <address className="mb-8 space-y-2.5 text-body-sm font-normal not-italic leading-relaxed text-dim">
- <p>{CONTACT.address_th}</p>
+ {/* task E1 — ที่อยู่กับเวลาทำการมีฉบับอังกฤษอยู่ใน lib/site.ts มาตลอด
+ (`address_en`, `hours_en`) และท้ายเว็บก็เลือกตามภาษาอยู่แล้ว มีแต่ตรงนี้
+ ที่อ่าน `_th` ตรง ๆ ค้างไว้ตั้งแต่ตอนที่ทั้งเว็บเป็นไทย — เป็น fallback ที่
+ ทำงานทั้งที่มีของจริงให้ใช้ ไม่ใช่ช่องว่างในข้อมูล */}
+ <p>{lang === 'th' ? CONTACT.address_th : CONTACT.address_en}</p>
  <p>{CONTACT.phone} · LINE {CONTACT.line}</p>
  <p>{CONTACT.email}</p>
- <p>{CONTACT.hours_th}</p>
+ <p>{lang === 'th' ? CONTACT.hours_th : CONTACT.hours_en}</p>
  </address>
  {/* ภาพหน้าร้าน: ฝัง Google Maps embed แทนที่ตรงนี้ตอนขึ้นจริง */}
  <div

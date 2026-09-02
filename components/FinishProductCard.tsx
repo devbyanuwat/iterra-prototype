@@ -14,6 +14,7 @@
 import Link from '@/components/Link';
 import ModelNumber from './ModelNumber';
 import { useLang } from './LangProvider';
+import { langAttr } from '@/lib/i18n';
 import { inkFitStyle, inkFor } from '@/lib/ink-fit';
 import type { Finish, Product } from '@/lib/products';
 
@@ -87,6 +88,7 @@ export default function FinishProductCard({ product, finish, priority = false }:
             srcSet={srcSet}
             sizes={srcSet ? SIZES : undefined}
             alt={`${product.name[lang]} — ${finish.name[lang]}`}
+            lang={langAttr(product.name[lang], lang)}
             loading={priority ? 'eager' : 'lazy'}
             decoding="async"
             className="aspect-[4/5] w-full object-contain"
@@ -97,7 +99,9 @@ export default function FinishProductCard({ product, finish, priority = false }:
 
       <div className="px-1 pb-2 pt-4">
         <p className="micro">{t.common.category[product.category]}</p>
-        <h3 className="mt-1.5 text-body font-normal text-ink">{product.name[lang]}</h3>
+        <h3 className="mt-1.5 text-body font-normal text-ink" lang={langAttr(product.name[lang], lang)}>
+          {product.name[lang]}
+        </h3>
         {/* เลขรุ่นเป็นข้อความจริงด้วย ไม่ใช่มีแต่ตัวยักษ์ที่ aria-hidden
             คนที่ใช้ screen reader ควรได้รหัสรุ่นเหมือนกับคนที่มองเห็น */}
         <p className="mt-1 text-body-sm text-dim">{product.model}</p>

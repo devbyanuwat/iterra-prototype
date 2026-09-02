@@ -13,6 +13,7 @@ import Link from '@/components/Link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLang } from './LangProvider';
+import { langAttr } from '@/lib/i18n';
 
 // ScrollTrigger ที่ pin จะย้าย element ของเราไปอยู่ใต้ .pin-spacer ที่มันสร้างเอง
 // React ไม่รู้เรื่องนี้ พอ unmount จะสั่ง removeChild จาก parent เดิม → NotFoundError
@@ -127,7 +128,12 @@ export default function HorizontalGallery({ items }: Props) {
  <div className="mt-4 flex items-baseline justify-between gap-3">
  <div>
  <p className="micro">{t.common.category[p.category]}</p>
- <h3 className="mt-1 text-[1rem] font-normal tracking-wide text-ink">{p.name[lang]}</h3>
+ <h3
+ className="mt-1 text-[1rem] font-normal tracking-wide text-ink"
+ lang={langAttr(p.name[lang], lang)}
+ >
+ {p.name[lang]}
+ </h3>
  </div>
  {meta ? <span className="whitespace-nowrap text-label text-dim">{meta}</span> : null}
  </div>

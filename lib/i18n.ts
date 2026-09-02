@@ -863,6 +863,64 @@ export type Localized = { th: string; en?: string };
 /** เลือกภาษา แล้วตกกลับเป็นไทยเมื่อยังไม่มีฉบับอังกฤษ */
 export const pick = (v: Localized, lang: Lang) => (lang === 'en' ? (v.en ?? v.th) : v.th);
 
+// ── อ่านภาษาจาก "ตัวอักษรที่อยู่ในสตริง" ไม่ใช่จาก "ฟิลด์ที่มันมาจาก" ──────────
+//
+// นี่คือแก่นของ task E1 ทั้งงาน
+//
+// resolve() รุ่นแรกถามว่า "มีฟิลด์ en ไหม" ซึ่งฟังดูถูกจนกระทั่งดูข้อมูลจริง:
+// lib/posts.ts เขียนไว้ตรง ๆ ในคอมเมนต์ของตัวเองว่า title.en กับ excerpt.en ถือ
+// "สตริงเดียวกันกับไทย ไม่ใช่คำแปลที่เราแต่งขึ้น" — ทั้งสิบบทความ ผลคือฟิลด์ en
+// มีอยู่ครบ resolve() จึงตอบว่า "นี่คืออังกฤษ" แล้วไม่ติดป้ายอะไรเลย ทั้งที่สิ่งที่
+// ออกไปอยู่บนหน้าจอเป็นอักษรไทยล้วนในเอกสารที่ประกาศ lang="en"
+//
+// ฟิลด์โกหกได้ ตัวอักษรโกหกไม่ได้ ทุกอย่างข้างล่างนี้จึงตัดสินจากสตริงที่จะถูก
+// เรนเดอร์จริง ไม่ใช่จากรูปร่างของข้อมูล
+
+const THAI_RE = /[฀-๿]/;
+/** ตัวอักษรไทย vs ตัวอักษรละติน — ตัวเลข ช่องว่าง เครื่องหมาย ไม่นับทั้งคู่ */
+const THAI_G = /[฀-๿]/g;
+const LATIN_G = /[A-Za-z]/g;
+
+/** มีอักษรไทยอยู่ในสตริงนี้ไหม (แม้แต่ตัวเดียว) */
+export const hasThai = (text: string) => THAI_RE.test(text);
+
+/**
+ * ภาษาที่ "ตัวอักษร" ในสตริงนี้บอก — คืน null เมื่อไม่มีตัวอักษรเลย
+ * (เลขรุ่น 'K-8623X', ราคา, ขนาด — พวกนี้ไม่มีภาษา ไม่ต้องติดป้าย)
+ */
+export function scriptOf(text: string): Lang | null {
+  const thai = (text.match(THAI_G) ?? []).length;
+  const latin = (text.match(LATIN_G) ?? []).length;
+  if (!thai && !latin) return null;
+  return thai > latin ? 'th' : 'en';
+}
+
+/**
+ * ค่าที่จะใส่ใน `lang=` ของ element — undefined เมื่อไม่ต้องใส่
+ *
+ * ติดป้ายเฉพาะตอนที่ตัวอักษรไม่ตรงกับภาษาของเอกสาร เพราะ `lang` ที่ซ้ำกับ <html>
+ * ไม่ได้บอกอะไรใครเพิ่ม มีแต่ทำให้ markup รก
+ *
+ * ทิศทางเดียว (ไทยบนหน้าอังกฤษ) โดยตั้งใจ: หน้าไทยที่มีคำละตินอยู่คือชื่อเฉด
+ * ชื่อคอลเลกชัน และเลขรุ่น ซึ่งเป็นวิสามานยนามที่คนไทยอ่านออกอยู่แล้ว การไล่ติด
+ * lang="en" ให้ทุกคำจะได้ markup ที่รกโดยไม่มีใครได้อะไร และ QA-F5 ตรวจต้นไม้ไทย
+ * ผ่านแล้ว ส่วนทางกลับกันคือข้อร้องเรียนจริงที่มีคนนับมาแล้วว่า 196 จาก 259 หน้า
+ */
+export const langAttr = (text: string, docLang: Lang): Lang | undefined => {
+  if (docLang === 'th') return undefined;
+  const thai = (text.match(THAI_G) ?? []).length;
+  if (!thai) return undefined;
+  // เสมอกันให้ถือว่าเป็นไทย ต่างจาก scriptOf ที่เสมอกันแล้วถือว่าเป็นอังกฤษ
+  //
+  // ที่นี่ใช้กับสตริงที่ **แบ่งไม่ได้** — alt กับ aria-label เป็น attribute จะห่อ
+  // span ไม่ได้ ต้องเลือกภาษาเดียวให้ทั้งก้อน และสองทางเลือกนั้นไม่ได้เสียหาย
+  // เท่ากัน: อักษรไทยที่ถูกอ่านด้วยเสียงอังกฤษออกมาเป็นเสียงที่ไม่มีความหมายเลย
+  // ส่วนคำละตินที่ถูกอ่านด้วยเสียงไทยยังพอฟังออก เมื่อคะแนนเท่ากันจึงเอียงไปทาง
+  // ที่เสียหายน้อยกว่า (เจอจริงกับ alt ว่า "Vibrant® ไทเทเนียม (TT)" — ไทย 9
+  // ละติน 9 พอดี)
+  return thai >= (text.match(LATIN_G) ?? []).length ? 'th' : undefined;
+};
+
 /**
  * Same choice as `pick`, but it also says which language actually came back.
  *
@@ -882,14 +940,73 @@ export const pick = (v: Localized, lang: Lang) => (lang === 'en' ? (v.en ?? v.th
  * when the translation lands — `resolve` starts returning `lang: 'en'` and the
  * attribute becomes a no-op, so nobody has to remember to remove it.
  *
+ * `lang` here is what the text IS, not what the field claimed. Between ba10764
+ * and task E1 this read `!v.en ? th : lang`, which trusted the shape of the data
+ * and was wrong for every one of the ten articles (see the note above). It is
+ * also the reason this function had zero callers for two tasks: AboutContent
+ * kept using `pick`, and switching it over would not have marked anything.
+ *
  * This is deliberately NOT wired into the Thai line-height floor, because that
  * floor does not need it: `h1..h4 { line-height: 1.6 }` and `.leading-thai` in
  * globals.css carry no `lang` selector, so Thai keeps its measured leading no
  * matter what the document declares. The one lang-scoped rule in the stylesheet
  * is `.en-tight`, which is opt-in and currently used by zero components.
  */
-export const resolve = (v: Localized, lang: Lang): { text: string; lang: Lang } =>
-  lang === 'en' && !v.en ? { text: v.th, lang: 'th' } : { text: pick(v, lang), lang };
+export const resolve = (v: Localized, lang: Lang): { text: string; lang: Lang } => {
+  const text = pick(v, lang);
+  return { text, lang: scriptOf(text) === 'th' ? 'th' : lang };
+};
+
+// ── ชื่อบทความภาษาอังกฤษ (task E1) ──────────────────────────────────────────
+//
+// ปัญหา: kohler.co.th ตีพิมพ์บทความสิบชิ้นนี้เป็นภาษาไทยอย่างเดียว เราจึงไม่มี
+// พาดหัวภาษาอังกฤษของมัน และ <title> ติดป้าย lang ไม่ได้ (มันไม่ใช่ element ที่มี
+// ลูกเป็น element ได้) ผลคือ /articles/<slug>/ ซึ่งเป็น URL อังกฤษ เสิร์ฟ <title>
+// ไทยล้วน — ข้อเดียวในรายงาน QA ที่ลูกค้าบอกตรง ๆ ว่ารับไม่ได้
+//
+// สิ่งที่เรามีจริง: **สแลกของ KOHLER เอง** ทุกบทความอยู่ที่ URL อังกฤษของเขาเอง
+// (`/articles/choosing-the-perfect-kitchen-faucets.html`) ซึ่งเป็นถ้อยคำที่ KOHLER
+// เลือกเอง ไม่ใช่คำที่เราแต่ง การคลี่สแลกกลับเป็นประโยคจึงไม่ใช่การเขียนเนื้อหา
+// ใหม่ แต่เป็นการอ่านข้อมูลที่มีอยู่แล้วอีกช่องหนึ่ง — ท่าเดียวกับ guideNames
+// ข้างบนที่มีอยู่เพราะไฟล์ข้อมูลมีแต่สแลกเหมือนกัน
+//
+// deslug() ทำงานอัตโนมัติกับทุกสแลก บทความใหม่ที่ crawl เข้ามาจึงได้ชื่ออังกฤษ
+// เองโดยไม่มีใครต้องมาเติม ส่วนแผนที่ข้างล่างมีไว้เฉพาะกรณีที่สแลกดิบอ่านผิด:
+// เครื่องหมายวรรคตอนที่ URL ใส่ไม่ได้ และคำที่ต้นทางพิมพ์ตกเอง
+const POST_TITLE_EN: Readonly<Record<string, string>> = {
+  // 'artilcle' สะกดผิดอยู่ใน URL ของ KOHLER เอง และ ':' ใส่ใน URL ไม่ได้
+  'functional-beauty-reconsidering-the-kitchen-sink': 'Functional Beauty: Reconsidering the Kitchen Sink',
+  'cleaner-toilets-revolution-360': 'Cleaner Toilets: Revolution 360',
+  'easy-affordable-bath-upgrades': 'Easy, Affordable Bath Upgrades',
+};
+
+/** คำที่ไม่ขึ้นต้นด้วยตัวใหญ่เมื่ออยู่กลางพาดหัว (Chicago-style, ย่อ) */
+const MINOR = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'in', 'of', 'on', 'or', 'the', 'to', 'up', 'with']);
+
+/** `choosing-the-perfect-kitchen-faucets` → `Choosing the Perfect Kitchen Faucets` */
+function deslug(slug: string): string {
+  return slug
+    // ส่วนท้ายที่เป็นชนิดของหน้า ไม่ใช่ส่วนหนึ่งของชื่อเรื่อง (รวมที่สะกดผิดที่ต้นทาง)
+    .replace(/-(article|artilcle|page)$/, '')
+    .split('-')
+    .map((w, i) => (i > 0 && MINOR.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ');
+}
+
+/**
+ * พาดหัวบทความในภาษาของหน้า พร้อมบอกว่ามันเป็นภาษาอะไรจริง ๆ
+ *
+ * ลำดับ: ฉบับอังกฤษจริงถ้ามี (สองในสิบชิ้นมี เพราะ KOHLER ตั้งชื่อเป็นอังกฤษเอง)
+ * → แผนที่ด้านบน → คลี่สแลก และภาษาไทยได้พาดหัวไทยเสมอ
+ */
+export function postTitle(post: { slug: string; title: Localized }, lang: Lang): { text: string; lang: Lang } {
+  if (lang === 'th') return { text: post.title.th, lang: 'th' };
+  const given = post.title.en;
+  // `en` ของ lib/posts.ts ถือสำเนาภาษาไทยไว้โดยตั้งใจ — เชื่อมันได้เฉพาะตอนที่
+  // ตัวอักษรในนั้นเป็นอังกฤษจริง
+  if (given && scriptOf(given) === 'en') return { text: given, lang: 'en' };
+  return { text: POST_TITLE_EN[post.slug] ?? deslug(post.slug), lang: 'en' };
+}
 
 /**
  * Editorial copy that has no English yet, as a flat list of paths.

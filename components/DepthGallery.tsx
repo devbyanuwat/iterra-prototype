@@ -24,6 +24,7 @@ import DepthField, { useFieldMode } from './DepthField';
 import ModelNumber from './ModelNumber';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
+import { langAttr } from '@/lib/i18n';
 import { inkFitStyle, inkFor } from '@/lib/ink-fit';
 import type { FieldPlane, IndexItem } from './depth-field';
 
@@ -172,6 +173,7 @@ export default function DepthGallery({ planes, index, total, finish }: Props) {
                         // cache entry เดียวตอนสลับมุมมองไปมา ไม่ใช่โหลดใหม่ทั้งกริด
                         src={item.src}
                         alt={item.alt[lang]}
+                        lang={langAttr(item.alt[lang], lang)}
                         loading={i < 8 ? 'eager' : 'lazy'}
                         decoding="async"
                         className="aspect-[4/5] w-full object-contain"
@@ -182,7 +184,12 @@ export default function DepthGallery({ planes, index, total, finish }: Props) {
 
                   <div className="px-1 pb-2 pt-4">
                     <p className="micro">{item.finishName[lang]}</p>
-                    <h2 className="mt-1.5 text-body font-normal text-ink">{item.name[lang]}</h2>
+                    <h2
+                      className="mt-1.5 text-body font-normal text-ink"
+                      lang={langAttr(item.name[lang], lang)}
+                    >
+                      {item.name[lang]}
+                    </h2>
                     {/* เลขรุ่นเป็นข้อความจริงด้วย ไม่ใช่มีแต่ตัวยักษ์ที่ aria-hidden */}
                     <p className="mt-1 text-body-sm text-dim">{item.model}</p>
                   </div>

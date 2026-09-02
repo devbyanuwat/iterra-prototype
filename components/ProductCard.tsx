@@ -9,6 +9,7 @@
 import Link from '@/components/Link';
 import TiltCard from './TiltCard';
 import { useLang } from './LangProvider';
+import { langAttr } from '@/lib/i18n';
 import { inkFitStyle, inkFor } from '@/lib/ink-fit';
 
 const MAX_DOTS = 5;
@@ -80,6 +81,7 @@ export default function ProductCard({
                     : undefined
                 }
                 alt={product.name[lang]}
+                lang={langAttr(product.name[lang], lang)}
                 loading="lazy"
                 decoding="async"
                 className="aspect-[4/5] w-full object-contain"
@@ -93,7 +95,12 @@ export default function ProductCard({
 
         <div className={compact ? 'px-1 pb-2 pt-3' : 'px-1 pb-2 pt-4'}>
           <p className="micro">{t.common.category[product.category]}</p>
-          <h3 className="mt-1.5 text-[1rem] font-normal tracking-wide text-ink">{product.name[lang]}</h3>
+          <h3
+            className="mt-1.5 text-[1rem] font-normal tracking-wide text-ink"
+            lang={langAttr(product.name[lang], lang)}
+          >
+            {product.name[lang]}
+          </h3>
           {!compact && <p className="mt-1 text-body-sm text-dim">{product.price[lang]}</p>}
 
           {/* สวอตช์ย่อ — เฉพาะเมื่อมีให้เลือกจริง */}

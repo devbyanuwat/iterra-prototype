@@ -50,6 +50,8 @@ type Layer = { key: string; src: string; src700: string };
 type Props = {
   /** ชื่อสินค้าไว้ทำ alt — ควรเป็นชื่อในภาษาที่กำลังแสดง */
   name: string;
+  /** ภาษาของ `name` เมื่อมันไม่ตรงกับภาษาของเอกสาร — ไปอยู่บน <img> ที่ถือ alt (task E1) */
+  nameLang?: 'th' | 'en';
   className?: string;
   /** hero/above the fold ให้ true */
   priority?: boolean;
@@ -81,6 +83,7 @@ const STAGE_INK_TARGET = 0.58;
 
 export default function ProductStage({
   name,
+  nameLang,
   className = '',
   priority = false,
   sizes = '(max-width: 768px) 90vw, 40vw',
@@ -239,6 +242,7 @@ export default function ProductStage({
           srcSet={srcSetFor(front.src, front.src700)}
           sizes={srcSetFor(front.src, front.src700) ? sizes : undefined}
           alt={name}
+          lang={nameLang}
           decoding="async"
           fetchPriority={priority ? 'high' : 'auto'}
           loading={priority ? 'eager' : 'lazy'}

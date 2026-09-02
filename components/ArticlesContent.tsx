@@ -20,13 +20,15 @@ import Link from '@/components/Link';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { posts } from '@/lib/posts';
-import { articlesIntro, pick } from '@/lib/i18n';
+import Foreign from './Foreign';
+import { articlesIntro, langAttr, postTitle, resolve } from '@/lib/i18n';
 
 // ความกว้างจริงของการ์ดที่ 1440 — เลือก rendition ไม่ให้ภาพถูกขยาย
 const CARD_SLOT = 370;
 
 export default function ArticlesContent() {
  const { lang, t } = useLang();
+ const intro = resolve(articlesIntro, lang);
 
  return (
  <>
@@ -37,7 +39,7 @@ export default function ArticlesContent() {
  ซึ่งชน element rule ของเราแล้วชนะ พาดหัวไทยที่นี่จึงเคยวิ่งที่ 48px/1.0
  ซึ่งต่ำกว่าพื้นที่ Sarabun ต้องการมาก — ดู tailwind.config.ts */}
  <h1 className="font-display text-hero font-normal text-ink">{t.nav.articles}</h1>
- <p className="mt-6 max-w-xl text-body text-dim">{pick(articlesIntro, lang)}</p>
+ <p className="mt-6 max-w-xl text-body text-dim" lang={intro.lang}>{intro.text}</p>
  </Reveal>
  </section>
 
@@ -46,6 +48,11 @@ export default function ArticlesContent() {
  {posts.map((post, i) => {
  const cover = post.cover;
  const hasVideo = post.videos.length > 0;
+ // task E1 — พาดหัวของการ์ดในต้นไม้อังกฤษเป็นชื่ออังกฤษของบทความ
+ // (ดู postTitle ใน lib/i18n.ts) ส่วนคำโปรยยังเป็นไทยตามต้นฉบับ จึงติดป้าย
+ // แทนที่จะแปล และ alt ของภาพปกเป็นข้อความที่ KOHLER เขียนไว้เอง —
+ // attribute ติด lang ไม่ได้ ต้องติดที่ <img> ซึ่งครอบ alt ของมันอยู่
+ const head = postTitle(post, lang);
  return (
  <Reveal key={post.slug} delay={(i % 3) * 0.12} y={30}>
  <Link href={`/articles/${post.slug}/`} className="group block">
@@ -58,6 +65,7 @@ export default function ArticlesContent() {
  <img
  src={cover.width > CARD_SLOT * 1.5 ? cover.src : cover.srcSmall}
  alt={cover.alt}
+ lang={langAttr(cover.alt, lang)}
  width={cover.width}
  height={cover.height}
  className="h-full w-full object-cover"
@@ -82,9 +90,11 @@ export default function ArticlesContent() {
  ไม่ต่อท้ายด้วย 'KOHLER' เพราะ tag ปริยายคือ 'เรื่องเล่าจาก KOHLER'
  อยู่แล้ว จะได้ 'KOHLER · KOHLER' ที่มาพูดครั้งเดียวท้ายรายการ */}
  <p className="mt-5 micro">{lang === 'en' ? post.tagEn : post.tag}</p>
- <h2 className="mt-2 text-card font-normal text-ink">{post.title[lang]}</h2>
+ <h2 className="mt-2 text-card font-normal text-ink" lang={head.lang}>
+ {head.text}
+ </h2>
  <p className="mt-3 text-body-sm leading-relaxed text-dim">
- {post.excerpt[lang]}
+ <Foreign>{post.excerpt[lang]}</Foreign>
  </p>
  <span className="mt-4 inline-block micro underline-offset-8 group-hover:underline">
  {t.common.readMore} →

@@ -202,6 +202,23 @@ export default function FinishWall({
       const drifts = driftRefs.current.filter(Boolean) as HTMLSpanElement[];
       const n = drifts.length || 1;
 
+      // ── ทำให้ AC ข้อ 4 ตรวจได้จริง ────────────────────────────────────
+      // QA รอบ F5 รายงานว่ากำแพงไม่ลอยเลย โดยวัดจาก document.getAnimations()
+      // ที่คืน 0 และ transform: none บนตัวแผงกับ <img> — ทั้งสองอย่างวัดผิดที่:
+      //
+      //   • getAnimations() เห็นเฉพาะ CSS animation/transition กับ WAAPI
+      //     GSAP ขยับด้วย requestAnimationFrame แล้วเขียน inline style ตรง ๆ
+      //     มันจึงคืน 0 เสมอ ไม่ว่าจะลอยอยู่หรือไม่ — เกณฑ์ที่ถามคำถามนี้
+      //     ตอบว่า "ไม่ผ่าน" ได้อย่างเดียว และเคยตอบว่า "ผ่าน" มาก่อนด้วย
+      //     ซึ่งแปลว่ามันไม่เคยวัดอะไรเลยทั้งสองทาง
+      //   • ตัวที่ขยับคือ [data-drift] ไม่ใช่แผงและไม่ใช่ <img> ทั้งสองอันนั้น
+      //     transform: none ถูกต้องแล้วตามการออกแบบ
+      //
+      // สองแอตทริบิวต์นี้ทำให้คำถาม "มันลอยอยู่ไหม" ตอบได้โดยไม่ต้องเดาว่าจะอ่าน
+      // โหนดไหน และที่สำคัญคือ **ตกได้จริง**: ถ้าเปิด reduced-motion หรือย่อจอ
+      // ต่ำกว่า 768 ก้อนนี้ไม่ถูกเรียก ค่าจึงเป็น 0 — ตรงข้ามกับ getAnimations()
+      // ที่เป็น 0 ทั้งตอนทำงานและตอนไม่ทำงาน เขียนครั้งเดียวตอนสร้าง/คืนค่า
+      // ไม่ใช่ทุกเฟรม จึงไม่มีต้นทุนตอนวิ่ง
       const tweens = drifts.map((el, i) => {
         const tw = gsap.to(el, {
           yPercent: -7,
@@ -232,7 +249,11 @@ export default function FinishWall({
         ),
       );
 
+      root.setAttribute('data-drift-tweens', String(tweens.length));
+
       return () => {
+        root.removeAttribute('data-drift-tweens');
+        root.removeAttribute('data-drift-running');
         tweens.forEach((tw) => tw.kill());
         parallax.forEach((p) => {
           p.scrollTrigger?.kill();
@@ -250,6 +271,12 @@ export default function FinishWall({
     drifts.forEach((el) => {
       gsap.getTweensOf(el).forEach((tw) => (onScreen ? tw.play() : tw.pause()));
     });
+    // คู่กับ data-drift-tweens: บอกว่าตอนนี้เดินอยู่หรือถูกพักไว้เพราะพ้นจอ
+    // (AC ข้อ 7 สั่งให้หยุดเมื่อพ้นจอ — ถ้าไม่ประกาศไว้ ตัวตรวจจะแยกไม่ออกว่า
+    // "หยุดเพราะถูกต้อง" กับ "ไม่เคยเริ่ม" ต่างกันอย่างไร)
+    if (section.current?.hasAttribute('data-drift-tweens')) {
+      section.current.setAttribute('data-drift-running', onScreen ? 'true' : 'false');
+    }
   }, [onScreen]);
 
   // ── สลับชิ้นตอน hover/focus (AC ข้อ 5) ───────────────────────────────────

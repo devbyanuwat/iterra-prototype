@@ -12,13 +12,17 @@
 
 import Link from '@/components/Link';
 import Reveal from './Reveal';
+import Foreign from './Foreign';
 import { useLang } from './LangProvider';
-import type { Lang } from '@/lib/i18n';
+import { langAttr, type Lang } from '@/lib/i18n';
 import { contentPages, getContentPage, type ContentPage } from '@/lib/pages.generated';
 import { getTile, tileSrc } from '@/lib/tiles.generated';
 import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle.generated';
 
 type Pair = { th: string; en: string };
+// task E1 — หน้าข้อมูลบางหน้ามีเฉพาะฉบับไทยที่ต้นทาง (7 จาก 42 ย่อหน้า และ
+// 4 จาก 9 ชื่อหน้ามีค่า en เท่ากับไทยเป๊ะ ๆ) say() จึงคืนไทยมาโดยตั้งใจ ซึ่งถูก
+// แล้ว สิ่งที่เพิ่มคือทุกจุดที่มันถูกเรนเดอร์ต้องประกาศภาษาที่ได้กลับมาจริง
 const say = (v: Pair, lang: Lang) => v[lang] || v.th || v.en;
 
 /**
@@ -79,6 +83,7 @@ function Figure({ id, slot, className = '' }: { id: string; slot: number; classN
       <img
         src={image.src}
         alt={say(image.alt, lang)}
+        lang={langAttr(say(image.alt, lang), lang)}
         width={image.width}
         height={image.height}
         loading="lazy"
@@ -226,7 +231,9 @@ function Single({ page }: { page: ContentPage }) {
       <div className="px-6 md:px-[8vw]">
         <Reveal className="max-w-3xl">
           <p className="mb-4 micro">{page.path}</p>
-          <h1 className="font-display text-section font-normal text-ink">{title}</h1>
+          <h1 className="font-display text-section font-normal text-ink">
+            <Foreign>{title}</Foreign>
+          </h1>
         </Reveal>
       </div>
 
@@ -252,7 +259,7 @@ function Single({ page }: { page: ContentPage }) {
                   เลือก step ให้ถูกแทนที่จะแก้ line-height ของ .micro ทั้งเว็บ */}
               {headings.map((heading, i) => (
                 <li key={i} className="text-body-sm uppercase tracking-widest2 text-dim">
-                  {say(heading, lang)}
+                  <Foreign>{say(heading, lang)}</Foreign>
                 </li>
               ))}
             </ul>
@@ -264,7 +271,9 @@ function Single({ page }: { page: ContentPage }) {
         <div className="mx-auto mt-14 max-w-2xl px-6 md:px-0">
           {paragraphs.map((paragraph, i) => (
             <Reveal key={i} y={24}>
-              <p className="mb-8 text-body leading-loose text-dim">{say(paragraph, lang)}</p>
+              <p className="mb-8 text-body leading-loose text-dim">
+                <Foreign>{say(paragraph, lang)}</Foreign>
+              </p>
             </Reveal>
           ))}
         </div>
@@ -284,9 +293,13 @@ function Single({ page }: { page: ContentPage }) {
                       </div>
                     </div>
                   )}
-                  <h2 className="mt-5 text-card font-normal text-ink">{say(tile.heading, lang)}</h2>
+                  <h2 className="mt-5 text-card font-normal text-ink">
+                    <Foreign>{say(tile.heading, lang)}</Foreign>
+                  </h2>
                   {say(tile.blurb, lang) && (
-                    <p className="mt-2 text-body-sm leading-relaxed text-dim">{say(tile.blurb, lang)}</p>
+                    <p className="mt-2 text-body-sm leading-relaxed text-dim">
+                      <Foreign>{say(tile.blurb, lang)}</Foreign>
+                    </p>
                   )}
                 </>
               );
@@ -332,9 +345,11 @@ function Single({ page }: { page: ContentPage }) {
               <Reveal key={item.href + i} y={18}>
                 <li className="border-t border-line-12 py-5">
                   <a href={item.href} target="_blank" rel="noopener noreferrer" className="group block">
-                    <p className="micro">{say(item.date, lang)}</p>
+                    <p className="micro">
+                      <Foreign>{say(item.date, lang)}</Foreign>
+                    </p>
                     <p className="mt-1.5 text-body text-ink underline-offset-8 group-hover:underline">
-                      {say(item.headline, lang)} ↗
+                      <Foreign>{say(item.headline, lang)}</Foreign> ↗
                     </p>
                   </a>
                 </li>
@@ -358,7 +373,7 @@ function Single({ page }: { page: ContentPage }) {
                     rel="noopener noreferrer"
                     className="text-body text-dim underline-offset-8 transition-colors hover:text-ink hover:underline"
                   >
-                    {say(download.label, lang)} ↗
+                    <Foreign>{say(download.label, lang)}</Foreign> ↗
                   </a>
                 </li>
               ))}

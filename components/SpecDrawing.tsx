@@ -13,6 +13,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useLang } from './LangProvider';
 
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -53,12 +54,34 @@ export function parseDimensions(specs: Spec[]): Dimensions | null {
 type Props = {
   specs: Spec[];
   title?: string;
-  /** หน่วยที่จะพิมพ์ต่อท้ายตัวเลข */
-  unit?: string;
   className?: string;
 };
 
-export default function SpecDrawing({ specs, title, unit = 'มม.', className = '' }: Props) {
+// ── ป้ายของแบบแปลนเป็น "ข้อความอินเทอร์เฟซ" ไม่ใช่ข้อมูลสินค้า (task E1) ──────
+//
+// ทั้งบล็อกนี้เคยเป็นภาษาเดียว และเป็นคนละภาษากันเองด้วย: หน่วยเป็นไทยฝังไว้เป็น
+// ค่า default ของ prop (`unit = 'มม.'` ซึ่งไม่มีใครส่งค่าอื่นมาเลยสักที่)
+// aria-label เป็นประโยคไทยเต็มประโยค ส่วนหัวคอลัมน์ WIDTH/HEIGHT/DEPTH เป็น
+// อังกฤษฝังไว้ ผลคือหน้าอังกฤษพิมพ์ "454 มม." ใต้หัวข้อ "DIMENSIONS" — QA-F5
+// นับได้ 288 ช่วงข้อความไทยกับ aria-label ไทยอีก 122 อัน ทั้งหมดจากบล็อกเดียวนี้
+//
+// "มม." กับ "mm" เป็นคำเดียวกันที่มีฉบับอังกฤษอยู่จริง จึงเป็นบั๊ก ไม่ใช่ fallback
+// ที่ยอมรับได้ — ไม่มีอะไรให้ติดป้าย lang มีแต่คำที่ต้องเลือกให้ถูกภาษา
+const UNIT = { th: 'มม.', en: 'mm' } as const;
+const AXES = {
+  th: { w: 'กว้าง', h: 'สูง', d: 'ลึก' },
+  en: { w: 'WIDTH', h: 'HEIGHT', d: 'DEPTH' },
+} as const;
+const DRAWING_LABEL = {
+  th: (w: number, h: number, d: number | undefined, u: string) =>
+    `ขนาดโดยประมาณ กว้าง ${w} สูง ${h}${d ? ` ลึก ${d}` : ''} ${u}`,
+  en: (w: number, h: number, d: number | undefined, u: string) =>
+    `Approximate dimensions: ${w} wide, ${h} high${d ? `, ${d} deep` : ''}, in ${u}`,
+} as const;
+
+export default function SpecDrawing({ specs, title, className = '' }: Props) {
+  const { lang } = useLang();
+  const unit = UNIT[lang];
   const root = useRef<HTMLDivElement>(null);
   const dims = parseDimensions(specs);
 
@@ -127,9 +150,9 @@ export default function SpecDrawing({ specs, title, unit = 'มม.', className 
         viewBox={`0 0 ${vbW} ${vbH}`}
         className="h-[340px] w-auto max-w-full"
         role="img"
-        aria-label={`ขนาดโดยประมาณ กว้าง ${dims.w} สูง ${dims.h}${
-          dims.d ? ` ลึก ${dims.d}` : ''
-        } ${unit}`}
+        // aria-label ติดป้าย lang ไม่ได้ (มันเป็น attribute) ภาษาของมันจึงต้อง
+        // ตรงกับเอกสารตั้งแต่ตอนเลือกคำ ไม่ใช่ตอนมาร์กอัป
+        aria-label={DRAWING_LABEL[lang](dims.w, dims.h, dims.d, unit)}
       >
         {/* กรอบตัววัตถุ */}
         <rect
@@ -184,16 +207,16 @@ export default function SpecDrawing({ specs, title, unit = 'มม.', className 
 
       <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-3">
         <div>
-          <dt className="micro">WIDTH</dt>
+          <dt className="micro">{AXES[lang].w}</dt>
           <dd className="mt-1 text-body-sm font-normal text-ink">{dims.w} {unit}</dd>
         </div>
         <div>
-          <dt className="micro">HEIGHT</dt>
+          <dt className="micro">{AXES[lang].h}</dt>
           <dd className="mt-1 text-body-sm font-normal text-ink">{dims.h} {unit}</dd>
         </div>
         {dims.d ? (
           <div>
-            <dt className="micro">DEPTH</dt>
+            <dt className="micro">{AXES[lang].d}</dt>
             <dd className="mt-1 text-body-sm font-normal text-ink">{dims.d} {unit}</dd>
           </div>
         ) : null}

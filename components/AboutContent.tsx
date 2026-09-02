@@ -5,11 +5,15 @@
 // ย้ายส่วนที่ render ออกมาเป็น client component เพื่ออ่าน useLang ได้
 // (รูปแบบเดียวกับ ProductsContent / ContactContent ที่มีอยู่แล้ว)
 //
-// เนื้อหาอยู่ใน lib/i18n.ts แล้ว ใช้ pick() ซึ่งตกกลับเป็นไทยเมื่อยังไม่มีฉบับอังกฤษ
+// เนื้อหาอยู่ใน lib/i18n.ts และยังไม่มีฉบับอังกฤษเลยสักหัวข้อ (ดู untranslated())
+// ใช้ resolve() ไม่ใช่ pick(): ทั้งคู่คืนข้อความไทยชุดเดียวกัน แต่ resolve บอกด้วย
+// ว่าข้อความที่คืนมาเป็นภาษาอะไรจริง ๆ เพื่อเอาไปติด lang= บน element
+// หน้านี้คือหน้าที่เป็นไทย 56% บน URL อังกฤษในรายงาน QA-F5 — เนื้อหาถูกต้องแล้ว
+// ที่ผิดคือมันไม่เคยบอกใครว่าเป็นไทย (task E1)
 
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
-import { aboutContent, pick } from '@/lib/i18n';
+import { aboutContent, resolve } from '@/lib/i18n';
 import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle.generated';
 
 // ภาพจริงจากคลัง lifestyle — เลือกให้ตรงกับเนื้อหาแต่ละหัวข้อ
@@ -53,21 +57,26 @@ function pic(id: string) {
 export default function AboutContent() {
  const { lang } = useLang();
  const hero = pic(HERO_ID);
+ const kicker = resolve(aboutContent.kicker, lang);
+ const title = resolve(aboutContent.title, lang);
 
  return (
  <>
  {/* header */}
  <section className="px-6 pb-16 pt-36 md:px-[8vw] md:pb-24 md:pt-44">
  <Reveal>
- <p className="mb-4 micro">{pick(aboutContent.kicker, lang)}</p>
+ <p className="mb-4 micro" lang={kicker.lang}>{kicker.text}</p>
  {/* No `leading-[1.2]` here. An arbitrary Tailwind leading beats the 1.6
               Thai floor in globals.css, and this heading is Thai — measured, it
               was the ONLY Thai collision left on the site after task D2: -0.91px
               at 1440, -0.90 at 1024, -0.67 at 768, -0.41 at 390, all on the pair
               5 / ที่. Removing the class is not a patch on this element, it is
               letting `text-hero` supply the leading it already carries. */}
-            <h1 className="max-w-3xl whitespace-pre-line font-display text-hero font-normal tracking-wide text-ink">
- {pick(aboutContent.title, lang)}
+            <h1
+              className="max-w-3xl whitespace-pre-line font-display text-hero font-normal tracking-wide text-ink"
+              lang={title.lang}
+            >
+ {title.text}
  </h1>
  </Reveal>
  </section>
@@ -94,6 +103,9 @@ export default function AboutContent() {
  <div className="space-y-24 px-6 py-24 md:space-y-36 md:px-[8vw] md:py-36">
  {aboutContent.sections.map((s, i) => {
  const image = pic(SECTION_IDS[i]);
+ const sk = resolve(s.kicker, lang);
+ const st = resolve(s.title, lang);
+ const sb = resolve(s.body, lang);
  return (
  <section
  key={i}
@@ -120,11 +132,16 @@ export default function AboutContent() {
  </div>
  </Reveal>
  <Reveal delay={0.15}>
- <p className="mb-4 micro">{pick(s.kicker, lang)}</p>
- <h2 className="mb-5 font-display text-section font-normal tracking-wide text-ink">
- {pick(s.title, lang)}
+ <p className="mb-4 micro" lang={sk.lang}>{sk.text}</p>
+ <h2
+ className="mb-5 font-display text-section font-normal tracking-wide text-ink"
+ lang={st.lang}
+ >
+ {st.text}
  </h2>
- <p className="max-w-md text-body-sm font-normal leading-loose text-dim">{pick(s.body, lang)}</p>
+ <p className="max-w-md text-body-sm font-normal leading-loose text-dim" lang={sb.lang}>
+ {sb.text}
+ </p>
  </Reveal>
  </section>
  );

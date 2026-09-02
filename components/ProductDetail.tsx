@@ -18,7 +18,9 @@ import ModelNumber from './ModelNumber';
 import FinishProvider, { useFinish } from './FinishProvider';
 import FinishSwatches, { FinishLabel } from './FinishSwatches';
 import SpecDrawing from './SpecDrawing';
+import Foreign from './Foreign';
 import { useLang } from './LangProvider';
+import { langAttr } from '@/lib/i18n';
 import { roomFor } from './home/rooms';
 import { lifestyleSrc } from '@/lib/lifestyle.generated';
 import { getFinishEntry } from './finish-index';
@@ -150,7 +152,9 @@ export default function ProductDetail({ slug }: { slug: string }) {
  </Link>
  )}
  <span className="mx-2">/</span>
- <span aria-current="page">{product.name[lang]}</span>
+ <span aria-current="page" lang={langAttr(product.name[lang], lang)}>
+ {product.name[lang]}
+ </span>
  </nav>
 
  <div className="grid gap-14 lg:grid-cols-[1.15fr_1fr] lg:gap-[5vw]">
@@ -167,6 +171,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
  <ModelNumber model={product.model} variant="detail" />
  <ProductStage
  name={product.name[lang]}
+ nameLang={langAttr(product.name[lang], lang)}
  priority
  sizes="(max-width: 1024px) 92vw, 46vw"
  // 4/5 = สัดส่วนของกล่องเวทีบรรทัดบน (`aspect-[4/5]`) เวทีเป็น
@@ -180,16 +185,28 @@ export default function ProductDetail({ slug }: { slug: string }) {
  <div>
  <Reveal>
  <p className="micro mb-3">{t.common.category[product.category]}</p>
- <h1 className="font-display text-section font-normal tracking-wide text-ink">
+ {/* สองบรรทัดนี้คือชื่อสินค้าในสองภาษาโดยตั้งใจ — บรรทัดบนเป็นภาษาของหน้า
+ บรรทัดล่างเป็นอีกภาษาหนึ่ง ซึ่งบนหน้าอังกฤษแปลว่าเป็นอักษรไทยเสมอ
+ นั่นคือ "ไทยที่ควรอยู่ตรงนั้นจริง" ตาม task E1 สิ่งที่ขาดคือคำประกาศว่า
+ มันเป็นไทย ไม่ใช่การเอามันออก
+ บรรทัดบนติดป้ายเฉพาะเมื่อจำเป็น: สินค้าสองชิ้นในแคตตาล็อก (800-18384t,
+ kohler-8623x) ไม่มีชื่ออังกฤษที่ต้นทางเลย name.en จึงถือข้อความไทย */}
+ <h1
+ className="font-display text-section font-normal tracking-wide text-ink"
+ lang={langAttr(product.name[lang], lang)}
+ >
  {product.name[lang]}
  </h1>
- <p className="mt-2 text-body-sm font-normal text-dim">
+ <p
+ className="mt-2 text-body-sm font-normal text-dim"
+ lang={langAttr(lang === 'th' ? product.name.en : product.name.th, lang)}
+ >
  {lang === 'th' ? product.name.en : product.name.th}
  </p>
  <p className="mt-1 text-label tracking-widest text-dim">{product.model}</p>
 
  <p className="mt-6 max-w-md text-body-sm font-normal leading-loose text-dim">
- {product.desc[lang]}
+ <Foreign>{product.desc[lang]}</Foreign>
  </p>
  <p className="mt-6 text-lg font-normal text-ink">{product.price[lang]}</p>
  </Reveal>
@@ -211,7 +228,13 @@ export default function ProductDetail({ slug }: { slug: string }) {
  <th scope="row" className="py-3 pr-6 text-left font-normal text-dim">
  {lang === 'en' ? (SPEC_LABEL_EN[s.label] ?? s.label) : s.label}
  </th>
- <td className="py-3 text-ink">{s.value}</td>
+ {/* ค่าในช่องขวาเป็นข้อมูลสินค้าของ KOHLER ซึ่งตีพิมพ์เป็นไทยอย่างเดียว
+ 626 จาก 812 แถวทั้งแคตตาล็อกมีอักษรไทยอยู่ และหลายแถวเป็นสองภาษา
+ ปนกันในสตริงเดียว ("H 368 มิลลิเมตร") — Foreign จึงห่อเฉพาะช่วงไทย
+ ไม่ใช่ทั้งช่อง ไม่งั้น H กับ W จะถูกประกาศว่าเป็นภาษาไทยไปด้วย */}
+ <td className="py-3 text-ink">
+ <Foreign>{s.value}</Foreign>
+ </td>
  </tr>
  ))}
  </tbody>
@@ -251,6 +274,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
  <img
  src={lifestyleSrc(inSitu, 1440, 1)}
  alt={inSitu.alt[lang]}
+ lang={langAttr(inSitu.alt[lang], lang)}
  width={inSitu.width}
  height={inSitu.height}
  loading="lazy"

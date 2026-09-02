@@ -17,7 +17,9 @@
 import Link from '@/components/Link';
 import Reveal from './Reveal';
 import VideoEmbed from './VideoEmbed';
+import Foreign from './Foreign';
 import { useLang } from './LangProvider';
+import { langAttr, postTitle } from '@/lib/i18n';
 import { getPost, type PostImage } from '@/lib/posts';
 
 // แทรกภาพหลังย่อหน้าที่ 2 และ 4 เหมือนเดิม — ภาพมาจาก post.figures ตามลำดับ
@@ -30,7 +32,7 @@ const HERO_SLOT = 894;
 const BODY_SLOT = 670;
 
 /** กรอบภาพตามสัดส่วนจริงของไฟล์ — กันภาพกระโดดตอนโหลด */
-function Figure({ image, slot }: { image: PostImage; slot: number }) {
+function Figure({ image, slot, lang }: { image: PostImage; slot: number; lang: 'th' | 'en' }) {
  return (
  <div
  className="overflow-hidden border border-line-6 bg-surface"
@@ -40,6 +42,9 @@ function Figure({ image, slot }: { image: PostImage; slot: number }) {
  <img
  src={image.width > slot * 1.5 ? image.src : image.srcSmall}
  alt={image.alt}
+ // alt เป็นข้อความของ KOHLER และเป็นไทยเกือบทุกใบ attribute ติด lang
+ // ไม่ได้ จึงติดที่ <img> เอง ซึ่งครอบ alt ของตัวเองอยู่ (task E1)
+ lang={langAttr(image.alt, lang)}
  width={image.width}
  height={image.height}
  className="h-full w-full object-cover"
@@ -57,6 +62,17 @@ export default function ArticleContent({ slug }: { slug: string }) {
 
  const tag = lang === 'en' ? post.tagEn : post.tag;
  const body = lang === 'en' ? (post.bodyEn ?? post.body) : post.body;
+ // ── task E1: หัวเรื่องภาษาอังกฤษ, พาดหัวไทยยังอยู่ใต้มันและติดป้ายไว้ ─────
+ //
+ // KOHLER ตีพิมพ์บทความสิบชิ้นนี้เป็นไทยอย่างเดียว lib/posts.ts จึงเก็บสำเนาไทย
+ // ไว้ในฟิลด์ en โดยตั้งใจ ผลข้างเคียงคือหน้าอังกฤษเคยขึ้นพาดหัวไทยเป็น <h1>
+ // และ <title> ซึ่ง <title> ติดป้ายภาษาไม่ได้เลย — ข้อที่ลูกค้าปฏิเสธตรง ๆ
+ //
+ // postTitle() ให้ชื่ออังกฤษจาก URL ของ KOHLER เอง ส่วนพาดหัวไทยตัวจริงย้ายลง
+ // มาเป็นบรรทัดรองที่ประกาศ lang="th" — รูปแบบเดียวกับหน้าสินค้าที่พิมพ์ชื่อ
+ // อีกภาษาไว้ใต้ชื่อหลักอยู่แล้ว ไม่มีอะไรหายไปจากหน้า
+ const head = postTitle(post, lang);
+ const alt = lang === 'en' ? post.title.th : null;
 
  // ช่องเปิดของหน้า: วิดีโอถ้าต้นฉบับเปิดด้วยวิดีโอ ไม่งั้นเป็นภาพ hero
  const opener = post.videos.find((v) => v.id === post.bannerVideo) ?? null;
@@ -71,12 +87,19 @@ export default function ArticleContent({ slug }: { slug: string }) {
  {/* text-section เป็น clamp(40,5vw,72) และมาพร้อม line-height 1.35 ที่วัดมา
  สำหรับ Sarabun แล้ว — เดิมที่นี่เป็น text-section /text-section ซึ่ง utility ของ
  Tailwind บังคับ line-height 1.0 ทับกฎ h1 ของเราไป */}
- <h1 className="font-display text-section font-normal text-ink">{post.title[lang]}</h1>
+ <h1 className="font-display text-section font-normal text-ink" lang={head.lang}>
+ {head.text}
+ </h1>
+ {alt && alt !== head.text && (
+ <p className="mt-3 text-body-sm font-normal text-dim" lang="th">
+ {alt}
+ </p>
+ )}
  </Reveal>
  </div>
 
  <Reveal className="mx-auto mt-12 max-w-4xl">
- {opener ? <VideoEmbed video={opener} slot={HERO_SLOT} /> : <Figure image={post.hero} slot={HERO_SLOT} />}
+ {opener ? <VideoEmbed video={opener} slot={HERO_SLOT} /> : <Figure image={post.hero} slot={HERO_SLOT} lang={lang} />}
  </Reveal>
 
  <div className="mx-auto mt-14 max-w-2xl">
@@ -87,11 +110,15 @@ export default function ArticleContent({ slug }: { slug: string }) {
  return (
  <div key={i}>
  <Reveal y={24}>
- <p className="mb-8 text-body leading-loose text-dim">{para}</p>
+ {/* เนื้อความไม่มีฉบับอังกฤษที่ต้นทาง (bodyEn ยังว่างทั้งสิบบทความ)
+ ลูกค้ารับ fallback ไทยตรงนี้แล้ว — ที่ขาดคือการบอกว่ามันเป็นไทย */}
+ <p className="mb-8 text-body leading-loose text-dim">
+ <Foreign>{para}</Foreign>
+ </p>
  </Reveal>
  {figure && (
  <Reveal className="mb-10">
- <Figure image={figure} slot={BODY_SLOT} />
+ <Figure image={figure} slot={BODY_SLOT} lang={lang} />
  </Reveal>
  )}
  {video && (
