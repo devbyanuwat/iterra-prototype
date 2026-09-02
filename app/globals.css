@@ -76,35 +76,77 @@ body {
 }
 
 /* ── Thai line-height floor ────────────────────────────────────────────────
-   DM Sans carries no Thai glyphs, so every Thai heading actually renders in
-   IBM Plex Sans Thai through the fallback in tailwind.config's font stacks.
-   Plex Thai stacks vowels above the consonant and tone marks above those, so a
-   Latin-tuned ratio clips the top row and collides adjacent lines.
+   DM Sans carries no Thai glyphs, so every Thai heading actually renders in the
+   Thai face through the fallback in tailwind.config's font stacks. Thai stacks
+   vowels above the consonant and tone marks above those, so a Latin-tuned ratio
+   clips the top row and collides adjacent lines.
 
-   Measured on 'ศิลปะของครัว / ที่คู่ควรกับบ้านคุณ' at the old hero's leading-[0.92]:
-     1440px, font-size 108  → ink box overflowed 9.61px, lines collided 7.61px,
-                              clearing only at ratio 1.009 (recommended 1.069)
-     390px,  font-size 50.7 → overflow 4.86px, collision 3.36px, clears at 1.018
-                              (recommended 1.078)
-   The same string in EN collided far less (2.84 / 1.34) because Latin has no
-   stacked marks — so one tight value cannot serve both scripts.
+   This floor was 1.08, and 1.08 was measured against IBM Plex Sans Thai. The
+   body face became Sarabun in 6cc30d9 — chosen because Plex was too light, and
+   correctly so — but nobody re-derived this number afterwards, and Sarabun's
+   vertical metrics are nothing like Plex's. Measured at 100px, weight 400:
 
-   1.08 clears both recommendations with headroom for two stacked marks. This is
-   the floor for anything that can hold Thai; use .en-tight below when a heading
-   should look tighter in English only. The oversized model number is exempt —
-   it is Latin and numeric (see components/ModelNumber.tsx). */
+     upper stack ฟื้  ink 1.25em ABOVE the baseline   (Plex: ~0.75em)
+     lower vowel ญู   ink 0.33em below
+     worst pair      1.58em total, against the 1.30em the font's own
+                     fontBoundingBox declares — Sarabun overflows its own em box
+
+   So 1.08 was not conservative, it was wrong: at 32px, the heading live on the
+   home page right now ('ชิ้นเด่นจากสามเฉดที่เรามีลึกที่สุด') collides by 4.17px on
+   the pair จ / ที่. Re-measured per grapheme cluster, counting a collision only
+   where the two clusters actually overlap horizontally, on the four headings
+   this site ships:
+
+     ratio   worst clearance @32px   @48px    @72px
+     1.08    -4.74px                 -7.11    -10.66   collides
+     1.15    -2.50px                 -3.75     -5.62   collides
+     1.25    +0.70px                 +1.06     +1.58   a rounding error
+     1.35    +3.90px                 +5.85     +8.78   clears these four
+
+   1.35 was the first answer and it was still wrong, because four hand-picked
+   strings are not the corpus. Sweeping every Thai heading the site renders —
+   1,108 wrap positions over 18 routes, including the ten Kohler articles
+   imported in the same pass — the ratio each one needs is:
+
+     under 1.25   950 of 1108
+     1.25-1.35    115
+     1.35-1.45     24
+     1.45-1.55     19    worst 1.550, 'อยู่ด้วยกันจนหลังการติดตั้ง' at ยู่ over ตั้
+
+   41 headings need more than 1.35, so 1.6 is the floor: it clears the measured
+   worst by 0.05em and also clears Sarabun's absolute worst cluster pair
+   (1.582em at weight 400, 1.613em at 600), which real Thai copy can produce at
+   any time. Method and full table in scratchpad/task-a3.md §1.
+
+   This is the floor for anything that can hold Thai. Latin does not want it —
+   Latin ink is 0.91em, so English headings get their own value below and
+   .en-tight stays available for display type that should be tighter still. The
+   oversized model number is exempt — it is Latin and numeric (see
+   components/ModelNumber.tsx). */
 h1,
 h2,
 h3,
 h4 {
-  line-height: 1.08;
+  line-height: 1.6;
 }
+
+/* A blanket `html[lang='en'] :is(h1,h2,h3,h4) { line-height: 1.12 }` is the
+   obvious next move here and it is WRONG on this site. Latin only needs 0.91em,
+   so 1.12 would be right if English mode meant English text — but it does not.
+   `pick()` in lib/i18n.ts deliberately falls back to Thai wherever no English
+   exists, and after the Kohler import that is every article title, excerpt and
+   paragraph, because kohler.co.th publishes those in one language only. An
+   English-mode rule would therefore hand 1.12 to real Thai copy and put the
+   collisions straight back.
+
+   So the tightening stays opt-in, where a developer can see the string: use
+   .en-tight below, and only on text that cannot fall back to Thai. */
 
 /* Explicit opt-in for non-heading elements that can hold Thai. Also the value to
    reach for instead of Tailwind's leading-none/tight/snug on Thai-bearing text —
    those utilities are classes and would otherwise win over the element rule. */
 .leading-thai {
-  line-height: 1.08;
+  line-height: 1.6;
 }
 
 /* Tight display leading, English only. LangProvider writes the current language
@@ -175,7 +217,19 @@ html[lang='en'] .en-tight {
 
    #08090A is the ground the site used to run before the retheme, which is why
    the scrim solver in finish-index.ts still carries the constants for it. */
-[data-field-dark] {
+/* ── Dark grounds as rhythm, not as a theme ─────────────────────────────────
+   Task A4: the six home sections all ran kicker → 32px heading → dim sub → grid
+   on `bg-base`, full width, left aligned. Six sections that could be shuffled
+   without anyone noticing. The client's answer to the palette question was
+   "light stays the primary ground, dark becomes rhythm" — so two sections get
+   this ground as punctuation and everything else stays light.
+
+   `[data-dark-beat]` shares the field's constants rather than inventing a
+   second dark palette: the values below were already derived and measured for
+   the depth field, and two dark tones on one page would read as an accident.
+   Anything opting in gets the ground, the ink, and the `.micro` correction. */
+[data-field-dark],
+[data-dark-beat] {
   --field-ground: #08090a;
   /* Not #FFFFFF: pure white on near-black is the one pairing that reads as
      glare rather than type at 15px. 16.4:1 is well past the 7:1 the derived
@@ -194,8 +248,22 @@ html[lang='en'] .en-tight {
 
 /* micro-caps carry a hard-coded #5d5d5d, which is 2.1:1 on the dark ground.
    Inside the field they follow the field's own secondary colour instead. */
-[data-field-dark] .micro {
+[data-field-dark] .micro,
+[data-dark-beat] .micro {
   color: var(--field-dim);
+}
+
+/* ตัวรองบนพื้นมืด: .text-dim เป็น #5D5D5D ซึ่งได้ 1.9:1 บนพื้น #08090A
+   อ่านไม่ออกเลย บล็อกจังหวะมืดจึงย้ายไปใช้ค่าของพื้นมืดเองเหมือน .micro
+   (วัดแล้ว #A8A8A4 บน #08090A = 8.9:1) */
+[data-dark-beat] .text-dim {
+  color: var(--field-dim);
+}
+
+/* เส้นคั่นบนพื้นมืด — token line/line-6 เป็นสีดำโปร่ง จึงหายไปทั้งเส้น */
+[data-dark-beat] .border-line-6,
+[data-dark-beat] .border-line-12 {
+  border-color: var(--field-line);
 }
 
 /* Focus ring readable on base and on white cards for every accent — see

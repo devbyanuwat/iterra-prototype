@@ -44,8 +44,47 @@ const config: Config = {
         label: ['15px', { lineHeight: '1.3', letterSpacing: '0.12em' }],
         body: ['16px', { lineHeight: '1.6' }],
         'body-sm': ['15px', { lineHeight: '1.6' }],
-        card: ['24px', { lineHeight: '1.25' }],
-        section: ['32px', { lineHeight: '1.15' }],
+
+        // ── display scale ──────────────────────────────────────────────────
+        // The scale used to stop at section: 32px, with nothing between it and
+        // the 420px decorative model number on the PDP. A 32px heading on a
+        // 1440px canvas is a fortieth of the frame, which is blog scale, not
+        // catalogue scale — see scratchpad/task-y-research.md §4.
+        //
+        // Both steps are fluid so the jump happens on the canvas that can hold
+        // it: `section` is 40px until ~800px wide and reaches its 72px ceiling
+        // at 1440; `hero` bottoms out at 48px on a 390px phone (the old pinned
+        // hero measured 50.7px there) and tops out at 108px at 1440, which is
+        // the size the Thai leading work was originally derived against.
+        //
+        // The 1.6 leading is a MEASURED floor, not a taste call, and it is not
+        // the 1.08 that used to be in globals.css — that number was derived
+        // against IBM Plex Sans Thai, and the body face became Sarabun in
+        // 6cc30d9. Sarabun sets a Thai upper stack (ascender + upper vowel +
+        // tone, e.g. ฟื้) 1.25em above the baseline and a lower vowel 0.33em
+        // below it, so its worst ink box is 1.58em — wider than the 1.30em its
+        // own font metrics declare.
+        //
+        // 1.6 comes from sweeping every Thai heading this site renders — 1,108
+        // wrap positions across 18 routes, including the ten Kohler articles
+        // imported in the same pass. The ratio each one needs to clear is:
+        //   under 1.25   950 of 1108
+        //   1.25–1.35    115
+        //   1.35–1.45     24
+        //   1.45–1.55     19   worst: 'อยู่ด้วยกันจนหลังการติดตั้ง' at ยู่|ตั้ = 1.550
+        // So 1.35 was not enough either — it was only enough for the four
+        // headings sampled by hand first. 1.6 clears the measured worst by
+        // 0.05em and also clears Sarabun's absolute worst cluster pair (1.582
+        // at weight 400, 1.613 at 600). Re-measured after the change: 907 wrap
+        // positions at 1.6, zero collisions, tightest +1.06px.
+        //
+        // Latin only needs 0.91em and 1.6 is slack on it, but there is no
+        // English-mode escape hatch here — see the note in globals.css, English
+        // mode falls back to Thai copy on most of this site. Use .en-tight per
+        // element instead. Full table and method in scratchpad/task-a3.md §1.
+        card: ['24px', { lineHeight: '1.6' }],
+        section: ['clamp(40px, 5vw, 72px)', { lineHeight: '1.6' }],
+        hero: ['clamp(48px, 7.5vw, 108px)', { lineHeight: '1.6' }],
       },
       letterSpacing: {
         // 0.22em was splash-screen tracking. 0.12em still reads as a label

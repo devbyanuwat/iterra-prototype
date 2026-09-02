@@ -104,6 +104,9 @@ export const dict = {
       specs: 'สเปกสินค้า',
       related: 'สินค้าใกล้เคียง',
       onlyFinish: 'สินค้าชิ้นนี้มีเฉดเดียว',
+      // คำบรรยายใต้ภาพห้องบนหน้าสินค้า — บอกว่าเป็นภาพบรรยากาศห้อง ไม่ได้อ้างว่า
+      // สินค้าชิ้นนี้อยู่ในภาพ (คลังภาพไม่มีข้อมูลว่าห้องไหนมีอะไรอยู่)
+      inSitu: 'บรรยากาศห้องจริงจากคลังภาพของแบรนด์',
       inFinish: (name: string) => `ดูทุกชิ้นในเฉด${thaiJoin(name)}`,
     },
     // กำแพงผิวเคลือบ = หน้าแรก (spec finish-first §4.1)
@@ -145,6 +148,15 @@ export const dict = {
     },
     articles: {
       kicker: 'JOURNAL',
+      // บทความทั้งหมดเป็นของ KOHLER คัดลอกมาทั้งข้อความและภาพ ไม่ได้เขียนเอง
+      // ป้ายนี้จึงอยู่บนการ์ดทุกใบและบนหัวบทความ ไม่ใช่ซ่อนไว้ท้ายหน้า
+      source: 'ต้นฉบับที่ kohler.co.th',
+      sourceNote: 'บทความและภาพทั้งหมดเป็นของ KOHLER',
+    },
+    video: {
+      play: 'เล่นวิดีโอ',
+      // ประกาศก่อนกด ไม่ใช่หลังกด — หน้านี้ตั้งใจไม่ติดต่อ YouTube จนกว่าจะกด
+      source: 'เล่นจาก YOUTUBE',
     },
     contact: {
       title: 'ติดต่อเรา',
@@ -250,6 +262,7 @@ export const dict = {
       specs: 'Specifications',
       related: 'Related pieces',
       onlyFinish: 'Available in this finish only',
+      inSitu: 'A room from the brand’s own photography',
       inFinish: (name: string) => `See everything in ${name}`,
     },
     wall: {
@@ -288,6 +301,12 @@ export const dict = {
     },
     articles: {
       kicker: 'JOURNAL',
+      source: 'Original on kohler.co.th',
+      sourceNote: 'Every article and image here is KOHLER’s',
+    },
+    video: {
+      play: 'Play video',
+      source: 'PLAYS FROM YOUTUBE',
     },
     contact: {
       title: 'Contact Us',
@@ -329,9 +348,16 @@ export type Localized = { th: string; en?: string };
 /** เลือกภาษา แล้วตกกลับเป็นไทยเมื่อยังไม่มีฉบับอังกฤษ */
 export const pick = (v: Localized, lang: Lang) => (lang === 'en' ? (v.en ?? v.th) : v.th);
 
-/** บทนำหน้ารวมบทความ — ยังไม่มีฉบับอังกฤษ */
+/**
+ * บทนำหน้ารวมบทความ
+ *
+ * เดิมบรรยายบทความที่เราแต่งขึ้นเองหกชิ้น ตอนนี้ lib/posts.ts เป็นบทความจริงของ
+ * KOHLER ทั้งสิบชิ้น (ดู header ของไฟล์นั้น) บทนำจึงต้องพูดตรง ๆ ว่าเป็นของใคร
+ * ไม่ใช่ปล่อยให้ผู้อ่านเข้าใจว่าเราเขียนเอง
+ */
 export const articlesIntro: Localized = {
-  th: 'ไอเดียครัวสไตล์โชว์รูม คู่มือเลือกซื้อ และเรื่องเล่าจากหน้างานจริง',
+  th: 'บทความและวิดีโอจาก KOHLER ทั้งหมด — ยกมาจาก kohler.co.th ไม่ได้เรียบเรียงใหม่',
+  en: 'Articles and video from KOHLER — taken from kohler.co.th, not rewritten by us',
 };
 
 export const aboutContent = {

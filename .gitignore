@@ -14,3 +14,9 @@ CLAUDE.md
 
 # Playwright MCP scratch output — tool artefact, never part of the project
 .playwright-mcp/
+
+# Scraper download cache. scrape-lifestyle / build-lifestyle have defaulted here
+# since they were written, but nothing had populated it in a checkout until the
+# editorial crawl did — it is now ~10MB of raw kohler.co.th HTML and source jpgs.
+# Re-runnable from the scripts, and not ours to commit.
+.cache/
