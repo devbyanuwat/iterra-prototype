@@ -130,6 +130,50 @@ h4 {
   line-height: 1.6;
 }
 
+/* ── where the line breaks, as opposed to how big it is (task D2) ───────────
+   The client's complaint was that some text looks the wrong size for the
+   screen, and they pointed at line breaking as the symptom. Half of that was
+   the clamps, retuned in tailwind.config.ts. The other half is this, and it is
+   not a size problem at all.
+
+   Thai has no word spaces. A Thai line breaks where the box runs out, using the
+   browser's dictionary, so the last line of a heading is as likely to be one
+   syllable as it is to be half the width. Measured across 18 routes at four
+   widths: 184 Thai blocks and 170 English ones ended on a line under 18% of the
+   width of the widest line — H3 product names were the worst, with last lines at
+   5-8% of a 370px card. That reads as a mistake even when every size is right.
+
+   `balance` asks the engine to even out the lines of a short block, which is
+   what a heading is; Chrome applies it up to about six lines and ignores it
+   after that, which is the correct behaviour for the long ones. `pretty` is the
+   cheaper rule for running text — it only pulls a word down to avoid leaving the
+   last line stranded.
+
+   Both are progressive: a browser that does not know them lays out exactly as
+   before, so nothing here depends on support. And neither touches leading, so
+   the 1.6 Thai floor measured over 1,108 wrap positions is untouched — though
+   changing WHERE lines break does change which clusters end up above each
+   other, so the collision sweep was re-run afterwards rather than assumed.
+
+   Not applied to the oversized model number: it is one unbroken token with
+   `whitespace-nowrap`, so there is nothing to balance. */
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+p,
+li,
+dd,
+dt,
+address,
+figcaption,
+blockquote {
+  text-wrap: pretty;
+}
+
 /* A blanket `html[lang='en'] :is(h1,h2,h3,h4) { line-height: 1.12 }` is the
    obvious next move here and it is WRONG on this site. Latin only needs 0.91em,
    so 1.12 would be right if English mode meant English text — but it does not.

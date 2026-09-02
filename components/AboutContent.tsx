@@ -60,7 +60,13 @@ export default function AboutContent() {
  <section className="px-6 pb-16 pt-36 md:px-[8vw] md:pb-24 md:pt-44">
  <Reveal>
  <p className="mb-4 micro">{pick(aboutContent.kicker, lang)}</p>
- <h1 className="max-w-3xl whitespace-pre-line font-display text-hero font-normal leading-[1.2] tracking-wide text-ink">
+ {/* No `leading-[1.2]` here. An arbitrary Tailwind leading beats the 1.6
+              Thai floor in globals.css, and this heading is Thai — measured, it
+              was the ONLY Thai collision left on the site after task D2: -0.91px
+              at 1440, -0.90 at 1024, -0.67 at 768, -0.41 at 390, all on the pair
+              5 / ที่. Removing the class is not a patch on this element, it is
+              letting `text-hero` supply the leading it already carries. */}
+            <h1 className="max-w-3xl whitespace-pre-line font-display text-hero font-normal tracking-wide text-ink">
  {pick(aboutContent.title, lang)}
  </h1>
  </Reveal>

@@ -51,11 +51,9 @@ const config: Config = {
         // 1440px canvas is a fortieth of the frame, which is blog scale, not
         // catalogue scale — see scratchpad/task-y-research.md §4.
         //
-        // Both steps are fluid so the jump happens on the canvas that can hold
-        // it: `section` is 40px until ~800px wide and reaches its 72px ceiling
-        // at 1440; `hero` bottoms out at 48px on a 390px phone (the old pinned
-        // hero measured 50.7px there) and tops out at 108px at 1440, which is
-        // the size the Thai leading work was originally derived against.
+        // Both steps are fluid, but they track the MEASURE rather than the
+        // window — the ranges below were retuned in task D2 after measuring what
+        // the containers actually give them. See the note above `section`.
         //
         // The 1.6 leading is a MEASURED floor, not a taste call, and it is not
         // the 1.08 that used to be in globals.css — that number was derived
@@ -83,8 +81,48 @@ const config: Config = {
         // mode falls back to Thai copy on most of this site. Use .en-tight per
         // element instead. Full table and method in scratchpad/task-a3.md §1.
         card: ['24px', { lineHeight: '1.6' }],
-        section: ['clamp(40px, 5vw, 72px)', { lineHeight: '1.6' }],
-        hero: ['clamp(48px, 7.5vw, 108px)', { lineHeight: '1.6' }],
+        // ── measure, not viewport (task D2) ────────────────────────────────
+        // The first version of these two steps sized off the viewport alone —
+        // 5vw and 7.5vw with maxima of 72 and 108 — and that is wrong here for a
+        // reason the vw unit cannot see: THE BOXES THESE HEADINGS LIVE IN STOP
+        // GROWING BEFORE THE VIEWPORT DOES. `max-w-2xl` is 672px and
+        // `max-w-4xl` is 896px whatever the window does, and a section heading
+        // in a two-column block at 768 gets a 286px column.
+        //
+        // So the size kept climbing while the measure did not, and characters
+        // per line — the thing that actually decides whether a heading reads —
+        // went the wrong way. Measured across 18 routes at four widths, both
+        // languages, on blocks that actually wrap (Thai figures; English within
+        // 1 character of these):
+        //
+        //   hero      390: 48px in 327px → 10.8 cpl, up to 4 lines
+        //             768: 56px in 633px → 21.5 cpl
+        //            1024: 76px in 768px → 21.5 cpl
+        //            1440: 107px in 896px → 10.8 cpl, 4 lines   ← worse than 768
+        //
+        // A heading that reads on a laptop wrapping to four lines on a desktop
+        // is exactly "the wrong size for the screen". The middle of that range
+        // is right, so the coefficient stays and the ENDS are pulled in: the max
+        // now lands where the container caps (7.5vw reaches 76px at a 1013px
+        // viewport, and max-w-4xl caps at 896px just above that), and the min
+        // stops a 390px phone being handed a 48px headline in a 327px box.
+        //
+        // `section` needed the coefficient changed as well, not just the cap:
+        // its containers are much narrower than `hero`'s (286–556px measured),
+        // so 5vw overshot them at every width — 13–15.5 cpl everywhere, up to
+        // 4 lines for a five-word heading. 3.6vw tracks those boxes instead of
+        // the window, and 30px at the bottom keeps it clear of `card` (24px)
+        // so the ranks never cross.
+        //
+        // Sizes are unchanged between Thai and English on purpose. Measured at
+        // the same size in the same box the two scripts come out within one
+        // character per line of each other, so a separate Thai step would be
+        // solving a problem the numbers do not show. What Thai does differently
+        // is WHERE the line breaks — no word spaces, so a break lands wherever
+        // the box runs out — and that is handled by `text-wrap` in globals.css,
+        // not by a second size ladder. Full before/after in scratchpad/task-d2.md.
+        section: ['clamp(30px, 3.6vw, 52px)', { lineHeight: '1.6' }],
+        hero: ['clamp(34px, 7.5vw, 76px)', { lineHeight: '1.6' }],
       },
       letterSpacing: {
         // 0.22em was splash-screen tracking. 0.12em still reads as a label

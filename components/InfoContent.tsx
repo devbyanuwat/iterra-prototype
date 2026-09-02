@@ -245,8 +245,13 @@ function Single({ page }: { page: ContentPage }) {
         <section className="px-6 pt-16 md:px-[8vw]">
           <Reveal className="max-w-3xl">
             <ul className="flex flex-wrap gap-x-5 gap-y-2">
+              {/* ไม่ใช้ .micro ตรงนี้ — .micro คือป้ายกำกับสั้น ๆ และมี line-height 1.3
+                  ซึ่งต่ำกว่าพื้นระยะบรรทัดไทย 1.6 แต่หัวข้อของ /careandclean เป็น
+                  ประโยคไทยจริงที่ตัดบรรทัด วัดได้ว่ามันคือจุดที่คับที่สุดในเว็บ:
+                  ระยะห่างระหว่างบรรทัด 0.00px ที่ 390 บนคู่ รุ|ห้ คือแตะกันพอดี
+                  เลือก step ให้ถูกแทนที่จะแก้ line-height ของ .micro ทั้งเว็บ */}
               {headings.map((heading, i) => (
-                <li key={i} className="micro">
+                <li key={i} className="text-body-sm uppercase tracking-widest2 text-dim">
                   {say(heading, lang)}
                 </li>
               ))}
