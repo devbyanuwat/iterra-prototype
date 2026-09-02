@@ -14,7 +14,11 @@
 import Link from 'next/link';
 import ModelNumber from './ModelNumber';
 import { useLang } from './LangProvider';
+import { inkFitStyle, inkFor } from '@/lib/ink-fit';
 import type { Finish, Product } from '@/lib/products';
+
+/** ตรงกับคลาส `aspect-[4/5]` ของรูปข้างล่าง — ดู lib/ink-fit.ts */
+const CARD_ASPECT = 4 / 5;
 
 /**
  * ใส่ srcSet เฉพาะตอนที่ไฟล์ครึ่งขนาดมีอยู่จริง
@@ -65,6 +69,15 @@ export default function FinishProductCard({ product, finish, priority = false }:
         {/* z-10: ModelNumber เป็น absolute จึงวาดทับ block ปกติที่ไม่ได้ positioned
             รูปสินค้าต้องถูกยกขึ้นมาเอง ไม่งั้นเลขรุ่นจะบังสินค้าแทนที่จะอยู่หลัง */}
         <div className="relative z-10 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
+          {/* เนื้อสินค้าเต็มการ์ด ไม่ใช่จุดเล็ก ๆ กลางกระดาษเปล่า — ค่ามาจาก
+              กรอบอัลฟาที่ build ไว้แล้ว ดู lib/ink-fit.ts */}
+          <span
+            className="block"
+            style={{
+              transform: inkFitStyle(inkFor(finish.image), CARD_ASPECT),
+              transformOrigin: 'center',
+            }}
+          >
           {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local จาก scraper */}
           <img
             src={finish.image}
@@ -75,6 +88,7 @@ export default function FinishProductCard({ product, finish, priority = false }:
             decoding="async"
             className="aspect-[4/5] w-full object-contain"
           />
+          </span>
         </div>
       </div>
 

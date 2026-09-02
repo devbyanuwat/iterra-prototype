@@ -25,6 +25,7 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useFinish } from './FinishProvider';
+import { inkFitStyle, inkFor } from '@/lib/ink-fit';
 
 const FADE_S = 0.42; // 420ms ตามสเปก §5
 const LOAD_WATCHDOG_MS = 1500;
@@ -56,7 +57,27 @@ type Props = {
   sizes?: string;
   /** ปิด spotlight เมื่อวางบนพื้นที่มีแสงอยู่แล้ว */
   spotlight?: boolean;
+  /**
+   * สัดส่วนของเวที (กว้าง/สูง) — ผู้เรียกเป็นคนรู้ เพราะเวทีเป็น `h-full w-full`
+   * ของกล่องที่ผู้เรียกกำหนด ส่งมาแล้วเวทีจะขยายเนื้อสินค้าให้เต็มกรอบตาม
+   * กรอบอัลฟาที่ build ไว้ (ดู lib/ink-fit.ts) ไม่ส่ง = เรนเดอร์แบบเดิม
+   */
+  fitAspect?: number;
 };
+
+/**
+ * เวทีขยายน้อยกว่าการ์ดในกริด
+ *
+ * การ์ดในกริดมีเวลาของผู้ใช้แค่ครึ่งวินาที เนื้อยิ่งใหญ่ยิ่งอ่านออก แต่เวทีคือ
+ * ที่ที่คนตั้งใจมาดูของชิ้นนี้ มี spotlight กับเงาอยู่รอบ ๆ และมีสวอตช์ให้กดข้าง ๆ
+ * เนื้อที่ชนขอบเวทีทำให้ทั้งบล็อกอึดอัดโดยไม่ได้ช่วยให้เห็นสินค้าชัดขึ้น
+ */
+// 0.58 ไม่ใช่ 0.72 — วัดจากของจริง: กล่องเวทีเป็น `aspect-[4/5]` ของคอลัมน์ซ้าย
+// ที่ 1440 กว้าง ~700px จึงสูง ~875px แต่มันเริ่มที่ y≈210 บนจอสูง 900
+// เหลือให้เห็นจริงราว 690px เท่านั้น ที่ 0.72 สุขภัณฑ์สูง ~630px ล้นพ้นขอบจอ
+// ตั้งแต่เฟรมแรก (ดู a1-pdp-after.png รอบแรก) — เวทีติด sticky ก็จริง แต่เฟรมแรก
+// ของหน้าสินค้าควรเห็นของทั้งชิ้น ไม่ใช่ครึ่งบน
+const STAGE_INK_TARGET = 0.58;
 
 export default function ProductStage({
   name,
@@ -64,8 +85,13 @@ export default function ProductStage({
   priority = false,
   sizes = '(max-width: 768px) 90vw, 40vw',
   spotlight = true,
+  fitAspect,
 }: Props) {
   const { selected } = useFinish();
+
+  // transform ต่อเลเยอร์ — คำนวณจากข้อมูลที่ build ไว้ ไม่มีการวัด DOM
+  const fitFor = (src: string) =>
+    fitAspect ? inkFitStyle(inkFor(src), fitAspect, STAGE_INK_TARGET) : undefined;
 
   // front = รูปที่กำลังจะเป็นตัวจริง · back = รูปเดิมที่ยังค้างไว้ระหว่าง crossfade
   const [front, setFront] = useState<Layer | null>(
@@ -189,6 +215,7 @@ export default function ProductStage({
             alt=""
             decoding="async"
             className="h-full w-full object-contain"
+            style={{ transform: fitFor(back.src), transformOrigin: 'center' }}
           />
         </div>
       )}
@@ -221,6 +248,10 @@ export default function ProductStage({
           // บนพื้น #E5E5E5 ค่านั้นไม่ใช่เงาแต่เป็นก้อนดำใต้สินค้า — เบาลงเป็น 16%
           // (สเปก 2026-09-01 ความเสี่ยงข้อ 2 อนุญาตให้ใส่เงาด้วย CSS ได้ ไม่ใช่เงาที่อบมากับรูป)
           className="h-full w-full object-contain drop-shadow-[0_24px_44px_rgba(0,0,0,0.16)]"
+          // transform บนตัว <img> เอง ไม่ใช่ชั้นครอบ: ชั้นครอบเป็นตัวที่ gsap
+          // tween opacity อยู่ ถ้าใส่ transform ไว้ตรงนั้นด้วย ทั้งสองจะเขียนทับ
+          // style เดียวกันคนละรอบ (เคยเจอมาแล้วในกำแพง — สามอย่างขยับของชิ้นเดียว)
+          style={{ transform: fitFor(front.src), transformOrigin: 'center' }}
         />
       </div>
     </div>

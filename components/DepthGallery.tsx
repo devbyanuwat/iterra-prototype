@@ -24,7 +24,11 @@ import DepthField, { useFieldMode } from './DepthField';
 import ModelNumber from './ModelNumber';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
+import { inkFitStyle, inkFor } from '@/lib/ink-fit';
 import type { FieldPlane, IndexItem } from './depth-field';
+
+/** ตรงกับคลาส `aspect-[4/5]` ของรูปในการ์ดดัชนี — ดู lib/ink-fit.ts */
+const CARD_ASPECT = 4 / 5;
 
 type Props = {
   planes: FieldPlane[];
@@ -104,6 +108,14 @@ export default function DepthGallery({ planes, index, total }: Props) {
                     {/* z-10: ModelNumber เป็น absolute จึงวาดทับ block ปกติ
                         รูปสินค้าต้องถูกยกขึ้นมาเอง */}
                     <div className="relative z-10 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
+                      {/* เนื้อสินค้าเต็มการ์ดเหมือนกริดอื่นทั้งเว็บ — ดู lib/ink-fit.ts */}
+                      <span
+                        className="block"
+                        style={{
+                          transform: inkFitStyle(inkFor(item.src), CARD_ASPECT),
+                          transformOrigin: 'center',
+                        }}
+                      >
                       {/* eslint-disable-next-line @next/next/no-img-element -- static export, ไฟล์เดียวกับที่สนามใช้ */}
                       <img
                         // ไฟล์เดียวกับระนาบในสนาม (700) เบราว์เซอร์จึงเห็นเป็น
@@ -114,6 +126,7 @@ export default function DepthGallery({ planes, index, total }: Props) {
                         decoding="async"
                         className="aspect-[4/5] w-full object-contain"
                       />
+                      </span>
                     </div>
                   </div>
 

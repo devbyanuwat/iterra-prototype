@@ -9,8 +9,13 @@
 import Link from 'next/link';
 import TiltCard from './TiltCard';
 import { useLang } from './LangProvider';
+import { inkFitStyle, inkFor } from '@/lib/ink-fit';
 
 const MAX_DOTS = 5;
+
+/** สัดส่วนกรอบรูปของการ์ดใบนี้ — ตัวเลขเดียวกับคลาส `aspect-[4/5]` ข้างล่าง
+ *  inkFitStyle ต้องรู้ค่านี้เพื่อคำนวณ transform โดยไม่ต้องวัด DOM */
+const CARD_ASPECT = 4 / 5;
 
 /**
  * รูปร่างขั้นต่ำที่การ์ดต้องใช้ ไม่ผูกกับ `Product` เต็มก้อน
@@ -48,7 +53,18 @@ export default function ProductCard({
         <div className="overflow-hidden border border-line-6 bg-surface">
           <div className="transition-transform duration-700 ease-out group-hover:scale-[1.04]">
             {finish ? (
-              // eslint-disable-next-line @next/next/no-img-element -- static export, รูป local จาก scraper
+              // ชั้นนี้มีหน้าที่เดียว: ขยายและเลื่อนเนื้อสินค้าให้เต็มการ์ด
+              // ค่ามาจากกรอบอัลฟาที่วัดไว้ตอน build (lib/product-ink.generated.ts)
+              // ไม่ใช่วัดตอนรันไทม์ จึงไม่มี canvas ไม่มีการอ่าน layout และ HTML
+              // ที่ static export ส่งมาก็มี transform นี้ติดมาแล้ว
+              <span
+                className="block"
+                style={{
+                  transform: inkFitStyle(inkFor(finish.image), CARD_ASPECT),
+                  transformOrigin: 'center',
+                }}
+              >
+              {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local จาก scraper */}
               <img
                 src={finish.image}
                 // ใส่ srcSet เฉพาะตอนที่ไฟล์ครึ่งขนาดมีอยู่จริง — สินค้าที่ master
@@ -68,6 +84,7 @@ export default function ProductCard({
                 decoding="async"
                 className="aspect-[4/5] w-full object-contain"
               />
+              </span>
             ) : (
               <div className="aspect-[4/5] w-full" aria-hidden />
             )}

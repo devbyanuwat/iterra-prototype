@@ -34,7 +34,16 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import Link from 'next/link';
 import gsap from 'gsap';
 import { useLang } from './LangProvider';
+import { inkFitStyle, inkFor } from '@/lib/ink-fit';
 import type { FieldPlane } from './depth-field';
+
+/**
+ * สนามภาพขยายมากกว่าการ์ดในกริด (0.78)
+ *
+ * ระนาบเป็นแผ่นลอยเดี่ยวบนพื้นดำ ไม่มีชื่อสินค้าอยู่ใต้กรอบและไม่มีอะไรข้าง ๆ
+ * ให้เทียบว่าเนื้อชนขอบ การ์ดในกริดมีทั้งสองอย่าง จึงต้องเหลือขอบหายใจไว้
+ */
+const FIELD_INK_TARGET = 0.82;
 
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -140,103 +149,18 @@ const ROOM_ASPECTS = [3 / 2, 4 / 3, 16 / 9];
 
 // ── การ์ดต้องเต็มไปด้วยสินค้า ไม่ใช่เต็มไปด้วยขอบว่างของไฟล์ ──────────────────
 //
-// วัดจากของจริง: ไฟล์สินค้าเป็น 700×525 ทุกใบ และ "เนื้อสินค้า" (พิกเซลที่ไม่โปร่ง)
-// กินพื้นที่มัธยฐานแค่ **12%** ของเฟรม บางใบ 1% — ก๊อกตัวเล็กลอยอยู่กลางผ้าใบกว้าง
+// วัดจากของจริงทั้งแคตตาล็อก: เนื้อสินค้ากินพื้นที่มัธยฐาน 12.8% ของเฟรม ต่ำสุด 1.5%
 // `object-contain` เฉย ๆ จึงเอาขอบว่างในไฟล์มาวางกลางการ์ดอีกที ได้แผ่นขาวที่มี
-// ของอยู่ตรงกลางนิดเดียว ซึ่งคือสาเหตุที่สนามรอบก่อนอ่านเป็นกองกระดาษเปล่า
+// ของอยู่ตรงกลางนิดเดียว
 //
-// วัดกรอบอัลฟาจริงของแต่ละไฟล์ตอนรันไทม์ แล้วขยาย/เลื่อนให้กรอบนั้นมาเต็มการ์ด
-// ทำครั้งเดียวต่อไฟล์แล้วแคชไว้ — ค่าคงที่ตายตัวใช้ไม่ได้ เพราะอัตราส่วนเนื้อต่อเฟรม
-// ต่างกัน 50 เท่าระหว่างใบที่น้อยสุดกับมากสุด ตัวคูณเดียวจะทำให้ใบใหญ่โดนตัดหัว
-// ในขณะที่ใบเล็กยังจิ๋วอยู่ดี
-
-/** กรอบอัลฟาเป็นสัดส่วนของภาพจริง + สัดส่วนของไฟล์เอง */
-type Ink = { bx: number; by: number; bw: number; bh: number; ratio: number };
-
-/** เนื้อสินค้าควรกินพื้นที่การ์ดเท่าไร — เหลือขอบหายใจไว้เล็กน้อย */
-const INK_TARGET = 0.82;
-/** เพดานการขยาย: ใบที่เนื้อ 1% ถ้าไม่จำกัดจะถูกขยายจนแตกเป็นพิกเซล */
-const INK_MAX_SCALE = 3;
-
-const inkCache = new Map<string, Ink | null>();
-
-function measureInk(img: HTMLImageElement): Ink | null {
-  const nw = img.naturalWidth;
-  const nh = img.naturalHeight;
-  if (!nw || !nh) return null;
-  // 64px กว้างพอจะหาขอบได้แม่นระดับ ~1.5% ของเฟรม ซึ่งละเอียดเกินพอสำหรับการ
-  // ตัดสินใจว่าจะขยายเท่าไร และเป็นหนึ่งในสี่ของงานอ่านพิกเซลเทียบกับ 96px
-  const W = 64;
-  const H = Math.max(1, Math.round((W * nh) / nw));
-  const canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
-  const g = canvas.getContext('2d');
-  if (!g) return null;
-  g.drawImage(img, 0, 0, W, H);
-
-  let data: Uint8ClampedArray;
-  try {
-    data = g.getImageData(0, 0, W, H).data;
-  } catch {
-    // ภาพข้าม origin จะโยนตรงนี้ — คืน null แล้วระนาบนั้นกลับไปใช้ contain เฉย ๆ
-    return null;
-  }
-
-  let x0 = W;
-  let y0 = H;
-  let x1 = -1;
-  let y1 = -1;
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      // 24 ไม่ใช่ 0: ขอบภาพที่คีย์มามี alpha เศษ ๆ เหลืออยู่รอบวัตถุ
-      if (data[(y * W + x) * 4 + 3] > 24) {
-        if (x < x0) x0 = x;
-        if (x > x1) x1 = x;
-        if (y < y0) y0 = y;
-        if (y > y1) y1 = y;
-      }
-    }
-  }
-  if (x1 < 0) return null;
-  return {
-    bx: x0 / W,
-    by: y0 / H,
-    bw: (x1 - x0 + 1) / W,
-    bh: (y1 - y0 + 1) / H,
-    ratio: nw / nh,
-  };
-}
-
-/**
- * transform ของภาพในการ์ด: ขยายให้กรอบอัลฟาเต็มการ์ด แล้วเลื่อนให้อยู่กลาง
- *
- * `translate(...) scale(s)` โดย transform-origin เป็นกลางกล่อง แปลว่าจุด p ถูกส่งไป
- * C + s·(p + t − C) อยากให้จุดกึ่งกลางของกรอบอัลฟา B ไปอยู่ที่ C พอดี จึงได้ t = C − B
- * (ถ้าสลับลำดับเป็น `scale() translate()` ค่า t จะถูกคูณด้วย s ซึ่งเลื่อนเกินไปทุกครั้ง)
- */
-function inkFit(ink: Ink | null, cardW: number, cardH: number) {
-  if (!ink || !cardW || !cardH) return undefined;
-  // object-contain: ภาพถูกย่อให้พอดีกล่อง แล้ววางกลาง
-  const c = Math.min(cardW / ink.ratio, cardH);
-  const paintedW = c * ink.ratio;
-  const paintedH = c;
-  const ox = (cardW - paintedW) / 2;
-  const oy = (cardH - paintedH) / 2;
-
-  const inkW = ink.bw * paintedW;
-  const inkH = ink.bh * paintedH;
-  if (inkW < 1 || inkH < 1) return undefined;
-
-  const s = Math.min(
-    INK_MAX_SCALE,
-    Math.max(1, Math.min((INK_TARGET * cardW) / inkW, (INK_TARGET * cardH) / inkH)),
-  );
-  const inkCx = ox + (ink.bx + ink.bw / 2) * paintedW;
-  const inkCy = oy + (ink.by + ink.bh / 2) * paintedH;
-
-  return `translate(${(cardW / 2 - inkCx).toFixed(1)}px, ${(cardH / 2 - inkCy).toFixed(1)}px) scale(${s.toFixed(3)})`;
-}
+// เวอร์ชันแรกของท่านี้อยู่ในไฟล์นี้: วัดกรอบอัลฟาบน canvas 64px ตอนรันไทม์ แล้ว
+// แคชไว้ระดับโมดูล มันทำงานได้ แต่มีอยู่ที่เดียวในเว็บและจ่ายค่า getImageData
+// ต่อรูปทุกครั้งที่สนามขึ้น ตอนนี้การวัดถูกย้ายไป build time
+// (`scripts/build-product-ink.mjs` → `lib/product-ink.generated.ts`) และคณิตศาสตร์
+// ชุดเดียวกันอยู่ที่ `lib/ink-fit.ts` ซึ่งทั้งเว็บใช้ร่วมกัน — **แหล่งความจริงเดียว**
+//
+// `inkFitStyle` รับ "สัดส่วนการ์ด" ไม่ใช่ "ขนาดการ์ดเป็น px" จึงไม่ต้องวัด DOM
+// ที่นี่เลย และ HTML ที่ static export ส่งมาก็มี transform ติดมาตั้งแต่ต้น
 
 type PlaneBox = {
   /** px — ความกว้างของ element เอง (ขนาดที่ตาเห็น × k) */
@@ -431,8 +355,6 @@ export default function DepthField({
   const [onScreen, setOnScreen] = useState(true);
   // ระนาบห้องเข้ามาได้หรือยัง (ใช้เมื่อ deferRooms เท่านั้น)
   const [roomsReady, setRoomsReady] = useState(false);
-  // กรอบอัลฟาต่อไฟล์ — ว่างไว้ก่อน ระนาบจะใช้ object-contain ธรรมดาจนกว่าจะวัดเสร็จ
-  const [inks, setInks] = useState<Record<string, Ink | null>>({});
 
   const boxes = useMemo(() => place(planes), [planes]);
 
@@ -546,81 +468,6 @@ export default function DepthField({
     };
   }, [deferRooms, roomsReady, planes]);
 
-  // ── วัดกรอบอัลฟาของรูปสินค้าทุกใบ ครั้งเดียว ─────────────────────────────
-  //
-  // รอให้ใบที่ยังไม่เสร็จโหลดจบก่อน แล้ววัดเป็นชุดละไม่กี่ใบต่อเฟรม
-  //
-  // ไม่วัดทีละใบตอน onLoad: setState 40 ครั้งติดกันแปลว่า re-render สนาม 40 รอบ
-  // ตอนที่ประตูกำลังจะเปิดพอดี — และไม่วัดรวดเดียวทั้ง 40 ใบด้วย เพราะ
-  // `getImageData` บังคับ decode + อ่านกลับจาก GPU ทีละใบ 40 ใบติดกันเป็นบล็อก
-  // ที่กินเมนเธรดยาว (วัดได้ TBT 440ms) หั่นเป็นชุดละ 6 ใบต่อเฟรมแล้วค่อย setState
-  // ครั้งเดียวตอนจบ ได้ทั้งสองอย่าง
-  //
-  // ผลถูกแคชที่ระดับโมดูล ไฟล์เดียวกันในสนามที่สอง (แกลเลอรี) จึงไม่ถูกวัดซ้ำ
-  useEffect(() => {
-    const cam = camera.current;
-    if (!cam) return;
-    let alive = true;
-    let raf = 0;
-
-    const CHUNK = 6;
-
-    const measureAll = (imgs: HTMLImageElement[]) => {
-      let at = 0;
-      const step = () => {
-        if (!alive) return;
-        const end = Math.min(at + CHUNK, imgs.length);
-        for (; at < end; at++) {
-          const key = imgs[at].getAttribute('src') ?? '';
-          if (key && !inkCache.has(key)) inkCache.set(key, measureInk(imgs[at]));
-        }
-        if (at < imgs.length) {
-          raf = requestAnimationFrame(step);
-          return;
-        }
-        const next: Record<string, Ink | null> = {};
-        for (const img of imgs) {
-          const key = img.getAttribute('src') ?? '';
-          if (key) next[key] = inkCache.get(key) ?? null;
-        }
-        setInks(next);
-      };
-      raf = requestAnimationFrame(step);
-    };
-
-    const ready = () => {
-      const imgs = Array.from(
-        cam.querySelectorAll<HTMLImageElement>('img:not([data-depth-defer])'),
-      );
-      if (!imgs.length || !imgs.every((i) => i.complete)) return null;
-      return imgs;
-    };
-
-    const first = ready();
-    if (first) {
-      measureAll(first);
-      return () => {
-        alive = false;
-        cancelAnimationFrame(raf);
-      };
-    }
-
-    const poll = window.setInterval(() => {
-      const imgs = ready();
-      if (imgs) {
-        window.clearInterval(poll);
-        measureAll(imgs);
-      }
-    }, 200);
-    const watchdog = window.setTimeout(() => window.clearInterval(poll), 8000);
-    return () => {
-      alive = false;
-      cancelAnimationFrame(raf);
-      window.clearInterval(poll);
-      window.clearTimeout(watchdog);
-    };
-  }, [planes]);
-
   // ── หยุดเมื่อพ้น viewport ─────────────────────────────────────────────────
   useEffect(() => {
     const el = viewport.current;
@@ -681,11 +528,10 @@ export default function DepthField({
 
           const isRoom = plane.kind === 'room';
 
-          // ขนาดกล่องการ์ดที่ inkFit ต้องรู้ — ความสูงมาจากสัดส่วนที่ place() เลือกไว้
-          // สัดส่วนของไฟล์ติดมากับผลการวัด ไม่ได้ฮาร์ดโค้ด เผื่อข้อมูลถูก generate ใหม่
+          // สัดส่วนของการ์ดคือทั้งหมดที่ inkFitStyle ต้องรู้ — ไม่ต้องวัด px
           const fit = isRoom
             ? undefined
-            : inkFit(inks[plane.src] ?? null, box.width, box.width / (box.aspect ?? 1));
+            : inkFitStyle(inkFor(plane.src), box.aspect ?? 1, FIELD_INK_TARGET);
 
           const style: React.CSSProperties = {
             width: box.width,
@@ -761,9 +607,7 @@ export default function DepthField({
           ) : (
             <span className="block h-full w-full overflow-hidden border border-[rgba(0,0,0,0.14)] bg-surface">
               {/* ชั้นนี้มีหน้าที่เดียว: ขยายและเลื่อนภาพให้ "เนื้อสินค้า" มาเต็มการ์ด
-                  ค่ามาจากกรอบอัลฟาที่วัดจากไฟล์จริง ดู measureInk/inkFit ด้านบน
-                  ยังไม่ได้วัด (เฟรมแรก ๆ) = ไม่มี transform = object-contain ธรรมดา
-                  ซึ่งเป็นสถานะที่ถูกต้องอยู่แล้ว แค่ว่างกว่า */}
+                  ค่ามาจากกรอบอัลฟาที่วัดไว้ตอน build ดู lib/ink-fit.ts */}
               <span
                 className="block h-full w-full"
                 style={{ transform: fit, transformOrigin: 'center' }}
