@@ -42,7 +42,9 @@ body {
   @apply bg-base text-ink font-sans;
   font-size: 16px;
   line-height: 1.6;
-  font-weight: 400;
+  /* 500, not 400. Thai at 400 was the 'บางมากอ่านยาก' complaint; DM Sans at 500
+     still reads as body text rather than bold, so one value serves both scripts. */
+  font-weight: 500;
 }
 
 /* Not var(--accent): the accent is the average colour of the selected finish, so
@@ -64,7 +66,7 @@ body {
    Colour tracks the `dim` token, which is #5D5D5D rather than the spec's
    #666666 — see the note on that token in tailwind.config.ts. 5.22:1 on base. */
 .micro {
-  font-family: var(--font-dm-sans), var(--font-plex-thai), system-ui, sans-serif;
+  font-family: var(--font-dm-sans), var(--font-thai), system-ui, sans-serif;
   font-weight: 500;
   font-size: 15px;
   line-height: 1.3;

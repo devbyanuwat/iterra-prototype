@@ -55,8 +55,8 @@ const config: Config = {
       fontFamily: {
         // ทั้งสอง family อยู่ในทั้งสอง stack — DM Sans ไม่มีอักษรไทย
         // ถ้าไม่ใส่ Plex Thai ต่อท้าย display พาดหัวไทยจะตกไปใช้ฟอนต์ระบบ
-        sans: ['var(--font-plex-thai)', 'var(--font-dm-sans)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-dm-sans)', 'var(--font-plex-thai)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-thai)', 'var(--font-dm-sans)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-dm-sans)', 'var(--font-thai)', 'system-ui', 'sans-serif'],
       },
     },
   },

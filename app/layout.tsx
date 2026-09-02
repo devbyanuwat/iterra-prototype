@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { DM_Sans, IBM_Plex_Sans_Thai } from 'next/font/google';
+import { DM_Sans, Sarabun } from 'next/font/google';
 import './globals.css';
 import { LangProvider } from '@/components/LangProvider';
 import Preloader from '@/components/Preloader';
@@ -21,17 +21,22 @@ const dmSans = DM_Sans({
 });
 
 // Body face: ไทย + ละติน · ไม่ใช่ variable font ต้องระบุน้ำหนักเป็นชุด
-//
-// เคยโหลด 100/200/300 ด้วย เพราะทั้งเว็บเซ็ตด้วย font-light/font-extralight
-// สเปก 2026-09-01 §3.2 ตัดน้ำหนักต่ำกว่า 400 ออกจากข้อความที่ต้องอ่านทั้งหมด
-// เหลือแค่ ModelNumber ที่ยังบาง และตัวนั้นเป็น font-display (DM Sans variable)
-// ไม่ได้ใช้ Plex Thai — สามน้ำหนักนั้นจึงไม่มีใครเรียกแล้ว ตัดทิ้งได้ทั้งชุด
 // 600 มาจาก h1 หน้าสินค้า 30px/600 ในตาราง §3.2
-const plexThai = IBM_Plex_Sans_Thai({
+//
+// Sarabun, not Plex Thai. Measured ink coverage of a real Thai sentence at 16px:
+// Plex Thai 400 (what shipped) 2821 px, Noto Sans Thai 500 3184, Anuphan 500 3415,
+// Sarabun 500 3714 — a third more ink than the face the client called too thin to
+// read, three separate times.
+//
+// Kohler themselves run Noto Sans, and matching the brand was the argument for Plex.
+// The complaint here is legibility, not brand fit, and Sarabun is drawn for Thai body
+// copy at small sizes. Copying a value off kohler.co.th without checking it against
+// our own context is a mistake already made once on this project, with `dim`.
+const thai = Sarabun({
   subsets: ['latin', 'thai'],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font-plex-thai',
+  variable: '--font-thai',
 });
 
 export const metadata: Metadata = {
@@ -83,7 +88,7 @@ setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s)},2000);}}catch
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     // สคริปต์ข้างล่างแก้ lang ก่อน hydrate — บอก React ว่า attribute นี้ต่างได้
-    <html lang="th" suppressHydrationWarning className={`${dmSans.variable} ${plexThai.variable}`}>
+    <html lang="th" suppressHydrationWarning className={`${dmSans.variable} ${thai.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: RESTORE_LANG }} />
       </head>
