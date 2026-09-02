@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import HomeHero from '@/components/home/HomeHero';
 import HomeContent from '@/components/home/HomeContent';
-import { DEPTH_SEED_ID, entryPlanes } from '@/components/depth-field';
+import { DEPTH_SEED_ID, GALLERY_PLANES, entryPlanes } from '@/components/depth-field';
 
 export const metadata: Metadata = {
   title: 'KOHLER — อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม | Premium Kitchen & Bath',
@@ -15,7 +15,24 @@ export const metadata: Metadata = {
 // คือวิธีกรองของ 182 ชิ้น ไม่ใช่ประตูหน้าบ้าน หน้าแรกจึงกลับไปเป็น hero ภาพจริง
 // ส่วนการนำทางด้วยเฉดยังอยู่ครบ — บล็อกจานสีใน HomeContent ลิงก์เข้ากริดที่กรอง
 // เฉดนั้นไว้แล้ว และกำแพงตัวจริงอยู่ห่างออกไปหนึ่งคลิก
+/**
+ * ตัวอย่างสนามของบล็อกทางเข้า /gallery (task B2 ข้อ 2)
+ *
+ * เอาเฉพาะระนาบ "สินค้า" ของประตูเข้า ไม่ใช่ชุดใหม่ และไม่ใช่ระนาบห้อง:
+ *   • สินค้า — ไฟล์เดียวกับที่ประตูเข้าโหลดไปแล้วตอนหน้าโหลด บล็อกนี้จึงเป็น
+ *     cache hit ล้วน ไม่เพิ่มไบต์ให้หน้าแรกแม้แต่ใบเดียว
+ *   • ห้อง   — ถูกเลื่อนให้โหลดทีหลังในประตูเข้า (deferRooms) ถ้าเอามาใช้ที่นี่
+ *     ก็เท่ากับดึงมันกลับมาโหลดทันที ซึ่งเป็นสิ่งที่ deferRooms ตั้งใจเลี่ยง
+ *
+ * 24 ใบ: พอให้อ่านเป็นสนามในกล่องสูง 78svh โดยไม่ต้องจ่ายค่า compositing
+ * เท่าประตูเข้า (58 ใบ) ซึ่งบล็อกนี้ไม่ได้ต้องการ
+ */
+const FIELD_ENTRY_PLANES = 24;
+
 export default function HomePage() {
+  const planes = entryPlanes();
+  const preview = planes.filter((p) => p.kind === 'product').slice(0, FIELD_ENTRY_PLANES);
+
   return (
     <>
       {/* ชุดระนาบของประตูเข้า (spec depth-field §4.1)
@@ -31,11 +48,11 @@ export default function HomePage() {
         id={DEPTH_SEED_ID}
         type="application/json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(entryPlanes()).replace(/</g, '\\u003c'),
+          __html: JSON.stringify(planes).replace(/</g, '\\u003c'),
         }}
       />
       <HomeHero />
-      <HomeContent />
+      <HomeContent fieldPlanes={preview} galleryTotal={GALLERY_PLANES} />
     </>
   );
 }

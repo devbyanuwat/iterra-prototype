@@ -30,26 +30,67 @@ import type { FieldPlane, IndexItem } from './depth-field';
 /** ตรงกับคลาส `aspect-[4/5]` ของรูปในการ์ดดัชนี — ดู lib/ink-fit.ts */
 const CARD_ASPECT = 4 / 5;
 
+/**
+ * ต่ำกว่านี้ไม่เรนเดอร์สนาม แสดงดัชนีอย่างเดียว (task B2)
+ *
+ * สนามของเฉดเดียวมีของเท่าที่เฉดนั้นมีจริง: โครเมี่ยม 74 ชิ้น (เต็มเพดาน 48)
+ * แต่บรอนซ์ปัดลายมี 4 ชิ้น วัดที่ 1440 แล้ว 4 ระนาบในกล่องสูง 82svh คือ
+ * สี่เหลี่ยมดำที่มีเศษกระดาษติดขอบสองใบ ไม่ใช่สนาม ส่วน 12 ระนาบ (ดำด้าน)
+ * ยังอ่านออกว่าเป็นสนาม บาง แต่จริง — เส้นแบ่งจึงอยู่ที่ 12
+ * ดัชนีไม่ใช่การถอยกลับ: มันคือของชุดเดียวกันในรูปแบบที่ค้นได้ (§4.2)
+ */
+const FIELD_MIN_PLANES = 12;
+
 type Props = {
   planes: FieldPlane[];
   index: IndexItem[];
   total: number;
+  /**
+   * สนามของเฉดเดียว (/gallery/[finish]) — ไม่ส่งมา = สนามรวมของ /gallery
+   *
+   * หน้านี้เป็นปลายทางของหน้า /finish/[code]: ของชุดเดียวกันเป๊ะ ๆ แต่อยู่ในที่ว่าง
+   * แทนที่จะเป็นกริด หัวข้อกับทางกลับจึงต้องบอกให้ชัดว่ากำลังดูเฉดไหนอยู่
+   */
+  finish?: { code: string; name: { th: string; en: string }; count: number };
 };
 
-export default function DepthGallery({ planes, index, total }: Props) {
+export default function DepthGallery({ planes, index, total, finish }: Props) {
   const { t, lang } = useLang();
   const fieldMode = useFieldMode();
   const [wantIndex, setWantIndex] = useState(false);
 
-  // สนามได้เมื่อ "เครื่องมีเมาส์และผู้ใช้ไม่ได้ขอให้หยุดขยับ" เท่านั้น
-  const showField = fieldMode && !wantIndex;
+  // สนามได้เมื่อ "เครื่องมีเมาส์ ผู้ใช้ไม่ได้ขอให้หยุดขยับ และมีของพอจะเป็นสนาม"
+  const enough = planes.length >= FIELD_MIN_PLANES;
+  const showField = fieldMode && !wantIndex && enough;
 
   return (
     <section className="px-6 pb-24 pt-28 md:px-[4vw] md:pt-32">
       <Reveal>
-        <p className="micro">{t.gallery.kicker}</p>
+        <p className="micro">
+          {t.gallery.kicker}
+          {/* ชื่อเฉดอยู่บน kicker ไม่ใช่ต่อท้ายพาดหัว: พาดหัวไทยที่ยาวขึ้นอีกหนึ่ง
+              วลีจะตัดบรรทัดกลางชื่อเฉดที่ 390 ซึ่งอ่านเป็นคนละคำ
+              และไม่ใช่ !text-accent: --accent ของหน้านี้คือสีของเฉดนั้นจริง ๆ
+              ซึ่งเฉดโครเมี่ยมเท่ากับ #CDCED3 — วัดบนพื้น #E5E5E5 ได้ 1.2:1 */}
+          {finish && <span className="!text-ink"> · {finish.name[lang]}</span>}
+        </p>
         <h1 className="mt-3 max-w-3xl text-section font-normal text-ink">{t.gallery.title}</h1>
-        <p className="mt-4 max-w-2xl text-body text-dim">{t.gallery.sub(planes.length)}</p>
+        {/* คำโปรยต้องบรรยายสิ่งที่หน้านี้ทำจริง: sub ของแกลเลอรีพูดว่า "เลื่อนเมาส์
+            เพื่อเดินดู" ซึ่งเป็นคำโกหกบนเฉดที่ของน้อยจนไม่มีสนาม — เฉดพวกนั้นใช้
+            ประโยคของหน้าเฉดแทน ซึ่งบรรยายกริดที่กำลังจะเห็นได้ตรงกว่า */}
+        <p className="mt-4 max-w-2xl text-body text-dim">
+          {enough || !finish ? t.gallery.sub(planes.length) : t.finish.sub(finish.count)}
+        </p>
+        {/* ทางกลับไปหน้าเฉด — ป้ายคือชื่อหน้านั้นเอง ไม่ใช่ "ย้อนกลับ" ลอย ๆ
+            คนที่เดินมาจากหน้าเฉดต้องกลับไปที่กริดค้นหาได้ในคลิกเดียว */}
+        {finish && (
+          <Link
+            href={`/finish/${encodeURIComponent(finish.code)}/`}
+            className="micro mt-5 inline-block underline-offset-8 hover:underline"
+          >
+            ← {t.finish.title(finish.name[lang])}
+          </Link>
+        )}
       </Reveal>
 
       <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
@@ -59,8 +100,9 @@ export default function DepthGallery({ planes, index, total }: Props) {
 
         <div className="flex items-center gap-5">
           <span className="micro hidden md:inline">{showField ? t.gallery.keyHint : ''}</span>
-          {/* ปุ่มโผล่เฉพาะตอนที่มีสองมุมมองให้เลือกจริง */}
-          {fieldMode && (
+          {/* ปุ่มโผล่เฉพาะตอนที่มีสองมุมมองให้เลือกจริง — เฉดที่ของไม่พอจะเป็นสนาม
+              ก็ไม่มีอะไรให้สลับไป เหมือนกับมือถือและ reduced-motion */}
+          {fieldMode && enough && (
             <button
               type="button"
               onClick={() => setWantIndex((v) => !v)}
@@ -101,9 +143,10 @@ export default function DepthGallery({ planes, index, total }: Props) {
                     หน้าตาเดียว ไม่ว่าจะมาจากหน้าเฉดหรือจากดัชนีของสนาม */}
                 <Link href={item.href} className="group block">
                   {/* ห้ามใส่ overflow-hidden ที่นี่: hidden สร้าง scroll container
-                      ที่ 390px จะได้แถบเลื่อนแนวนอนกลับมา ตัว ModelNumber ถือ
-                      overflow-clip ของมันเองไว้แล้ว */}
-                  <div className="relative border border-line-6 bg-surface">
+                      ที่ 390px จะได้แถบเลื่อนแนวนอนกลับมา — overflow-clip ตัดให้
+                      โดยไม่สร้าง scroll container จึงใช้ได้ และต้องมี เพราะรูปที่
+                      ถูกซูมด้วยกรอบอัลฟา (งาน A1) ล้นออกนอกการ์ดได้ */}
+                  <div className="relative overflow-clip border border-line-6 bg-surface">
                     <ModelNumber model={item.model} variant="card" />
                     {/* z-10: ModelNumber เป็น absolute จึงวาดทับ block ปกติ
                         รูปสินค้าต้องถูกยกขึ้นมาเอง */}

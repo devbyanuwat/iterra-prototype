@@ -25,9 +25,11 @@ import PinnedStory from '@/components/PinnedStory';
 import ParallaxImage from '@/components/ParallaxImage';
 import { useLang } from '@/components/LangProvider';
 import { finishIndex, finishOf } from '@/components/finish-index';
+import FieldEntry from './FieldEntry';
 import { roomById } from './rooms';
 import { lifestyleSrc } from '@/lib/lifestyle.generated';
 import { products, type Finish, type Product } from '@/lib/products';
+import type { FieldPlane } from '@/components/depth-field';
 import { posts } from '@/lib/posts';
 import { CONTACT } from '@/lib/site';
 
@@ -35,6 +37,13 @@ import { CONTACT } from '@/lib/site';
 //
 // ทั้งหมดเป็นฟังก์ชันบริสุทธิ์บนข้อมูลคงที่ ไม่มีอะไรขึ้นกับภาษาหรือ state
 // จึงไม่มีเหตุผลให้คิดใหม่ทุกครั้งที่ผู้ใช้กดสลับ TH/EN
+
+type Props = {
+  /** ตัวอย่างระนาบให้บล็อกทางเข้าสนาม — คำนวณฝั่ง server ใน app/page.tsx */
+  fieldPlanes: FieldPlane[];
+  /** จำนวนระนาบที่ /gallery มีจริง ใช้ในคำโปรยของบล็อกนั้น */
+  galleryTotal: number;
+};
 
 /** สามเฉดที่มีของเยอะสุด — finishIndex เรียง count มาก→น้อยมาแล้ว */
 const TOP_FINISHES = finishIndex.slice(0, 3);
@@ -501,10 +510,14 @@ function ShowroomBlock() {
   );
 }
 
-export default function HomeContent() {
+export default function HomeContent({ fieldPlanes, galleryTotal }: Props) {
   return (
     <>
       <TopFinishGrid />
+      {/* ทางเข้าสนามภาพวางต่อจากกริดชิ้นเด่นโดยตั้งใจ (task B2 ข้อ 2):
+          กริดคือของแปดชิ้นเรียงกันบนพื้นสว่าง บล็อกถัดมาคือของทั้งชุดลอยอยู่ใน
+          ที่ว่างมืด — เป็นก้าวต่อจากกันจริง ๆ ไม่ใช่ปุ่มที่แปะไว้เฉย ๆ */}
+      <FieldEntry planes={fieldPlanes} total={galleryTotal} />
       <RoomSplit />
       <PinnedStory images={STORY_IMAGES} />
       <Stats />

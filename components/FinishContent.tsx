@@ -303,7 +303,34 @@ export default function FinishContent({ code }: { code: string }) {
           </div>
         )}
 
-        <div className="mt-16 flex flex-wrap items-center gap-x-8 gap-y-4">
+        {/* ── ก้าวถัดไปของหน้านี้: ของชุดเดิม ในที่ว่าง (task B2 ข้อ 2) ──────
+            วางไว้ท้ายกริดโดยตั้งใจ ไม่ใช่บนหัวหน้า — คนที่เพิ่งเลื่อนผ่านของทั้ง
+            เฉดมาแล้วคือคนที่คำถาม "แล้วมันอยู่ด้วยกันหน้าตาเป็นยังไง" เกิดขึ้นจริง
+            ปลายทางเป็นสนามของ "เฉดนี้" ไม่ใช่สนามรวม จึงเป็นของชุดเดียวกับกริด
+            ข้างบนเป๊ะ ๆ (ดู app/gallery/finish-planes.ts) */}
+        <Link
+          href={`/gallery/${encodeURIComponent(entry.code)}/`}
+          className="group mt-16 flex flex-wrap items-center justify-between gap-6 border border-line-12 px-8 py-10 transition-colors duration-300 hover:border-accent md:px-12"
+        >
+          <div>
+            <p className="micro">{t.gallery.kicker}</p>
+            <h2 className="mt-2 text-card font-normal text-ink">{t.gallery.title}</h2>
+            <p className="mt-2 text-body-sm text-dim">
+              {t.finish.pieces(entry.count)} · {entry.name[lang]}
+            </p>
+          </div>
+          {/* ไม่ใช่ !text-accent: --accent ของหน้านี้เป็นสีของเฉด ซึ่งเฉดโครเมี่ยม
+              (#CDCED3) และเฉดขาวบนพื้น #E5E5E5 อ่านไม่ออก — สีของ accent อยู่ที่
+              ขอบกล่องตอน hover ซึ่งเป็นของประดับ ไม่ใช่ตัวหนังสือ */}
+          <span className="micro flex items-center gap-4 !text-ink">
+            {t.common.explore}
+            <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">
+              →
+            </span>
+          </span>
+        </Link>
+
+        <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4">
           <Link href="/" className="micro underline-offset-8 hover:underline">
             ← {t.finish.backToWall}
           </Link>
