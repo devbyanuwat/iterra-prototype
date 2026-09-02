@@ -15,7 +15,7 @@
 // 424KB — เหตุผลเดียวกับที่ depth-field.ts เป็นข้อมูลล้วน
 
 import { finishOf, getFinishEntry } from '@/components/finish-index';
-import { GALLERY_PLANES, type FieldPlane, type IndexItem } from '@/components/depth-field';
+import { FIELD_PLANES, GALLERY_PLANES, type FieldPlane, type IndexItem } from '@/components/depth-field';
 
 export function finishPlanes(
   code: string,
@@ -69,5 +69,7 @@ export function finishPlanes(
     });
   }
 
-  return { planes, index };
+  // สนามได้ 18 ใบแรก ดัชนีได้ทั้งชุด (task D1) — เหตุผลเต็มอยู่ที่ FIELD_PLANES
+  // ใน components/depth-field.ts: 48 ใบไม่มีทางอยู่ในกล่องเดียวโดยยังกดทีละชิ้นได้
+  return { planes: planes.slice(0, FIELD_PLANES), index };
 }

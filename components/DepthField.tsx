@@ -199,6 +199,105 @@ function atDepth(x: number, y: number, z: number, newZ: number, scale = 1) {
   return { x: x * r * scale, y: y * r * scale };
 }
 
+// ── โหมดเรียกดู: สนามเดียวกัน คนละงาน (task D1) ─────────────────────────────
+//
+// ประตูเข้าคือ "ช่วงเวลา": กำแพงรูปหนาแน่นที่เห็นไม่กี่วินาที ความหนาแน่นคือเนื้อหา
+// /gallery คือ "หน้า" ที่คนเปิดมาเพื่อ **หาสินค้าสักชิ้น** ความหนาแน่นชุดเดียวกัน
+// กลายเป็นกองที่ใช้งานไม่ได้ทันที — วัดจากของจริงก่อนแก้ (ดู scratchpad/task-d1.md):
+//   · 22 จาก 48 ระนาบตกอยู่นอกกล่องที่มองเห็น ถูกครอปทิ้งทั้งใบ
+//   · จาก 26 ใบที่เหลือ มีเพียง 4 ใบที่จุดกึ่งกลางของมันชี้กลับมาที่ตัวมันเอง
+//     ที่เหลือถูกใบอื่นทับ — คลิกโดนใบข้าง ๆ หรือไม่โดนอะไรเลย
+//
+// โหมดนี้จึงจัดวางคนละแบบ ไม่ใช่ "แบบเดิมแต่ห่างขึ้น":
+//   1. คิดตำแหน่งใน **พิกัดจอ** แล้วค่อยแปลงกลับเป็นพิกัดโลกด้วย persp(z)
+//      ระนาบทุกใบจึงตกลงในช่องกริดของตัวเองเสมอ ไม่ว่าจะลึกเท่าไหร่ ความลึกเหลือ
+//      หน้าที่เดียวคือขนาดกับความจาง ซึ่งเป็นสัญญาณระยะที่ตายังอ่านได้
+//      (ของเดิมสุ่ม x,y ในพิกัดโลก ใบไกลจึงถูกเปอร์สเปกทีฟดูดเข้าหากลางจอไปกองกัน)
+//   2. ช่องกริดคำนวณจากขนาดกล่องจริง ไม่ใช่ค่าคงที่ — สนามที่กว้าง 950px กับ 1310px
+//      ไม่ควรได้เลย์เอาต์เดียวกัน
+//   3. ไม่มีผนังหมุน 30–56° การหมุนแรง ๆ ทำให้พื้นที่กดจริงเป็นสี่เหลี่ยมคางหมูแคบ ๆ
+//      ที่ไม่ตรงกับสิ่งที่ตาเห็น ±7° พอให้ไม่แข็งและยังกดตรงกลางได้
+const BROWSE = {
+  /** ขอบในของกล่อง — ระนาบริมสุดต้องไม่ถูกครอป */
+  margin: { x: 70, y: 56 },
+  zNear: 120,
+  zFar: -760,
+  /**
+   * ความกว้างที่ตาเห็น: ใบหน้าสุด → ใบไกลสุด
+   *
+   * เพดาน 145 ไม่ใช่รสนิยม: การ์ดที่สัดส่วนสูงสุดในชุดคือ 3/4 ซึ่งสูง 145÷0.75 =
+   * 193px ส่วนช่องกริดที่กล่องสูง 78svh (≈702px) แบ่งสามแถวได้สูงช่องละ ~202px
+   * ใบที่สูงกว่าช่องของตัวเองจะไปกินช่องแถวถัดไป ซึ่งคือการซ้อนทับที่งานนี้แก้อยู่
+   */
+  wNear: 145,
+  wFar: 112,
+  /** เขย่าตำแหน่งได้ไม่เกินเศษส่วนนี้ของช่อง — จุดกึ่งกลางของแต่ละใบจึงยังว่างเสมอ */
+  jitter: 0.14,
+  yaw: 7,
+};
+
+/** ขนาดกล่องที่ใช้จัดวางโหมดเรียกดู — วัดจาก viewport จริง */
+export type FieldBox = { w: number; h: number };
+
+function placeBrowse(planes: FieldPlane[], box: FieldBox): PlaneBox[] {
+  const rnd = mulberry32(0x42524f); // 'BRO'
+  const n = planes.length;
+
+  const sx = Math.max(180, box.w / 2 - BROWSE.margin.x);
+  const sy = Math.max(140, box.h / 2 - BROWSE.margin.y);
+
+  // คอลัมน์จากสัดส่วนกล่อง ไม่ใช่ค่าคงที่: กล่องเตี้ยกว้างต้องได้คอลัมน์มากกว่า
+  const cols = Math.max(2, Math.min(n, Math.round(Math.sqrt(n * (box.w / box.h)))));
+  const rows = Math.ceil(n / cols);
+  const cellW = (sx * 2) / cols;
+  const cellH = (sy * 2) / rows;
+
+  return planes.map((plane, idx) => {
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+
+    // ความลึกเดินแบบ low-discrepancy เหมือนโหมดประตู — แต่ตื้นกว่ามาก
+    const u = (idx * PHI_STEP) % 1;
+    const z = BROWSE.zNear + (BROWSE.zFar - BROWSE.zNear) * u;
+    const depth01 = (BROWSE.zNear - z) / (BROWSE.zNear - BROWSE.zFar);
+
+    // จุดกึ่งกลางช่อง ในพิกัดจอ (px จากกลางกล่อง)
+    const jx = (rnd() - 0.5) * 2 * BROWSE.jitter * cellW;
+    const jy = (rnd() - 0.5) * 2 * BROWSE.jitter * cellH;
+    const screenX = -sx + (col + 0.5) * cellW + jx;
+    const screenY = -sy + (row + 0.5) * cellH + jy;
+
+    const apparentW = BROWSE.wFar + (1 - depth01) * (BROWSE.wNear - BROWSE.wFar);
+    const aspect = plane.kind === 'room'
+      ? ROOM_ASPECTS[idx % ROOM_ASPECTS.length]
+      : PRODUCT_ASPECTS[idx % PRODUCT_ASPECTS.length];
+
+    // แปลงพิกัดจอกลับเป็นพิกัดโลก: โลก = จอ ÷ ตัวคูณเปอร์สเปกทีฟ
+    const k = persp(z);
+    const x = screenX / k;
+    const y = screenY / k;
+    const width = Math.round(apparentW / k);
+    const yaw = (rnd() - 0.5) * 2 * BROWSE.yaw;
+
+    // hover: เข้ามาใกล้กล้อง แต่ atDepth ตรึง "ตำแหน่งที่ตาเห็น" ไว้ที่เดิม
+    // ระนาบจึงโตอยู่กับที่ ไม่เลื่อนหนีเคอร์เซอร์
+    const zHover = Math.min(z + 150, BROWSE.zNear + 140);
+    const hoverPos = atDepth(x, y, z, zHover);
+    const zPull = Math.min(z + 700, 300);
+    const pullPos = atDepth(x, y, z, zPull, 0.34);
+
+    return {
+      width,
+      aspect,
+      rest: tf(x, y, z, yaw),
+      hover: tf(hoverPos.x, hoverPos.y, zHover, yaw),
+      pulled: `${tf(pullPos.x, pullPos.y, zPull, yaw * 0.15)} scale(1.12)`,
+      // หรี่น้อยกว่าโหมดประตูมาก: นี่คือหน้าที่ต้องอ่านของออก ไม่ใช่บรรยากาศ
+      opacity: 1 - depth01 * 0.18,
+    };
+  });
+}
+
 function place(planes: FieldPlane[]): PlaneBox[] {
   const rnd = mulberry32(0x4b4f48); // 'KOH'
   const seen = { product: 0, room: 0 };
@@ -331,6 +430,14 @@ type Props = {
    * ผูกกับสีพื้นนอกจากตรงที่ระบุไว้ในไฟล์นี้
    */
   dark?: boolean;
+  /**
+   * งานของสนามนี้ (task D1)
+   *
+   * `gate`   — ประตูเข้า: กำแพงหนาแน่น เห็นไม่กี่วินาที กล้องกวาดกว้าง
+   * `browse` — /gallery: หน้าที่คนเปิดมาหาสินค้า ระนาบต้องแยกออกจากกันเป็นชิ้น ๆ
+   *            กดได้ทีละชิ้น และกล้องต้องไม่แย่งเป้าไปจากปลายเคอร์เซอร์
+   */
+  mode?: 'gate' | 'browse';
   className?: string;
   /** ป้ายกำกับของ region สำหรับ screen reader */
   label: string;
@@ -343,6 +450,7 @@ export default function DepthField({
   revealByProgress = false,
   deferRooms = false,
   dark = true,
+  mode = 'gate',
   className = '',
   label,
 }: Props) {
@@ -350,13 +458,50 @@ export default function DepthField({
   const viewport = useRef<HTMLDivElement>(null);
   const camera = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<number | null>(null);
+  /**
+   * เคอร์เซอร์อยู่บนระนาบใบใดใบหนึ่งอยู่ตอนนี้ (task D1)
+   *
+   * เป็น ref ไม่ใช่ state เพราะตัวจัดการ pointermove ของกล้องอ่านมันทุกเฟรม
+   * ถ้าเป็น state ตัวจัดการจะต้องถูกผูกใหม่ทุกครั้งที่เมาส์เข้า/ออกระนาบ
+   */
+  const aiming = useRef(false);
   const [focused, setFocused] = useState<number | null>(null);
   // สนามพ้นจอแล้วต้องหยุดทุกอย่าง (§5 ข้อ 5) — บนประตูเข้าเป็นจริงตลอด
   const [onScreen, setOnScreen] = useState(true);
   // ระนาบห้องเข้ามาได้หรือยัง (ใช้เมื่อ deferRooms เท่านั้น)
   const [roomsReady, setRoomsReady] = useState(false);
 
-  const boxes = useMemo(() => place(planes), [planes]);
+  // ── โหมดเรียกดูจัดวางตามขนาดกล่องจริง ────────────────────────────────────
+  //
+  // วัดหลัง mount แล้วเก็บไว้ใน state: static export ส่ง HTML ชุดเดียวให้ทุกเครื่อง
+  // จึงเดาความกว้างไม่ได้ตั้งแต่ต้น ค่าเริ่มต้นเป็นกล่องขนาดที่พบบ่อยที่สุด (1440)
+  // เพื่อให้เฟรมแรกไม่หลุดกรอบก่อนตัววัดจะมา
+  const [fieldBox, setFieldBox] = useState<FieldBox>({ w: 1300, h: 700 });
+  useIsoLayoutEffect(() => {
+    if (mode !== 'browse') return;
+    const el = viewport.current;
+    if (!el) return;
+    const read = () => {
+      const r = el.getBoundingClientRect();
+      if (r.width && r.height) {
+        setFieldBox((cur) =>
+          Math.abs(cur.w - r.width) < 2 && Math.abs(cur.h - r.height) < 2
+            ? cur
+            : { w: r.width, h: r.height },
+        );
+      }
+    };
+    read();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [mode]);
+
+  const boxes = useMemo(
+    () => (mode === 'browse' ? placeBrowse(planes, fieldBox) : place(planes)),
+    [planes, mode, fieldBox],
+  );
 
   // ── กล้อง: เมาส์ ───────────────────────────────────────────────────────────
   //
@@ -375,9 +520,23 @@ export default function DepthField({
     //
     // หมุนที่ "กล้อง" ซึ่งเป็น container ของทั้งฉาก = หมุนโลกรอบจุดกำเนิด
     // ซึ่งเทียบเท่ากับกล้องโคจรรอบห้อง และถูกกว่าการขยับระนาบ 52 ใบทีละใบมาก
-    const ROT_Y = 26;
-    const ROT_X = 13;
-    const PAN = 190;
+    // ── โหมดเรียกดูใช้ช่วงเล็กกว่ามาก และมีเหตุผลที่วัดได้ (task D1) ────────
+    //
+    // ด้วยค่าของประตู กล้องกวาด rotateY +23.7° → −18° และเลื่อน x +174 → −145 px
+    // ตลอดความกว้างกล่อง ผลที่วัดได้ตอนพยายามใช้งานจริง: ขยับเมาส์เข้าหาระนาบ
+    // ระนาบนั้น **เลื่อนออกไป 200px ซ้ายและ 113px ขึ้น** พอกดปุ่มลงไป ใต้เคอร์เซอร์
+    // ไม่เหลืออะไรที่กดได้เลย (elementFromPoint คืนพื้นของกล้อง) หน้าจึงไม่ไปไหน
+    // — นี่คือ "hover ไม่ติด กดไม่ได้" ที่ลูกค้าเจอ ไม่ใช่ event ถูกกลืน
+    //
+    // 6°/3°/40px ยังให้ความรู้สึกว่าฉากมีความลึกตอบสนอง แต่ระยะที่ของขยับตลอด
+    // การเข้าหาเป้าน้อยกว่าครึ่งความกว้างของระนาบหนึ่งใบ เป้าจึงยังอยู่ใต้ปลายนิ้ว
+    // 6°/40px ยังไม่พอ: วัดการเข้าหาเป้าจริงระยะ 420px แล้วระนาบยังเลื่อนไป 70px
+    // ซึ่งมากกว่าครึ่งความกว้างของมันเอง (118px) เคอร์เซอร์จึงไปถึงที่ที่ระนาบ
+    // "เคยอยู่" แล้วคลิกไม่โดน — 2°/10px ทำให้ระยะนั้นเหลือระดับสิบพิกเซล
+    const browse = mode === 'browse';
+    const ROT_Y = browse ? 2 : 26;
+    const ROT_X = browse ? 1 : 13;
+    const PAN = browse ? 10 : 190;
 
     // หน่วงยาวขึ้นตามระยะที่กว้างขึ้น — ระยะเท่าเดิมที่ 0.9s จะกระตุก
     const xTo = gsap.quickTo(cam, 'x', { duration: 1.15, ease: 'power3.out' });
@@ -386,6 +545,9 @@ export default function DepthField({
     const ryTo = gsap.quickTo(cam, 'rotationY', { duration: 1.3, ease: 'power3.out' });
 
     const onMove = (e: PointerEvent) => {
+      // เล็งอยู่ที่ระนาบใบหนึ่ง → กล้องหยุดสนิท ไม่ใช่แค่ช้าลง
+      // ระนาบที่กำลังจะถูกกดต้องไม่ขยับ และเมื่อออกจากมันแล้วสนามก็เดินต่อเอง
+      if (browse && aiming.current) return;
       const rect = box.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
       // −1..1 ไม่ใช่ −0.5..0.5: ค่าที่ประกาศไว้ข้างบนคือ "องศาที่มุมจอ"
@@ -400,12 +562,15 @@ export default function DepthField({
       rxTo(-ny * ROT_X);
     };
 
-    window.addEventListener('pointermove', onMove, { passive: true });
+    // โหมดเรียกดูฟังเฉพาะ "ในกล่อง": สนามที่แกว่งตามเมาส์ที่กำลังอ่านหัวข้ออยู่
+    // ข้างบนคือของที่ขยับโดยไม่มีใครสั่ง ส่วนประตูเข้ากินทั้งจอ window จึงถูกอยู่แล้ว
+    const source: Window | HTMLElement = browse ? box : window;
+    source.addEventListener('pointermove', onMove as EventListener, { passive: true });
     return () => {
-      window.removeEventListener('pointermove', onMove);
+      source.removeEventListener('pointermove', onMove as EventListener);
       gsap.killTweensOf(cam);
     };
-  }, [onScreen]);
+  }, [onScreen, mode]);
 
   // ── กล้อง: ซูมเข้าตามความคืบหน้าจริง ──────────────────────────────────────
   const zoomed = useRef(false);
@@ -509,6 +674,19 @@ export default function DepthField({
         className="absolute inset-0"
         style={{
           transformStyle: 'preserve-3d',
+          // ── กล้องต้องไม่รับ pointer เอง (task D1 — นี่คือสาเหตุของ "กดไม่ได้") ──
+          //
+          // กล่องนี้ inset-0 ทับเต็มสนาม และในระบบพิกัด 3 มิติมันอยู่ที่ z = 0
+          // ระนาบที่ z ติดลบ (ก็คือเกือบทั้งสนาม — ทางเดินลึกลงไปถึง −2050) อยู่
+          // "หลัง" ระนาบของกล้อง การทดสอบการชนจึงเจอกล่องกล้องก่อนเสมอแล้วหยุด
+          // ตรงนั้น ทั้งที่ตาเห็นระนาบอยู่ข้างหน้าเต็ม ๆ
+          //
+          // วัดก่อนแก้ที่ 1440: ระนาบ 26 ใบที่อยู่ในกล่อง มีเพียง 4 ใบที่จุดกึ่งกลาง
+          // ของมันชี้กลับมาที่ตัวเอง — ทั้ง 4 ใบคือใบที่ z เป็นบวก
+          // ใส่ none ที่กล้องแล้วเปิด auto กลับที่ระนาบ: กล้องเลิกเป็นฉากกั้น
+          // ตัวจับ pointermove ของกล้องไม่ได้อยู่ที่ element นี้อยู่แล้ว (อยู่ที่กล่อง
+          // สนามด้านนอกหรือที่ window) การปิดจึงไม่ทำให้ฟีเจอร์ไหนหาย
+          pointerEvents: 'none',
           // will-change เฉพาะตัวที่ขยับจริง (§5 ข้อ 5) — กล้องเป็น element เดียว
           // ที่มี tween วิ่งอยู่ ระนาบทั้ง 40 ใบอยู่นิ่งในระบบพิกัดของกล้อง
           // ใส่ที่ระนาบด้วยจะได้ compositing layer 40 ชั้นซึ่งเป็นความเสี่ยง §7 ข้อ 1 พอดี
@@ -639,9 +817,17 @@ export default function DepthField({
               // จึงไม่มี tabIndex ที่นี่และไม่มี roving — Tab ต้องเดินได้ครบทุกระนาบ
               onFocus={() => setFocused(i)}
               onBlur={() => setFocused((cur) => (cur === i ? null : cur))}
-              onMouseEnter={() => setActive(i)}
-              onMouseLeave={() => setActive((cur) => (cur === i ? null : cur))}
-              className="focus-inset group absolute left-1/2 top-1/2 block"
+              onMouseEnter={() => {
+                aiming.current = true;
+                setActive(i);
+              }}
+              onMouseLeave={() => {
+                aiming.current = false;
+                setActive((cur) => (cur === i ? null : cur));
+              }}
+              // pointer-events-auto: กล้องแม่ถูกปิดไว้ (ดูหมายเหตุที่นั่น) ระนาบ
+              // ต้องเปิดกลับเองทีละใบ ผลคือมีแต่ระนาบเท่านั้นที่รับ pointer ได้
+              className="focus-inset group pointer-events-auto absolute left-1/2 top-1/2 block"
               style={style}
             >
               {body}
