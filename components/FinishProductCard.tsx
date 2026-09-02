@@ -60,10 +60,13 @@ export default function FinishProductCard({ product, finish, priority = false }:
     // query อ่านได้ทั้งฝั่ง client และเปิดลิงก์ตรง ๆ ก็ยังใช้ได้ ซึ่ง static export รองรับ
     <Link href={`/products/${product.slug}/?finish=${encodeURIComponent(finish.code)}`} className="group block">
       {/* relative: ModelNumber วางตัวเองด้วย absolute inset-0 จึงต้องมี containing block
-          ตัว ModelNumber ถือ overflow-clip ของมันเองไว้ (ดูหมายเหตุในไฟล์นั้น)
-          การ์ดจึงไม่ต้องใส่ซ้ำ และ **ห้าม** ใส่ overflow-hidden ตรงนี้ —
-          hidden สร้าง scroll container ที่ 390px จะได้แถบเลื่อนแนวนอนกลับมา (§6 ข้อ 4) */}
-      <div className="relative border border-line-6 bg-surface">
+          **ห้าม** ใส่ overflow-hidden ตรงนี้ — hidden สร้าง scroll container ที่ 390px
+          จะได้แถบเลื่อนแนวนอนกลับมา (§6 ข้อ 4)
+          overflow-clip ต่างกันตรงนั้นพอดี: มันตัดโดยไม่สร้าง scroll container
+          และการ์ดต้องมีมันเอง ไม่ใช่พึ่ง overflow-clip ของ ModelNumber — ตั้งแต่
+          รูปสินค้าถูกซูมด้วยกรอบอัลฟา (งาน A1) รูปที่ถูกขยายสุด ๆ ล้นออกนอกการ์ด
+          วัดที่ 390 บน /finish/CP: หน้าเลื่อนแนวนอนได้ 320px (ที่ 1440 ได้ 135px) */}
+      <div className="relative overflow-clip border border-line-6 bg-surface">
         <ModelNumber model={product.model} variant="card" />
 
         {/* z-10: ModelNumber เป็น absolute จึงวาดทับ block ปกติที่ไม่ได้ positioned
