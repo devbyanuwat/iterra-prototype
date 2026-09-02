@@ -6,7 +6,7 @@
 // สวอตช์ย่อ: แสดงเฉพาะสินค้าที่มีมากกว่าหนึ่งเฉด — แคตตาล็อกราวสองในสาม
 // มีเฉดเดียว จุดกลม ๆ จุดเดียวบนการ์ดสื่อว่าเลือกได้ทั้งที่เลือกไม่ได้
 
-import Link from 'next/link';
+import Link from '@/components/Link';
 import TiltCard from './TiltCard';
 import { useLang } from './LangProvider';
 import { inkFitStyle, inkFor } from '@/lib/ink-fit';

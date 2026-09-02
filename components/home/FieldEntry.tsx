@@ -20,7 +20,7 @@
 // มือถือกับ reduced-motion ไม่มีสนาม (useFieldMode) — ตกลงมาเป็นกริดนิ่งของ
 // การ์ดชุดเดียวกัน ตามกติกาเดิมของสนาม: มือถือ = เลื่อนธรรมดา ไม่ใช่ 3 มิติย่อส่วน
 
-import Link from 'next/link';
+import Link from '@/components/Link';
 import DepthField, { useFieldMode } from '@/components/DepthField';
 import { useLang } from '@/components/LangProvider';
 // type เท่านั้น — import ค่าจริงจาก depth-field จะลาก lib/products (424KB) เข้ามา

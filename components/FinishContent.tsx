@@ -9,13 +9,14 @@
 //   4. สลับเฉดจากแถบขอบจอ กริด crossfade ไม่โหลดหน้าใหม่ → switchTo()
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/Link';
 import gsap from 'gsap';
 import FinishProductCard from './FinishProductCard';
 import FinishRail from './FinishRail';
 import { useLang } from './LangProvider';
 import { finishIndex, finishOf, getFinishEntry } from './finish-index';
 import { roomFor } from './home/rooms';
+import { langPath, splitLangPath } from '@/lib/i18n';
 import { lifestyleSrc } from '@/lib/lifestyle.generated';
 import type { Category, Finish, Product } from '@/lib/products';
 
@@ -159,10 +160,17 @@ export default function FinishContent({ code }: { code: string }) {
   const switchTo = useCallback(
     (next: string) => {
       if (next === active || fading.current) return;
-      window.history.pushState({ finish: next }, '', `/finish/${encodeURIComponent(next)}/`);
+      // langPath: URL ที่เขียนกลับต้องอยู่ในต้นไม้เดียวกับหน้าที่ผู้อ่านยืนอยู่
+      // ไม่งั้นการสลับเฉดในหน้าไทยจะเขียน URL อังกฤษทับ แล้วปุ่ม refresh หรือ
+      // ลิงก์ที่ก๊อปไปจะพาไปอีกภาษาหนึ่งโดยที่หน้าจอไม่ได้เปลี่ยนอะไรเลย
+      window.history.pushState(
+        { finish: next },
+        '',
+        langPath(lang, `/finish/${encodeURIComponent(next)}/`),
+      );
       applySwitch(next);
     },
-    [active, applySwitch],
+    [active, applySwitch, lang],
   );
 
   // จางกลับเข้าหลัง React วาดกริดใหม่แล้ว
@@ -188,7 +196,9 @@ export default function FinishContent({ code }: { code: string }) {
   // ปุ่ม back/forward: อ่านรหัสเฉดกลับจาก URL
   useEffect(() => {
     const onPop = () => {
-      const raw = window.location.pathname.split('/').filter(Boolean)[1];
+      // ตัดคำนำหน้าภาษาออกก่อนนับตำแหน่ง — ใน /th/finish/CP/ ส่วนที่ [1] ชี้ไป
+      // คือ 'finish' ไม่ใช่รหัสเฉด ปุ่ม back ในต้นไม้ไทยจึงจะเงียบไปเฉย ๆ
+      const raw = splitLangPath(window.location.pathname).path.split('/').filter(Boolean)[1];
       if (!raw) return;
       const next = decodeURIComponent(raw);
       // ไม่เช็คด้วย truthiness — '0' คือ White ซึ่งเป็นเฉดที่ใหญ่อันดับสอง

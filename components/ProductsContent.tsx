@@ -19,7 +19,7 @@ import ProductCard from './ProductCard';
 import FinishWall, { type WallPanel } from './FinishWall';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
-import { TYPE_LABELS, TYPE_ORDER, type ProductType } from '@/app/products/facets';
+import { TYPE_LABELS, TYPE_ORDER, type ProductType } from '@/app/_routes/parts/facets';
 
 export type ProductItem = {
  slug: string;

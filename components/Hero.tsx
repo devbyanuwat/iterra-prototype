@@ -10,7 +10,7 @@
 // ที่เรียก <Hero /> เปล่า ๆ ยัง compile ได้ · task E จะส่งรูปสินค้าจริงเข้ามา
 
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import Link from 'next/link';
+import Link from '@/components/Link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SplitReveal from './SplitReveal';

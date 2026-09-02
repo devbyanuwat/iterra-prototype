@@ -9,7 +9,7 @@
 // ไม่มีราคาในการ์ด (สเปก §1 non-goals) — ช่องขวาใช้ `meta` เท่าที่ส่งมา
 
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import Link from 'next/link';
+import Link from '@/components/Link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLang } from './LangProvider';

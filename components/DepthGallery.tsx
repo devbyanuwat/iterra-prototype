@@ -19,7 +19,7 @@
 // และปุ่มสลับก็ไม่ต้องมี เพราะไม่มีอะไรให้สลับไป (§5 ข้อ 3–4)
 
 import { useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/Link';
 import DepthField, { useFieldMode } from './DepthField';
 import ModelNumber from './ModelNumber';
 import Reveal from './Reveal';

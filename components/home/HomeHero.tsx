@@ -25,7 +25,7 @@
 // ใบแรกจึงมาก่อนใบเดียว ที่เหลือตามมาหลัง window load (ดู mountRest)
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/Link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLang } from '@/components/LangProvider';

@@ -15,12 +15,12 @@
 // คงที่ 13.2:1 ทุกหน้า ทุกแผง ไม่ขึ้นกับว่าอะไรอยู่ข้างหลัง
 // กำแพงเผื่อที่ให้แถบนี้อยู่แล้ว (FinishWall วาง header ของตัวเองที่ top-[64px])
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import Link from '@/components/Link';
 import { usePathname } from 'next/navigation';
 import BrandMark from './BrandMark';
 import { useLang } from './LangProvider';
-import { ALT_LANG, DEFAULT_LANG, type Lang } from '@/lib/i18n';
+import { ALT_LANG, DEFAULT_LANG, langPath, splitLangPath, type Lang } from '@/lib/i18n';
 
 const LINKS = [
   { href: '/', key: 'home' },
@@ -46,39 +46,91 @@ const LINKS = [
   { href: '/contact/', key: 'contact' },
 ] as const;
 
+// ── ปุ่มสลับภาษา = ลิงก์จริง ไม่ใช่ปุ่มที่สลับ state (task D3) ────────────────
+//
+// เดิมเป็น <button> ที่เรียก setLang() เพราะทั้งเว็บมี URL ชุดเดียว การเปลี่ยน
+// ภาษาจึงเป็นการเปลี่ยนสถานะของหน้าเดียวกัน ตอนนี้ทุกเส้นทางมีสอง URL จริง
+// การเปลี่ยนภาษาจึงเป็น "ไปอีกที่หนึ่ง" ซึ่งต้องเป็นลิงก์: ก๊อปไปแปะได้ เปิดแท็บ
+// ใหม่ได้ crawler เดินตามได้ และตรงกับ hreflang ที่หน้าประกาศไว้
+//
+// ปลายทางคือ **หน้าเดิมในอีกภาษา** ไม่ใช่หน้าแรก — splitLangPath ตัดคำนำหน้า
+// ออกจาก pathname ปัจจุบันแล้ว langPath ใส่คำนำหน้าของอีกภาษากลับเข้าไป
+//
+// <a> ไม่ใช่ <Link>: สองต้นไม้มี root layout คนละตัว Next จึงต้องโหลดเอกสารใหม่
+// อยู่ดี และการเปลี่ยนภาษาของเอกสารควรได้เอกสารใหม่จริง ๆ (<html lang> ใหม่
+// <title> ใหม่ canonical ใหม่) ไม่ใช่ DOM เดิมที่ถูกแก้ทีหลัง
 function LangSwitch({ className = '' }: { className?: string }) {
-  const { lang, setLang, t } = useLang();
-  const Btn = ({ code }: { code: Lang }) => (
-    <button
-      type="button"
-      onClick={() => setLang(code)}
-      aria-pressed={lang === code}
+  const { lang, t } = useLang();
+  const pathname = usePathname();
+  const { path } = splitLangPath(pathname);
+
+  // query string กับ hash ไม่ได้อยู่ใน usePathname และเป็นของฝั่ง client ล้วน
+  // (?finish=CP บนหน้าสินค้า, ?cat=kitchen บนหน้ารวม) — ถ้าไม่พามันไปด้วย
+  // การสลับภาษาจะรีเซ็ตตัวกรองที่ผู้อ่านเพิ่งตั้ง ซึ่งก็คือการไม่พาไปที่เดิม
+  //
+  // อ่านใน effect ไม่ใช่ตอน render: useSearchParams บังคับให้ต้องมี Suspense
+  // ล้อมทั้ง Nav ใน static export และ markup ที่ server เขียนต้องไม่ขึ้นกับค่าที่
+  // server ไม่มีทางรู้ ลิงก์ที่ crawler เห็นจึงเป็นเส้นทางเปล่า ซึ่งถูกต้องแล้ว
+  const [tail, setTail] = useState('');
+  useEffect(() => {
+    setTail(window.location.search + window.location.hash);
+  }, [pathname]);
+
+  const Item = ({ code }: { code: Lang }) =>
+    code === lang ? (
+      // ภาษาปัจจุบันไม่ใช่ลิงก์ไปหาตัวเอง — aria-current บอกสถานะแทน
       // 0.5 คือ ink บน base = 3.2:1 อ่านไม่ผ่านเกณฑ์ AC ข้อ 3 (ต้อง ≥ 4.5:1)
       // 0.8 ให้ 7.04:1 และตัวที่เลือกอยู่ยังแยกออกด้วยขีดใต้ ไม่ได้พึ่งความจางอย่างเดียว
-      className={`px-1.5 py-0.5 text-label uppercase tracking-widest transition-opacity ${
-        lang === code ? 'opacity-100 underline underline-offset-4' : 'opacity-80 hover:opacity-100'
-      }`}
-    >
-      {code}
-    </button>
-  );
+      <span
+        aria-current="true"
+        className="px-1.5 py-0.5 text-label uppercase tracking-widest opacity-100 underline underline-offset-4"
+      >
+        {code}
+      </span>
+    ) : (
+      <a
+        href={`${langPath(code, path)}${tail}`}
+        hrefLang={code}
+        rel="alternate"
+        // href ที่เรนเดอร์ไว้ถือ query ตอน mount ซึ่งพอสำหรับ crawler และสำหรับ
+        // การเปิดแท็บใหม่ แต่หน้าอย่าง /products/ กับหน้าสินค้าเขียน ?finish=
+        // ใหม่ด้วย replaceState ระหว่างที่ผู้อ่านเล่นอยู่ และ replaceState ไม่ยิง
+        // event ใด ๆ ให้ React รู้ ตอนคลิกจึงอ่านค่าสด ๆ อีกครั้ง
+        // (รูปแบบเดียวกับ handleClick ของ FinishRail — คลิกที่มีปุ่มร่วมคือความ
+        // ตั้งใจจะเปิดแท็บใหม่ ปล่อยให้เบราว์เซอร์จัดการตามปกติ)
+        onClick={(e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+          e.preventDefault();
+          window.location.assign(
+            `${langPath(code, path)}${window.location.search}${window.location.hash}`,
+          );
+        }}
+        className="px-1.5 py-0.5 text-label uppercase tracking-widest opacity-80 transition-opacity hover:opacity-100"
+      >
+        {code}
+      </a>
+    );
+
   return (
-    // เรียงตาม DEFAULT_LANG ก่อน: ภาษาที่อยู่ใน HTML จริงควรเป็นตัวแรกที่ตาเห็น
+    // เรียงตาม DEFAULT_LANG ก่อน: ภาษาที่อยู่ที่ path เปล่าควรเป็นตัวแรกที่ตาเห็น
     // ไม่ใช่ 'th' ที่ฮาร์ดโค้ดไว้ตอนที่ไทยยังเป็นภาษาเริ่มต้น
-    // group + aria-label เพราะปุ่มสองปุ่มนี้เป็นตัวเลือกชุดเดียวกัน ไม่ใช่ปุ่มลอย ๆ
+    // group + aria-label เพราะสองตัวนี้เป็นตัวเลือกชุดเดียวกัน ไม่ใช่ลิงก์ลอย ๆ
     <div role="group" aria-label={t.a11y.langSwitch} className={`flex items-center ${className}`}>
-      <Btn code={DEFAULT_LANG} />
-      {/* ตัวคั่นล้วน ๆ screen reader ได้ยินปุ่มสองปุ่มอยู่แล้วไม่ต้องได้ยิน "/" */}
+      <Item code={DEFAULT_LANG} />
+      {/* ตัวคั่นล้วน ๆ screen reader ได้ยินสองตัวเลือกอยู่แล้วไม่ต้องได้ยิน "/" */}
       <span aria-hidden className="opacity-40">
         /
       </span>
-      <Btn code={ALT_LANG} />
+      <Item code={ALT_LANG} />
     </div>
   );
 }
 
 export default function Nav() {
-  const pathname = usePathname();
+  // เทียบกับเส้นทางที่ตัดคำนำหน้าภาษาออกแล้ว — LINKS เก็บเส้นทางของเว็บ ไม่ใช่
+  // ของต้นไม้ใดต้นไม้หนึ่ง (คำนำหน้าถูกใส่ให้ตอนเรนเดอร์โดย components/Link.tsx)
+  // ถ้าเทียบกับ pathname ดิบ เมนูในต้นไม้ไทยจะไม่มีรายการไหนถูกไฮไลต์เลย
+  const { path: pathname } = splitLangPath(usePathname());
   const { t } = useLang();
   const [open, setOpen] = useState(false);
 

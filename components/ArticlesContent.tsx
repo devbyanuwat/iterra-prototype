@@ -16,7 +16,7 @@
 // ป้ายวิดีโอบนการ์ด: บทความที่มีวิดีโอจะติดป้ายไว้ที่ปก คนอ่านจะได้รู้ก่อนกดเข้าไป
 // ตัววิดีโอเองยังไม่โหลดอะไรจาก YouTube จนกว่าจะกดในหน้าบทความ (ดู VideoEmbed)
 
-import Link from 'next/link';
+import Link from '@/components/Link';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { posts } from '@/lib/posts';

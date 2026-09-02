@@ -13,7 +13,7 @@
 // เรามีของจากคอลเลกชันนั้นจริง การ์ดจะพาไปที่ของจริงแทน — ซึ่งมีประโยชน์กว่าลิงก์
 // ที่ต้นทางพังไปแล้ว การจับคู่ใช้ค่า "คอลเลกชัน" ในสเปกสินค้า (7 ใน 16 ใบมีของ)
 
-import Link from 'next/link';
+import Link from '@/components/Link';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle.generated';

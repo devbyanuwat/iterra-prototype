@@ -5,28 +5,74 @@
 export type Lang = 'th' | 'en';
 
 /**
- * The language the exported HTML actually contains.
+ * The language served from the unprefixed route tree.
  *
  * This is a static export: one HTML file per route, and whatever language is in
  * that file is what a crawler, a link preview, a no-JS reader and the first
- * paint all get. The other language is a client-side switch restored from
- * localStorage. So this constant is not a preference — it decides which
- * language is *real* and which is a JS enhancement.
+ * paint all get. Until task D3 there was exactly one tree, so this constant
+ * decided which language was *real* and which was a JS enhancement.
  *
- * Everything that has to agree with it reads it from here: <html lang> and the
- * pre-paint restore script in app/layout.tsx, the initial state in
- * LangProvider, the root metadata, and the JSON-LD.
+ * Both languages are real now. Every route is exported twice — English at its
+ * bare path, Thai under /th/ — each prerendered in its own language, with its
+ * own <html lang> from a per-tree root layout. So what this constant decides is
+ * narrower and purely a URL question: which language gets the bare path and
+ * which one carries the prefix. Flipping it moves the prefix to the other
+ * language; nothing else has to change, because LANG_PREFIX below is derived
+ * from it and every link, canonical, hreflang and sitemap entry is derived from
+ * LANG_PREFIX.
  *
- * The honest limit of this arrangement, and the reason there is no hreflang
- * anywhere in this repo: hreflang describes *alternate URLs*, one per language.
- * We have one URL per route serving both languages through JS, so there is no
- * second URL to point at, and declaring one would be a claim we cannot back.
- * The fix is a real /en route tree, not a meta tag — see scratchpad/task-b3.md.
+ * The old caveat here — that hreflang was unearnable because both languages
+ * came from one URL — is gone with the second tree. There are two URLs per
+ * route now, they reciprocate, and app/_lib/routes.ts declares them.
  */
 export const DEFAULT_LANG: Lang = 'en';
 
-/** The language that has to be restored from storage, whichever that is. */
+/** The language that carries the URL prefix, whichever that is. */
 export const ALT_LANG: Lang = DEFAULT_LANG === 'en' ? 'th' : 'en';
+
+/**
+ * The path prefix each tree lives under. Derived, never typed out twice.
+ *
+ * `''` for the default language and `/th` for the other one — so the exported
+ * trees are `/products/` and `/th/products/`. Everything that builds a URL goes
+ * through `langPath` or `treeUrl` rather than concatenating this itself.
+ */
+export const LANG_PREFIX = {
+  [DEFAULT_LANG]: '',
+  [ALT_LANG]: `/${ALT_LANG}`,
+} as Record<Lang, string>;
+
+/**
+ * Move an in-site path into a language's tree.
+ *
+ * Deliberately conservative about what it will touch, because it sits under
+ * every `<Link>` on the site (see components/Link.tsx): only root-relative
+ * paths are prefixed. External URLs, protocol-relative URLs, `mailto:`, `tel:`,
+ * bare hashes and query-only hrefs are returned untouched, and a path already
+ * inside the tree is not prefixed twice.
+ */
+export function langPath(lang: Lang, href: string): string {
+  const prefix = LANG_PREFIX[lang];
+  if (!prefix || !href.startsWith('/') || href.startsWith('//')) return href;
+  if (href === prefix || href.startsWith(`${prefix}/`)) return href;
+  return `${prefix}${href}`;
+}
+
+/**
+ * The inverse: which tree a pathname is in, and what the path is inside it.
+ *
+ * The language toggle needs this to answer "the same page, in the other
+ * language" — it is the whole reason the toggle can keep the reader in place
+ * instead of dropping them on a home page.
+ */
+export function splitLangPath(pathname: string): { lang: Lang; path: string } {
+  const prefix = LANG_PREFIX[ALT_LANG];
+  if (pathname === prefix) return { lang: ALT_LANG, path: '/' };
+  if (pathname.startsWith(`${prefix}/`)) {
+    return { lang: ALT_LANG, path: pathname.slice(prefix.length) };
+  }
+  return { lang: DEFAULT_LANG, path: pathname };
+}
 
 /**
  * ต่อชื่อเข้ากับข้อความไทย โดยเว้นวรรคให้เฉพาะเมื่อชื่อขึ้นต้นด้วยอักษรละติน
@@ -74,6 +120,77 @@ const dictSource = {
       ogDescription: 'คัดสรรอุปกรณ์ครัวและสุขภัณฑ์จากแบรนด์ชั้นนำระดับโลก',
       orgDescription: 'ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม',
       ogLocale: 'th_TH',
+    },
+    // ── <title> และ <meta description> ของแต่ละหน้า ──
+    //
+    // เคยเขียนไทยฝังไว้ในไฟล์ page.tsx ทีละหน้า ซึ่งพอ ba10764 พลิกเอกสารเป็น
+    // อังกฤษ ทุกหน้าก็เหลือ <title> ไทยอยู่ในเอกสารที่ประกาศ lang="en" — บั๊กที่
+    // มองไม่เห็นบนหน้าจอ แต่เห็นเต็ม ๆ ในผลค้นหาและ link preview
+    //
+    // ตอนนี้มีสองต้นไม้จริง หน้าเดียวกันจึงต้องมีสองชุดจริง ๆ ไม่ใช่ชุดเดียวที่
+    // เดาเอา คีย์ตรงกับ path ของหน้า และ Record<Lang, Dict> บังคับให้ทั้งสอง
+    // ภาษามีครบเท่ากันเสมอ
+    meta: {
+      home: {
+        title: 'KOHLER — อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม',
+        description:
+          'อุปกรณ์ครัวและสุขภัณฑ์คัดสรรจากแบรนด์ชั้นนำระดับโลก — 182 รายการ สิบเอ็ดเฉดผิวเคลือบ สัมผัสจริงได้ที่โชว์รูม KOHLER กรุงเทพฯ',
+      },
+      about: {
+        title: 'เกี่ยวกับเรา — เรื่องราวของ KOHLER',
+        description:
+          'กว่า 25 ปีของ KOHLER ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม จากร้านเล็กบนถนนสุขุมวิทสู่โชว์รูมที่ให้คุณสัมผัสของจริงทุกชิ้น',
+      },
+      products: {
+        title: 'สินค้าทั้งหมด — อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม',
+        description:
+          'สินค้าคัดสรร 182 รายการของ KOHLER — กรองตามเฉด หมวด และประเภทสินค้า พร้อมกำแพงสิบเอ็ดเฉดสำหรับเลือกจากผิวเคลือบ',
+      },
+      palette: {
+        title: 'สีและผิวเคลือบทั้งหมด',
+        description:
+          'ทุกสีและผิวเคลือบที่ KOHLER ประกาศไว้ ยกมาจากหน้าอ้างอิงต้นทาง — พร้อมสิบเอ็ดเฉดที่เรามีของจริง ซึ่งห่างจากห้องที่มันเติมอยู่หนึ่งคลิก',
+      },
+      collections: {
+        title: 'คอลเลกชัน',
+        description:
+          'สิบหกคอลเลกชันจากหน้ารวมของ KOHLER พร้อมชิ้นที่เรามีในแคตตาล็อกของแต่ละชุด และหมายเหตุตรง ๆ เมื่อหน้าของต้นทางหายไปแล้ว',
+      },
+      gallery: {
+        title: 'แกลเลอรี — สนามภาพเชิงลึก',
+        description:
+          'สินค้าคัดสรรลอยอยู่ในสนามภาพเชิงลึก เลื่อนเมาส์เพื่อเดินดู คลิกเพื่อเปิดชิ้นนั้นในเฉดที่กำลังมองอยู่ — พร้อมมุมมองดัชนีสำหรับการค้นหา',
+      },
+      articles: {
+        title: 'บทความ — ไอเดียครัวสไตล์โชว์รูม',
+        description:
+          'รวมบทความไอเดียครัวและห้องน้ำจาก KOHLER — วิธีจัดครัวให้เหมือนโชว์รูม คู่มือเลือกซื้อ และเทรนด์วัสดุพรีเมียม',
+      },
+      guides: {
+        title: 'คู่มือเลือกซื้อ',
+        description:
+          'คู่มือเลือกซื้อของ KOHLER สิบสามชุด ยกมาจาก kohler.co.th ทั้งสองภาษา — ก๊อก อ่างล้างจาน สุขภัณฑ์ ฝักบัว เฟอร์นิเจอร์ห้องน้ำ และอื่น ๆ',
+      },
+      ideas: {
+        title: 'ไอเดียแต่งห้อง',
+        description:
+          'ไอเดียห้องน้ำและห้องครัวจาก kohler.co.th ทั้งไทยและอังกฤษ — เรื่องไหนที่เรามีบทความอยู่แล้วจะเปิดอ่านในเว็บนี้ ไม่ต้องออกไปข้างนอก',
+      },
+      stores: {
+        title: 'ร้านที่มีของจริงให้จับ',
+        description:
+          'ตัวแทนจำหน่าย KOHLER ในเขตกรุงเทพฯ และปริมณฑล พร้อมที่อยู่ เบอร์โทร และแผนที่ — ยกมาจากหน้าค้นหาร้านค้าของ kohler.co.th',
+      },
+      info: {
+        title: 'ข้อมูลและบริการ',
+        description:
+          'คู่มือดูแลรักษา การรับประกัน แคตตาล็อก ข่าว และเรื่องขององค์กร — ยกมาจาก kohler.co.th',
+      },
+      contact: {
+        title: 'ติดต่อเรา — นัดหมายชมโชว์รูม',
+        description:
+          'ติดต่อทีมที่ปรึกษา KOHLER สอบถามสินค้า นัดหมายเข้าชมโชว์รูมอุปกรณ์ครัวและสุขภัณฑ์พรีเมียมในกรุงเทพฯ ตอบกลับภายใน 24 ชั่วโมง',
+      },
     },
     common: {
       inquire: 'สอบถามสินค้านี้',
@@ -390,6 +507,68 @@ const dictSource = {
       orgDescription: 'Premium kitchen and bath dealer',
       ogLocale: 'en_US',
     },
+    meta: {
+      home: {
+        title: 'KOHLER — Premium Kitchen & Bath',
+        description:
+          'Kitchen and bath curated from the world’s leading brands — 182 pieces, eleven finishes, all of them on the floor of our Bangkok showroom.',
+      },
+      about: {
+        title: 'About — the KOHLER story',
+        description:
+          '25 years of KOHLER, premium kitchen and bath dealer: from one shophouse on Sukhumvit to a showroom where every piece can be touched, opened and run.',
+      },
+      products: {
+        title: 'All products — premium kitchen and bath',
+        description:
+          '182 curated KOHLER pieces — filter by finish, by room and by type, with the eleven-finish wall for choosing from the surface rather than the spec.',
+      },
+      palette: {
+        title: 'Colours & Finishes',
+        description:
+          'Every colour and finish KOHLER publishes, harvested from the source reference — and the eleven finishes we actually stock, each one a click from the room it fills.',
+      },
+      collections: {
+        title: 'Collections',
+        description:
+          'The sixteen collections on KOHLER’s own index, with the pieces from each one that are in our catalogue — and a plain note where the source’s own page is gone.',
+      },
+      gallery: {
+        title: 'Gallery — the depth field',
+        description:
+          'Curated pieces suspended in a field of depth. Move the mouse to walk through them, click one to open it in the finish you are looking at — with an index view for searching.',
+      },
+      articles: {
+        title: 'Journal — kitchen ideas from the showroom floor',
+        description:
+          'Kitchen and bath stories from KOHLER — how to lay out a kitchen like a showroom, how to choose, and what the premium materials actually do.',
+      },
+      guides: {
+        title: 'Shopping guides',
+        description:
+          'KOHLER shopping guides taken from kohler.co.th in both languages — 13 guides covering faucets, sinks, toilets, showering, bathroom furniture and more.',
+      },
+      ideas: {
+        title: 'Ideas',
+        description:
+          'Bathroom and kitchen ideas from kohler.co.th, in Thai and English — with the articles we hold opening here rather than off-site.',
+      },
+      stores: {
+        title: 'Where you can actually touch one',
+        description:
+          'KOHLER dealers across Bangkok and the surrounding provinces, with address, phone and map — taken from KOHLER’s own store finder.',
+      },
+      info: {
+        title: 'Information & service',
+        description:
+          'Care, warranty, catalogues, press and the corporate pages — taken from kohler.co.th',
+      },
+      contact: {
+        title: 'Contact us — book a showroom visit',
+        description:
+          'Talk to a KOHLER consultant, ask about a piece, or book a visit to the premium kitchen and bath showroom in Bangkok. We reply within 24 hours.',
+      },
+    },
     common: {
       inquire: 'Inquire about this piece',
       finish: 'Finish',
@@ -659,12 +838,19 @@ export type Dict = (typeof dictSource)['th'];
  */
 export const dict: Record<Lang, Dict> = dictSource;
 
-// ── การจำภาษาที่เลือก ──
-// อยู่ในไฟล์นี้เพราะทั้ง app/layout.tsx (server) และ LangProvider (client) ต้องใช้
-// ถ้าประกาศไว้ใน LangProvider ซึ่งเป็น 'use client' ฝั่ง server จะได้ตัวแทน
-// (client reference) มาแทนค่าจริง แล้วสคริปต์ก่อนวาดจะฝังสตริงผิดลงไปใน HTML
-export const LANG_STORAGE_KEY = 'kohler:lang';
-export const LANG_HIDE_ATTR = 'data-lang-restore';
+// ── การจำภาษาที่เลือก: ไม่มีแล้ว ──
+//
+// 5af7a23 เก็บภาษาที่เลือกไว้ใน localStorage แล้วกู้คืนด้วยสคริปต์ก่อนหน้าจอวาด
+// (`kohler:lang` + `data-lang-restore`) ซึ่งจำเป็นตอนที่ทั้งเว็บมี URL ชุดเดียว —
+// ถ้าไม่จำ ภาษาที่ผู้อ่านเลือกจะหายไปทุกครั้งที่โหลดหน้าใหม่
+//
+// ตอนนี้ภาษาอยู่ใน URL แล้ว ค่าที่จำไว้จึงกลายเป็นของที่ "แย่งกับ URL" ได้:
+// คนที่เคยกดไทยไว้แล้วเปิดลิงก์ /products/ จะได้หน้าอังกฤษที่ถูกสลับเป็นไทยหลัง
+// hydrate ทั้งที่ URL, <html lang>, canonical และ hreflang ทั้งหมดบอกว่าอังกฤษ
+// — ความจำที่ขัดกับ URL แย่กว่าไม่มีความจำเลย จึงถอดทิ้งทั้งชุด
+//
+// คีย์เก่าถูกลบออกจากเครื่องผู้อ่านใน LangProvider (ครั้งเดียวตอน mount)
+export const LEGACY_LANG_STORAGE_KEY = 'kohler:lang';
 
 
 // ── เนื้อหาที่ยังไม่มีฉบับภาษาอังกฤษ ──

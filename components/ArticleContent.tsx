@@ -14,7 +14,7 @@
 // 3. ไม่มีวันที่ KOHLER ไม่ได้ประกาศวันเผยแพร่ไว้ที่ไหน หัวบทความจึงเป็น
 // หมวด + ที่มา แทน และมีลิงก์ไปต้นฉบับจริงท้ายบทความ
 
-import Link from 'next/link';
+import Link from '@/components/Link';
 import Reveal from './Reveal';
 import VideoEmbed from './VideoEmbed';
 import { useLang } from './LangProvider';

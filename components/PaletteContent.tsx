@@ -15,7 +15,7 @@
 // คู่ที่เป็นสีเดียวกันจริง ๆ ส่วนสีที่ไม่มีในแคตตาล็อกจะไม่ถูกทำให้เป็นลิงก์
 // (59 แผง จับคู่ได้ 16 — ที่เหลือคือจานสีระดับโลกของ KOHLER ที่เราไม่ได้สต็อก)
 
-import Link from 'next/link';
+import Link from '@/components/Link';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { finishIndex } from './finish-index';

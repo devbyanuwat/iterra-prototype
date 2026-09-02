@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/Link';
 import BrandMark from './BrandMark';
 import { useLang } from './LangProvider';
 import { contentPages } from '@/lib/pages.generated';

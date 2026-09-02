@@ -11,7 +11,7 @@
 //
 // 2. มี ModelNumber — §4.3 บังคับเฉพาะหน้านี้กับหน้า detail ห้ามมีบนหน้าแรก
 
-import Link from 'next/link';
+import Link from '@/components/Link';
 import ModelNumber from './ModelNumber';
 import { useLang } from './LangProvider';
 import { inkFitStyle, inkFor } from '@/lib/ink-fit';

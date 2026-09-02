@@ -11,7 +11,7 @@
 // ผู้ใช้คีย์บอร์ดจึงเจอพฤติกรรมเดิมทุกที่ที่มีแถวสวอตช์
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/Link';
 import { useLang } from './LangProvider';
 import type { FinishEntry } from './finish-index';
 

@@ -10,7 +10,7 @@
 // แล้ว FinishLabel ขึ้นชื่อเฉดแทน
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/Link';
 import Reveal from './Reveal';
 import ProductCard from './ProductCard';
 import ProductStage from './ProductStage';

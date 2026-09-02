@@ -22,7 +22,7 @@
 //   [data-lift]     ← CSS transition ตอน hover/focus (ลอยขึ้น + ใหญ่ขึ้น)
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/Link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import PanelProduct from './PanelProduct';

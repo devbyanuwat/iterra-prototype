@@ -18,7 +18,7 @@
 // Hero กับ HorizontalGallery ของหน้าแรกเดิมไม่ได้ถูกเรียกจากที่นี่แล้ว:
 // hero ถูกกำแพงแทนที่ไปตั้งแต่ 9bc26e7 และ §3.3 สั่งกริด ไม่ใช่แถบเลื่อนแนวนอน
 
-import Link from 'next/link';
+import Link from '@/components/Link';
 import Reveal from '@/components/Reveal';
 import CountUp from '@/components/CountUp';
 import PinnedStory from '@/components/PinnedStory';

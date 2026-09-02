@@ -17,7 +17,7 @@
 //    ที่เปิดหน้านี้ ทั้งที่ส่วนใหญ่ไม่ได้จะดูแผนที่ — หลักการเดียวกับ VideoEmbed
 //    ลิงก์ไม่โหลดอะไรเลยจนกว่าจะกด และยังพาไปแอปแผนที่ของเครื่องได้ด้วย
 
-import Link from 'next/link';
+import Link from '@/components/Link';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { stores, storeSource, type Store } from '@/lib/stores.generated';

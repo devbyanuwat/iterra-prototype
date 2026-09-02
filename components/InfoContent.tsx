@@ -10,7 +10,7 @@
 // service-solution มีแต่ไทล์และไม่มีแม้แต่ชื่อหน้า, faq ว่างเปล่าจริง ๆ
 // เรนเดอร์จึงเป็น "มีอะไรก็แสดงอันนั้น" ไม่ใช่เทมเพลตตายตัวที่ต้องเติมช่องว่าง
 
-import Link from 'next/link';
+import Link from '@/components/Link';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import type { Lang } from '@/lib/i18n';
