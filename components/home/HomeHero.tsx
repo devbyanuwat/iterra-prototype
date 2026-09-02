@@ -62,7 +62,13 @@ export default function HomeHero() {
 
         <div className="relative z-10 flex min-h-[86svh] flex-col justify-end px-6 pb-16 pt-36 md:min-h-[92svh] md:px-[8vw] md:pb-20">
           <p className="micro !text-white/80">{t.home.heroKicker}</p>
-          <h1 className="mt-4 max-w-4xl whitespace-pre-line font-display text-4xl font-normal leading-[1.12] tracking-wide text-white md:text-7xl">
+          {/* md:text-[72px] ไม่ใช่ md:text-7xl — และ leading-thai ไม่ใช่ leading-[1.12]
+              text-7xl ของ Tailwind พก line-height: 1 มาด้วย และ Tailwind ปล่อย
+              variant ที่มี breakpoint ไว้ "ท้ายไฟล์" หลังคลาสของเราเอง พอ
+              specificity เท่ากันมันจึงชนะ — วัดจริงได้ 72px/lh 1.00 ที่ ≥768px
+              ซึ่งต่ำกว่าพื้นความสูงบรรทัดของไทย ส่วน text-[72px] ตั้งแค่ขนาด
+              ไม่ไปยุ่งกับ line-height พาดหัวจึงได้ค่าจาก .leading-thai จริง ๆ */}
+          <h1 className="mt-4 max-w-4xl whitespace-pre-line font-display text-4xl font-normal leading-thai tracking-wide text-white md:text-[72px]">
             {t.home.heroTitle}
           </h1>
           <p className="mt-6 max-w-xl text-body font-normal leading-relaxed text-white/85">

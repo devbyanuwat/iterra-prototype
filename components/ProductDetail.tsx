@@ -19,6 +19,8 @@ import FinishProvider, { useFinish } from './FinishProvider';
 import FinishSwatches, { FinishLabel } from './FinishSwatches';
 import SpecDrawing from './SpecDrawing';
 import { useLang } from './LangProvider';
+import { roomFor } from './home/rooms';
+import { lifestyleSrc } from '@/lib/lifestyle.generated';
 import { getFinishEntry } from './finish-index';
 import { getProduct, relatedProducts } from '@/lib/products';
 
@@ -118,6 +120,12 @@ export default function ProductDetail({ slug }: { slug: string }) {
 
   if (!product) return null;
   const related = relatedProducts(slug);
+  // ห้องจริงประกอบหน้าสินค้า — คงที่ต่อ slug (ดู components/home/rooms.ts)
+  const inSitu = roomFor(product.slug, {
+    space: product.category,
+    minWidth: 1440,
+    minAspect: 1.4,
+  });
   const backEntry = fromFinish ? getFinishEntry(fromFinish) : undefined;
 
   return (
@@ -161,6 +169,9 @@ export default function ProductDetail({ slug }: { slug: string }) {
                 name={product.name[lang]}
                 priority
                 sizes="(max-width: 1024px) 92vw, 46vw"
+                // 4/5 = สัดส่วนของกล่องเวทีบรรทัดบน (`aspect-[4/5]`) เวทีเป็น
+                // h-full w-full จึงไม่รู้สัดส่วนของตัวเอง ต้องบอกมัน
+                fitAspect={4 / 5}
               />
             </div>
           </div>
@@ -225,6 +236,32 @@ export default function ProductDetail({ slug }: { slug: string }) {
           className="mt-24 pt-12"
         />
       </section>
+
+      {/* ── ห้องจริงหนึ่งใบต่อหนึ่งสินค้า (task A2) ────────────────────────────
+          หน้านี้เคยมีแต่สินค้าตัดพื้นขาวบนเวทีเปล่า ๆ ทั้งที่คลังมีภาพห้อง 88 ใบ
+          ภาพเลือกจากแฮชของ slug จึงคงที่ต่อสินค้าหนึ่งชิ้น และกรองด้วย space
+          ให้ตรงหมวด — ครัวได้ครัว ห้องน้ำได้ห้องน้ำ
+
+          คำบรรยายบอกตรง ๆ ว่านี่คือบรรยากาศห้อง ไม่ใช่ภาพของสินค้าชิ้นนี้:
+          คลังไม่มีเมทาดาทาว่าห้องไหนมีสินค้าอะไรอยู่ การจัดวางให้ดูเหมือน
+          "ภาพสินค้าตัวนี้ในห้องจริง" จะเป็นการอ้างสิ่งที่ข้อมูลไม่รองรับ */}
+      {inSitu && (
+        <section aria-label={t.products.inSitu} className="relative isolate mt-8">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
+          <img
+            src={lifestyleSrc(inSitu, 1440, 1)}
+            alt={inSitu.alt[lang]}
+            width={inSitu.width}
+            height={inSitu.height}
+            loading="lazy"
+            decoding="async"
+            className="h-[52svh] w-full object-cover md:h-[68svh]"
+          />
+          <p className="micro absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[rgba(8,9,10,0.82)] to-transparent px-6 pb-5 pt-16 !text-white/85 md:px-[6vw]">
+            {t.products.inSitu}
+          </p>
+        </section>
+      )}
 
       {/* สินค้าใกล้เคียง */}
       {related.length > 0 && (

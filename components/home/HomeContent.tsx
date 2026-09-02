@@ -24,7 +24,9 @@ import CountUp from '@/components/CountUp';
 import PinnedStory from '@/components/PinnedStory';
 import ParallaxImage from '@/components/ParallaxImage';
 import { useLang } from '@/components/LangProvider';
-import { contrastRatio, finishIndex, finishOf } from '@/components/finish-index';
+import { finishIndex, finishOf } from '@/components/finish-index';
+import { roomById } from './rooms';
+import { lifestyleSrc } from '@/lib/lifestyle.generated';
 import { products, type Finish, type Product } from '@/lib/products';
 import { posts } from '@/lib/posts';
 import { CONTACT } from '@/lib/site';
@@ -94,28 +96,44 @@ function room(category: 'kitchen' | 'bath') {
 const ROOMS = { kitchen: room('kitchen'), bath: room('bath') };
 
 /**
- * ปกบทความ = ไฟล์ "ผิววัสดุ" ต่อเฉด ไม่ใช่ภาพสินค้า
+ * ภาพห้องจริงของบล็อกหมวดหมู่ (task A2)
  *
- * โพสต์ยังไม่มีภาพปกจริง (posts[].cover เป็นแค่ป้ายชื่อ) เอาภาพสินค้ามาใส่จะอ่าน
- * เป็น "บทความเกี่ยวกับสินค้าชิ้นนี้" ซึ่งไม่จริง — พื้นผิวเป็นของกลาง พูดภาษา
- * เดียวกับกำแพงหน้าแรก และยังเป็นรูปจริงไม่ใช่กรอบเปล่า
- *
- * เลือกจาก "เฉดที่ต่างจากพื้นมากที่สุด" ไม่ใช่สามตัวแรกของ finishIndex — สามตัวแรก
- * เรียงตามจำนวนของ ซึ่งได้ CP กับ `0` มาก่อน ทั้งคู่เป็นวัสดุเกือบขาว พอครอปลง
- * กรอบ 16:9 บนพื้นสว่างแล้วอ่านเป็นสี่เหลี่ยมว่าง ๆ (เห็นชัดในภาพตรวจรอบแรก)
- * ซึ่งเป็นความว่างเปล่าแบบเดียวกับที่ลูกค้าบ่นตั้งแต่แรก
+ * เดิมช่องนี้เป็นภาพสินค้าตัดพื้นขาวของสินค้าชิ้นแรกในหมวด — บล็อกที่มีหน้าที่
+ * บอกว่า "ครัว" กับ "ห้องน้ำ" จึงไม่มีทั้งครัวและห้องน้ำอยู่ในนั้นเลย ทั้งที่คลัง
+ * มีภาพห้องอยู่ 88 ใบ เลือกด้วยตาไม่ใช่ด้วยแฮช เพราะสองใบนี้เป็นหน้าตาของหมวด
  */
-const COVER_FINISHES = [...finishIndex].sort(
-  (a, b) => contrastRatio(b.accent, '#E5E5E5') - contrastRatio(a.accent, '#E5E5E5'),
-);
+const ROOM_PHOTO = {
+  kitchen: roomById('zab91996-rgb'),
+  bath: roomById('zab29178-rgb'),
+  /** ฉากหลังของบล็อกปิดหน้า — โชว์รูม/ติดต่อ */
+  showroom: roomById('zac06644-rgb'),
+};
 
-const LATEST = posts.slice(0, 3).map((post, i) => ({
+/**
+ * ปกบทความบนหน้าแรก = ภาพห้องของบทความนั้นเอง (task A2)
+ *
+ * เดิมเป็น "ไฟล์ผิววัสดุต่อเฉด" เพราะตอนนั้นบทความยังไม่มีภาพปกจริง ตอนนี้มีแล้ว:
+ * lib/posts.ts เก็บ coverId ของแต่ละบทความไว้ตั้งแต่ task M และหน้า /articles ก็ใช้
+ * ภาพเดียวกันนี้อยู่ — หน้าแรกจึงไม่มีเหตุผลจะโชว์แผ่นวัสดุแบนราบเป็นปกอีกต่อไป
+ */
+const LATEST = posts.slice(0, 3).map((post) => ({
   post,
-  cover: COVER_FINISHES[i % COVER_FINISHES.length],
+  cover: roomById(post.coverId),
 }));
 
-/** ภาพเรื่องราวสามสไลด์ — หยิบจากชิ้นเด่นที่เลือกไว้แล้ว ไม่ต้องมีชุดภาพแยก */
-const STORY_IMAGES = FEATURED.slice(0, 3).map((f) => f.finish.image);
+/**
+ * ภาพเรื่องราวสามสไลด์ — ห้องจริง ไม่ใช่สินค้าตัดพื้นขาว (task A2)
+ *
+ * เดิมหยิบภาพสินค้าสามชิ้นแรกจากกริดชิ้นเด่นมาใช้ซ้ำ ผลคือบล็อกที่ถูกตรึงเต็มจอ
+ * สามจอติดกันแสดง "ก๊อกหนึ่งชิ้นบนพื้นว่าง" ซึ่งเป็นความว่างเปล่าที่ลูกค้าบ่นมาตลอด
+ * — PinnedStory ครอปภาพด้วย object-cover อยู่แล้ว ภาพห้องจึงเต็มกรอบพอดี
+ * ทั้งสามใบเป็นคนละใบกับที่บล็อกหมวดหมู่และบล็อกปิดหน้าใช้ ไม่ให้ซ้ำกันในหน้าเดียว
+ */
+const STORY_IMAGES = [
+  roomById('zac02157-rgb'),
+  roomById('zab95042-rgb'),
+  roomById('zac00286-rgb'),
+].map((image) => lifestyleSrc(image, 900, 2));
 
 // ── บล็อกต่าง ๆ ───────────────────────────────────────────────────────────
 
@@ -193,7 +211,14 @@ function TopFinishGrid() {
   );
 }
 
-/** §3.3 ข้อ 3 — เลือกตามห้อง พร้อมจำนวนจริงจากแคตตาล็อก */
+/**
+ * §3.3 ข้อ 3 — เลือกตามห้อง (task A2 + A4)
+ *
+ * A2: ภาพนำของแต่ละหมวดเป็นภาพห้องจริง ไม่ใช่ก๊อกตัดพื้นขาวอีกต่อไป
+ * A4: บล็อกนี้เป็นตัวหักจังหวะตัวแรก — เต็มความกว้างจอ ไม่มี px-[8vw] ไม่มี
+ *     kicker/หัวข้อ/คำโปรยนำหน้า และตัวอักษรวางทับภาพแทนที่จะอยู่ใต้ภาพ
+ *     ที่เหลือของหน้ายังเป็นกริดบนพื้นสว่างตามเดิม
+ */
 function RoomSplit() {
   const { lang, t } = useLang();
   const rooms = [
@@ -201,86 +226,97 @@ function RoomSplit() {
       key: 'kitchen' as const,
       title: t.home.catKitchen,
       desc: t.home.catKitchenDesc,
+      photo: ROOM_PHOTO.kitchen,
       ...ROOMS.kitchen,
     },
-    { key: 'bath' as const, title: t.home.catBath, desc: t.home.catBathDesc, ...ROOMS.bath },
+    {
+      key: 'bath' as const,
+      title: t.home.catBath,
+      desc: t.home.catBathDesc,
+      photo: ROOM_PHOTO.bath,
+      ...ROOMS.bath,
+    },
   ];
 
   return (
-    <section className="border-t border-line-6 bg-base px-6 py-24 md:px-[8vw] md:py-32">
-      <Reveal className="mb-14 max-w-2xl">
-        <p className="micro mb-3">CATEGORIES</p>
-        <h2 className="font-display text-section font-normal text-ink">{t.home.catTitle}</h2>
-        <p className="mt-4 text-body text-dim">{t.home.catSub}</p>
-      </Reveal>
+    <section aria-label={t.home.catTitle} className="grid grid-cols-1 md:grid-cols-2">
+      {rooms.map((r) => (
+        <Link
+          key={r.key}
+          href={`/products/?cat=${r.key}`}
+          className="group relative isolate block min-h-[62svh] overflow-clip bg-ink md:min-h-[78svh]"
+        >
+          {/* ภาพเต็มแผง: ช่องกว้างครึ่งจอ (720px ที่ 1440) จึงขอ rendition ที่คลุม
+              ระดับ retina ได้ — คลังหยุดที่ 1800px ซึ่งคลุม 720×2 พอดี */}
+          {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
+          <img
+            src={lifestyleSrc(r.photo, 720, 2)}
+            alt={r.photo.alt[lang]}
+            width={r.photo.width}
+            height={r.photo.height}
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
+          />
+          {/* ม่านไล่เฉด: ตัวอักษรอยู่บนภาพถ่าย จึงต้องมีชั้นที่รับประกัน contrast
+              ไล่จากล่างขึ้นบน ภาพยังต้องอ่านออกว่าเป็นห้องอะไร */}
+          <span
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(to top, rgba(8,9,10,0.86) 0%, rgba(8,9,10,0.55) 42%, rgba(8,9,10,0.12) 78%, rgba(8,9,10,0.04) 100%)',
+            }}
+          />
 
-      <div className="grid gap-12 md:grid-cols-2">
-        {rooms.map((r, i) => (
-          <Reveal key={r.key} delay={i * 0.12}>
-            <Link href={`/products/?cat=${r.key}`} className="group block">
-              <ParallaxImage
-                src={r.lead?.finishes[0]?.image}
-                alt={r.lead ? r.lead.name[lang] : ''}
-                ratio="3/2"
-                speed={i % 2 ? 7 : -7}
-                sizes="(max-width: 768px) 100vw, 45vw"
-              />
-              <div className="mt-5 flex items-baseline justify-between gap-4">
-                <h3 className="font-display text-card font-normal text-ink">{r.title}</h3>
-                <span className="micro whitespace-nowrap transition-transform duration-300 group-hover:translate-x-1.5">
-                  {t.home.catCount(r.count)} →
-                </span>
-              </div>
-              <p className="mt-2 text-body-sm text-dim">{r.desc}</p>
-
-              {/* ภาพย่อยสามใบ: ทำให้บล็อกนี้เป็น "หมวดที่มีของ" ไม่ใช่ป้ายหมวดเปล่า */}
-              <div className="mt-5 grid grid-cols-3 gap-3" aria-hidden>
-                {r.thumbs.map((p) => (
-                  <div key={p.slug} className="overflow-hidden border border-line-6 bg-surface">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local จาก scraper */}
-                    <img
-                      src={p.finishes[0]?.image700 ?? p.finishes[0]?.image}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="aspect-square w-full object-contain"
-                    />
-                  </div>
-                ))}
-              </div>
-            </Link>
-          </Reveal>
-        ))}
-      </div>
+          <div className="relative z-10 flex h-full min-h-[62svh] flex-col justify-end p-8 md:min-h-[78svh] md:p-12">
+            <p className="micro !text-white/80">{t.home.catCount(r.count)}</p>
+            {/* ใหญ่กว่าหัวข้อ 32px ของบล็อกอื่นอย่างตั้งใจ — นี่คือจังหวะที่ต่าง */}
+            <h2 className="mt-3 font-display text-[clamp(40px,6vw,76px)] font-normal leading-thai text-white">
+              {r.title}
+            </h2>
+            <p className="mt-4 max-w-sm text-body text-white/85">{r.desc}</p>
+            <span className="micro mt-7 !text-white transition-transform duration-300 group-hover:translate-x-2">
+              {t.common.viewAll} →
+            </span>
+          </div>
+        </Link>
+      ))}
     </section>
   );
 }
 
-/** §3.3 ข้อ 4 (ครึ่งหลัง) — แถวตัวเลข ดึงกลับจากหน้าแรกเดิม */
+/**
+ * §3.3 ข้อ 4 (ครึ่งหลัง) — แถวตัวเลข (task A4: จังหวะมืดที่หนึ่ง)
+ *
+ * บล็อกเดียวในหน้าที่จัดกลาง และเป็นหนึ่งในสองบล็อกที่อยู่บนพื้นมืด ตัวเลขใหญ่กว่า
+ * หัวข้อของบล็อกอื่นเท่าตัว ทำหน้าที่เป็นเครื่องหมายวรรคตอนคั่นครึ่งหน้า ไม่ใช่
+ * อีกหนึ่งกริดต่อจากกริดก่อนหน้า — พื้นมืดใช้ค่าชุดเดียวกับ depth field
+ * (ดู [data-dark-beat] ใน app/globals.css)
+ */
 function Stats() {
   const { t } = useLang();
   return (
-    <section className="border-y border-line-6 bg-base px-6 py-20 md:px-[8vw] md:py-24">
-      <Reveal className="mb-12">
-        <h2 className="font-display text-card font-normal text-ink">{t.home.statsTitle}</h2>
+    <section data-dark-beat className="px-6 py-24 text-center md:px-[8vw] md:py-32">
+      <Reveal className="mb-16">
+        <h2 className="mx-auto max-w-2xl font-display text-[clamp(30px,3.4vw,46px)] font-normal leading-thai">
+          {t.home.statsTitle}
+        </h2>
       </Reveal>
-      <dl className="grid grid-cols-2 gap-10 md:grid-cols-4">
+      <dl className="mx-auto grid max-w-5xl grid-cols-2 gap-y-14 md:grid-cols-4">
         {t.home.stats.map((s, i) => (
           // <dt> ต้องมาก่อน <dd> ใน DOM (axe: dlitem) เดิมสลับกันอยู่จึงตก
           // definition-list ทุกครั้งที่รัน Lighthouse — พลิกกลับด้วย
           // flex-col-reverse ตัวเลขจึงยังอยู่บนป้ายเหมือนเดิม
-          // และ dt/dd ต้องเป็นลูกตรงของ div ที่เป็นลูกตรงของ <dl> — Reveal
-          // เรนเดอร์ div ตัวนั้นเอง ไม่มี div ซ้อนคั่นอีกชั้น
           <Reveal
             key={s.label}
             delay={i * 0.1}
             y={20}
-            className="flex flex-col-reverse text-center"
+            className="flex flex-col-reverse px-3 text-center"
           >
-            <dt className="micro mt-3">{s.label}</dt>
-            {/* ตัวเลขใหญ่ 48–60px แต่ยังเป็นน้ำหนัก 400 ไม่ใช่ 200 — สเปก §3.2
-                ยกเว้นน้ำหนักบางไว้ให้ตัวประดับล้วนอย่าง ModelNumber เท่านั้น */}
-            <dd className="font-display text-5xl font-normal text-ink md:text-6xl">
+            <dt className="micro mt-4">{s.label}</dt>
+            {/* ใหญ่ขึ้นเพราะเป็นจังหวะ ไม่ใช่เพราะบาง — น้ำหนักยังเป็น 400 ตามสเปก §3.2 */}
+            <dd className="font-display text-[clamp(52px,7vw,104px)] font-normal leading-none">
               <CountUp to={s.value} suffix={s.suffix} />
             </dd>
           </Reveal>
@@ -294,8 +330,11 @@ function Stats() {
 function LatestPosts() {
   const { lang, t } = useLang();
   return (
-    <section className="bg-base px-6 py-24 md:px-[8vw] md:py-32">
-      <Reveal className="mb-14 flex items-end justify-between gap-6">
+    // A4: บล็อกนี้แคบกว่าและจัดกลาง ไม่ใช่เต็มความกว้าง px-[8vw] เหมือนบล็อกอื่น
+    // และกริดไม่ใช่สามช่องเท่ากัน — ชิ้นแรกกิน 7 ส่วนพร้อมภาพใหญ่ อีกสองชิ้นซ้อนกัน
+    // อยู่ใน 5 ส่วนที่เหลือ ตรรกะคอลัมน์จึงต่างจากกริด 4 ช่องด้านบนจริง ๆ
+    <section className="bg-base px-6 py-24 md:py-32">
+      <Reveal className="mx-auto mb-14 flex max-w-6xl items-end justify-between gap-6">
         <div>
           <p className="micro mb-3">{t.home.articlesKicker}</p>
           <h2 className="font-display text-section font-normal text-ink">{t.home.articlesTitle}</h2>
@@ -308,18 +347,22 @@ function LatestPosts() {
         </Link>
       </Reveal>
 
-      <div className="grid gap-10 md:grid-cols-3">
+      <div className="mx-auto grid max-w-6xl gap-x-10 gap-y-12 md:grid-cols-12">
         {LATEST.map(({ post, cover }, i) => (
-          <Reveal key={post.slug} delay={i * 0.12}>
+          <Reveal
+            key={post.slug}
+            delay={i * 0.12}
+            className={i === 0 ? 'md:col-span-7 md:row-span-2' : 'md:col-span-5'}
+          >
             <Link href={`/articles/${post.slug}/`} className="group block">
               <div className="overflow-hidden">
                 <div className="transition-transform duration-700 ease-out group-hover:scale-105">
                   <ParallaxImage
-                    src={cover.material}
-                    alt={cover.name[lang]}
-                    ratio="16/9"
+                    src={lifestyleSrc(cover, i === 0 ? 700 : 460, 2)}
+                    alt={cover.alt[lang]}
+                    ratio={i === 0 ? '3/2' : '16/9'}
                     speed={i % 2 ? 5 : -5}
-                    sizes="(max-width: 768px) 100vw, 30vw"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 40vw"
                   />
                 </div>
               </div>
@@ -331,7 +374,13 @@ function LatestPosts() {
                   day: 'numeric',
                 })}
               </p>
-              <h3 className="mt-2 text-card font-normal text-ink">{post.title[lang]}</h3>
+              <h3
+                className={`mt-2 font-normal text-ink ${
+                  i === 0 ? 'font-display text-[clamp(24px,2.6vw,36px)] leading-thai' : 'text-card'
+                }`}
+              >
+                {post.title[lang]}
+              </h3>
               <p className="mt-3 text-body-sm leading-relaxed text-dim">{post.excerpt[lang]}</p>
             </Link>
           </Reveal>
@@ -341,17 +390,24 @@ function LatestPosts() {
   );
 }
 
-/** §3.3 ข้อ 6 — โชว์รูม/ติดต่อ ปิดท้ายด้วยจานสีทั้งสิบเอ็ดเฉด */
+/**
+ * §3.3 ข้อ 6 — โชว์รูม/ติดต่อ + จานสีสิบเอ็ดเฉด (task A4: จังหวะมืดที่สอง)
+ *
+ * ปิดหน้าด้วยพื้นมืด ไม่ใช่กริดสว่างอีกอันต่อจากกริดบทความ วัสดุสิบเอ็ดแถบเรือง
+ * ขึ้นบนพื้นมืดแทนที่จะจมหายไปกับพื้น #E5E5E5 แบบเดิม (เหตุผลเดียวกับที่ depth
+ * field ต้องมืด) และครึ่ง CTA มีภาพห้องจริงเป็นฉากหลังแทนกล่องเปล่า
+ */
 function ShowroomBlock() {
   const { lang, t } = useLang();
+  const room = ROOM_PHOTO.showroom;
   return (
-    <section className="border-t border-line-6 bg-base">
+    <section data-dark-beat className="border-t border-line-6">
       {/* แถบวัสดุ: ไม่ใช่ลิงก์ ตั้งใจ — ตัวนำทางด้วยเฉดคือกำแพงด้านบน
           แถบนี้ทำหน้าที่ปิดวง ย้ำว่าทั้งสิบเอ็ดเฉดมีของจริง */}
       <div className="px-6 py-20 md:px-[8vw] md:py-24">
         <Reveal className="mb-10 max-w-2xl">
           <p className="micro mb-3">{t.home.paletteKicker}</p>
-          <h2 className="font-display text-section font-normal text-ink">{t.home.paletteTitle}</h2>
+          <h2 className="font-display text-section font-normal">{t.home.paletteTitle}</h2>
           <p className="mt-4 text-body text-dim">{t.home.paletteSub}</p>
         </Reveal>
         {/* เคยเป็นแถบวัสดุเฉย ๆ ไม่ใช่ลิงก์ เพราะตัวนำทางด้วยเฉดคือกำแพงบนหัวหน้า
@@ -364,7 +420,7 @@ function ShowroomBlock() {
                 href={`/products/?finish=${encodeURIComponent(f.code)}`}
                 className="focus-inset group block"
               >
-                <div className="overflow-hidden border border-line-6 bg-surface">
+                <div className="overflow-hidden border border-line-6">
                   {/* eslint-disable-next-line @next/next/no-img-element -- static export, ไฟล์วัสดุ local */}
                   <img
                     src={f.material}
@@ -374,7 +430,7 @@ function ShowroomBlock() {
                     className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
-                <p className="mt-2 text-body-sm text-ink">{f.name[lang]}</p>
+                <p className="mt-2 text-body-sm">{f.name[lang]}</p>
                 <p className="text-body-sm text-dim">{t.finish.pieces(f.count)}</p>
               </Link>
             </li>
@@ -382,16 +438,29 @@ function ShowroomBlock() {
         </ul>
       </div>
 
-      <div className="grid gap-12 border-t border-line-6 px-6 py-24 md:grid-cols-2 md:px-[8vw] md:py-28">
+      <div className="relative isolate grid gap-12 border-t border-line-6 px-6 py-24 md:grid-cols-2 md:px-[8vw] md:py-32">
+        {/* ภาพห้องจริงเป็นฉากหลังของบล็อกปิด — หรี่ไว้จนตัวอักษรยังนำสายตา
+            0.18 ไม่ใช่ 0.28: วัดจากพิกเซลที่เรนเดอร์จริงแล้ว ป้าย .micro บนภาพที่
+            หรี่ไว้ 0.28 ได้ 4.27:1 ซึ่งต่ำกว่าเกณฑ์ตัวรอง 4.5:1 — ค่าที่ประกาศ
+            (#A8A8A4 บน #08090A = 8.35:1) เชื่อไม่ได้เมื่อมีภาพคั่นอยู่ตรงกลาง */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
+        <img
+          src={lifestyleSrc(room, 1440, 1)}
+          alt=""
+          aria-hidden
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-[0.18]"
+        />
         <Reveal>
           <p className="micro mb-3">{t.home.showroomKicker}</p>
-          <h2 className="max-w-xl font-display text-section font-normal text-ink">
+          <h2 className="max-w-xl font-display text-[clamp(32px,4vw,58px)] font-normal leading-thai">
             {t.home.ctaTitle}
           </h2>
           <p className="mt-4 max-w-md text-body text-dim">{t.home.ctaSub}</p>
           <Link
             href="/contact/"
-            className="mt-10 inline-block border border-line-12 px-10 py-4 text-ink transition-colors duration-300 hover:border-accent hover:text-accent"
+            className="mt-10 inline-block border border-line-12 px-10 py-4 transition-colors duration-300 hover:border-accent hover:text-accent"
           >
             <span className="micro !text-current">{t.home.ctaBtn}</span>
           </Link>
@@ -401,17 +470,17 @@ function ShowroomBlock() {
           <dl className="space-y-7">
             <div>
               <dt className="micro mb-2">{t.home.showroomAddressLabel}</dt>
-              <dd className="max-w-xs text-body text-ink">
+              <dd className="max-w-xs text-body">
                 {lang === 'th' ? CONTACT.address_th : CONTACT.address_en}
               </dd>
             </div>
             <div>
               <dt className="micro mb-2">{t.home.showroomHoursLabel}</dt>
-              <dd className="text-body text-ink">{t.home.showroomHours}</dd>
+              <dd className="text-body">{t.home.showroomHours}</dd>
             </div>
             <div>
               <dt className="micro mb-2">{t.home.showroomPhoneLabel}</dt>
-              <dd className="text-body text-ink">
+              <dd className="text-body">
                 <a href={`tel:${CONTACT.phone}`} className="underline-offset-4 hover:underline">
                   {CONTACT.phone}
                 </a>
@@ -419,7 +488,7 @@ function ShowroomBlock() {
             </div>
             <div>
               <dt className="micro mb-2">E-MAIL</dt>
-              <dd className="text-body text-ink">
+              <dd className="text-body">
                 <a href={`mailto:${CONTACT.email}`} className="underline-offset-4 hover:underline">
                   {CONTACT.email}
                 </a>

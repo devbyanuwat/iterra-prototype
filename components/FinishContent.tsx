@@ -15,6 +15,8 @@ import FinishProductCard from './FinishProductCard';
 import FinishRail from './FinishRail';
 import { useLang } from './LangProvider';
 import { finishIndex, finishOf, getFinishEntry } from './finish-index';
+import { roomFor } from './home/rooms';
+import { lifestyleSrc } from '@/lib/lifestyle.generated';
 import type { Category, Finish, Product } from '@/lib/products';
 
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
@@ -200,17 +202,58 @@ export default function FinishContent({ code }: { code: string }) {
   // ถ้าเฉดใหม่ไม่มีของในหมวดนั้น ปุ่มฟิลเตอร์บอกจำนวน 0 ให้เห็นก่อนกด และมี empty state รับ
   const filters: Filter[] = ['all', 'kitchen', 'bath'];
 
+  // ── หน้าเฉดเปิดด้วยห้องจริง ไม่ใช่พาดหัวลอย ๆ เหนือกริด (task A2) ─────────
+  // เลือกจากแฮชของรหัสเฉด จึงคงที่ต่อเฉดหนึ่ง ๆ และเปลี่ยนตามเฉดที่สลับอยู่
+  // ไม่ได้อ้างว่าห้องในภาพใช้เฉดนี้ — คลังภาพไม่มีข้อมูลนั้น สิ่งที่แถบนี้ทำคือ
+  // เปิดหน้าด้วยห้อง แล้วค่อยตามด้วยของที่อยู่ในห้องได้
+  //
+  // เลือก space ตามหมวดที่เฉดนี้มีของเยอะกว่า — เฉดที่ของเกือบทั้งหมดเป็นห้องน้ำ
+  // ไม่ควรเปิดหน้าด้วยภาพครัว
+  const room = roomFor(entry.code, {
+    minWidth: 1440,
+    minAspect: 1.4,
+    space: kitchenCount * 2 > items.length ? 'kitchen' : 'bath',
+  });
+
   return (
     <>
-      <section className="px-6 pb-12 pt-36 md:px-[8vw] md:pb-16 md:pt-44">
-        <p className="micro mb-4">{t.finish.kicker}</p>
-        <h1 className="font-display text-4xl font-semibold text-ink md:text-5xl">
-          {t.finish.title(entry.name[lang])}
-        </h1>
-        <p className="mt-4 max-w-xl text-body text-dim">{t.finish.sub(entry.count)}</p>
+      {room && (
+        <section className="relative isolate min-h-[46svh] overflow-clip bg-ink md:min-h-[62svh]">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
+          <img
+            src={lifestyleSrc(room, 1440, 1)}
+            alt={room.alt[lang]}
+            width={room.width}
+            height={room.height}
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <span
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(to top, rgba(8,9,10,0.86) 0%, rgba(8,9,10,0.55) 44%, rgba(8,9,10,0.12) 80%, rgba(8,9,10,0.04) 100%)',
+            }}
+          />
+          <div className="relative z-10 flex min-h-[46svh] flex-col justify-end px-6 pb-10 pt-36 md:min-h-[62svh] md:px-[8vw] md:pb-14 md:pt-44">
+            <p className="micro !text-white/80">{t.finish.kicker}</p>
+            <h1 className="mt-3 max-w-3xl font-display text-[clamp(34px,5vw,68px)] font-semibold leading-thai text-white">
+              {t.finish.title(entry.name[lang])}
+            </h1>
+            <p className="mt-4 max-w-xl text-body text-white/85">{t.finish.sub(entry.count)}</p>
+            {/* ตัวอย่างวัสดุจริงของเฉดนี้ วางคู่กับห้อง — เส้น accent เดิมบอกสีได้
+                อย่างเดียว แถบวัสดุบอก "ผิว" ซึ่งเป็นสิ่งที่หน้านี้ขาย */}
+            <span
+              aria-hidden
+              className="mt-7 block h-10 w-40 border border-white/30 bg-accent bg-cover bg-center"
+              style={{ backgroundImage: `url(${entry.material})` }}
+            />
+          </div>
+        </section>
+      )}
 
-        {/* เส้น kicker ใช้ --accent — ตัวชี้วัดสายตาว่าสีของหน้าเปลี่ยนตามเฉดจริง */}
-        <span aria-hidden className="mt-8 block h-px w-24 bg-accent" />
+      <section className="px-6 pb-12 pt-14 md:px-[8vw] md:pb-16">
 
         {/* ครัว/ห้องน้ำ เป็นฟิลเตอร์ "ในหน้า" ไม่ใช่แกนหลัก (§4.2) จึงอยู่ใต้พาดหัว
             ของเฉด ไม่ได้อยู่บน nav และไม่ได้อยู่เหนือชื่อเฉด */}
