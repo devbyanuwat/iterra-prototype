@@ -174,6 +174,23 @@ type Props = {
   interactive?: boolean;
   /** ประตูเข้าเผยระนาบทีละใบตามความคืบหน้าจริง — ชิ้นที่ n โผล่เมื่อถึง n/total */
   revealByProgress?: boolean;
+  /**
+   * ระนาบห้องรอจนกว่า "ระนาบสินค้าในสนามนี้" จะโหลดครบ ถึงจะเข้ามา
+   *
+   * สเปก §4.1 สั่งให้ประตูมีรูปห้อง แต่ §5 ข้อ 6 สั่งว่ารูปในสนามต้องเป็นไฟล์ที่
+   * หน้าอื่นใช้อยู่แล้ว — หน้าแรกไม่ได้เรนเดอร์รูปห้องสักใบ ข้อบังคับสองข้อนี้จึงขัดกัน
+   * ทางออกคือให้ห้อง "อยู่ในสนาม แต่ไม่ขวางทางเข้า": ประตูวัดความคืบหน้าจากสินค้า
+   * ซึ่งเป็นของที่หน้าแรกต้องโหลดอยู่แล้ว พอถึง 100% ประตูก็เปิดได้ทันที
+   * ห้องจึงเริ่มโหลดตอนที่การรอสิ้นสุดลงแล้ว — คนที่กดเข้าเลยไม่ได้จ่ายค่ามันเลย
+   * ส่วนคนที่ยืนดูสนามต่อจะเห็นฉากหลังไล่เข้ามาทีหลัง
+   *
+   * เงื่อนไขคือ "รูปสินค้าในสนามครบ" ไม่ใช่ `progress >= 1`:
+   * วัดจริงแล้วเปอร์เซ็นต์ของประตูแทบไม่เคยแตะ 100 ด้วยตัวเอง เพราะ `real()` หาร
+   * ด้วย document.images ทั้งหน้า ซึ่งรวมรูป lazy ใต้จอของหน้าแรกที่ยังไม่โหลด
+   * (`complete === false` ตลอด) — ผูกห้องไว้กับ 100% จึงเท่ากับผูกไว้กับ watchdog
+   * ที่ 6 วินาที แปลว่าในการใช้งานจริงห้องจะไม่มาเลย
+   */
+  deferRooms?: boolean;
   className?: string;
   /** ป้ายกำกับของ region สำหรับ screen reader */
   label: string;
@@ -184,6 +201,7 @@ export default function DepthField({
   progress = 1,
   interactive = false,
   revealByProgress = false,
+  deferRooms = false,
   className = '',
   label,
 }: Props) {
@@ -194,6 +212,8 @@ export default function DepthField({
   const [focused, setFocused] = useState<number | null>(null);
   // สนามพ้นจอแล้วต้องหยุดทุกอย่าง (§5 ข้อ 5) — บนประตูเข้าเป็นจริงตลอด
   const [onScreen, setOnScreen] = useState(true);
+  // ระนาบห้องเข้ามาได้หรือยัง (ใช้เมื่อ deferRooms เท่านั้น)
+  const [roomsReady, setRoomsReady] = useState(false);
 
   const boxes = useMemo(() => place(planes), [planes]);
 
@@ -250,6 +270,47 @@ export default function DepthField({
     gsap.to(cam, { z, duration: 0.9, ease: 'power2.out', overwrite: 'auto' });
   }, [progress]);
 
+  // ── ฉากหลังเข้ามาหลังสินค้าโหลดครบ ────────────────────────────────────────
+  //
+  // เดินสำรวจ <img> ของ "ระนาบสินค้าในสนามนี้" ไม่ใช่ document.images ทั้งหน้า:
+  // เกณฑ์คือของที่สนามต้องมีเพื่อทำหน้าที่ของมัน ไม่ใช่ของทั้งหน้าแรก
+  //
+  // watchdog: รูปสินค้าที่พังหรือค้างต้องไม่แปลว่าห้องจะไม่มาตลอดกาล
+  // เหตุผลเดียวกับ watchdog ของประตูเข้า — ห้ามให้สิ่งที่โหลดไม่สำเร็จกลายเป็น
+  // เงื่อนไขถาวรของสิ่งที่ยังทำงานได้
+  useEffect(() => {
+    if (!deferRooms || roomsReady) return;
+    const cam = camera.current;
+    if (!cam) return;
+
+    const done = () => {
+      const imgs = Array.from(
+        cam.querySelectorAll<HTMLImageElement>('img:not([data-depth-defer])'),
+      );
+      return imgs.length > 0 && imgs.every((i) => i.complete);
+    };
+
+    if (done()) {
+      setRoomsReady(true);
+      return;
+    }
+    const poll = window.setInterval(() => {
+      if (done()) {
+        window.clearInterval(poll);
+        setRoomsReady(true);
+      }
+    }, 160);
+    const watchdog = window.setTimeout(() => {
+      window.clearInterval(poll);
+      setRoomsReady(true);
+    }, 6000);
+
+    return () => {
+      window.clearInterval(poll);
+      window.clearTimeout(watchdog);
+    };
+  }, [deferRooms, roomsReady, planes]);
+
   // ── หยุดเมื่อพ้น viewport ─────────────────────────────────────────────────
   useEffect(() => {
     const el = viewport.current;
@@ -273,6 +334,8 @@ export default function DepthField({
     ? Math.round(Math.min(1, Math.max(0, progress)) * planes.length)
     : planes.length;
 
+  const roomsIn = !deferRooms || roomsReady;
+
   return (
     <div
       ref={viewport}
@@ -295,6 +358,11 @@ export default function DepthField({
         }}
       >
         {planes.map((plane, i) => {
+          // ตัดทั้งระนาบทิ้ง ไม่ใช่ปล่อย <img> ที่ยังไม่มี src ค้างไว้: ระนาบที่ไม่มีรูป
+          // ไม่ใช่ระนาบ และ AC ข้อ 1 นับ "ระนาบที่เป็น <img>" ไม่ใช่กล่องเปล่า
+          // ตำแหน่งสินค้าไม่ขยับตอนห้องโผล่ เพราะ place() เดิน sunflower **แยกต่อชนิด**
+          // จำนวนสินค้าจึงเท่าเดิมไม่ว่าห้องจะอยู่หรือไม่อยู่
+          if (plane.kind === 'room' && !roomsIn) return null;
           const box = boxes[i];
           const state = focused === i ? box.pulled : active === i ? box.hover : box.rest;
           const revealed = i < shown;
@@ -316,6 +384,12 @@ export default function DepthField({
               // 12 ใบแรกคือของที่เห็นชัดที่สุดตอนสนามเปิด ที่เหลือปล่อยให้เบราว์เซอร์
               // จัดคิวเอง — ทุกใบอยู่ในจอจึงถูกโหลดอยู่ดี แต่ลำดับต่างกัน
               loading={i < 12 ? 'eager' : 'lazy'}
+              // ห้องต่อคิวหลังสินค้าเสมอ แม้ในกรณีที่มันถูกใส่เข้ามาพร้อมกัน
+              // (แกลเลอรีไม่มีระนาบห้อง ค่านี้จึงมีผลเฉพาะประตูเข้า)
+              fetchPriority={plane.kind === 'room' ? 'low' : undefined}
+              // ตัวชี้ให้ Preloader ตัดออกจากการนับความคืบหน้า — ประตูต้องเปิดได้
+              // โดยไม่ต้องรอฉากหลัง ดูหมายเหตุ `deferRooms` ด้านบน
+              data-depth-defer={plane.kind === 'room' ? '' : undefined}
               decoding="async"
               draggable={false}
               className="block h-auto w-full select-none object-contain"

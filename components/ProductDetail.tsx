@@ -9,7 +9,7 @@
 // สินค้าเฉดเดียวเป็นส่วนใหญ่ของแคตตาล็อก — FinishSwatches จะไม่ render อะไรเลย
 // แล้ว FinishLabel ขึ้นชื่อเฉดแทน
 
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Reveal from './Reveal';
 import ProductCard from './ProductCard';
@@ -43,6 +43,65 @@ function FinishFromQuery() {
   return null;
 }
 
+/**
+ * เขียนเฉดที่เลือกอยู่กลับลง `?finish=` ทุกครั้งที่ผู้ใช้สลับสวอตช์บนหน้านี้
+ *
+ * `?finish=` ถูกใส่เข้ามาตอนแรกเพื่อให้เฉด "รอดจากการคลิก" จากหน้าเฉด แต่พอมาถึง
+ * หน้าสินค้าแล้วกดสวอตช์เอง URL ยังค้างที่เฉดเดิม — รีโหลดหรือส่งลิงก์ให้คนอื่น
+ * แล้วได้เฉดที่ไม่ใช่ตัวที่กำลังดูอยู่ ซึ่งพังด้วยเหตุผลเดียวกับที่ทำให้ต้องมี
+ * `?finish=` ตั้งแต่แรก
+ *
+ * `replaceState` ไม่ใช่ `pushState`: สวอตช์ 11 ปุ่มไม่ควรกลายเป็นประวัติ 11 หน้า
+ * ที่ผู้ใช้ต้องกด back ผ่านทีละอันเพื่อออกจากหน้าสินค้าชิ้นเดียว
+ *
+ * ส่ง `history.state` เดิมไปด้วย — App Router เก็บสถานะ router ของมันไว้ตรงนั้น
+ * เขียนทับด้วย null จะทำให้ปุ่ม back ของเบราว์เซอร์เพี้ยนหลังจากนี้
+ *
+ * ข้ามรอบแรก: การเลือกครั้งแรกมาจาก URL (หรือเป็นค่า default) ไม่ใช่การกระทำของ
+ * ผู้ใช้ ถ้าไม่ข้าม ทุกหน้าสินค้าจะถูกเติม `?finish=` ให้เองตั้งแต่ยังไม่มีใครแตะ
+ */
+function FinishToQuery() {
+  const { selected } = useFinish();
+  const code = selected?.code;
+  const settled = useRef(false);
+
+  useEffect(() => {
+    if (!code) return;
+    if (!settled.current) {
+      settled.current = true;
+      return;
+    }
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('finish') === code) return;
+    url.searchParams.set('finish', code);
+    window.history.replaceState(window.history.state, '', url);
+  }, [code]);
+
+  return null;
+}
+
+/**
+ * ป้ายหัวแถวของตารางสเปกเป็น "ข้อความอินเทอร์เฟซ" ไม่ใช่ข้อมูลสินค้า
+ *
+ * scraper เก็บ label มาเป็นไทยล้วน (7 ค่าทั้งแคตตาล็อก) หน้าสินค้าฉบับอังกฤษจึงมี
+ * หัวข้อ "SPECIFICATIONS" อยู่บนตารางที่หัวแถวเขียนว่า "ขนาด" / "คอลเลกชัน"
+ * ค่าในช่องขวาเป็นข้อมูลสินค้า ปล่อยไว้ตามเดิม
+ *
+ * แผนที่นี้อยู่ที่นี่ไม่ใช่ใน lib/i18n.ts เพราะมันไม่ใช่ป้าย UI ที่เราตั้งชื่อเอง
+ * แต่เป็นการ "อ่านค่าที่มาจากข้อมูล" — คีย์ของมันคือสตริงจาก scraper ถ้าข้อมูลถูก
+ * generate ใหม่แล้วมี label ตัวใหม่โผล่มา ค่าที่ไม่รู้จักจะตกกลับเป็นไทยตามเดิม
+ * ไม่ใช่ช่องว่าง
+ */
+const SPEC_LABEL_EN: Readonly<Record<string, string>> = {
+  ขนาด: 'Dimensions',
+  คอลเลกชัน: 'Collection',
+  การติดตั้ง: 'Installation',
+  วัสดุ: 'Material',
+  'คุณสมบัติ 1': 'Feature 1',
+  'คุณสมบัติ 2': 'Feature 2',
+  'คุณสมบัติ 3': 'Feature 3',
+};
+
 export default function ProductDetail({ slug }: { slug: string }) {
   const { lang, t } = useLang();
   const product = getProduct(slug);
@@ -64,6 +123,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
   return (
     <FinishProvider finishes={product.finishes} applyTo="root">
       <FinishFromQuery />
+      <FinishToQuery />
       <section className="px-6 pb-24 pt-32 md:px-[6vw] md:pt-40">
         {/* breadcrumb */}
         {/* ย้อนกลับไปที่เฉดที่มาจริง ๆ ไม่ใช่ /products เสมอ — คนที่กำลังไล่ดู
@@ -138,7 +198,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
                   {product.specs.map((s) => (
                     <tr key={s.label} className="border-b border-line-6">
                       <th scope="row" className="py-3 pr-6 text-left font-normal text-dim">
-                        {s.label}
+                        {lang === 'en' ? (SPEC_LABEL_EN[s.label] ?? s.label) : s.label}
                       </th>
                       <td className="py-3 text-ink">{s.value}</td>
                     </tr>

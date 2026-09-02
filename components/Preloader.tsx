@@ -187,7 +187,10 @@ export default function Preloader({
       if (document.readyState !== 'loading') p += 0.2;
       if (document.readyState === 'complete') p += 0.15;
       if (fontsReady) p += 0.25;
-      const imgs = Array.from(document.images);
+      // รูปที่ถือ data-depth-defer ไม่นับ: มันคือฉากหลังของสนามที่หน้าแรกไม่ได้ใช้
+      // ประตูจึงต้องเปิดได้โดยไม่ต้องรอมัน และเมื่อมันเริ่มโหลดหลังจากถึง 100%
+      // แล้ว ตัวหารก็จะไม่โตขึ้นจนเปอร์เซ็นต์เดินถอยหลัง (ดู deferRooms ใน DepthField)
+      const imgs = Array.from(document.images).filter((i) => !i.hasAttribute('data-depth-defer'));
       const decoded = imgs.filter((i) => i.complete).length;
       p += 0.4 * (imgs.length ? decoded / imgs.length : 1);
       return clamp01(p);
@@ -322,6 +325,9 @@ export default function Preloader({
               planes={planes}
               progress={pct / 100}
               revealByProgress
+              // ฉากหลังเข้ามาหลังสินค้าโหลดครบ ไม่ใช่พร้อมกัน — ประตูจึงไม่ได้
+              // ถือ ~300KB ของรูปห้องไว้เป็นเงื่อนไขก่อนจะเปิดให้เข้า
+              deferRooms
               label={t.gate.fieldLabel}
               className="absolute inset-0"
             />
@@ -383,7 +389,12 @@ export default function Preloader({
                     <img
                       src={plane.src}
                       alt={plane.alt[lang]}
-                      loading={i < 9 ? 'eager' : 'lazy'}
+                      // ห้องเป็น lazy เสมอและไม่นับในความคืบหน้า เหมือนในสนาม
+                      // ที่นี่ lazy ได้ผลจริงด้วย เพราะกริดเป็นกล่องที่เลื่อนได้
+                      // ของส่วนใหญ่จึงอยู่นอกจอตั้งแต่แรก
+                      loading={plane.kind === 'room' || i >= 9 ? 'lazy' : 'eager'}
+                      fetchPriority={plane.kind === 'room' ? 'low' : undefined}
+                      data-depth-defer={plane.kind === 'room' ? '' : undefined}
                       decoding="async"
                       className={
                         plane.kind === 'room'

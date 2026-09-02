@@ -31,6 +31,45 @@ export default function FinishRail({ entries, activeCode, onSelect }: Props) {
   const [roving, setRoving] = useState(activeIndex);
   const refs = useRef<(HTMLAnchorElement | null)[]>([]);
   const listRef = useRef<HTMLUListElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  // ── ที่มือถือ แถบนี้ลอยทับท้ายหน้าถาวร ──────────────────────────────────
+  //
+  // มันเป็น `fixed` จึงไม่กินที่ของตัวเองเลย QA วัดได้ว่าบรรทัดลิขสิทธิ์ของ footer
+  // อยู่ที่ 775–844 ส่วนแถบอยู่ 772–844 — บรรทัดสุดท้ายของเว็บถูกบังทั้งบรรทัด
+  // และ **เลื่อนหนีไม่ได้** เพราะมันคือจุดต่ำสุดของหน้าอยู่แล้ว
+  // (`pb-40` ที่ FinishContent เผื่อไว้ให้การ์ดใบท้าย ไม่ได้ช่วย footer ซึ่งอยู่
+  //  คนละ subtree — footer มาจาก layout ไม่ได้อยู่ในหน้าเฉด)
+  //
+  // ตัวที่บังคือแถบ ตัวที่รู้ความสูงของแถบก็คือแถบ การชดเชยจึงเป็นหน้าที่ของมันเอง
+  // ไม่ใช่ของ layout หรือ Footer ที่ไม่มีทางรู้ว่าหน้านี้มีแถบอยู่หรือเปล่า
+  //
+  // เดสก์ท็อปแถบย้ายไปเกาะขอบขวาแนวตั้ง ไม่ทับอะไรในแนวตั้ง จึงไม่ต้องชดเชย
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+    const mq = window.matchMedia('(min-width: 768px)');
+    const previous = document.body.style.paddingBottom;
+
+    const apply = () => {
+      document.body.style.paddingBottom = mq.matches
+        ? previous
+        : `${Math.ceil(el.getBoundingClientRect().height)}px`;
+    };
+
+    apply();
+    mq.addEventListener('change', apply);
+    // ความสูงเปลี่ยนได้จริงตอนฟอนต์สลับ — วัดใหม่แทนการฮาร์ดโค้ดตัวเลขที่จะเพี้ยน
+    // เงียบ ๆ วันที่ใครแก้ padding ของชิป
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+
+    return () => {
+      mq.removeEventListener('change', apply);
+      ro.disconnect();
+      document.body.style.paddingBottom = previous;
+    };
+  }, []);
 
   // เฉดที่ active เปลี่ยนจากที่อื่น (ปุ่ม back ของเบราว์เซอร์) — roving ต้องตามไปด้วย
   // ไม่งั้นกด Tab เข้าแถบแล้วโฟกัสไปตกที่เฉดก่อนหน้า
@@ -98,6 +137,7 @@ export default function FinishRail({ entries, activeCode, onSelect }: Props) {
 
   return (
     <nav
+      ref={navRef}
       aria-label={t.finish.railLabel}
       // มือถือ: แถบนอนติดขอบล่าง เลื่อนในตัวเอง (overflow-x-auto สร้าง scroll
       // container ของตัวเอง จึงไม่ดัน scrollWidth ของหน้า — AC 8)
@@ -110,7 +150,11 @@ export default function FinishRail({ entries, activeCode, onSelect }: Props) {
     >
       <ul
         ref={listRef}
-        className="snap-gallery flex gap-2 overflow-x-auto px-3 py-3 md:flex-col md:overflow-visible md:px-2.5 md:py-3"
+        // min-h-[72px] บนมือถือ: ชิป 36 + p-1 ของลิงก์ 8 + py-3 ของแถบ 24 = 68
+        // แล้ว `snap-gallery` เติมรางสกรอลล์แนวนอนสูง 3px **หลังจาก** ไฟล์วัสดุ 11 ใบ
+        // โหลดเสร็จจนแถบล้น — แถบจึงโตจาก 69 เป็น 72px กลางคัน ซึ่งเป็น layout shift
+        // เดียวที่วัดเจอบนหน้าเฉด จองความสูงสุดท้ายไว้ตั้งแต่แรก รางจะโผล่ตอนไหนก็ได้
+        className="snap-gallery flex min-h-[72px] gap-2 overflow-x-auto px-3 py-3 md:min-h-0 md:flex-col md:overflow-visible md:px-2.5 md:py-3"
       >
         {entries.map((e, i) => {
           const isOn = e.code === activeCode;
