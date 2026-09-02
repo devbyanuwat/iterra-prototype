@@ -69,6 +69,8 @@ export default function Preloader({
   const [gated, setGated] = useState(true);
   const [pct, setPct] = useState(0);
   const [stalled, setStalled] = useState(false);
+  /** โหลดเสร็จ "จริง" (ไม่ใช่ watchdog ดัน) — ตัวสั่งให้ประตูเข้าเอง */
+  const [reallyDone, setReallyDone] = useState(false);
   const [planes, setPlanes] = useState<FieldPlane[]>([]);
   const [reducedMotion, setReducedMotion] = useState(false);
   const { t, lang } = useLang();
@@ -212,10 +214,22 @@ export default function Preloader({
       if (document.readyState !== 'loading') p += 0.2;
       if (document.readyState === 'complete') p += 0.15;
       if (fontsReady) p += 0.25;
-      // รูปที่ถือ data-depth-defer ไม่นับ: มันคือฉากหลังของสนามที่หน้าแรกไม่ได้ใช้
-      // ประตูจึงต้องเปิดได้โดยไม่ต้องรอมัน และเมื่อมันเริ่มโหลดหลังจากถึง 100%
-      // แล้ว ตัวหารก็จะไม่โตขึ้นจนเปอร์เซ็นต์เดินถอยหลัง (ดู deferRooms ใน DepthField)
-      const imgs = Array.from(document.images).filter((i) => !i.hasAttribute('data-depth-defer'));
+      // ── ตัวหารต้องเป็นของที่ประตูรับผิดชอบเท่านั้น ──────────────────────
+      //
+      // เดิมหารด้วย `document.images` ทั้งหน้า ซึ่งรวมรูป lazy ใต้จอของหน้าแรก
+      // ที่ยังไม่ถูกโหลด (ประตูล็อกการเลื่อนไว้ มันจึงไม่มีวันเข้ามาในจอ)
+      // `.complete` ของรูปพวกนั้นเป็น false ตลอดกาล อัตราส่วนแตะ 1 ไม่ได้
+      // เปอร์เซ็นต์จึงค้างต่ำกว่า 100 และเงื่อนไข "โหลดเสร็จ" ไม่เคยเป็นจริง
+      //
+      // ประตูนับเฉพาะรูปที่ตัวเองแสดงอยู่ ซึ่งเป็นคำนิยามที่ตรงกับสิ่งที่ตัวเลข
+      // อ้างว่าวัดอยู่แล้ว (และตรงกับกติกาจากงาน S: สินค้าคือของที่ตัวเลขติดตาม)
+      // รูปที่ถือ data-depth-defer ยังถูกตัดออกเหมือนเดิม — มันคือฉากหลังที่เริ่ม
+      // โหลดหลังจากถึง 100% แล้ว ถ้านับ ตัวหารจะโตขึ้นแล้วเปอร์เซ็นต์เดินถอยหลัง
+      const gateEl = root.current;
+      const pool = gateEl
+        ? Array.from(gateEl.querySelectorAll<HTMLImageElement>('img'))
+        : Array.from(document.images);
+      const imgs = pool.filter((i) => !i.hasAttribute('data-depth-defer'));
       const decoded = imgs.filter((i) => i.complete).length;
       p += 0.4 * (imgs.length ? decoded / imgs.length : 1);
       return clamp01(p);
@@ -227,7 +241,11 @@ export default function Preloader({
     let target = 0;
     const tick = () => {
       if (!alive) return;
-      target = Math.max(target, real());
+      const now = real();
+      // "โหลดเสร็จจริง" = ค่าที่คำนวณได้ถึง 1 เอง ไม่ใช่ watchdog ดันขึ้นไป
+      // ตัวที่สั่งให้ประตูเข้าเองต้องเป็นอันแรกเท่านั้น
+      if (now >= 1) setReallyDone(true);
+      target = Math.max(target, now);
       if (reduced) {
         proxy.v = target;
         setPct(Math.round(target * 100));
@@ -271,6 +289,24 @@ export default function Preloader({
       gsap.killTweensOf(proxy);
     };
   }, [gated, stallMs]);
+
+  // ── โหลดเสร็จแล้วประตูเข้าเอง ─────────────────────────────────────────────
+  //
+  // ประตูคือ "ช่วงเวลา" ที่ผู้อ่านเดินผ่าน มันไม่ควรรอให้กดเมื่อไม่มีอะไรให้รอแล้ว
+  //
+  // เงื่อนไขคือ `reallyDone` ไม่ใช่ `pct >= 100`: watchdog ดัน pct ขึ้น 100 ตอน
+  // โหลดค้าง ซึ่งเป็นสถานะ "ข้ามได้" ไม่ใช่ "เสร็จแล้ว" — ประตูที่พาเข้าเองตอนนั้น
+  // จะพาเข้าไปยังหน้าที่รูปยังมาไม่ครบ
+  //
+  // หน่วง 900ms **นับจากตอนที่เลขบนจอถึง 100** ไม่ใช่ตอนที่ค่าจริงถึง 1:
+  // ตัวเลขที่แสดงวิ่งตามค่าจริงแบบ tween 0.6s ถ้าเริ่มนับจากค่าจริง ผู้ใช้จะเห็น
+  // "100%" อยู่แค่ ~120ms ก่อนประตูจะเริ่มออก (วัดได้: ถึง 100 ที่ 1055ms
+  // ประตูเริ่มออกที่ ~1180ms) ซึ่งอ่านเป็นการกระตุก ไม่ใช่การจบของอะไรสักอย่าง
+  useEffect(() => {
+    if (!gated || !reallyDone || pct < 100) return;
+    const id = window.setTimeout(leave, 900);
+    return () => window.clearTimeout(id);
+  }, [gated, reallyDone, pct, leave]);
 
   // ── intro + โฟกัสไปที่ปุ่ม (ปุ่มเดียวที่ focus ได้ = trap ในตัว) ──
   useEffect(() => {
@@ -433,10 +469,15 @@ export default function Preloader({
                     <img
                       src={plane.src}
                       alt={plane.alt[lang]}
-                      // ห้องเป็น lazy เสมอและไม่นับในความคืบหน้า เหมือนในสนาม
-                      // ที่นี่ lazy ได้ผลจริงด้วย เพราะกริดเป็นกล่องที่เลื่อนได้
-                      // ของส่วนใหญ่จึงอยู่นอกจอตั้งแต่แรก
-                      loading={plane.kind === 'room' || i >= 9 ? 'lazy' : 'eager'}
+                      // ห้องเป็น lazy และไม่นับในความคืบหน้า เหมือนในสนาม
+                      // ที่นี่ lazy ได้ผลจริง เพราะกริดเป็นกล่องที่เลื่อนได้จริง
+                      // ไม่ใช่ container ที่มี 3D transform
+                      //
+                      // แต่ **สินค้าเป็น eager ทุกใบ** ไม่ใช่แค่ 9 ใบแรก: ตัวเลข
+                      // ความคืบหน้าหารด้วยรูปที่ประตูแสดง ถ้าปล่อยใบที่ 10 เป็นต้นไป
+                      // เป็น lazy อัตราส่วนจะแตะ 1 ไม่ได้จนกว่าผู้ใช้จะเลื่อนกริดเอง
+                      // ซึ่งเป็นบั๊กเดียวกับที่เกิดในสนาม แค่คนละกลไก
+                      loading={plane.kind === 'room' ? 'lazy' : 'eager'}
                       fetchPriority={plane.kind === 'room' ? 'low' : undefined}
                       data-depth-defer={plane.kind === 'room' ? '' : undefined}
                       decoding="async"
