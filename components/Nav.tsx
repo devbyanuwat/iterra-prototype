@@ -20,7 +20,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import BrandMark from './BrandMark';
 import { useLang } from './LangProvider';
-import type { Lang } from '@/lib/i18n';
+import { ALT_LANG, DEFAULT_LANG, type Lang } from '@/lib/i18n';
 
 const LINKS = [
   { href: '/', key: 'home' },
@@ -32,7 +32,7 @@ const LINKS = [
 ] as const;
 
 function LangSwitch({ className = '' }: { className?: string }) {
-  const { lang, setLang } = useLang();
+  const { lang, setLang, t } = useLang();
   const Btn = ({ code }: { code: Lang }) => (
     <button
       type="button"
@@ -48,13 +48,16 @@ function LangSwitch({ className = '' }: { className?: string }) {
     </button>
   );
   return (
-    <div className={`flex items-center ${className}`}>
-      <Btn code="th" />
+    // เรียงตาม DEFAULT_LANG ก่อน: ภาษาที่อยู่ใน HTML จริงควรเป็นตัวแรกที่ตาเห็น
+    // ไม่ใช่ 'th' ที่ฮาร์ดโค้ดไว้ตอนที่ไทยยังเป็นภาษาเริ่มต้น
+    // group + aria-label เพราะปุ่มสองปุ่มนี้เป็นตัวเลือกชุดเดียวกัน ไม่ใช่ปุ่มลอย ๆ
+    <div role="group" aria-label={t.a11y.langSwitch} className={`flex items-center ${className}`}>
+      <Btn code={DEFAULT_LANG} />
       {/* ตัวคั่นล้วน ๆ screen reader ได้ยินปุ่มสองปุ่มอยู่แล้วไม่ต้องได้ยิน "/" */}
       <span aria-hidden className="opacity-40">
         /
       </span>
-      <Btn code="en" />
+      <Btn code={ALT_LANG} />
     </div>
   );
 }
@@ -76,7 +79,7 @@ export default function Nav() {
           <Link href="/" className="pointer-events-auto">
             <BrandMark height={18} />
           </Link>
-          <nav aria-label="เมนูหลัก" className="pointer-events-auto hidden items-center gap-8 md:flex">
+          <nav aria-label={t.a11y.menuMain} className="pointer-events-auto hidden items-center gap-8 md:flex">
             {LINKS.map((l) => (
               <Link
                 key={l.href}
@@ -96,7 +99,7 @@ export default function Nav() {
             <button
               type="button"
               onClick={() => setOpen(true)}
-              aria-label="เปิดเมนู"
+              aria-label={t.a11y.menuOpen}
               className="flex h-8 w-8 flex-col items-center justify-center gap-1.5"
             >
               <span className="block h-px w-6 bg-ink" />
@@ -117,11 +120,11 @@ export default function Nav() {
           {/* ในเมนูมือถือ โลโก้ไม่ใช่ลิงก์ (มีรายการ "หน้าแรก" อยู่ในเมนูแล้ว)
               จึงเป็นภาพประดับ ไม่ต้องมีชื่อซ้ำให้ screen reader อ่านสองรอบ */}
           <BrandMark height={18} alt="" />
-          <button type="button" onClick={() => setOpen(false)} aria-label="ปิดเมนู" className="text-2xl font-normal">
+          <button type="button" onClick={() => setOpen(false)} aria-label={t.a11y.menuClose} className="text-2xl font-normal">
             ×
           </button>
         </div>
-        <nav aria-label="เมนูมือถือ" className="flex flex-1 flex-col justify-center gap-7 px-8">
+        <nav aria-label={t.a11y.menuMobile} className="flex flex-1 flex-col justify-center gap-7 px-8">
           {LINKS.map((l, i) => (
             <Link
               key={l.href}

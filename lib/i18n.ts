@@ -1,9 +1,32 @@
-// ── i18n MOCK ──
-// จุดเปลี่ยนเป็นของจริง #3: dictionary สองภาษาแบบง่ายสำหรับเดโม่
-// ของจริงแนะนำย้ายไป next-intl / เส้นทาง /en แยก เพื่อ SEO ต่อภาษา
-// ตอนนี้แปลครบ: เมนู, หน้าแรก, หน้าสินค้ารวม + ปุ่ม/ป้ายที่ใช้ร่วมกัน
+// ── i18n ──
+// Two-language dictionary for the prototype. A real build should move to
+// next-intl with a /th and /en route each — see the note on DEFAULT_LANG.
 
 export type Lang = 'th' | 'en';
+
+/**
+ * The language the exported HTML actually contains.
+ *
+ * This is a static export: one HTML file per route, and whatever language is in
+ * that file is what a crawler, a link preview, a no-JS reader and the first
+ * paint all get. The other language is a client-side switch restored from
+ * localStorage. So this constant is not a preference — it decides which
+ * language is *real* and which is a JS enhancement.
+ *
+ * Everything that has to agree with it reads it from here: <html lang> and the
+ * pre-paint restore script in app/layout.tsx, the initial state in
+ * LangProvider, the root metadata, and the JSON-LD.
+ *
+ * The honest limit of this arrangement, and the reason there is no hreflang
+ * anywhere in this repo: hreflang describes *alternate URLs*, one per language.
+ * We have one URL per route serving both languages through JS, so there is no
+ * second URL to point at, and declaring one would be a claim we cannot back.
+ * The fix is a real /en route tree, not a meta tag — see scratchpad/task-b3.md.
+ */
+export const DEFAULT_LANG: Lang = 'en';
+
+/** The language that has to be restored from storage, whichever that is. */
+export const ALT_LANG: Lang = DEFAULT_LANG === 'en' ? 'th' : 'en';
 
 /**
  * ต่อชื่อเข้ากับข้อความไทย โดยเว้นวรรคให้เฉพาะเมื่อชื่อขึ้นต้นด้วยอักษรละติน
@@ -15,7 +38,7 @@ export type Lang = 'th' | 'en';
  */
 export const thaiJoin = (name: string) => (/^[฀-๿]/.test(name) ? '' : ' ') + name;
 
-export const dict = {
+const dictSource = {
   th: {
     nav: {
       home: 'หน้าแรก',
@@ -25,6 +48,26 @@ export const dict = {
       contact: 'ติดต่อเรา',
       showroom: 'นัดชมโชว์รูม',
       gallery: 'แกลเลอรี',
+    },
+    // ป้ายที่มีแต่ screen reader ได้ยิน เคยฮาร์ดโค้ดไทยไว้ใน Nav/Footer
+    // ตอนที่เอกสารเป็นไทยเสมอมันก็พอถูก แต่ตอนนี้ HTML ที่ export เป็นอังกฤษ
+    // aria-label ภาษาไทยใน document ที่ประกาศ lang=en คือป้ายที่ผิดภาษาจริง ๆ
+    a11y: {
+      menuMain: 'เมนูหลัก',
+      menuMobile: 'เมนูมือถือ',
+      menuOpen: 'เปิดเมนู',
+      menuClose: 'ปิดเมนู',
+      langSwitch: 'เลือกภาษา',
+    },
+    // ข้อความของ <head> เคยฮาร์ดโค้ดไทยไว้ใน app/layout.tsx ทั้งก้อน
+    // ย้ายมาที่นี่เพราะมันต้องเปลี่ยนตาม DEFAULT_LANG ไม่ใช่ค่าคงที่ของเว็บ
+    seo: {
+      tagline: 'อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม',
+      description:
+        'KOHLER ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม คัดสรรซิงก์ ก๊อก เตา เครื่องใช้บิลท์อิน และสุขภัณฑ์จากแบรนด์ชั้นนำระดับโลก พร้อมโชว์รูมให้สัมผัสจริงในกรุงเทพฯ',
+      ogDescription: 'คัดสรรอุปกรณ์ครัวและสุขภัณฑ์จากแบรนด์ชั้นนำระดับโลก',
+      orgDescription: 'ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม',
+      ogLocale: 'th_TH',
     },
     common: {
       inquire: 'สอบถามสินค้านี้',
@@ -131,6 +174,11 @@ export const dict = {
     // ประตูเข้า + สนามภาพเชิงลึก (spec 2026-09-01-kohler-depth-field)
     gate: {
       fieldLabel: 'สนามภาพสินค้าและห้องตัวอย่าง',
+      // ปุ่มของประตูเข้าเคยเป็นค่า default ภาษาไทยฝังอยู่ใน Preloader.tsx
+      // มันคือข้อความแรกที่คนเห็นก่อนอย่างอื่นทั้งหมด ปล่อยเป็นไทยใน HTML ที่
+      // ประกาศ lang=en ไม่ได้ app/layout.tsx จึงส่งค่าจากที่นี่เข้าไปแทน
+      enter: 'เข้าสู่โชว์รูม',
+      stalled: 'เข้าสู่โชว์รูม — ข้ามการโหลด',
     },
     gallery: {
       kicker: 'GALLERY',
@@ -186,6 +234,21 @@ export const dict = {
       contact: 'Contact',
       showroom: 'Book a Visit',
       gallery: 'Gallery',
+    },
+    a11y: {
+      menuMain: 'Main menu',
+      menuMobile: 'Mobile menu',
+      menuOpen: 'Open menu',
+      menuClose: 'Close menu',
+      langSwitch: 'Choose language',
+    },
+    seo: {
+      tagline: 'Premium Kitchen & Bath',
+      description:
+        'KOHLER — premium kitchen and bath dealer in Bangkok. Sinks, faucets, hobs, built-in appliances and sanitaryware from the world’s leading brands, with a showroom where every piece can be touched, opened and run.',
+      ogDescription: 'Premium kitchen and bath, curated from the world’s leading brands.',
+      orgDescription: 'Premium kitchen and bath dealer',
+      ogLocale: 'en_US',
     },
     common: {
       inquire: 'Inquire about this piece',
@@ -284,6 +347,8 @@ export const dict = {
     },
     gate: {
       fieldLabel: 'A field of product and room photography',
+      enter: 'Enter the showroom',
+      stalled: 'Enter the showroom — skip loading',
     },
     gallery: {
       kicker: 'GALLERY',
@@ -328,7 +393,19 @@ export const dict = {
   },
 };
 
-export type Dict = (typeof dict)['th'];
+export type Dict = (typeof dictSource)['th'];
+
+/**
+ * `Record<Lang, Dict>`, not a bare `export const dict = {…}`.
+ *
+ * Dict is derived from the Thai half, and until now the English half was not
+ * checked against it at all — a missing key would have compiled fine and
+ * rendered `undefined` at runtime. That was survivable while Thai was the
+ * default and English was an opt-in switch. It is not survivable now that
+ * English is what every exported HTML file contains, so the annotation makes
+ * tsc fail if the two halves ever drift. Currently 104 keys each, at parity.
+ */
+export const dict: Record<Lang, Dict> = dictSource;
 
 // ── การจำภาษาที่เลือก ──
 // อยู่ในไฟล์นี้เพราะทั้ง app/layout.tsx (server) และ LangProvider (client) ต้องใช้
@@ -347,6 +424,57 @@ export type Localized = { th: string; en?: string };
 
 /** เลือกภาษา แล้วตกกลับเป็นไทยเมื่อยังไม่มีฉบับอังกฤษ */
 export const pick = (v: Localized, lang: Lang) => (lang === 'en' ? (v.en ?? v.th) : v.th);
+
+/**
+ * Same choice as `pick`, but it also says which language actually came back.
+ *
+ * This matters now that the document declares English. `pick` silently returns
+ * Thai when there is no English, which was fine when the page was Thai anyway —
+ * the fallback and the document agreed. It does not agree any more: an English
+ * document rendering Thai copy is a page whose `lang` is a lie, and a screen
+ * reader will read Thai glyphs with an English voice.
+ *
+ * The fix is one attribute at the point of use, not a global rule:
+ *
+ *   const about = resolve(aboutContent.title, lang);
+ *   <h1 lang={about.lang}>{about.text}</h1>
+ *
+ * `lang` on an element overrides `lang` on <html> for exactly the subtree that
+ * needs it, so the rest of the page stays honestly English. It costs nothing
+ * when the translation lands — `resolve` starts returning `lang: 'en'` and the
+ * attribute becomes a no-op, so nobody has to remember to remove it.
+ *
+ * This is deliberately NOT wired into the Thai line-height floor, because that
+ * floor does not need it: `h1..h4 { line-height: 1.6 }` and `.leading-thai` in
+ * globals.css carry no `lang` selector, so Thai keeps its measured leading no
+ * matter what the document declares. The one lang-scoped rule in the stylesheet
+ * is `.en-tight`, which is opt-in and currently used by zero components.
+ */
+export const resolve = (v: Localized, lang: Lang): { text: string; lang: Lang } =>
+  lang === 'en' && !v.en ? { text: v.th, lang: 'th' } : { text: pick(v, lang), lang };
+
+/**
+ * Editorial copy that has no English yet, as a flat list of paths.
+ *
+ * Kept as data rather than prose so it stays true: it is derived from the
+ * content itself, so a field disappears from the list the moment a translation
+ * lands, and nobody has to maintain a stale checklist in a spec. Consumed by
+ * the report for task B3; safe for a check script to import later.
+ */
+export function untranslated(): string[] {
+  const gaps: string[] = [];
+  const check = (v: Localized, path: string) => {
+    if (!v.en) gaps.push(path);
+  };
+  check(aboutContent.kicker, 'aboutContent.kicker');
+  check(aboutContent.title, 'aboutContent.title');
+  aboutContent.sections.forEach((section, i) => {
+    check(section.kicker, `aboutContent.sections[${i}].kicker`);
+    check(section.title, `aboutContent.sections[${i}].title`);
+    check(section.body, `aboutContent.sections[${i}].body`);
+  });
+  return gaps;
+}
 
 /**
  * บทนำหน้ารวมบทความ
