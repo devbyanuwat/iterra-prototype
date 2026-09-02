@@ -19,6 +19,22 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/* จองรางสกรอลล์ไว้เสมอ — เฉพาะจอที่มีสกรอลล์บาร์กินพื้นที่จริง
+   ประตูเข้าล็อกการเลื่อนด้วย `overflow: hidden` ตอน mount ซึ่งทำให้สกรอลล์บาร์
+   หายไปและหน้ากว้างขึ้น ~15px ทันที กำแพงผิวเคลือบข้างหลังจึงขยับ — วัดได้
+   CLS 0.0185 จากแผงกำแพง 11 แผงที่กว้างจาก 130 เป็น 131px ที่ t=144ms
+   ก่อนหน้านี้มองไม่เห็นเพราะประตูเป็นสีเดียวกับหน้าเว็บ ตอนนี้ประตูมืดแล้ว
+   ขอบที่ขยับอยู่ข้างหลังจึงกลายเป็นสิ่งที่ตาจับได้ตอนไฟเปิด
+
+   จำกัดไว้ที่ ≥768px: มือถือใช้สกรอลล์บาร์แบบลอยทับ ไม่ได้กินความกว้างอยู่แล้ว
+   การจองรางที่นั่นมีผลอย่างเดียวคือหั่นความกว้างทิ้ง 15px ในเบราว์เซอร์เดสก์ท็อป
+   ที่จำลองขนาดมือถือ (วัดได้ scrollWidth ติดลบ 15 ที่ 390px) */
+@media (min-width: 768px) {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
 /* Body sits at 16px/400, the size and weight kohler.co.th runs. The previous
    font-light here was inherited by everything and is most of why the site read
    as thin — see spec 2026-09-01 §2. */
@@ -140,6 +156,44 @@ html[lang='en'] .en-tight {
 
 .focus-inset:focus-visible [data-focus-ring] {
   opacity: 1;
+}
+
+/* ── The depth field runs on a dark ground, and only the depth field ────────
+   The reference the client picked (michaelgatt.com) works because the stills
+   glow against black. The site moved to a light palette after that reference
+   was chosen, so white product cards on #E5E5E5 merge into the page and the
+   field reads as a pile of paper — the room photographs were the only planes
+   with any presence, because they were the only planes carrying colour.
+
+   This is a local exception, scoped to `[data-field-dark]`. Every other route
+   stays light. The gate can carry it because it is a moment the reader passes
+   through rather than a page; on /gallery the dark ground is confined to the
+   field box, so the nav, the mark and the type around it still belong to the
+   rest of the site.
+
+   #08090A is the ground the site used to run before the retheme, which is why
+   the scrim solver in finish-index.ts still carries the constants for it. */
+[data-field-dark] {
+  --field-ground: #08090a;
+  /* Not #FFFFFF: pure white on near-black is the one pairing that reads as
+     glare rather than type at 15px. 16.4:1 is well past the 7:1 the derived
+     system asks of primary text. */
+  --field-ink: #f4f4f1;
+  --field-dim: #a8a8a4;
+  /* เส้นประดับ: คั่นภาพถ่ายมืดออกจากพื้นมืด ไม่ใช่ขอบเขตของตัวควบคุม */
+  --field-line: rgba(255, 255, 255, 0.2);
+  /* ขอบเขตของ "ของที่กดได้" — วัดแล้ว 0.2 ให้ 1.75:1 กับพื้น ซึ่งต่ำกว่าเกณฑ์
+     ของ non-text contrast (3:1) ปุ่มบนพื้นมืดที่ไม่มีพื้นของตัวเองต่างจากพื้นหลัง
+     จึงเหลือเส้นขอบเป็นตัวประกาศตัวเดียว มันต้องเข้มพอ — 0.45 ให้ 4.5:1 */
+  --field-edge: rgba(255, 255, 255, 0.45);
+  background-color: var(--field-ground);
+  color: var(--field-ink);
+}
+
+/* micro-caps carry a hard-coded #5d5d5d, which is 2.1:1 on the dark ground.
+   Inside the field they follow the field's own secondary colour instead. */
+[data-field-dark] .micro {
+  color: var(--field-dim);
 }
 
 /* Focus ring readable on base and on white cards for every accent — see

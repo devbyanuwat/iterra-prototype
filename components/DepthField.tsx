@@ -348,6 +348,17 @@ type Props = {
    * ที่ 6 วินาที แปลว่าในการใช้งานจริงห้องจะไม่มาเลย
    */
   deferRooms?: boolean;
+  /**
+   * สนามวางบนพื้นมืด `#08090A` — ค่าเริ่มต้นของทั้งประตูเข้าและแกลเลอรี
+   *
+   * ของอ้างอิงทำงานได้เพราะเฟรมภาพ "เรืองขึ้นมาจากพื้นดำ" การ์ดสินค้าเป็นแผ่นขาว
+   * บนพื้น `#E5E5E5` ต่างกัน 1.13:1 — สนามจึงอ่านเป็นกองกระดาษ ไม่ใช่กำแพงรูป
+   * บนพื้นดำ การ์ดขาวชุดเดิมกลายเป็นของที่ถูกต้องทันทีโดยไม่ต้องแก้การ์ดเลย
+   *
+   * ปิดได้ (`dark={false}`) เผื่อมีที่ใช้สนามบนพื้นสว่างในอนาคต ตัวสนามไม่ได้
+   * ผูกกับสีพื้นนอกจากตรงที่ระบุไว้ในไฟล์นี้
+   */
+  dark?: boolean;
   className?: string;
   /** ป้ายกำกับของ region สำหรับ screen reader */
   label: string;
@@ -359,6 +370,7 @@ export default function DepthField({
   interactive = false,
   revealByProgress = false,
   deferRooms = false,
+  dark = true,
   className = '',
   label,
 }: Props) {
@@ -576,6 +588,7 @@ export default function DepthField({
       role="region"
       aria-label={label}
       onScroll={pinScroll}
+      data-field-dark={dark ? '' : undefined}
       className={`overflow-hidden ${className}`}
       style={{ perspective: `${PERSPECTIVE}px`, perspectiveOrigin: '50% 50%' }}
     >
@@ -617,13 +630,20 @@ export default function DepthField({
             opacity: revealed ? box.opacity : 0,
             transition:
               'transform 520ms cubic-bezier(0.22, 1, 0.36, 1), opacity 620ms ease-out',
-            // เงาอยู่ที่ "แผ่น" ไม่ใช่ที่ตัวสินค้า — ระนาบเป็นวัตถุแบนที่ลอยอยู่
-            // ในอวกาศ ไม่ใช่ก๊อกที่ลอยเดี่ยว ๆ เงาจึงต้องเป็นเงาของสี่เหลี่ยม
+            // เงาบนพื้นมืด = ดำบนดำ = ไม่มีอะไรเลย นอกจากค่า compositing ที่ยังจ่ายอยู่
+            // (เงาเบลอ 48px บนระนาบ 44 ใบเคยวัดได้ 84fps / 49 เฟรมตก — ราคาของมันจริง)
+            // บนพื้นมืดตัวที่แยกการ์ดขาวออกจากกันคือเส้นขอบ 1px ซึ่งเป็นขอบคมพอดี
+            // ตรงกับของอ้างอิง ส่วนพื้นสว่างยังต้องพึ่งเงาเพราะขาวบนเทาแทบไม่มีขอบ
+            boxShadow: dark || isRoom ? undefined : '0 14px 26px rgba(0,0,0,0.14)',
+            // ภาพถ่ายห้องที่มืดบนพื้นมืดคือปัญหาเดียวกับการ์ดขาวบนพื้นสว่าง
+            // แค่กลับด้าน — เส้นขอบสว่างทำให้มันยังเป็นสี่เหลี่ยมที่มีขอบ
+            // (border-box: รูป h-full w-full อยู่ในกรอบ เส้นจึงไม่ถูกทับ)
             //
-            // เฉพาะการ์ดสินค้า และเบลอแคบ: เงาเบลอกว้าง 48px บนระนาบ 44 ใบที่ซ้อนกัน
-            // วัดได้ 84fps / 49 เฟรมเกิน 16.7ms ภาพถ่ายห้องมีขอบคมของตัวเองอยู่แล้ว
-            // ไม่ต้องพึ่งเงาเพื่อให้แยกออกจากพื้น — ตัดออกได้ฟรี
-            boxShadow: isRoom ? undefined : '0 14px 26px rgba(0,0,0,0.14)',
+            // ใช้ --field-edge (0.45) ไม่ใช่ --field-line (0.2): เส้น 0.2 วัดได้ 1.75:1
+            // กับพื้น ซึ่งพึ่งได้ก็ต่อเมื่อภาพถ่ายสว่างพออยู่แล้ว — แต่ถ้าภาพสว่างพอ
+            // มันก็ไม่ต้องการเส้นตั้งแต่แรก เส้นนี้มีไว้สำหรับใบที่มืด จึงต้องเข้ม
+            // พอที่จะทำงานในกรณีที่มันถูกเรียกใช้จริง (4.5:1)
+            border: dark && isRoom ? '1px solid var(--field-edge)' : undefined,
           };
 
           const image = (
@@ -728,11 +748,25 @@ export default function DepthField({
                   Nav เลิกใช้ mix-blend-difference) */}
               {plane.title && (
                 <span className="pointer-events-none absolute inset-x-0 top-full z-40 mt-2 hidden flex-col items-center gap-0.5 group-hover:flex group-focus-visible:flex">
-                  <span className="max-w-[16rem] truncate bg-base px-2 py-1 text-body-sm text-ink">
+                  <span
+                    className="max-w-[16rem] truncate bg-base px-2 py-1 text-body-sm text-ink"
+                    style={
+                      dark
+                        ? { background: 'var(--field-ground)', color: 'var(--field-ink)' }
+                        : undefined
+                    }
+                  >
                     {plane.title[lang]}
                   </span>
                   {plane.sub && (
-                    <span className="max-w-[16rem] truncate bg-base px-2 py-0.5 text-label uppercase tracking-widest2 text-dim">
+                    <span
+                      className="max-w-[16rem] truncate bg-base px-2 py-0.5 text-label uppercase tracking-widest2 text-dim"
+                      style={
+                        dark
+                          ? { background: 'var(--field-ground)', color: 'var(--field-dim)' }
+                          : undefined
+                      }
+                    >
                       {plane.sub[lang]}
                     </span>
                   )}

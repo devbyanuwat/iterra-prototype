@@ -32,6 +32,19 @@ type Props = {
   /** ความสูงของ "ตัวอักษร" เป็น px ไม่ใช่ความสูงของไฟล์ */
   height?: number;
   /**
+   * 'ink'   = ไฟล์ต้นฉบับ (หมึกดำ) สำหรับพื้นสว่างทุกที่ในเว็บ
+   * 'light' = เวิร์ดมาร์กสีขาว สำหรับพื้นมืดของสนามภาพ
+   *
+   * ทำด้วย `brightness(0) invert(1)` ไม่ใช่ไฟล์ใหม่: `brightness(0)` บีบทุกพิกเซล
+   * ที่ทึบให้เป็นดำสนิทก่อน แล้ว `invert(1)` พลิกเป็นขาวสนิท — ช่องอัลฟาไม่ถูกแตะ
+   * ทรงตัวอักษรจึงเหมือนเดิมเป๊ะ ไม่ใช่การประมาณ
+   *
+   * ทำไมไม่ครอปหรือแก้ไฟล์: PNG นี้เป็นของลูกค้า การแก้ asset ต้นทางต้องขออนุญาต
+   * เหตุผลเดียวกับที่ component นี้ครอปขอบโปร่งด้วย CSS แทนการแก้ไฟล์มาตั้งแต่แรก
+   * (ดูหมายเหตุเรื่องขนาดด้านบน) — filter ย้อนกลับได้และไม่แตะของเดิม
+   */
+  tone?: 'ink' | 'light';
+  /**
    * ชื่อที่ screen reader อ่าน — โลโก้ตัวนี้เป็นลิงก์กลับหน้าแรก จึงต้องมีชื่อเสมอ
    * ส่งค่าว่างได้เฉพาะตอนที่มีข้อความอื่นอธิบายลิงก์อยู่แล้ว
    */
@@ -39,7 +52,12 @@ type Props = {
   className?: string;
 };
 
-export default function BrandMark({ height = 18, alt = 'KOHLER', className = '' }: Props) {
+export default function BrandMark({
+  height = 18,
+  alt = 'KOHLER',
+  tone = 'ink',
+  className = '',
+}: Props) {
   const scale = height / INK_H;
   const w = NATURAL_W * scale;
 
@@ -62,6 +80,7 @@ export default function BrandMark({ height = 18, alt = 'KOHLER', className = '' 
           marginTop: -INK_TOP * scale,
           display: 'block',
           maxWidth: 'none',
+          filter: tone === 'light' ? 'brightness(0) invert(1)' : undefined,
         }}
       />
     </span>

@@ -100,12 +100,37 @@ export default function Preloader({
       done();
       return;
     }
-    gsap.to(root.current, {
-      opacity: 0,
-      duration: 0.55,
-      ease: 'power2.inOut',
-      onComplete: done,
-    });
+
+    // ── ออกจากประตูมืดไปหน้าเว็บสว่าง ต้องตั้งใจ ไม่ใช่กระพริบ ────────────
+    //
+    // ของเดิมคือ fade opacity ของประตูลง 0 อย่างเดียว ซึ่งตอนประตูเป็นสีเดียวกับ
+    // หน้าเว็บก็มองไม่ออก แต่ตอนนี้ประตูเป็น #08090A ทับหน้า #E5E5E5 — การ fade
+    // ตรง ๆ คือการเปิดม่านให้เห็นของสว่างโผล่ทะลุของมืด อ่านเป็นแฟลช
+    //
+    // ลำดับที่ใช้: **เปิดไฟก่อน** แล้วค่อยถอนประตูออก
+    //   0.00–0.52s พื้นไล่จาก #08090A ไป #E5E5E5 พร้อมกับ scrim และระนาบที่จางลง
+    //               — ผู้ใช้เห็น "ไฟในห้องค่อย ๆ สว่างขึ้น" ไม่ใช่จอดับ
+    //   0.46–0.72s ประตูที่ตอนนี้เป็นสีเดียวกับหน้าเว็บพอดี จางออกไป
+    //               — ไม่มีอะไรให้เห็นว่าเปลี่ยน เพราะสองชั้นสีเท่ากันแล้ว
+    //
+    // ลองลำดับกลับกันมาแล้ว (ดับสนามก่อน แล้วค่อยเปิดไฟที่พื้น) ได้จอดำสนิทค้าง
+    // อยู่หนึ่งช่วง แล้วหน้าเว็บสว่างโผล่ทะลุม่านมืด ซึ่งอ่านเป็นแฟลชกลับด้าน
+    const el = root.current;
+    const tl = gsap.timeline({ onComplete: done });
+    tl.to(el, { backgroundColor: '#E5E5E5', duration: 0.52, ease: 'power1.inOut' }, 0)
+      // scrim เป็นชั้นแยกที่ทาสีพื้นของสนามไว้ ถ้าไม่ไล่ไปด้วยจะเหลือแถบมืด
+      // คาดหัวคาดท้ายอยู่บนพื้นสว่างในเฟรมสุดท้าย
+      .to(
+        el.querySelectorAll('[data-gate-scrim]'),
+        { opacity: 0, duration: 0.42, ease: 'power1.inOut' },
+        0,
+      )
+      .to(
+        el.querySelectorAll('[data-pre-fade], [data-depth-camera], [data-preloader-gallery]'),
+        { opacity: 0, duration: 0.46, ease: 'power2.in' },
+        0.02,
+      )
+      .to(el, { opacity: 0, duration: 0.26, ease: 'none' }, 0.46);
   }, [onEnter, storageKey]);
 
   // ── ผ่าน gate มาแล้วใน session นี้หรือยัง ──
@@ -313,7 +338,11 @@ export default function Preloader({
         role="dialog"
         aria-modal="true"
         aria-label={brand}
-        className="fixed inset-0 z-[100] bg-base text-ink"
+        // ประตูเป็น "ช่วงเวลา" ไม่ใช่หน้า ผู้อ่านเดินผ่านมัน — พื้นมืดจึงอยู่ได้ทั้งจอ
+        // ที่นี่ ต่างจาก /gallery ซึ่งเป็นหน้าจริงและได้พื้นมืดเฉพาะกล่องสนาม
+        // สีพื้นถูก tween กลับเป็นสีเว็บตอนออก (ดู leave) ไม่ใช่ตัดภาพ
+        data-field-dark
+        className="fixed inset-0 z-[100]"
       >
         {/* สนาม: กล้องอยู่ข้างนอกแล้วซูมเข้าตาม pct จริง (§4.1)
             อยู่ข้างหลังตัวหนังสือทั้งหมด และ pointer-events ถูกปิดในตัว
@@ -337,14 +366,24 @@ export default function Preloader({
                 ระนาบไหนลอยมาอยู่หลัง (เหตุผลเดียวกับ veil ของกำแพง) */}
             <span
               aria-hidden
+              data-gate-scrim
               className="pointer-events-none absolute inset-0"
               style={{
                 backgroundImage:
                   // แถบบน/ล่างเข้มขึ้นและกว้างขึ้นกว่าเดิม: ตอนที่ระนาบยังเป็น PNG
                   // ลอยเดี่ยว ๆ พื้นหลังของตัวหนังสือมักเป็นพื้นเปล่าอยู่แล้ว
                   // ตอนนี้สนามปูเต็มจอ 84% ตัวหนังสือจึงนั่งอยู่บนภาพถ่ายเกือบตลอด
-                  // ช่วงกลางยังใสไว้ที่ 0.12 เพื่อไม่ให้กำแพงรูปดูซีด
-                  'linear-gradient(to bottom, rgba(229,229,229,0.97) 0%, rgba(229,229,229,0.62) 9%, rgba(229,229,229,0.12) 24%, rgba(229,229,229,0.12) 66%, rgba(229,229,229,0.66) 86%, rgba(229,229,229,0.98) 100%)',
+                  // สีของ scrim ต้องเป็นสีพื้นของสนาม (#08090A) ไม่ใช่สีพื้นของเว็บ —
+                  // มันคือ "พื้นเปล่าที่ทาทับกลับเข้าไป" ถ้าใช้สีผิดจะกลายเป็นหมอกสว่าง
+                  // คร่อมกลางประตูมืด ซึ่งอ่านเป็นความผิดพลาด ไม่ใช่ scrim
+                  //
+                  // แถบแคบและชันกว่าตอนพื้นสว่างมาก: บนพื้นสว่าง scrim ทำให้ของ
+                  // "จางลง" ซึ่งเสียหายน้อย บนพื้นมืดมันทำให้การ์ดขาว "หม่นลง"
+                  // — ค่ากลาง 0.12 เดิมกดการ์ดจาก #FFFFFF เหลือ #E0E0E0 ทั้งสนาม
+                  // อ่านเป็นหมอกเทาคลุมกำแพง ตรงข้ามกับที่พื้นมืดควรให้
+                  // จึงเหลือ 0.05 ตรงกลาง แล้วไปหนาเฉพาะ ~8% บนกับ ~9% ล่าง
+                  // ซึ่งเป็นแถบที่ตัวหนังสือนั่งอยู่จริง
+                  'linear-gradient(to bottom, rgba(8,9,10,0.97) 0%, rgba(8,9,10,0.9) 8%, rgba(8,9,10,0.05) 14%, rgba(8,9,10,0.05) 84%, rgba(8,9,10,0.88) 91%, rgba(8,9,10,0.97) 100%)',
               }}
             />
           </>
@@ -355,7 +394,8 @@ export default function Preloader({
             {/* alt="" — ตัวประตูประกาศชื่อตัวเองผ่าน aria-label ของ role="dialog" อยู่แล้ว
                 ใส่ alt ซ้ำจะได้ยิน "KOHLER" สองครั้งติดกันตอนโฟกัสเข้ามา
                 ที่นี่ใหญ่กว่าเมนูได้ เพราะเป็นจอเปล่าที่มีโลโก้เป็นตัวนำ */}
-            <BrandMark height={22} alt="" />
+            {/* tone="light": ไฟล์เวิร์ดมาร์กเป็นหมึกดำ บนพื้น #08090A มันหายไปสนิท */}
+            <BrandMark height={22} alt="" tone="light" />
             <span className="micro">{tagline}</span>
           </div>
 
@@ -405,12 +445,13 @@ export default function Preloader({
                           ? 'h-[clamp(60px,14vw,120px)] w-full object-cover'
                           : 'mx-auto h-[clamp(60px,14vw,120px)] w-full object-contain'
                       }
+                      // บนพื้นมืด เซรามิกขาวแยกตัวเองได้อยู่แล้ว เงาที่เคยใส่ไว้
+                      // เพื่อให้มันไม่จมพื้น #E5E5E5 กลายเป็นดำบนดำ — ตัดทิ้ง
+                      // ส่วนภาพถ่ายห้องเจอปัญหากลับด้าน จึงได้เส้นขอบสว่างบาง ๆ แทน
                       style={
                         plane.kind === 'room'
-                          ? undefined
-                          : // เซรามิกขาวบนพื้น #E5E5E5 แทบไม่มีขอบให้ตาจับ
-                            // drop-shadow เดินตามอัลฟาของ PNG จึงได้เงาตามรูปทรงจริง
-                            { filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.18))' }
+                          ? { border: '1px solid var(--field-edge)' }
+                          : undefined
                       }
                     />
                   </li>
@@ -427,9 +468,15 @@ export default function Preloader({
               ref={btn}
               type="button"
               onClick={leave}
-              // bg-base: ปุ่มต้องเป็นวัตถุทึบของตัวเอง ไม่ใช่กรอบโปร่งที่ยืมพื้นหลัง
-              // สนามที่ปูเต็มจอทำให้กรอบโปร่งลอยอยู่บนภาพถ่ายและอ่านไม่ออกว่าเป็นปุ่ม
-              className="group inline-flex items-center gap-4 self-start border border-line-12 bg-base px-8 py-4 text-ink transition-colors duration-300 hover:border-accent hover:text-accent"
+              // พื้นทึบของตัวเอง ไม่ใช่กรอบโปร่งที่ยืมพื้นหลัง — สนามปูเต็มจอ
+              // กรอบโปร่งจะลอยอยู่บนภาพถ่ายและอ่านไม่ออกว่าเป็นปุ่ม
+              // บนพื้นมืด ทั้งพื้นปุ่ม เส้นขอบ และตัวอักษรพลิกมาใช้สีของสนาม
+              className="group inline-flex items-center gap-4 self-start border px-8 py-4 transition-colors duration-300 hover:border-accent hover:text-accent"
+              style={{
+                background: 'var(--field-ground)',
+                borderColor: 'var(--field-edge)',
+                color: 'var(--field-ink)',
+              }}
             >
               <span className="micro !text-current">{stalled ? stalledLabel : enterLabel}</span>
               <span
@@ -450,8 +497,13 @@ export default function Preloader({
               >
                 {String(pct).padStart(2, '0')}%
               </span>
-              {/* แถบความคืบหน้า — scaleX เท่านั้น ไม่แตะ width */}
-              <span className="block h-px w-40 bg-line-12 md:w-64" aria-hidden>
+              {/* แถบความคืบหน้า — scaleX เท่านั้น ไม่แตะ width
+                  รางเดิมเป็น rgba(0,0,0,0.12) ซึ่งบนพื้น #08090A คือไม่มีราง */}
+              <span
+                className="block h-px w-40 md:w-64"
+                style={{ background: 'var(--field-line)' }}
+                aria-hidden
+              >
                 <span
                   className="block h-full origin-left bg-accent transition-transform duration-500 ease-out"
                   style={{ transform: `scaleX(${pct / 100})` }}
