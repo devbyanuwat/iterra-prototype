@@ -71,9 +71,16 @@ export function useFieldMode(): boolean {
 // ── การจัดวาง ───────────────────────────────────────────────────────────────
 
 const PERSPECTIVE = 1400;
-/** ครึ่งความกว้าง/สูงของสนามเป็นหน่วยจอ — สนามกว้างกว่าจอ ระนาบขอบจึงถูกตัด */
-const SPREAD_X = 44;
-const SPREAD_Y = 40;
+/**
+ * ครึ่งความกว้าง/สูงของสนามเป็นหน่วยจอ — สนามกว้างกว่าจอ ระนาบขอบจึงถูกตัด
+ *
+ * แคบลงจาก 44/40 โดยตั้งใจ: รอบก่อนระนาบกระจายกว้างเกินจอจนของครึ่งหนึ่งไปอยู่
+ * นอกเฟรม สิ่งที่เหลือในจอจึงเป็นวัตถุไม่กี่ชิ้นลอยอยู่บนพื้นว่าง
+ * ของ michaelgatt ระนาบ ~40 ใบ "ปูเต็มจอ" ด้วยจำนวนเท่ากัน ต่างกันที่ขนาดกับ
+ * การกระจาย ไม่ใช่จำนวน — สนามที่แคบลงบวกระนาบที่ใหญ่ขึ้นคือส่วนผสมนั้น
+ */
+const SPREAD_X = 40;
+const SPREAD_Y = 35;
 /** มุมทองคำ — sunflower packing กระจายทั่วจานโดยไม่ต้องสุ่มตำแหน่งและไม่กระจุก */
 const GOLDEN = 2.399963229728653;
 /** กล้องเริ่มที่ "ข้างนอก" สนาม ไม่ใช่ระยะประชิด (ความเสี่ยง §7 ข้อ 2) */
@@ -91,9 +98,133 @@ function mulberry32(seed: number) {
   };
 }
 
+/**
+ * สัดส่วนของ "การ์ด" สินค้า — ตั้งใจให้มีหลายอัตราส่วน
+ *
+ * อัตราส่วนเดียวทั้งสนามอ่านเป็น "กริดที่ถูกทำให้เอียง" ไม่ใช่กำแพงรูป
+ * ผสมตั้ง/นอน/จัตุรัสแล้วขอบของแต่ละใบไม่ไปเรียงตรงกัน ตาจึงอ่านว่าเป็นของ
+ * คนละใบวางทับกัน ซึ่งเป็นสิ่งเดียวที่ทำให้ภาพนิ่งของ michaelgatt อ่านเป็นกำแพง
+ *
+ * เดินตามดัชนีไม่ใช่สุ่ม: 5 ค่ากับมุมทองคำกระจายทั่วอยู่แล้ว และการสุ่มเปิดโอกาส
+ * ให้ได้ใบสัดส่วนเดียวกันติดกันสามสี่ใบซึ่งย้อนกลับไปหาปัญหาเดิม
+ */
+const PRODUCT_ASPECTS = [4 / 5, 1, 5 / 4, 3 / 4, 4 / 3];
+
+/**
+ * ระนาบห้องเป็นแนวนอนเสมอ — ยังเต็มกรอบ ไม่มีการ์ด แค่ครอปเป็นสี่เหลี่ยมนอน
+ *
+ * เหตุผลไม่ใช่ความสวย แต่เป็น AC ข้อ 7: ปล่อยตามสัดส่วนไฟล์แล้วใบที่เป็นแนวตั้ง
+ * จะสูง 410/0.75 ≈ 547px กลายเป็น element ที่ใหญ่ที่สุดในจอ และเพราะห้องถูกเลื่อน
+ * ให้โหลดทีหลัง (งาน S) LCP จึงไปตกที่ของที่วาดตอน 3.1 วินาที → Lighthouse 62
+ * บังคับให้นอนแล้วความสูงมีเพดาน การ์ดสินค้าจึงเป็นตัวใหญ่สุดแทน ซึ่งมาก่อน
+ */
+const ROOM_ASPECTS = [3 / 2, 4 / 3, 16 / 9];
+
+// ── การ์ดต้องเต็มไปด้วยสินค้า ไม่ใช่เต็มไปด้วยขอบว่างของไฟล์ ──────────────────
+//
+// วัดจากของจริง: ไฟล์สินค้าเป็น 700×525 ทุกใบ และ "เนื้อสินค้า" (พิกเซลที่ไม่โปร่ง)
+// กินพื้นที่มัธยฐานแค่ **12%** ของเฟรม บางใบ 1% — ก๊อกตัวเล็กลอยอยู่กลางผ้าใบกว้าง
+// `object-contain` เฉย ๆ จึงเอาขอบว่างในไฟล์มาวางกลางการ์ดอีกที ได้แผ่นขาวที่มี
+// ของอยู่ตรงกลางนิดเดียว ซึ่งคือสาเหตุที่สนามรอบก่อนอ่านเป็นกองกระดาษเปล่า
+//
+// วัดกรอบอัลฟาจริงของแต่ละไฟล์ตอนรันไทม์ แล้วขยาย/เลื่อนให้กรอบนั้นมาเต็มการ์ด
+// ทำครั้งเดียวต่อไฟล์แล้วแคชไว้ — ค่าคงที่ตายตัวใช้ไม่ได้ เพราะอัตราส่วนเนื้อต่อเฟรม
+// ต่างกัน 50 เท่าระหว่างใบที่น้อยสุดกับมากสุด ตัวคูณเดียวจะทำให้ใบใหญ่โดนตัดหัว
+// ในขณะที่ใบเล็กยังจิ๋วอยู่ดี
+
+/** กรอบอัลฟาเป็นสัดส่วนของภาพจริง + สัดส่วนของไฟล์เอง */
+type Ink = { bx: number; by: number; bw: number; bh: number; ratio: number };
+
+/** เนื้อสินค้าควรกินพื้นที่การ์ดเท่าไร — เหลือขอบหายใจไว้เล็กน้อย */
+const INK_TARGET = 0.82;
+/** เพดานการขยาย: ใบที่เนื้อ 1% ถ้าไม่จำกัดจะถูกขยายจนแตกเป็นพิกเซล */
+const INK_MAX_SCALE = 3;
+
+const inkCache = new Map<string, Ink | null>();
+
+function measureInk(img: HTMLImageElement): Ink | null {
+  const nw = img.naturalWidth;
+  const nh = img.naturalHeight;
+  if (!nw || !nh) return null;
+  // 64px กว้างพอจะหาขอบได้แม่นระดับ ~1.5% ของเฟรม ซึ่งละเอียดเกินพอสำหรับการ
+  // ตัดสินใจว่าจะขยายเท่าไร และเป็นหนึ่งในสี่ของงานอ่านพิกเซลเทียบกับ 96px
+  const W = 64;
+  const H = Math.max(1, Math.round((W * nh) / nw));
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const g = canvas.getContext('2d');
+  if (!g) return null;
+  g.drawImage(img, 0, 0, W, H);
+
+  let data: Uint8ClampedArray;
+  try {
+    data = g.getImageData(0, 0, W, H).data;
+  } catch {
+    // ภาพข้าม origin จะโยนตรงนี้ — คืน null แล้วระนาบนั้นกลับไปใช้ contain เฉย ๆ
+    return null;
+  }
+
+  let x0 = W;
+  let y0 = H;
+  let x1 = -1;
+  let y1 = -1;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      // 24 ไม่ใช่ 0: ขอบภาพที่คีย์มามี alpha เศษ ๆ เหลืออยู่รอบวัตถุ
+      if (data[(y * W + x) * 4 + 3] > 24) {
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+      }
+    }
+  }
+  if (x1 < 0) return null;
+  return {
+    bx: x0 / W,
+    by: y0 / H,
+    bw: (x1 - x0 + 1) / W,
+    bh: (y1 - y0 + 1) / H,
+    ratio: nw / nh,
+  };
+}
+
+/**
+ * transform ของภาพในการ์ด: ขยายให้กรอบอัลฟาเต็มการ์ด แล้วเลื่อนให้อยู่กลาง
+ *
+ * `translate(...) scale(s)` โดย transform-origin เป็นกลางกล่อง แปลว่าจุด p ถูกส่งไป
+ * C + s·(p + t − C) อยากให้จุดกึ่งกลางของกรอบอัลฟา B ไปอยู่ที่ C พอดี จึงได้ t = C − B
+ * (ถ้าสลับลำดับเป็น `scale() translate()` ค่า t จะถูกคูณด้วย s ซึ่งเลื่อนเกินไปทุกครั้ง)
+ */
+function inkFit(ink: Ink | null, cardW: number, cardH: number) {
+  if (!ink || !cardW || !cardH) return undefined;
+  // object-contain: ภาพถูกย่อให้พอดีกล่อง แล้ววางกลาง
+  const c = Math.min(cardW / ink.ratio, cardH);
+  const paintedW = c * ink.ratio;
+  const paintedH = c;
+  const ox = (cardW - paintedW) / 2;
+  const oy = (cardH - paintedH) / 2;
+
+  const inkW = ink.bw * paintedW;
+  const inkH = ink.bh * paintedH;
+  if (inkW < 1 || inkH < 1) return undefined;
+
+  const s = Math.min(
+    INK_MAX_SCALE,
+    Math.max(1, Math.min((INK_TARGET * cardW) / inkW, (INK_TARGET * cardH) / inkH)),
+  );
+  const inkCx = ox + (ink.bx + ink.bw / 2) * paintedW;
+  const inkCy = oy + (ink.by + ink.bh / 2) * paintedH;
+
+  return `translate(${(cardW / 2 - inkCx).toFixed(1)}px, ${(cardH / 2 - inkCy).toFixed(1)}px) scale(${s.toFixed(3)})`;
+}
+
 type PlaneBox = {
   /** px — ความกว้างของ element เอง (ขนาดที่ตาเห็น × k) */
   width: number;
+  /** สัดส่วนของกล่อง — undefined = ปล่อยตามสัดส่วนจริงของไฟล์ (ระนาบห้อง) */
+  aspect?: number;
   rest: string;
   /** hover: โตขึ้นอยู่กับที่ */
   hover: string;
@@ -127,35 +258,61 @@ function place(planes: FieldPlane[]): PlaneBox[] {
     const j = seen[plane.kind]++;
     const n = total[plane.kind];
 
-    // เจาะรูกลางสนามไว้: ตรงกลางเป็นที่ของตัวหนังสือ (แบรนด์+ปุ่มบนประตูเข้า
-    // · หัวข้อบนแกลเลอรี) ถ้าไม่เจาะ ระนาบจะไปนั่งทับข้อความที่ต้องอ่าน
-    // ห้องเริ่มที่รัศมีไกลกว่าและออฟเซ็ตมุม — มันเป็นกรอบของสนาม ไม่ใช่เนื้อใน
+    // รูกลางสนามเล็กลงมาก (0.3 → 0.12): ตัวหนังสือบนประตูมีฉาก base ทาทับสองขอบ
+    // เป็นตัวรับประกันคอนทราสต์อยู่แล้ว การเว้นกลางไว้กว้าง ๆ อีกชั้นมีผลอย่างเดียว
+    // คือเจาะรูโบ๋กลางเฟรม ซึ่งเป็นสิ่งแรกที่ตาจับได้ว่าสนาม "ว่าง"
+    // ห้องเริ่มที่รัศมีไกลกว่าและออฟเซ็ตมุม — มันเป็นฉากหลังที่ล้อมเนื้อใน
     const angle = j * GOLDEN + (room ? 1.1 : 0);
     const t = Math.sqrt((j + 0.6) / n);
-    const radius = room ? 0.52 + 0.62 * t : 0.3 + 0.72 * t;
+    const radius = room ? 0.2 + 0.9 * t : 0.16 + 0.86 * t;
     const wobble = 0.9 + rnd() * 0.2;
     const fx = Math.cos(angle) * radius * wobble;
     const fy = Math.sin(angle) * radius * wobble * 0.92;
 
-    // ห้องอยู่ลึกและใหญ่ = ฉากหลัง · สินค้าพื้นโปร่งอยู่ชั้นหน้าและเล็กกว่า
-    // (ความเสี่ยง §7 ข้อ 4 — ถ้าอยู่ชั้นเดียวกันสนามจะอ่านว่ามั่ว)
+    // ห้องอยู่ลึกและใหญ่ = ฉากหลัง · การ์ดสินค้าอยู่ชั้นหน้า
     const z = room ? -1060 + rnd() * 340 : -430 + rnd() * 540;
     const k = (PERSPECTIVE - z) / PERSPECTIVE;
-    const apparent = room ? 210 + rnd() * 120 : 112 + rnd() * 118;
+
+    // ใหญ่ขึ้นจากรอบก่อน (สินค้า 112–230 → 165–290 · ห้อง 210–330 → 380–600)
+    // ที่ 1440×900 ระนาบ 40 ใบขนาดนี้กินพื้นที่รวมมากกว่าหนึ่งจอ จึงต้องซ้อนกัน
+    // ซึ่งคือเป้าหมาย — การซ้อนกันคือสิ่งที่ทำให้มันอ่านเป็นกำแพง ไม่ใช่ของวางกระจาย
+    //
+    // การ์ดสินค้า **เล็กกว่า** ระนาบห้องอย่างจงใจ: รูปสินค้าเป็นภาพตัดพื้นโปร่งที่มี
+    // ขอบว่างเยอะอยู่ในไฟล์อยู่แล้ว ขยายการ์ดขึ้นไม่ได้ทำให้เห็นสินค้ามากขึ้น
+    // ได้แต่พื้นที่ขาวมากขึ้น (ลองที่ 208–392 แล้วสนามอ่านเป็นกองกระดาษเปล่า)
+    // ภาพถ่ายห้องต่างหากที่ยิ่งใหญ่ยิ่งได้ เพราะมันมีเนื้อภาพเต็มกรอบจริง
+    // ห้องต้องใหญ่ ไม่งั้นการ์ดขาวบังหมดแล้วสนามกลับไปเป็นกองกระดาษอีก (ลอง 300–410
+    // แล้วภาพถ่ายเหลือแค่เศษเสี้ยวตามขอบ) ส่วนการ์ดใหญ่ขึ้นได้เพราะ inkFit ทำให้
+    // มันมีเนื้อสินค้าเต็มใบแล้ว ไม่ใช่แผ่นเปล่าเหมือนตอนแรก
+    //
+    // ── เพดานขนาดต่อระนาบ มาจาก AC ข้อ 7 ไม่ใช่จากรสนิยม ──────────────────
+    // LCP คือ element ที่ใหญ่ที่สุดในจอ สนามเป็น client component ที่มาหลัง hydrate
+    // และรูปของมันมาต่อคิวกับรูปอีก ~50 ใบของหน้าแรก ระนาบใดก็ตามที่ใหญ่กว่าแผง
+    // กำแพงผิวเคลือบข้างหลัง (≈131×900 = 118k px²) จะแย่งเป็น LCP แล้ววาดที่ ~3.1s
+    // (วัดแล้วทั้งสองทาง: ห้องใหญ่สุด → 81 · การ์ดใบใหญ่สุด → 81 เท่ากันเป๊ะ
+    //  เพราะตัวที่ช้าคือ "สนาม" ไม่ใช่ "ชนิดของระนาบ")
+    // ทุกระนาบจึงถูกกดให้ต่ำกว่า 118k px² แล้วชดเชยความหนาแน่นด้วยจำนวนแทน —
+    // ซึ่งใกล้ของอ้างอิงมากกว่าอยู่แล้ว: กำแพงของเขาคือรูปขนาดกลางหลายใบ
+    // ไม่ใช่รูปยักษ์ไม่กี่ใบ
+    const apparent = room ? 300 + rnd() * 85 : 170 + rnd() * 130;
 
     const zHover = z + 160;
     const zPull = Math.min(z + 520, 260);
 
     return {
       width: Math.round(apparent * k),
+      aspect: room
+        ? ROOM_ASPECTS[j % ROOM_ASPECTS.length]
+        : PRODUCT_ASPECTS[j % PRODUCT_ASPECTS.length],
       rest: transform(fx, fy, z),
       hover: transform(fx, fy, zHover),
       // 0.34 = ดึงเข้าหากลางจอเหลือหนึ่งในสามของรัศมีเดิม ระนาบที่โฟกัสจึงเข้ามา
       // อยู่ในสายตาจริง ไม่ใช่โตขึ้นอยู่นอกจอ
       pulled: transform(fx * 0.34, fy * 0.34, zPull),
-      // ห้องเป็นฉากหลัง จึงหรี่ลง — สินค้าพื้นโปร่งต้องอ่านออกว่าอยู่ "ข้างหน้า"
-      // ไม่ใช่จมหายไปในภาพถ่ายห้องที่มีรายละเอียดเต็มกรอบ
-      opacity: room ? 0.42 : 1,
+      // ห้องเคยอยู่ที่ 0.42 เพื่อไม่ให้ก๊อกพื้นโปร่งจมหายไปในภาพถ่าย
+      // ตอนนี้สินค้าอยู่บนการ์ดทึบแล้ว มันแยกตัวเองได้ด้วยขอบ ไม่ต้องพึ่งการหรี่
+      // ฉากหลังจึงกลับมาเป็นสี่เหลี่ยมทึบจริง ๆ ซึ่งคือของที่ดูถูกอยู่แล้วตั้งแต่แรก
+      opacity: room ? 0.95 : 1,
     };
   });
 }
@@ -214,6 +371,8 @@ export default function DepthField({
   const [onScreen, setOnScreen] = useState(true);
   // ระนาบห้องเข้ามาได้หรือยัง (ใช้เมื่อ deferRooms เท่านั้น)
   const [roomsReady, setRoomsReady] = useState(false);
+  // กรอบอัลฟาต่อไฟล์ — ว่างไว้ก่อน ระนาบจะใช้ object-contain ธรรมดาจนกว่าจะวัดเสร็จ
+  const [inks, setInks] = useState<Record<string, Ink | null>>({});
 
   const boxes = useMemo(() => place(planes), [planes]);
 
@@ -311,6 +470,81 @@ export default function DepthField({
     };
   }, [deferRooms, roomsReady, planes]);
 
+  // ── วัดกรอบอัลฟาของรูปสินค้าทุกใบ ครั้งเดียว ─────────────────────────────
+  //
+  // รอให้ใบที่ยังไม่เสร็จโหลดจบก่อน แล้ววัดเป็นชุดละไม่กี่ใบต่อเฟรม
+  //
+  // ไม่วัดทีละใบตอน onLoad: setState 40 ครั้งติดกันแปลว่า re-render สนาม 40 รอบ
+  // ตอนที่ประตูกำลังจะเปิดพอดี — และไม่วัดรวดเดียวทั้ง 40 ใบด้วย เพราะ
+  // `getImageData` บังคับ decode + อ่านกลับจาก GPU ทีละใบ 40 ใบติดกันเป็นบล็อก
+  // ที่กินเมนเธรดยาว (วัดได้ TBT 440ms) หั่นเป็นชุดละ 6 ใบต่อเฟรมแล้วค่อย setState
+  // ครั้งเดียวตอนจบ ได้ทั้งสองอย่าง
+  //
+  // ผลถูกแคชที่ระดับโมดูล ไฟล์เดียวกันในสนามที่สอง (แกลเลอรี) จึงไม่ถูกวัดซ้ำ
+  useEffect(() => {
+    const cam = camera.current;
+    if (!cam) return;
+    let alive = true;
+    let raf = 0;
+
+    const CHUNK = 6;
+
+    const measureAll = (imgs: HTMLImageElement[]) => {
+      let at = 0;
+      const step = () => {
+        if (!alive) return;
+        const end = Math.min(at + CHUNK, imgs.length);
+        for (; at < end; at++) {
+          const key = imgs[at].getAttribute('src') ?? '';
+          if (key && !inkCache.has(key)) inkCache.set(key, measureInk(imgs[at]));
+        }
+        if (at < imgs.length) {
+          raf = requestAnimationFrame(step);
+          return;
+        }
+        const next: Record<string, Ink | null> = {};
+        for (const img of imgs) {
+          const key = img.getAttribute('src') ?? '';
+          if (key) next[key] = inkCache.get(key) ?? null;
+        }
+        setInks(next);
+      };
+      raf = requestAnimationFrame(step);
+    };
+
+    const ready = () => {
+      const imgs = Array.from(
+        cam.querySelectorAll<HTMLImageElement>('img:not([data-depth-defer])'),
+      );
+      if (!imgs.length || !imgs.every((i) => i.complete)) return null;
+      return imgs;
+    };
+
+    const first = ready();
+    if (first) {
+      measureAll(first);
+      return () => {
+        alive = false;
+        cancelAnimationFrame(raf);
+      };
+    }
+
+    const poll = window.setInterval(() => {
+      const imgs = ready();
+      if (imgs) {
+        window.clearInterval(poll);
+        measureAll(imgs);
+      }
+    }, 200);
+    const watchdog = window.setTimeout(() => window.clearInterval(poll), 8000);
+    return () => {
+      alive = false;
+      cancelAnimationFrame(raf);
+      window.clearInterval(poll);
+      window.clearTimeout(watchdog);
+    };
+  }, [planes]);
+
   // ── หยุดเมื่อพ้น viewport ─────────────────────────────────────────────────
   useEffect(() => {
     const el = viewport.current;
@@ -368,39 +602,86 @@ export default function DepthField({
           const revealed = i < shown;
           const alt = plane.alt[lang];
 
+          const isRoom = plane.kind === 'room';
+
+          // ขนาดกล่องการ์ดที่ inkFit ต้องรู้ — ความสูงมาจากสัดส่วนที่ place() เลือกไว้
+          // สัดส่วนของไฟล์ติดมากับผลการวัด ไม่ได้ฮาร์ดโค้ด เผื่อข้อมูลถูก generate ใหม่
+          const fit = isRoom
+            ? undefined
+            : inkFit(inks[plane.src] ?? null, box.width, box.width / (box.aspect ?? 1));
+
           const style: React.CSSProperties = {
             width: box.width,
+            aspectRatio: box.aspect,
             transform: state,
             opacity: revealed ? box.opacity : 0,
             transition:
               'transform 520ms cubic-bezier(0.22, 1, 0.36, 1), opacity 620ms ease-out',
+            // เงาอยู่ที่ "แผ่น" ไม่ใช่ที่ตัวสินค้า — ระนาบเป็นวัตถุแบนที่ลอยอยู่
+            // ในอวกาศ ไม่ใช่ก๊อกที่ลอยเดี่ยว ๆ เงาจึงต้องเป็นเงาของสี่เหลี่ยม
+            //
+            // เฉพาะการ์ดสินค้า และเบลอแคบ: เงาเบลอกว้าง 48px บนระนาบ 44 ใบที่ซ้อนกัน
+            // วัดได้ 84fps / 49 เฟรมเกิน 16.7ms ภาพถ่ายห้องมีขอบคมของตัวเองอยู่แล้ว
+            // ไม่ต้องพึ่งเงาเพื่อให้แยกออกจากพื้น — ตัดออกได้ฟรี
+            boxShadow: isRoom ? undefined : '0 14px 26px rgba(0,0,0,0.14)',
           };
 
-          const img = (
+          const image = (
             /* eslint-disable-next-line @next/next/no-img-element -- static export, ไฟล์เดียวกับที่หน้าอื่นใช้ */
             <img
               src={plane.src}
               alt={alt}
-              // 12 ใบแรกคือของที่เห็นชัดที่สุดตอนสนามเปิด ที่เหลือปล่อยให้เบราว์เซอร์
-              // จัดคิวเอง — ทุกใบอยู่ในจอจึงถูกโหลดอยู่ดี แต่ลำดับต่างกัน
-              loading={i < 12 ? 'eager' : 'lazy'}
+              // ระนาบห้องถูกเรนเดอร์ก็ต่อเมื่อสินค้าโหลดครบแล้ว ณ จุดนั้นมันอยู่ในจอ
+              // และเราตัดสินใจแล้วว่าจะเอา — `lazy` ตรงนี้จึงไม่ได้เลื่อนอะไรออกไป
+              // นอกจากทำให้เบราว์เซอร์ดองมันไว้ท้ายคิวจริง ๆ
+              // (วัดได้: ห้องเป็น LCP ที่ 3.1 วินาที Lighthouse หน้าแรกเหลือ 62
+              //  เอา lazy ออกแล้ว fetchPriority=low ยังคุมลำดับให้อยู่หลังสินค้าเหมือนเดิม)
+              loading={isRoom ? 'eager' : i < 12 ? 'eager' : 'lazy'}
               // ห้องต่อคิวหลังสินค้าเสมอ แม้ในกรณีที่มันถูกใส่เข้ามาพร้อมกัน
               // (แกลเลอรีไม่มีระนาบห้อง ค่านี้จึงมีผลเฉพาะประตูเข้า)
-              fetchPriority={plane.kind === 'room' ? 'low' : undefined}
+              fetchPriority={isRoom ? 'low' : undefined}
               // ตัวชี้ให้ Preloader ตัดออกจากการนับความคืบหน้า — ประตูต้องเปิดได้
               // โดยไม่ต้องรอฉากหลัง ดูหมายเหตุ `deferRooms` ด้านบน
-              data-depth-defer={plane.kind === 'room' ? '' : undefined}
+              data-depth-defer={isRoom ? '' : undefined}
               decoding="async"
               draggable={false}
-              className="block h-auto w-full select-none object-contain"
-              style={
-                plane.kind === 'room'
-                  ? undefined
-                  : // สินค้าเป็น PNG พื้นโปร่ง เงาตามอัลฟาทำให้มันลอยอยู่ในอวกาศ
-                    // ไม่ใช่แปะอยู่บนพื้น (ท่าเดียวกับ productHalo ในกำแพง)
-                    { filter: 'drop-shadow(0 12px 26px rgba(0,0,0,0.20))' }
+              // ห้องใช้ object-cover: ระนาบมีสัดส่วนของตัวเองแล้ว ภาพต้องเต็มกรอบ
+              // ไม่ใช่ทิ้งแถบว่าง — "เต็มกรอบ ไม่มีการ์ด" คือสิ่งที่ระนาบห้องต้องเป็น
+              className={
+                isRoom
+                  ? 'block h-full w-full select-none object-cover'
+                  : 'block h-full w-full select-none object-contain'
               }
             />
+          );
+
+          // ── ระนาบสินค้า = การ์ด ไม่ใช่ PNG ลอย ────────────────────────────
+          //
+          // สาเหตุที่สนามรอบก่อนไม่อ่านเป็นกำแพงรูป: ระนาบสินค้าเป็นภาพพื้นโปร่ง
+          // ล้วน ๆ ตาไม่มีขอบให้จับ ยิ่งซ้อนกันยิ่งอ่านเป็นก๊อกกองรวมกันมั่ว ๆ
+          // ไม่ใช่แผ่นภาพซ้อนกัน — ของ michaelgatt ทุกระนาบเป็นเฟรมหนังทึบขอบคม
+          //
+          // การ์ดจึงเป็น "พื้นผิวจริง": surface ขาว + ขอบเส้นผม + padding ให้สินค้า
+          // หายใจ ขอบสำคัญกว่าที่คิด — surface `#FFFFFF` บนพื้น `#E5E5E5` ต่างกัน
+          // แค่ 1.13:1 ถ้าไม่มีเส้นขอบ การ์ดก็คือสี่เหลี่ยมที่มองไม่เห็นขอบอยู่ดี
+          //
+          // ห้องไม่ต้องมีการ์ด (ข้อ 2 ของงานนี้): มันเป็นสี่เหลี่ยมทึบขอบคมโดยธรรมชาติ
+          // ใส่กรอบให้อีกชั้นคือใส่กรอบให้ของที่เป็นกรอบอยู่แล้ว
+          const body = isRoom ? (
+            image
+          ) : (
+            <span className="block h-full w-full overflow-hidden border border-[rgba(0,0,0,0.14)] bg-surface">
+              {/* ชั้นนี้มีหน้าที่เดียว: ขยายและเลื่อนภาพให้ "เนื้อสินค้า" มาเต็มการ์ด
+                  ค่ามาจากกรอบอัลฟาที่วัดจากไฟล์จริง ดู measureInk/inkFit ด้านบน
+                  ยังไม่ได้วัด (เฟรมแรก ๆ) = ไม่มี transform = object-contain ธรรมดา
+                  ซึ่งเป็นสถานะที่ถูกต้องอยู่แล้ว แค่ว่างกว่า */}
+              <span
+                className="block h-full w-full"
+                style={{ transform: fit, transformOrigin: 'center' }}
+              >
+                {image}
+              </span>
+            </span>
           );
 
           if (!interactive) {
@@ -411,7 +692,7 @@ export default function DepthField({
                 className="pointer-events-none absolute left-1/2 top-1/2 block"
                 style={style}
               >
-                {img}
+                {body}
               </span>
             );
           }
@@ -430,7 +711,7 @@ export default function DepthField({
               className="focus-inset group absolute left-1/2 top-1/2 block"
               style={style}
             >
-              {img}
+              {body}
 
               {/* วงแหวนโฟกัสต้องเป็น "ลูก" ไม่ใช่ box-shadow ของตัว <a> เอง
                   เงาของ element วาดในชั้นพื้นหลังของมัน ซึ่งอยู่ใต้เนื้อหาลูกทุกตัว

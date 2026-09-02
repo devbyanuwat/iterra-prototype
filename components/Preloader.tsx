@@ -340,7 +340,11 @@ export default function Preloader({
               className="pointer-events-none absolute inset-0"
               style={{
                 backgroundImage:
-                  'linear-gradient(to bottom, rgba(229,229,229,0.94) 0%, rgba(229,229,229,0.16) 17%, rgba(229,229,229,0.16) 76%, rgba(229,229,229,0.96) 100%)',
+                  // แถบบน/ล่างเข้มขึ้นและกว้างขึ้นกว่าเดิม: ตอนที่ระนาบยังเป็น PNG
+                  // ลอยเดี่ยว ๆ พื้นหลังของตัวหนังสือมักเป็นพื้นเปล่าอยู่แล้ว
+                  // ตอนนี้สนามปูเต็มจอ 84% ตัวหนังสือจึงนั่งอยู่บนภาพถ่ายเกือบตลอด
+                  // ช่วงกลางยังใสไว้ที่ 0.12 เพื่อไม่ให้กำแพงรูปดูซีด
+                  'linear-gradient(to bottom, rgba(229,229,229,0.97) 0%, rgba(229,229,229,0.62) 9%, rgba(229,229,229,0.12) 24%, rgba(229,229,229,0.12) 66%, rgba(229,229,229,0.66) 86%, rgba(229,229,229,0.98) 100%)',
               }}
             />
           </>
@@ -423,7 +427,9 @@ export default function Preloader({
               ref={btn}
               type="button"
               onClick={leave}
-              className="group inline-flex items-center gap-4 self-start border border-line-12 px-8 py-4 text-ink transition-colors duration-300 hover:border-accent hover:text-accent"
+              // bg-base: ปุ่มต้องเป็นวัตถุทึบของตัวเอง ไม่ใช่กรอบโปร่งที่ยืมพื้นหลัง
+              // สนามที่ปูเต็มจอทำให้กรอบโปร่งลอยอยู่บนภาพถ่ายและอ่านไม่ออกว่าเป็นปุ่ม
+              className="group inline-flex items-center gap-4 self-start border border-line-12 bg-base px-8 py-4 text-ink transition-colors duration-300 hover:border-accent hover:text-accent"
             >
               <span className="micro !text-current">{stalled ? stalledLabel : enterLabel}</span>
               <span
