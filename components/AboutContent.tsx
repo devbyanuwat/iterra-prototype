@@ -16,11 +16,11 @@ import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle.generated';
 // เรียงตาม aboutContent.sections: จุดเริ่มต้น / วิธีคัดสรร / โชว์รูม / งานช่าง
 const HERO_ID = 'aaa80571-1800x800';
 const SECTION_IDS = [
-  // เดิมเป็น 02-handshower ซึ่งกว้าง 461px แต่ช่องกว้าง 552px — ต้องขยายภาพ
-  'malleco-article-banner-968x544', // ต่อน้ำเข้าทุกก๊อก เปิดให้ลองก่อนซื้อ
-  'aleutian-02', // เกณฑ์เดียว: บ้านเราใช้เองได้ไหม
-  'aaa68094-rgb', // โชว์รูมจัดเป็นห้องจริง
-  'kss-thai-web-secondary-banner', // ทีมช่างของเราเอง
+ // เดิมเป็น 02-handshower ซึ่งกว้าง 461px แต่ช่องกว้าง 552px — ต้องขยายภาพ
+ 'malleco-article-banner-968x544', // ต่อน้ำเข้าทุกก๊อก เปิดให้ลองก่อนซื้อ
+ 'aleutian-02', // เกณฑ์เดียว: บ้านเราใช้เองได้ไหม
+ 'aaa68094-rgb', // โชว์รูมจัดเป็นห้องจริง
+ 'kss-thai-web-secondary-banner', // ทีมช่างของเราเอง
 ];
 
 // ความกว้างจริงของช่องที่ 1440 ใช้เลือก rendition ไม่ให้ภาพถูกขยาย
@@ -29,85 +29,85 @@ const SECTION_SLOT = 552;
 
 /** ค้นภาพจาก id — id ผิดจะพังตอน build ไม่ใช่ตอนผู้ใช้เปิดหน้า */
 function pic(id: string) {
-  const found = lifestyleImages.find((image) => image.id === id);
-  if (!found) throw new Error(`unknown lifestyle image: ${id}`);
-  return found;
+ const found = lifestyleImages.find((image) => image.id === id);
+ if (!found) throw new Error(`unknown lifestyle image: ${id}`);
+ return found;
 }
 
 export default function AboutContent() {
-  const { lang } = useLang();
-  const hero = pic(HERO_ID);
+ const { lang } = useLang();
+ const hero = pic(HERO_ID);
 
-  return (
-    <>
-      {/* header */}
-      <section className="px-6 pb-16 pt-36 md:px-[8vw] md:pb-24 md:pt-44">
-        <Reveal>
-          <p className="mb-4 micro">{pick(aboutContent.kicker, lang)}</p>
-          <h1 className="max-w-3xl whitespace-pre-line font-display text-4xl font-normal leading-[1.2] tracking-wide text-ink md:text-6xl">
-            {pick(aboutContent.title, lang)}
-          </h1>
-        </Reveal>
-      </section>
+ return (
+ <>
+ {/* header */}
+ <section className="px-6 pb-16 pt-36 md:px-[8vw] md:pb-24 md:pt-44">
+ <Reveal>
+ <p className="mb-4 micro">{pick(aboutContent.kicker, lang)}</p>
+ <h1 className="max-w-3xl whitespace-pre-line font-display text-section font-normal leading-[1.2] tracking-wide text-ink text-hero">
+ {pick(aboutContent.title, lang)}
+ </h1>
+ </Reveal>
+ </section>
 
-      <Reveal className="px-6 md:px-[8vw]">
-        {/* ภาพเปิดหน้ากว้างเต็มคอลัมน์เนื้อหา — ขอ rendition ที่คลุม 1193px */}
-        <div
-          className="overflow-hidden border border-line-6 bg-surface"
-          style={{ aspectRatio: `${hero.width} / ${hero.height}` }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
-          <img
-            src={lifestyleSrc(hero, HERO_SLOT, 2)}
-            alt={hero.alt[lang]}
-            width={hero.width}
-            height={hero.height}
-            className="h-full w-full object-cover"
-            decoding="async"
-          />
-        </div>
-      </Reveal>
+ <Reveal className="px-6 md:px-[8vw]">
+ {/* ภาพเปิดหน้ากว้างเต็มคอลัมน์เนื้อหา — ขอ rendition ที่คลุม 1193px */}
+ <div
+ className="overflow-hidden border border-line-6 bg-surface"
+ style={{ aspectRatio: `${hero.width} / ${hero.height}` }}
+ >
+ {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
+ <img
+ src={lifestyleSrc(hero, HERO_SLOT, 2)}
+ alt={hero.alt[lang]}
+ width={hero.width}
+ height={hero.height}
+ className="h-full w-full object-cover"
+ decoding="async"
+ />
+ </div>
+ </Reveal>
 
-      {/* ภาพสลับข้อความ + parallax เบา ๆ */}
-      <div className="space-y-24 px-6 py-24 md:space-y-36 md:px-[8vw] md:py-36">
-        {aboutContent.sections.map((s, i) => {
-          const image = pic(SECTION_IDS[i]);
-          return (
-          <section
-            key={i}
-            className={`grid items-center gap-10 md:grid-cols-2 md:gap-[6vw] ${
-              i % 2 ? 'md:[&>*:first-child]:order-2' : ''
-            }`}
-          >
-            <Reveal>
-              {/* กรอบตามสัดส่วนจริงของภาพ ไม่บังคับทุกใบให้เป็น 4/5 */}
-              <div
-                className="overflow-hidden border border-line-6 bg-surface"
-                style={{ aspectRatio: `${image.width} / ${image.height}` }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
-                <img
-                  src={lifestyleSrc(image, SECTION_SLOT, 2)}
-                  alt={image.alt[lang]}
-                  width={image.width}
-                  height={image.height}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-            </Reveal>
-            <Reveal delay={0.15}>
-              <p className="mb-4 micro">{pick(s.kicker, lang)}</p>
-              <h2 className="mb-5 font-display text-3xl font-normal leading-snug tracking-wide text-ink md:text-4xl">
-                {pick(s.title, lang)}
-              </h2>
-              <p className="max-w-md text-body-sm font-normal leading-loose text-dim">{pick(s.body, lang)}</p>
-            </Reveal>
-          </section>
-          );
-        })}
-      </div>
-    </>
-  );
+ {/* ภาพสลับข้อความ + parallax เบา ๆ */}
+ <div className="space-y-24 px-6 py-24 md:space-y-36 md:px-[8vw] md:py-36">
+ {aboutContent.sections.map((s, i) => {
+ const image = pic(SECTION_IDS[i]);
+ return (
+ <section
+ key={i}
+ className={`grid items-center gap-10 md:grid-cols-2 md:gap-[6vw] ${
+ i % 2 ? 'md:[&>*:first-child]:order-2' : ''
+ }`}
+ >
+ <Reveal>
+ {/* กรอบตามสัดส่วนจริงของภาพ ไม่บังคับทุกใบให้เป็น 4/5 */}
+ <div
+ className="overflow-hidden border border-line-6 bg-surface"
+ style={{ aspectRatio: `${image.width} / ${image.height}` }}
+ >
+ {/* eslint-disable-next-line @next/next/no-img-element -- static export, รูป local */}
+ <img
+ src={lifestyleSrc(image, SECTION_SLOT, 2)}
+ alt={image.alt[lang]}
+ width={image.width}
+ height={image.height}
+ className="h-full w-full object-cover"
+ loading="lazy"
+ decoding="async"
+ />
+ </div>
+ </Reveal>
+ <Reveal delay={0.15}>
+ <p className="mb-4 micro">{pick(s.kicker, lang)}</p>
+ <h2 className="mb-5 font-display text-section font-normal tracking-wide text-ink text-section">
+ {pick(s.title, lang)}
+ </h2>
+ <p className="max-w-md text-body-sm font-normal leading-loose text-dim">{pick(s.body, lang)}</p>
+ </Reveal>
+ </section>
+ );
+ })}
+ </div>
+ </>
+ );
 }
