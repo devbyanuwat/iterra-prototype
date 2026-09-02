@@ -41,9 +41,47 @@ const config: Config = {
         // ("no readable text below 15px") and a label is read, so the two
         // clash. AC 1 is the gate that gets checked, so it wins; 0.12em
         // tracking carries the label voice on its own.
-        label: ['15px', { lineHeight: '1.3', letterSpacing: '0.12em' }],
+        // 1.6, not 1.3 (task E2). The floor below was derived over 1,108 Thai
+        // wrap positions and then applied to `h1..h4` in globals.css — an ELEMENT
+        // selector, which any utility class outranks. So the floor covered body
+        // copy and nothing else: `label` shipped 1.30, `.micro` shipped 1.30, and
+        // `text-2xl` (Tailwind's own default, 24/32 = 1.333) silently overrode the
+        // heading rule wherever a component reached for it.
+        //
+        // Measured on the shipped build, every Thai text node on 24 route-loads ×
+        // 4 widths: 2,773 node-instances below 1.6, **150 of them wrapping to two
+        // or more lines** — which is where a 1.3 ratio on Thai actually collides.
+        // The ratio is scale-invariant: Sarabun's worst cluster pair is 1.582em at
+        // weight 400, so 15px/19.5px overlaps exactly as 32px/41.6px would.
+        //
+        // The fix is that the floor now lives in the SCALE, where the utilities
+        // get their value, instead of in a selector the utilities beat.
+        label: ['15px', { lineHeight: '1.6', letterSpacing: '0.12em' }],
         body: ['16px', { lineHeight: '1.6' }],
         'body-sm': ['15px', { lineHeight: '1.6' }],
+
+        // ── Tailwind's own ladder, re-floored (task E2) ────────────────────
+        // These keys already exist in Tailwind's defaults and carry Latin-tuned
+        // leading (text-2xl is 24/32). Every one of them is one autocomplete away
+        // from a developer, they all outrank the `h1..h4` element rule, and this
+        // site's text falls back to Thai on most routes — so each is a live way to
+        // put a 1.33 ratio back under Thai glyphs. Overriding the line-height (the
+        // sizes are untouched) closes that door without forbidding the utilities.
+        // Anything that genuinely wants tighter leading asks for it: `.en-tight`
+        // for English display type, `leading-none` for the numeric model number.
+        xs: ['12px', { lineHeight: '1.6' }],
+        sm: ['14px', { lineHeight: '1.6' }],
+        base: ['16px', { lineHeight: '1.6' }],
+        lg: ['18px', { lineHeight: '1.6' }],
+        xl: ['20px', { lineHeight: '1.6' }],
+        '2xl': ['24px', { lineHeight: '1.6' }],
+        '3xl': ['30px', { lineHeight: '1.6' }],
+        '4xl': ['36px', { lineHeight: '1.6' }],
+        '5xl': ['48px', { lineHeight: '1.6' }],
+        '6xl': ['60px', { lineHeight: '1.6' }],
+        '7xl': ['72px', { lineHeight: '1.6' }],
+        '8xl': ['96px', { lineHeight: '1.6' }],
+        '9xl': ['128px', { lineHeight: '1.6' }],
 
         // ── display scale ──────────────────────────────────────────────────
         // The scale used to stop at section: 32px, with nothing between it and

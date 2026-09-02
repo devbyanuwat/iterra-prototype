@@ -160,13 +160,33 @@ export default function Nav() {
               การจัดกลุ่มเมนูเป็นการตัดสินใจของงานออกแบบ ไม่ใช่ของ task ใด task หนึ่ง
               (บันทึกไว้ใน scratchpad/task-c1.md)
               ส่วน lg: แทน md: เพราะที่ 768–1023 แถวเดียวใส่ไม่ลงในทุกกรณี — ช่วงนั้น
-              ใช้เมนูเต็มจอซึ่งมีลิงก์ครบชุดเดียวกันอยู่แล้ว */}
-          <nav aria-label={t.a11y.menuMain} className="pointer-events-auto hidden items-center gap-4 lg:flex">
+              ใช้เมนูเต็มจอซึ่งมีลิงก์ครบชุดเดียวกันอยู่แล้ว
+
+              ── xl: ไม่ใช่ lg: และเหตุผลเป็นภาษาไทยล้วน ๆ (task E2) ──────────
+              ตัวเลขข้างบนวัดจากป้ายอังกฤษ ป้ายไทยกว้างกว่านั้นมาก วัดแถวไทยที่
+              ไม่ถูกบีบ (white-space: nowrap) ได้ **1,025px** ขณะที่ที่ว่างระหว่าง
+              เวิร์ดมาร์กกับขอบขวาที่ 1024 มีแค่ **844px** — ขาดไป 181px
+              flex จึงบีบทุกรายการให้แคบกว่าข้อความของมันเอง และภาษาไทยไม่มีช่องว่าง
+              ให้ตัด เบราว์เซอร์เลยหักกลางคำ: คอลเลก/ชัน · แกล/เลอรี · สีและผิว/เคลือบ
+              (วัดที่ 1024 ก่อนแก้: หัก 9 จาก 11 รายการ สูงแถว 39–59px)
+              1,025 + เวิร์ดมาร์ก 141 + ขอบ 2×51 = ~1,268 แถวไทยจึงเริ่มพอดีที่ xl
+              (1280) ไม่ใช่ lg — ต่ำกว่านั้นใช้เมนูเต็มจอ ซึ่งมีลิงก์ครบชุดเดียวกัน
+              shrink-0 คู่กับ nowrap (กฎรวมอยู่ใน globals.css): รายการไม่ยอมแคบกว่า
+              ข้อความของตัวเอง สิ่งที่ยอมคือแถว ไม่ใช่คำ */}
+          {/* flex-wrap + justify-end: ที่ 1280–1439 แถว **อังกฤษ** ยังกว้างเกิน
+              (ป้ายอังกฤษรวม 1,189px ต้องการจอ ~1,432px จึงจะพอ) เมื่อรายการไม่ยอม
+              หดแล้ว สิ่งที่ต้องยอมคือแถว ไม่ใช่คำ — ตัดขึ้นบรรทัดใหม่ "ระหว่างรายการ"
+              ซึ่งอ่านออกทุกคำ แทนที่จะล้นออกนอกขอบ (วัดก่อนใส่: ล้น 109px ที่ 1280)
+              ไทยกว้าง 1,025px จึงอยู่บรรทัดเดียวตั้งแต่ 1280 ขึ้นไป */}
+          <nav
+            aria-label={t.a11y.menuMain}
+            className="pointer-events-auto hidden flex-wrap items-center justify-end gap-x-4 gap-y-1 xl:flex"
+          >
             {LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`text-label uppercase tracking-widest2 transition-opacity ${
+                className={`shrink-0 text-label uppercase tracking-widest2 transition-opacity ${
                   // เหตุผลเดียวกับ LangSwitch: 0.6 = 3.88:1 ตกเกณฑ์ · 0.8 = 7.04:1
                   pathname === l.href ? 'opacity-100 underline underline-offset-8' : 'opacity-80 hover:opacity-100'
                 }`}
@@ -176,7 +196,7 @@ export default function Nav() {
             ))}
             <LangSwitch />
           </nav>
-          <div className="pointer-events-auto flex items-center gap-4 lg:hidden">
+          <div className="pointer-events-auto flex items-center gap-4 xl:hidden">
             <LangSwitch />
             <button
               type="button"
@@ -193,7 +213,7 @@ export default function Nav() {
 
       {/* เมนูมือถือแบบเต็มจอ */}
       <div
-        className={`fixed inset-0 z-[60] flex flex-col bg-base text-ink transition-transform duration-500 lg:hidden ${
+        className={`fixed inset-0 z-[60] flex flex-col bg-base text-ink transition-transform duration-500 xl:hidden ${
           open ? 'translate-y-0' : '-translate-y-full'
         }`}
         aria-hidden={!open}
@@ -202,7 +222,7 @@ export default function Nav() {
           {/* ในเมนูมือถือ โลโก้ไม่ใช่ลิงก์ (มีรายการ "หน้าแรก" อยู่ในเมนูแล้ว)
               จึงเป็นภาพประดับ ไม่ต้องมีชื่อซ้ำให้ screen reader อ่านสองรอบ */}
           <BrandMark height={18} alt="" />
-          <button type="button" onClick={() => setOpen(false)} aria-label={t.a11y.menuClose} className="text-2xl font-normal">
+          <button type="button" onClick={() => setOpen(false)} aria-label={t.a11y.menuClose} className="text-card font-normal">
             ×
           </button>
         </div>
@@ -212,7 +232,7 @@ export default function Nav() {
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="text-2xl font-normal tracking-wide"
+              className="text-card font-normal tracking-wide"
               style={{ transitionDelay: `${i * 40}ms` }}
             >
               {t.nav[l.key]}

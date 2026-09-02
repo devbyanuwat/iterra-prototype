@@ -69,7 +69,11 @@ body {
   font-family: var(--font-dm-sans), var(--font-thai), system-ui, sans-serif;
   font-weight: 500;
   font-size: 15px;
-  line-height: 1.3;
+  /* 1.6, not 1.3 (task E2). `.micro` is the single most common Thai-bearing
+     class on the site — 1,090 node-instances in one sweep — and it carried its
+     own leading, so the measured floor never reached it. See the note on the
+     `label` token in tailwind.config.ts for the numbers. */
+  line-height: 1.6;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #5d5d5d;
@@ -122,12 +126,52 @@ body {
    Latin ink is 0.91em, so English headings get their own value below and
    .en-tight stays available for display type that should be tighter still. The
    oversized model number is exempt — it is Latin and numeric (see
-   components/ModelNumber.tsx). */
+   components/ModelNumber.tsx).
+
+   ── why this rule was not enough on its own (task E2) ──────────────────────
+   This is an ELEMENT selector, and it was the only place the floor was written.
+   Every Tailwind size utility is a CLASS, so `h2.text-2xl` computed 24/32 and
+   this rule never applied; `label` and `.micro` carried 1.30 of their own and
+   were never headings in the first place. Measured before the fix: 2,773 Thai
+   node-instances below 1.6, 150 of them wrapping.
+
+   The floor now lives in the SCALE — every fontSize token in tailwind.config.ts,
+   including Tailwind's own default ladder — so a utility carries the floor with
+   it instead of overriding it. This rule stays as the backstop for headings that
+   carry no size class at all. */
 h1,
 h2,
 h3,
 h4 {
   line-height: 1.6;
+}
+
+/* ── a label is one unit; the row wraps, the word does not (task E2) ────────
+   Thai has no word spaces, so when a flex item is squeezed narrower than its own
+   text the engine has no legal break and force-breaks mid-word: คอลเลก/ชัน,
+   แกล/เลอรี, สีและผิว/เคลือบ. Measured in the Thai nav at 1024: 9 of 11 items.
+
+   Things that do NOT fix it, tested on the real nav at 1024 before choosing:
+     word-break: keep-all   9 items still broken — Chrome applies keep-all to
+                            CJK, not to Thai's dictionary breaking
+     line-break: strict     9 still broken — that property governs punctuation
+     line-height: 1.6       9 still broken — leading is a different defect
+     white-space: nowrap    0 broken, row one line again
+   Inserting U+200B word boundaries into the strings would also work and is what
+   most sites do; it is rejected here because it puts a typographic rule inside
+   the content, has to be redone for every new string in two languages, and
+   breaks copy/paste and search for the reader.
+
+   So: any control that carries the label voice never breaks inside itself. What
+   gives instead is the container — a flex row wraps between items, and where the
+   row cannot fit at all the nav falls back to the full-screen menu (see the
+   breakpoint note in components/Nav.tsx). This also removes the 7px last-line
+   slivers on the /products filter chips, which are the same defect. */
+:is(a, button, summary, [role='button']):is(.micro, .text-label),
+:is(a, button, summary, [role='button']) :is(.micro, .text-label),
+header nav a,
+header nav [aria-current] {
+  white-space: nowrap;
 }
 
 /* ── where the line breaks, as opposed to how big it is (task D2) ───────────
@@ -164,6 +208,18 @@ h4 {
   text-wrap: balance;
 }
 
+/* `balance`, not `pretty` (task E2).
+   `pretty` only pulls the last WORD down to save an orphan, and Thai running
+   text has no word boundaries for it to pull — measured with `pretty` live, 15
+   Thai blocks still ended on a line under 12% of their measure, including the
+   /th/ hero paragraph (65px of 568) and /th/palette (44 of 762).
+
+   `balance` distributes the lines evenly instead of rescuing the last one, which
+   is the rule that works on a script whose breaks land anywhere. Chrome applies
+   it up to about six lines and ignores it beyond, so long body copy lays out
+   exactly as before — verified: the count of Thai blocks over six lines is
+   unchanged at 14 with balance on. Neither value touches leading, so the 1.6
+   floor is unaffected. */
 p,
 li,
 dd,
@@ -171,7 +227,7 @@ dt,
 address,
 figcaption,
 blockquote {
-  text-wrap: pretty;
+  text-wrap: balance;
 }
 
 /* A blanket `html[lang='en'] :is(h1,h2,h3,h4) { line-height: 1.12 }` is the
