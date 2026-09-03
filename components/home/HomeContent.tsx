@@ -34,6 +34,7 @@ import { products, type Finish, type Product } from '@/lib/products';
 import type { FieldPlane } from '@/components/depth-field';
 import { posts } from '@/lib/posts';
 import { CONTACT } from '@/lib/site';
+import { shortDate } from '@/lib/date';
 
 // ── ที่มาของข้อมูลทุกบล็อก คำนวณครั้งเดียวตอนโหลดโมดูล ───────────────────
 //
@@ -384,12 +385,7 @@ function LatestPosts() {
                   ก็เลือกตามภาษาอยู่แล้ว มีแต่การ์ดชุดนี้ที่อ่าน post.tag ตรง ๆ
                   หมวดหมู่จึงเป็นไทยค้างอยู่บนหน้าแรกฉบับอังกฤษ */}
               <p className="micro mt-5">
-                {lang === 'en' ? post.tagEn : post.tag} ·{' '}
-                {new Date(post.date).toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-GB', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })}
+                {lang === 'en' ? post.tagEn : post.tag} · {shortDate(post.date, lang)}
               </p>
               <h3
                 className={`mt-2 font-normal text-ink ${

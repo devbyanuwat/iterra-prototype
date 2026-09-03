@@ -27,6 +27,7 @@ import Footer from '@/components/Footer';
 import JsonLd from '@/components/JsonLd';
 import { ALT_LANG, DEFAULT_LANG, dict, type Lang } from '@/lib/i18n';
 import { ADDRESS, CONTACT, SITE_NAME, SITE_URL } from '@/lib/site';
+import { GATE_ANTI_FLASH_SCRIPT } from '@/lib/gate';
 import { treeUrl } from './routes';
 
 // Display + micro-caps. Variable — opsz ปรับรูปตัวอักษรตามขนาดที่ใช้จริง
@@ -118,6 +119,9 @@ export default function RootShell({ lang, children }: { lang: Lang; children: Re
     // ตั้งแต่ต้น (5af7a23 ใส่ทั้งสองอย่างไว้เพื่อกัน mismatch ที่ไม่มีอีกแล้ว)
     <html lang={lang} className={`${dmSans.variable} ${thai.variable}`}>
       <body>
+        {/* ต้องอยู่ก่อน <Preloader> ในเอกสาร และต้องถูก render โดย server
+            component ตัวนี้ ไม่ใช่โดยตัวประตูเอง — เหตุผลเต็มอยู่ที่ lib/gate.ts */}
+        <script dangerouslySetInnerHTML={{ __html: GATE_ANTI_FLASH_SCRIPT }} />
         <LangProvider lang={lang}>
           {/* Entry gate อยู่ใน layout ไม่ใช่ในหน้าใดหน้าหนึ่ง — layout ไม่ถูก
               remount ตอนเปลี่ยน route ฝั่ง client ประตูจึงไม่เด้งขึ้นซ้ำ

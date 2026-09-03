@@ -6,6 +6,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { groupedNumber } from '@/lib/date';
 
 type Props = { to: number; suffix?: string; className?: string };
 
@@ -28,7 +29,7 @@ export default function CountUp({ to, suffix = '', className = '' }: Props) {
         el.textContent = `0${suffix}`;
       },
       onUpdate: () => {
-        el.textContent = `${Math.round(obj.v).toLocaleString()}${suffix}`;
+        el.textContent = `${groupedNumber(obj.v)}${suffix}`;
       },
     });
 
@@ -40,7 +41,7 @@ export default function CountUp({ to, suffix = '', className = '' }: Props) {
 
   return (
     <span ref={ref} className={className}>
-      {to.toLocaleString()}
+      {groupedNumber(to)}
       {suffix}
     </span>
   );

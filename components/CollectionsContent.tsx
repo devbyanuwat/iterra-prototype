@@ -68,8 +68,14 @@ export default function CollectionsContent({ entries }: { entries: CollectionEnt
       <section className="px-6 pb-28 md:px-[8vw]">
         <ul className="grid gap-x-10 gap-y-20 md:grid-cols-2">
           {entries.map(({ card, family, products }, i) => {
-            const lead = card.images[0];
-            const rest = card.images.slice(1, 3);
+            // ต้นทางแปะภาพเดิมซ้ำในการ์ดเดียวกันสองใบ (aleutian-02, zaa99845-rgb)
+            // ปล่อยผ่านคือได้ภาพเดียวกันวางเรียงกันเองในตะแกรงล่าง และ React
+            // ก็ได้ key ซ้ำจนเตือนว่าลูกอาจถูกซ้ำหรือหายไป — ตัดซ้ำที่นี่
+            // ไม่ใช่ไปแก้ข้อมูล เพราะ collections.generated.ts ถูกเขียนทับทุกครั้ง
+            // ที่ scrape ใหม่ ของที่แก้ลงไปจะหายเงียบ
+            const images = [...new Set(card.images)];
+            const lead = images[0];
+            const rest = images.slice(1, 3);
             return (
               <li key={card.name}>
                 <Reveal delay={(i % 2) * 0.1} y={26}>

@@ -29,6 +29,7 @@ import BrandMark from './BrandMark';
 import DepthField, { useFieldMode } from './DepthField';
 import { useLang } from './LangProvider';
 import type { FieldPlane } from './depth-field';
+import { GATE_STORAGE_KEY } from '@/lib/gate';
 
 /**
  * id ของ <script type="application/json"> ที่ app/page.tsx ฝากชุดระนาบไว้
@@ -60,7 +61,7 @@ export default function Preloader({
   tagline = 'PREMIUM KITCHEN & BATH',
   enterLabel = 'เข้าสู่โชว์รูม',
   stalledLabel = 'เข้าสู่โชว์รูม — ข้ามการโหลด',
-  storageKey = 'kohler:entered',
+  storageKey = GATE_STORAGE_KEY,
   stallMs = 6000,
   onEnter,
 }: Props) {
@@ -346,28 +347,8 @@ export default function Preloader({
 
   return (
     <>
-      {/* กัน flash ของ overlay สำหรับคนที่ผ่าน gate มาแล้วใน session นี้
-          สคริปต์นี้อยู่ใน HTML ที่ส่งมา จึงรันก่อน React hydrate
-          markup ฝั่ง server ไม่มีทางรู้ค่า sessionStorage จึง render overlay มาเสมอ
-          แล้วให้สคริปต์นี้ซ่อนทันทีถ้าเคยเข้ามาแล้ว
-
-          มันแทรก <style> เข้าไปใน <head> เอง ไม่ไปแตะ attribute หรือ class ของ
-          <html> — สองอย่างนั้นเป็นของ app/layout.tsx ถ้าไปเขียนทับก่อน hydrate
-          React จะฟ้อง "tree hydrated but some attributes ... didn't match"
-          ทุกครั้งที่โหลดเต็มหน้าในเซสชันที่ผ่านประตูมาแล้ว
-          (เจอจริงตอนย้ายมา mount ที่ layout — ตอนอยู่ใต้ page ยังไม่โผล่)
-          node ที่สคริปต์สร้างเองไม่ได้อยู่ในต้นไม้ของ React จึงไม่ถูกนำไปเทียบ */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html:
-            "try{if(sessionStorage.getItem('" +
-            storageKey +
-            "')==='1'){var s=document.createElement('style');" +
-            "s.setAttribute('data-preloader-skip','');" +
-            "s.textContent='[data-preloader]{display:none!important}';" +
-            'document.head.appendChild(s);}}catch(e){}',
-        }}
-      />
+      {/* สคริปต์กัน flash ไม่ได้อยู่ตรงนี้แล้ว — ดู antiFlashScript ด้านบน
+          และจุดที่ RootShell เรียกใช้ */}
       <div
         ref={root}
         data-preloader
