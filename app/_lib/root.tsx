@@ -24,6 +24,7 @@ import Preloader from '@/components/Preloader';
 import SmoothScroll from '@/components/SmoothScroll';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import PageCta from '@/components/PageCta';
 import JsonLd from '@/components/JsonLd';
 import { ALT_LANG, DEFAULT_LANG, dict, type Lang } from '@/lib/i18n';
 import { ADDRESS, CONTACT, SITE_NAME, SITE_URL } from '@/lib/site';
@@ -135,6 +136,10 @@ export default function RootShell({ lang, children }: { lang: Lang; children: Re
           <SmoothScroll />
           <Nav />
           <main>{children}</main>
+          {/* แถบชวนต่อ อยู่นอก <main> โดยตั้งใจ — มันไม่ใช่เนื้อหาของหน้า แต่เป็น
+              ทางออกจากหน้า เหมือนที่ท้ายเว็บเป็น และมันเลือกข้อความเองจาก path
+              จึงไม่ต้องมี route ไหนจำได้ว่าต้องใส่ (ดู lib/cta.ts) */}
+          <PageCta />
           <Footer />
         </LangProvider>
         <JsonLd data={organizationJsonLd(lang)} />
