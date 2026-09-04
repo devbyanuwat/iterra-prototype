@@ -1,11 +1,11 @@
 import type { MetadataRoute } from 'next';
 import { finishIndex } from '@/components/finish-index';
-import { contentPages } from '@/lib/pages.generated';
-import { paletteGroups } from '@/lib/palette.generated';
+import { contentPages } from '@/lib/pages';
+import { paletteGroups } from '@/lib/editorial';
 import { products } from '@/lib/products';
-import { posts } from '@/lib/posts';
-import { guides } from '@/lib/guides.generated';
-import { ideaHubs } from '@/lib/ideas.generated';
+import { posts } from '@/lib/editorial';
+import { guides } from '@/lib/editorial';
+import { ideaHubs } from '@/lib/editorial';
 import { DEFAULT_LANG } from '@/lib/i18n';
 import { LANGS, STATIC_PATHS, treeUrl, treeUrls } from './_lib/routes';
 

@@ -14,6 +14,7 @@
 import type { Metadata } from 'next';
 import { ALT_LANG, DEFAULT_LANG, LANG_PREFIX, langPath, type Lang } from '@/lib/i18n';
 import { SITE_URL } from '@/lib/site';
+import { COLLECTIONS_ENABLED } from '@/lib/scope';
 
 /**
  * เติมคำนำหน้าภาษาให้ href ที่มาจาก "ข้อมูล" ไม่ใช่จาก JSX
@@ -62,7 +63,7 @@ export function alternates(lang: Lang, path: string): Metadata['alternates'] {
  * ที่ต้องรู้ว่ามีอะไรอยู่บ้าง เก็บเป็น path ของเว็บ (ไม่มีคำนำหน้าภาษา) เพราะ
  * คำนำหน้าเป็นเรื่องของต้นไม้ ไม่ใช่ของเส้นทาง
  */
-export const STATIC_PATHS = [
+const ALL_STATIC_PATHS = [
   '/',
   '/about/',
   '/products/',
@@ -76,3 +77,13 @@ export const STATIC_PATHS = [
   '/info/',
   '/contact/',
 ] as const;
+
+/**
+ * เส้นทางคงที่ที่ยังมีหน้าจริงอยู่ — sitemap อ่านจากตัวนี้
+ *
+ * /collections/ ถูกปิดตอนเว็บเหลือเฉพาะห้องครัว (ดู lib/scope.ts) การประกาศมัน
+ * ใน sitemap ทั้งที่ไม่มีหน้าให้เข้าคือการบอก search engine ว่ามี URL ที่ตอบ 404
+ */
+export const STATIC_PATHS = ALL_STATIC_PATHS.filter(
+  (p) => p !== '/collections/' || COLLECTIONS_ENABLED,
+);

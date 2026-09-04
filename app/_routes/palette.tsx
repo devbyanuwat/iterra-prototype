@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { PaletteIndex } from '@/components/PaletteContent';
 import JsonLd from '@/components/JsonLd';
 import { dict, type Lang } from '@/lib/i18n';
-import { paletteGroups } from '@/lib/palette.generated';
+import { paletteGroups } from '@/lib/editorial';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import { alternates, treeUrl } from '@/app/_lib/routes';
 

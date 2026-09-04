@@ -6,8 +6,8 @@
 // จะประกาศตัวเป็นเว็บนั้นซึ่งไม่จริง โดเมนสมมติที่เห็นชัดว่าสมมติปลอดภัยกว่า
 export const SITE_URL = 'https://kohler-demo.example.com';
 export const SITE_NAME = 'KOHLER';
-export const SITE_TAGLINE_TH = 'อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม';
-export const SITE_TAGLINE_EN = 'Premium Kitchen & Bath';
+export const SITE_TAGLINE_TH = 'อุปกรณ์ครัวพรีเมียม';
+export const SITE_TAGLINE_EN = 'Premium Kitchen';
 
 /**
  * The postal address, split into the parts schema.org wants.

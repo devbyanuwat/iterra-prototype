@@ -14,17 +14,17 @@
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { aboutContent, resolve } from '@/lib/i18n';
-import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle.generated';
+import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle';
 
 // ภาพจริงจากคลัง lifestyle — เลือกให้ตรงกับเนื้อหาแต่ละหัวข้อ
 // เรียงตาม aboutContent.sections: จุดเริ่มต้น / วิธีคัดสรร / โชว์รูม / งานช่าง
-const HERO_ID = 'aaa80571-1800x800';
+const HERO_ID = 'zab59998-1800x800-hollywoodhills';
 const SECTION_IDS = [
  // เดิมเป็น 02-handshower ซึ่งกว้าง 461px แต่ช่องกว้าง 552px — ต้องขยายภาพ
  'malleco-article-banner-968x544', // ต่อน้ำเข้าทุกก๊อก เปิดให้ลองก่อนซื้อ
- 'aleutian-02', // เกณฑ์เดียว: บ้านเราใช้เองได้ไหม
- 'aaa68094-rgb', // โชว์รูมจัดเป็นห้องจริง
- 'kss-thai-web-secondary-banner', // ทีมช่างของเราเอง
+ 'zab27056-rgb', // เกณฑ์เดียว: บ้านเราใช้เองได้ไหม
+ 'kohler-kec-bkk', // โชว์รูมจัดเป็นห้องจริง
+ 'zac02930-rgb', // ทีมช่างของเราเอง
 ];
 
 // ความกว้างจริงของช่องที่ 1440 ใช้เลือก rendition ไม่ให้ภาพถูกขยาย

@@ -8,7 +8,8 @@
 //
 // ไม่มี 'use client' — โมดูลนี้เป็นข้อมูลล้วน server component จึง import ได้
 
-import { products, type Finish, type Product } from '@/lib/products';
+import { allProducts, products, type Finish, type Product } from '@/lib/products';
+import { KITCHEN_ONLY } from '@/lib/scope';
 
 /** ฐานสีของหน้า — ใช้คำนวณว่าแผงเฉดหนึ่ง ๆ จมหายกับพื้นหรือไม่
  *  พื้นเปลี่ยนเป็น #E5E5E5 แล้ว ทิศทางจึงพลิก: แผงขาวคือตัวที่จมพื้น
@@ -17,12 +18,19 @@ const BASE = '#E5E5E5';
 const INK = '#232323';
 
 /**
- * จำนวนสินค้าต่อเฉดตามสเปก §3 — นับจากข้อมูลจริง 182 ตัว
+ * จำนวนสินค้าต่อเฉดตามสเปก §3 — นับจาก **ทั้งแคตตาล็อก** 182 ตัว
  *
  * นี่คือค่าที่ "ต้องเป็น" ไม่ใช่ค่าที่ "บังเอิญเป็น" AC ข้อ 3 บังคับให้ตรงทั้ง 11 ค่า
  * จึง assert ตอนโหลดโมดูล (ดู assertFinishCounts ท้ายไฟล์) ถ้าข้อมูลถูก generate
  * ใหม่แล้วจำนวนเพี้ยน build จะพังทันทีพร้อมบอกว่าเฉดไหนเพี้ยนไปเท่าไร
  * ดีกว่าปล่อยให้หน้าเฉดแสดงจำนวนผิดเงียบ ๆ
+ *
+ * ── ตารางนี้ต้องเทียบกับ allProducts ไม่ใช่ products ─────────────────────
+ * เว็บแสดงเฉพาะห้องครัวแล้ว (lib/scope.ts) ส่วน `products` ที่หน้าเว็บใช้จึงเป็น
+ * ชุดที่กรองแล้ว ถ้าเอาตารางนี้ไปเทียบกับชุดที่กรอง build จะพังทันที — และพังด้วย
+ * เหตุผลที่ผิด: มันจะรายงานว่า "ข้อมูลเพี้ยน" ทั้งที่ข้อมูลถูกต้องและเป็นตัวกรอง
+ * ที่ทำงานตามที่สั่ง หน้าที่ของตารางนี้คือเฝ้า scraper ไม่ใช่เฝ้าขอบเขตของเว็บ
+ * ขอบเขตของเว็บมีตารางของตัวเองอยู่ข้างล่าง
  */
 export const EXPECTED_FINISH_COUNTS: Readonly<Record<string, number>> = {
   CP: 74,
@@ -37,6 +45,20 @@ export const EXPECTED_FINISH_COUNTS: Readonly<Record<string, number>> = {
   NA: 6,
   BV: 4,
 };
+
+/**
+ * จำนวนต่อเฉดของ "เว็บที่ผู้อ่านเห็นจริง" — ตอนนี้คือห้องครัวอย่างเดียว
+ *
+ * แยกจากตารางข้างบนเพราะสองตารางเฝ้าคนละอย่าง: ตารางบนเฝ้าว่า scraper ดึงของมา
+ * ครบไหม ตารางนี้เฝ้าว่าตัวกรองขอบเขตยังตัดตรงจุดเดิม ถ้าเอาไปรวมเป็นตารางเดียว
+ * จะแยกไม่ออกว่า build ที่พังเกิดจาก scraper เพี้ยนหรือขอบเขตเลื่อน
+ *
+ * เจ็ดเฉดที่หายไป (BRD BRT AF RGD BN BL 2MB) ไม่ได้หายจากข้อมูล — ของครัวไม่มี
+ * ชิ้นไหนสั่งเฉดพวกนั้นได้ พลิก KITCHEN_ONLY กลับ ทั้งสิบเอ็ดเฉดก็กลับมา
+ */
+const EXPECTED_SCOPED_FINISH_COUNTS: Readonly<Record<string, number>> = KITCHEN_ONLY
+  ? { CP: 8, NA: 6, '0': 1, BV: 1 }
+  : EXPECTED_FINISH_COUNTS;
 
 export type FinishEntry = {
   code: string;
@@ -261,28 +283,51 @@ export function panelScrim(accent: string): PanelScrim {
  * โยน error ตอนโหลดโมดูล = พังตอน `next build` ไม่ใช่ตอนลูกค้าเปิดดู
  * ข้อความบอกส่วนต่างทุกตัวในครั้งเดียว จะได้ไม่ต้องไล่แก้ทีละรอบ
  */
-export function assertFinishCounts(): void {
+function compare(
+  label: string,
+  expected: Readonly<Record<string, number>>,
+  actual: Readonly<Record<string, number>>,
+): string[] {
   const problems: string[] = [];
-
-  const expectedCodes = Object.keys(EXPECTED_FINISH_COUNTS);
-  const actualCodes = finishIndex.map((f) => f.code);
-
-  for (const code of expectedCodes) {
-    if (!actualCodes.includes(code)) problems.push(`${code}: หายไปจากข้อมูล`);
+  for (const code of Object.keys(expected)) {
+    if (!(code in actual)) problems.push(`${label} ${code}: หายไปจากข้อมูล`);
   }
-  for (const code of actualCodes) {
-    if (!(code in EXPECTED_FINISH_COUNTS)) problems.push(`${code}: เฉดใหม่ที่ไม่มีในสเปก §3`);
+  for (const code of Object.keys(actual)) {
+    if (!(code in expected)) problems.push(`${label} ${code}: เฉดใหม่ที่ไม่มีในตาราง`);
   }
-  for (const entry of finishIndex) {
-    const want = EXPECTED_FINISH_COUNTS[entry.code];
-    if (want !== undefined && want !== entry.count) {
-      problems.push(`${entry.code}: สเปก §3 บอก ${want} แต่ข้อมูลมี ${entry.count}`);
+  for (const [code, want] of Object.entries(expected)) {
+    const got = actual[code];
+    if (got !== undefined && got !== want) {
+      problems.push(`${label} ${code}: ตารางบอก ${want} แต่ข้อมูลมี ${got}`);
     }
   }
+  return problems;
+}
+
+/** นับสินค้าต่อรหัสเฉดจากรายการที่ให้มา */
+function countByFinish(list: readonly Product[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const product of list) {
+    for (const finish of product.finishes) out[finish.code] = (out[finish.code] ?? 0) + 1;
+  }
+  return out;
+}
+
+export function assertFinishCounts(): void {
+  const problems = [
+    // สเปก §3 เทียบกับทั้งแคตตาล็อก — เฝ้า scraper
+    ...compare('[สเปก §3]', EXPECTED_FINISH_COUNTS, countByFinish(allProducts)),
+    // ตารางขอบเขตเทียบกับสิ่งที่หน้าเว็บใช้จริง — เฝ้าตัวกรองห้อง
+    ...compare(
+      '[ขอบเขต]',
+      EXPECTED_SCOPED_FINISH_COUNTS,
+      Object.fromEntries(finishIndex.map((f) => [f.code, f.count])),
+    ),
+  ];
 
   if (problems.length) {
     throw new Error(
-      `[finish-index] จำนวนสินค้าต่อเฉดไม่ตรงกับสเปก §3 (AC ข้อ 3):\n  ${problems.join('\n  ')}`,
+      `[finish-index] จำนวนสินค้าต่อเฉดไม่ตรงกับตารางที่ประกาศไว้ (AC ข้อ 3):\n  ${problems.join('\n  ')}`,
     );
   }
 }

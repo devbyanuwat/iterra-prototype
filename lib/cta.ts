@@ -36,12 +36,12 @@ const GO = {
   products: {
     href: '/products/',
     label: { th: 'ดูสินค้าทั้งหมด', en: 'Browse the catalogue' },
-    note: { th: '182 รายการ กรองตามห้อง ประเภท และเฉดผิวเคลือบ', en: '182 items, filtered by room, type and finish.' },
+    note: { th: 'ก๊อกครัวและอ่างล้างจาน กรองตามประเภทและเฉดผิวเคลือบ', en: 'Kitchen faucets and sinks, filtered by type and finish.' },
   },
   palette: {
     href: '/palette/',
     label: { th: 'สีและผิวเคลือบ', en: 'Colours & finishes' },
-    note: { th: 'สิบเอ็ดเฉดจริง ดูว่าเฉดไหนเข้ากับห้องของคุณ', en: 'Eleven real finishes, and which room each one belongs in.' },
+    note: { th: 'เฉดจริงที่ของครัวสั่งได้ ดูว่าเฉดไหนเข้ากับครัวของคุณ', en: 'The finishes the kitchen range actually ships in, and which suits yours.' },
   },
   gallery: {
     href: '/gallery/',
@@ -55,8 +55,8 @@ const GO = {
   },
   ideas: {
     href: '/ideas/',
-    label: { th: 'ไอเดียแต่งห้อง', en: 'Room ideas' },
-    note: { th: 'ห้องจริงที่จัดเสร็จแล้ว พร้อมของที่ใช้ในนั้น', en: 'Finished rooms, and what went into them.' },
+    label: { th: 'ไอเดียแต่งครัว', en: 'Kitchen ideas' },
+    note: { th: 'ครัวจริงที่จัดเสร็จแล้ว พร้อมของที่ใช้ในนั้น', en: 'Finished kitchens, and what went into them.' },
   },
   articles: {
     href: '/articles/',
@@ -119,17 +119,17 @@ const BANDS: Record<string, BandCopy> = {
     kicker: CONTINUE,
     title: { th: 'เลือกไม่ถูกใช่ไหม', en: 'Not sure which one' },
     body: {
-      th: 'แคตตาล็อกใหญ่และรุ่นที่ต่างกันนิดเดียวมีเยอะ บอกเราว่าห้องเป็นอย่างไรแล้วเราช่วยตัดตัวเลือกให้เหลือสองสามตัว',
-      en: 'The catalogue is large and many models differ by very little. Tell us about the room and we will cut it down to two or three.',
+      th: 'รุ่นที่ต่างกันนิดเดียวมีเยอะ และความต่างที่สำคัญมักไม่ได้อยู่ในรูป บอกเราว่าครัวเป็นอย่างไรแล้วเราช่วยตัดตัวเลือกให้เหลือสองสามตัว',
+      en: 'Models differ by very little, and the differences that matter rarely show in a photograph. Tell us about the kitchen and we will cut it down to two or three.',
     },
     links: [GO.palette, GO.stores, GO.contact],
   },
   finish: {
     kicker: CONTINUE,
-    title: { th: 'เฉดเดียวกัน ทั้งห้อง', en: 'One finish, the whole room' },
+    title: { th: 'เฉดเดียวกัน ทั้งครัว', en: 'One finish, the whole kitchen' },
     body: {
-      th: 'เฉดผิวเคลือบเป็นสิ่งที่ตาจับได้ก่อนรูปทรง เลือกเฉดให้ตรงกันทั้งก๊อก อ่างล้างหน้า และมือจับ แล้วห้องจะดูเหมือนถูกออกแบบมา ไม่ใช่ถูกซื้อมา',
-      en: 'The eye reads finish before it reads form. Match it across the faucet, the basin and the handles and the room looks designed rather than assembled.',
+      th: 'เฉดผิวเคลือบเป็นสิ่งที่ตาจับได้ก่อนรูปทรง เลือกเฉดให้ตรงกันทั้งก๊อก ขอบอ่าง และมือจับตู้ แล้วครัวจะดูเหมือนถูกออกแบบมา ไม่ใช่ถูกซื้อมา',
+      en: 'The eye reads finish before it reads form. Match it across the faucet, the sink rim and the cabinet pulls and the kitchen looks designed rather than assembled.',
     },
     links: [GO.products, GO.gallery, GO.stores],
   },
@@ -164,8 +164,8 @@ const BANDS: Record<string, BandCopy> = {
     kicker: CONTINUE,
     title: { th: 'อ่านจบแล้ว ลองของจริง', en: 'You have read it — now handle it' },
     body: {
-      th: 'คู่มือบอกว่าควรดูอะไร แต่ความรู้สึกตอนหมุนก้านก๊อกหรือน้ำหนักของฝาชักโครก ไม่มีตัวหนังสือไหนแทนได้',
-      en: 'A guide tells you what to look for. What a lever feels like turning, how a seat lands — no amount of text stands in for that.',
+      th: 'คู่มือบอกว่าควรดูอะไร แต่ความรู้สึกตอนโยกก้านก๊อกหรือเสียงที่อ่างสเตนเลสตอบกลับ ไม่มีตัวหนังสือไหนแทนได้',
+      en: 'A guide tells you what to look for. What a lever feels like turning, what a steel bowl sounds like under a dropped pan — no amount of text stands in for that.',
     },
     links: [GO.products, GO.stores, GO.contact],
   },
@@ -176,7 +176,7 @@ const BANDS: Record<string, BandCopy> = {
       th: 'ไม่ใช่ภาพเรนเดอร์ ทุกชิ้นในห้องเหล่านี้อยู่ในแคตตาล็อก และเรายินดีช่วยไล่ว่าห้องของคุณต้องใช้อะไรบ้าง',
       en: 'Not renders. Every piece in these rooms is in the catalogue, and we are glad to work out what yours would need.',
     },
-    links: [GO.products, GO.collections, GO.contact],
+    links: [GO.products, GO.guides, GO.contact],
   },
   articles: {
     kicker: CONTINUE,

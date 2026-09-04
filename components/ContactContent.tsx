@@ -8,7 +8,8 @@ import { useEffect, useRef, useState } from 'react';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { CONTACT } from '@/lib/site';
-import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle.generated';
+import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle';
+import { TYPE_LABELS } from '@/app/_routes/parts/facets';
 
 // ช่องแผนที่เดิมเป็นกล่องเปล่า — ใส่ภาพหน้าร้านโชว์รูมไปก่อน
 // (ภาพ retail ใบเดียวในคลัง) ตอนขึ้นจริงค่อยแทนด้วย Google Maps embed
@@ -30,12 +31,13 @@ export default function ContactContent() {
  const { t, lang } = useLang();
  const [toast, setToast] = useState(false);
  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
- const [interest, setInterest] = useState('kitchen');
+ const [interest, setInterest] = useState('kitchen-faucet');
 
  useEffect(() => {
  // ถ้ามาจากปุ่ม"สอบถามสินค้านี้" — เติมหมวดให้เอง
  const p = new URLSearchParams(window.location.search).get('product');
- if (p) setInterest(p.includes('bath') || p.includes('basin') || p.includes('toilet') || p.includes('shower') ? 'bath' : 'kitchen');
+ // เว็บเหลือเฉพาะห้องครัว ค่าเริ่มต้นจึงเป็นประเภทของครัว ไม่ใช่ห้อง
+ if (p) setInterest(p.includes('sink') || p.includes('อ่างล้างจาน') ? 'kitchen-sink' : 'kitchen-faucet');
  return () => clearTimeout(timer.current);
  }, []);
 
@@ -93,8 +95,11 @@ export default function ContactContent() {
  onChange={(e) => setInterest(e.target.value)}
  className="w-full border-b border-line-12 bg-transparent py-3 text-body-sm font-normal text-ink outline-none focus:border-accent"
  >
- <option value="kitchen" className="bg-surface text-ink">{t.common.category.kitchen}</option>
- <option value="bath" className="bg-surface text-ink">{t.common.category.bath}</option>
+ {/* ตัวเลือกมาจาก TYPE_LABELS ของตัวกรองหน้าสินค้า ไม่ใช่รายชื่อห้องอีกแล้ว
+     — คนที่ทักมาสนใจ "ก๊อกครัว" หรือ "อ่างล้างจาน" ไม่ใช่ "ครัว" ซึ่งตอนนี้
+     เป็นคำตอบเดียวที่เป็นไปได้ จึงไม่ได้บอกอะไรเราเลย */}
+ <option value="kitchen-faucet" className="bg-surface text-ink">{TYPE_LABELS['kitchen-faucet'][lang]}</option>
+ <option value="kitchen-sink" className="bg-surface text-ink">{TYPE_LABELS['kitchen-sink'][lang]}</option>
  </select>
  </div>
  <div>

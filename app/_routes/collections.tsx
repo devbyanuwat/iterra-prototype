@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import CollectionsContent, { type CollectionEntry } from '@/components/CollectionsContent';
 import JsonLd from '@/components/JsonLd';
-import { collectionCards, collectionFamilies } from '@/lib/collections.generated';
+import { collectionCards, collectionFamilies } from '@/lib/editorial';
 import { dict, type Lang } from '@/lib/i18n';
 import { products } from '@/lib/products';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
+import { COLLECTIONS_ENABLED } from '@/lib/scope';
 import { alternates, treeUrl } from '@/app/_lib/routes';
 
 export const path = '/collections/';
@@ -65,6 +67,12 @@ export default function CollectionsPage({ lang }: { lang: Lang }) {
     inLanguage: lang,
     isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: SITE_URL },
   };
+
+  // เว็บเหลือเฉพาะห้องครัว การ์ดคอลเลกชันทั้ง 14 ใบเป็นชุดห้องน้ำล้วน หน้านี้จึง
+  // ว่างทั้งหน้า ไม่ใช่แค่การ์ดบางใบหาย — ตอบ 404 ดีกว่าโชว์หัวข้อบนกริดเปล่า
+  // ลิงก์ทุกเส้นที่เคยชี้มาถูกถอดไปแล้ว (เมนู, sitemap, แถบชวนต่อ) หน้านี้จึงไม่
+  // มีทางเข้าจากในเว็บ เหลือแต่คนที่พิมพ์ URL เองหรือมีลิงก์เก่าค้างอยู่
+  if (!COLLECTIONS_ENABLED) notFound();
 
   return (
     <>

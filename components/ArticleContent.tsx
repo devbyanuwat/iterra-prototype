@@ -20,7 +20,7 @@ import VideoEmbed from './VideoEmbed';
 import Foreign from './Foreign';
 import { useLang } from './LangProvider';
 import { langAttr, postTitle } from '@/lib/i18n';
-import { getPost, type PostImage } from '@/lib/posts';
+import { getPost, type PostImage } from '@/lib/editorial';
 
 // แทรกภาพหลังย่อหน้าที่ 2 และ 4 เหมือนเดิม — ภาพมาจาก post.figures ตามลำดับ
 const IMAGE_AFTER = [1, 3];

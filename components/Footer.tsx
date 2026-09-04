@@ -3,7 +3,7 @@
 import Link from '@/components/Link';
 import BrandMark from './BrandMark';
 import { useLang } from './LangProvider';
-import { contentPages } from '@/lib/pages.generated';
+import { contentPages } from '@/lib/pages';
 import { CONTACT, SITE_NAME } from '@/lib/site';
 
 /**

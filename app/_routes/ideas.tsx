@@ -3,7 +3,7 @@
 import type { Metadata } from 'next';
 import IdeasContent, { type HubCard } from './parts/IdeasContent';
 import { ideaPicture } from './parts/idea-media';
-import { ideaHubs } from '@/lib/ideas.generated';
+import { ideaHubs } from '@/lib/editorial';
 import { dict, type Lang } from '@/lib/i18n';
 import { alternates } from '@/app/_lib/routes';
 

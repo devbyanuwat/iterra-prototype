@@ -8,7 +8,7 @@
 // ไฟล์นี้คือการนับธงพวกนั้น เพื่อให้หน้าเว็บ "บอก" ช่องว่างได้ ไม่ใช่กลืนมันลงไป
 // เงียบ ๆ — หน้าที่ครึ่งหนึ่งเป็นไทยในเอกสารที่ประกาศ lang="en" ต้องประกาศตัว
 
-import type { Guide } from '@/lib/guides.generated';
+import type { Guide } from '@/lib/editorial';
 
 export type Coverage = {
   /** หมวด + ตัวเลือก ทั้งหมดในคู่มือนี้ */

@@ -21,8 +21,9 @@ import { usePathname } from 'next/navigation';
 import BrandMark from './BrandMark';
 import { useLang } from './LangProvider';
 import { ALT_LANG, DEFAULT_LANG, langPath, splitLangPath, type Lang } from '@/lib/i18n';
+import { COLLECTIONS_ENABLED } from '@/lib/scope';
 
-const LINKS = [
+const ALL_LINKS = [
   { href: '/', key: 'home' },
   { href: '/about/', key: 'about' },
   { href: '/products/', key: 'products' },
@@ -45,6 +46,18 @@ const LINKS = [
   { href: '/stores/', key: 'stores' },
   { href: '/contact/', key: 'contact' },
 ] as const;
+
+/**
+ * เมนูจริง = รายการที่ยังมีหน้าปลายทางอยู่
+ *
+ * /collections/ ถูกปิดตอนเว็บเหลือเฉพาะห้องครัว: การ์ดคอลเลกชันทั้ง 14 ใบเป็น
+ * ชุดห้องน้ำล้วน หน้านั้นจึงว่างทั้งหน้า ไม่ใช่แค่การ์ดบางใบหาย (ดู lib/scope.ts)
+ * ปล่อยไว้ในเมนูคือมีปุ่มที่พาไปหน้าที่ไม่ถูก export = 404
+ *
+ * กรองที่นี่ ไม่ใช่ลบบรรทัดออกจากรายการ — พลิก KITCHEN_ONLY กลับเป็น false
+ * แล้วเมนูกลับมาครบเองโดยไม่ต้องจำว่าเคยลบอะไรไป
+ */
+const LINKS = ALL_LINKS.filter((l) => l.key !== 'collections' || COLLECTIONS_ENABLED);
 
 // ── ปุ่มสลับภาษา = ลิงก์จริง ไม่ใช่ปุ่มที่สลับ state (task D3) ────────────────
 //

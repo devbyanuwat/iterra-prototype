@@ -29,7 +29,7 @@
 
 import { useState } from 'react';
 import { useLang } from './LangProvider';
-import type { PostVideo } from '@/lib/posts';
+import type { PostVideo } from '@/lib/editorial';
 
 type Props = {
   video: PostVideo;

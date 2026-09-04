@@ -20,7 +20,7 @@
 
 import { finishIndex, finishOf } from './finish-index';
 import { WALL_PANEL_PRODUCTS } from './wall-products';
-import { lifestyleByCategory } from '@/lib/lifestyle.generated';
+import { lifestyleByCategory } from '@/lib/lifestyle';
 
 /** id ของ <script type="application/json"> ที่ app/page.tsx ฝากชุดระนาบไว้ให้ Preloader */
 export const DEPTH_SEED_ID = 'depth-field-seed';

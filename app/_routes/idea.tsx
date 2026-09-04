@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import IdeaHubContent, { type HubView } from './parts/IdeaHubContent';
 import { ideaPicture, localPostFor } from './parts/idea-media';
-import { ideaHubs } from '@/lib/ideas.generated';
+import { ideaHubs } from '@/lib/editorial';
 import { dict, type Lang } from '@/lib/i18n';
 import { alternates } from '@/app/_lib/routes';
 

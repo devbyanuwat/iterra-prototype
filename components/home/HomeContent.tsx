@@ -29,10 +29,11 @@ import { postTitle } from '@/lib/i18n';
 import { finishIndex, finishOf } from '@/components/finish-index';
 import FieldEntry from './FieldEntry';
 import { roomById } from './rooms';
-import { lifestyleSrc } from '@/lib/lifestyle.generated';
+import { productType, type ProductType } from '@/app/_routes/parts/facets';
+import { lifestyleSrc } from '@/lib/lifestyle';
 import { products, type Finish, type Product } from '@/lib/products';
 import type { FieldPlane } from '@/components/depth-field';
-import { posts } from '@/lib/posts';
+import { posts } from '@/lib/editorial';
 import { CONTACT } from '@/lib/site';
 import { shortDate } from '@/lib/date';
 
@@ -98,27 +99,42 @@ const FEATURED: FeaturedPick[] = (() => {
 // ไม่มีตัวรวมจำนวนสามเฉด — สินค้าชิ้นเดียวอยู่ได้หลายเฉด ผลบวกจึงนับซ้ำ
 // ป้ายกำกับจึงบอกจำนวนแยกรายเฉดแทน ดู topFinishSub ใน lib/i18n.ts
 
-/** ครัว/ห้องน้ำ พร้อมภาพนำ 1 + ภาพย่อย 3 จากสินค้าจริงในหมวดนั้น */
-function room(category: 'kitchen' | 'bath') {
-  const list = products.filter((p) => p.category === category);
+/**
+ * บล็อกหักจังหวะสองแผง — เดิมคือ "ครัว | ห้องน้ำ"
+ *
+ * เว็บแสดงเฉพาะห้องครัวแล้ว (lib/scope.ts) แผงห้องน้ำจึงไม่มีของให้พูดถึง
+ * แต่บล็อกนี้ยังทำงานของมันได้ เพราะแคตตาล็อกครัวแบ่งครึ่งพอดีตามประเภทจริง:
+ * ก๊อกครัว 8 · อ่างล้างจาน 8 — สองแผงเท่าเดิม เปลี่ยนแค่แกนที่ใช้แบ่ง
+ *
+ * แบ่งตาม productType ไม่ใช่ category เพราะ category เหลือค่าเดียวแล้ว
+ * และลิงก์ก็เปลี่ยนตาม: `?type=` แทน `?cat=` ซึ่ง ProductsContent รับอยู่แล้ว
+ */
+function typeGroup(key: ProductType) {
+  const list = products.filter((p) => productType(p) === key);
   const withImage = list.filter((p) => p.finishes[0]?.image);
   return { count: list.length, lead: withImage[0], thumbs: withImage.slice(1, 4) };
 }
 
-const ROOMS = { kitchen: room('kitchen'), bath: room('bath') };
+const GROUPS = {
+  'kitchen-faucet': typeGroup('kitchen-faucet'),
+  'kitchen-sink': typeGroup('kitchen-sink'),
+};
 
 /**
  * ภาพห้องจริงของบล็อกหมวดหมู่ (task A2)
  *
  * เดิมช่องนี้เป็นภาพสินค้าตัดพื้นขาวของสินค้าชิ้นแรกในหมวด — บล็อกที่มีหน้าที่
- * บอกว่า "ครัว" กับ "ห้องน้ำ" จึงไม่มีทั้งครัวและห้องน้ำอยู่ในนั้นเลย ทั้งที่คลัง
- * มีภาพห้องอยู่ 88 ใบ เลือกด้วยตาไม่ใช่ด้วยแฮช เพราะสองใบนี้เป็นหน้าตาของหมวด
+ * บอกว่าเป็นครัว จึงไม่มีครัวอยู่ในนั้นเลย ทั้งที่คลังมีภาพห้องอยู่ เลือกด้วยตา
+ * ไม่ใช่ด้วยแฮช เพราะสองใบนี้เป็นหน้าตาของหมวด
+ *
+ * ทั้งสามใบเป็นภาพครัวหรือภาพหน้าร้าน — ของเดิมสองใบ (zab29178-rgb,
+ * zac06644-rgb) เป็นห้องน้ำ ซึ่งถูกปิดไปพร้อมกับที่เหลือ
  */
 const ROOM_PHOTO = {
-  kitchen: roomById('zab91996-rgb'),
-  bath: roomById('zab29178-rgb'),
+  'kitchen-faucet': roomById('zab91996-rgb'),
+  'kitchen-sink': roomById('aab27241'),
   /** ฉากหลังของบล็อกปิดหน้า — โชว์รูม/ติดต่อ */
-  showroom: roomById('zac06644-rgb'),
+  showroom: roomById('zab64028-1800x800'),
 };
 
 /**
@@ -142,9 +158,9 @@ const LATEST = posts.slice(0, 3).map((post) => ({
  * ทั้งสามใบเป็นคนละใบกับที่บล็อกหมวดหมู่และบล็อกปิดหน้าใช้ ไม่ให้ซ้ำกันในหน้าเดียว
  */
 const STORY_IMAGES = [
-  roomById('zac02157-rgb'),
-  roomById('zab95042-rgb'),
-  roomById('zac00286-rgb'),
+  roomById('zaa08493'),
+  roomById('zab68492-rgb'),
+  roomById('aab39432'),
 ].map((image) => lifestyleSrc(image, 900, 2));
 
 // ── บล็อกต่าง ๆ ───────────────────────────────────────────────────────────
@@ -235,18 +251,18 @@ function RoomSplit() {
   const { lang, t } = useLang();
   const rooms = [
     {
-      key: 'kitchen' as const,
-      title: t.home.catKitchen,
-      desc: t.home.catKitchenDesc,
-      photo: ROOM_PHOTO.kitchen,
-      ...ROOMS.kitchen,
+      key: 'kitchen-faucet' as const,
+      title: t.home.catKitchenFaucet,
+      desc: t.home.catKitchenFaucetDesc,
+      photo: ROOM_PHOTO['kitchen-faucet'],
+      ...GROUPS['kitchen-faucet'],
     },
     {
-      key: 'bath' as const,
-      title: t.home.catBath,
-      desc: t.home.catBathDesc,
-      photo: ROOM_PHOTO.bath,
-      ...ROOMS.bath,
+      key: 'kitchen-sink' as const,
+      title: t.home.catKitchenSink,
+      desc: t.home.catKitchenSinkDesc,
+      photo: ROOM_PHOTO['kitchen-sink'],
+      ...GROUPS['kitchen-sink'],
     },
   ];
 
@@ -255,7 +271,7 @@ function RoomSplit() {
       {rooms.map((r) => (
         <Link
           key={r.key}
-          href={`/products/?cat=${r.key}`}
+          href={`/products/?type=${r.key}`}
           className="group relative isolate block min-h-[62svh] overflow-clip bg-ink md:min-h-[78svh]"
         >
           {/* ภาพเต็มแผง: ช่องกว้างครึ่งจอ (720px ที่ 1440) จึงขอ rendition ที่คลุม

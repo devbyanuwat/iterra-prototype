@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import JsonLd from '@/components/JsonLd';
 import ArticleContent from '@/components/ArticleContent';
 import { postTitle, scriptOf, type Lang } from '@/lib/i18n';
-import { getPost, posts } from '@/lib/posts';
+import { getPost, posts } from '@/lib/editorial';
 import { SITE_NAME } from '@/lib/site';
 import { alternates, treeUrl } from '@/app/_lib/routes';
 

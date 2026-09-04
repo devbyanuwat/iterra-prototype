@@ -3,8 +3,8 @@
 // ต่างจากคู่มือเลือกซื้อตรงที่ id ของไอเดียทั้ง 17 ใบอยู่ในคลังไลฟ์สไตล์ครบ
 // ไม่ต้องถามคลังไทล์ (ตรวจแล้ว: 17/17 อยู่ใน lib/lifestyle.generated.ts)
 
-import { lifestyleImages } from '@/lib/lifestyle.generated';
-import { posts } from '@/lib/posts';
+import { lifestyleImages } from '@/lib/lifestyle';
+import { posts } from '@/lib/editorial';
 
 export type Picture = { src: string; srcSet: string; width: number; height: number };
 

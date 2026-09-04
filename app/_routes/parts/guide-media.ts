@@ -11,7 +11,7 @@
 // ไทล์ส่วนใหญ่กว้าง 400px จริง ๆ — ช่องกว้างกว่านั้นคือการขยายภาพให้เบลอ
 
 import { getTile } from '@/lib/tiles.generated';
-import { lifestyleImages } from '@/lib/lifestyle.generated';
+import { lifestyleImages } from '@/lib/lifestyle';
 
 export type GuidePicture = {
   /** ไฟล์ที่เล็กที่สุดที่ยังคลุมช่องได้ — ใช้เป็น src ตั้งต้น */

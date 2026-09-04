@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import InfoContent from '@/components/InfoContent';
-import { contentPages, getContentPage } from '@/lib/pages.generated';
+import { contentPages, getContentPage } from '@/lib/pages';
 import { dict, type Lang } from '@/lib/i18n';
 import { alternates } from '@/app/_lib/routes';
 

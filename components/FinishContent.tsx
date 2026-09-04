@@ -17,7 +17,7 @@ import { useLang } from './LangProvider';
 import { finishIndex, finishOf, getFinishEntry } from './finish-index';
 import { roomFor } from './home/rooms';
 import { langPath, splitLangPath } from '@/lib/i18n';
-import { lifestyleSrc } from '@/lib/lifestyle.generated';
+import { lifestyleSrc } from '@/lib/lifestyle';
 import type { Category, Finish, Product } from '@/lib/products';
 
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
@@ -210,7 +210,11 @@ export default function FinishContent({ code }: { code: string }) {
 
   // เปลี่ยนเฉดแล้วยังอยู่หมวดเดิมโดยตั้งใจ ("ขอดูครัวในทุกเฉด" เป็นคำถามที่สมเหตุสมผล)
   // ถ้าเฉดใหม่ไม่มีของในหมวดนั้น ปุ่มฟิลเตอร์บอกจำนวน 0 ให้เห็นก่อนกด และมี empty state รับ
-  const filters: Filter[] = ['all', 'kitchen', 'bath'];
+  // แถวกรองห้องเหลือเฉพาะห้องที่มีของจริงในเฉดนี้ และหายไปทั้งแถวถ้าเหลือห้องเดียว
+  // (เว็บแสดงเฉพาะห้องครัวแล้ว — lib/scope.ts) ปุ่มที่กดแล้วผลไม่เปลี่ยนคือ UI
+  // ที่อ้างว่ามีตัวเลือกทั้งที่ไม่มี
+  const rooms = (['kitchen', 'bath'] as const).filter((c) => items.some((i) => i.product.category === c));
+  const filters: Filter[] = rooms.length > 1 ? ['all', ...rooms] : [];
 
   // ── หน้าเฉดเปิดด้วยห้องจริง ไม่ใช่พาดหัวลอย ๆ เหนือกริด (task A2) ─────────
   // เลือกจากแฮชของรหัสเฉด จึงคงที่ต่อเฉดหนึ่ง ๆ และเปลี่ยนตามเฉดที่สลับอยู่
@@ -222,6 +226,9 @@ export default function FinishContent({ code }: { code: string }) {
   const room = roomFor(entry.code, {
     minWidth: 1440,
     minAspect: 1.4,
+    // ขอ 'kitchen' เมื่อของส่วนใหญ่ในเฉดนี้เป็นของครัว — ซึ่งตอนนี้เป็นทุกเฉด
+    // เพราะเว็บเหลือเฉพาะห้องครัว ปล่อยเงื่อนไขไว้ ไม่ได้ตรึงเป็น 'kitchen':
+    // มันจะถูกต้องเองอีกครั้งถ้าพลิก KITCHEN_ONLY กลับ
     space: kitchenCount * 2 > items.length ? 'kitchen' : 'bath',
   });
 

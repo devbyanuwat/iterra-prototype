@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation';
 import GuideContent, { type GuideView } from './parts/GuideContent';
 import { catFor, coverageOf } from './parts/coverage';
 import { guidePicture } from './parts/guide-media';
-import { getGuide, guides } from '@/lib/guides.generated';
+import { getGuide, guides } from '@/lib/editorial';
 import { dict, type Lang } from '@/lib/i18n';
 import { alternates } from '@/app/_lib/routes';
 

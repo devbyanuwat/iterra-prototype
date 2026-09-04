@@ -12,7 +12,7 @@ import type { Metadata } from 'next';
 import GuidesContent, { type GuideCard } from './parts/GuidesContent';
 import { coverageOf } from './parts/coverage';
 import { coverPicture } from './parts/guide-media';
-import { guides } from '@/lib/guides.generated';
+import { guides } from '@/lib/editorial';
 import { dict, type Lang } from '@/lib/i18n';
 import { alternates } from '@/app/_lib/routes';
 

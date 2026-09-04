@@ -114,11 +114,11 @@ const dictSource = {
     // ข้อความของ <head> เคยฮาร์ดโค้ดไทยไว้ใน app/layout.tsx ทั้งก้อน
     // ย้ายมาที่นี่เพราะมันต้องเปลี่ยนตาม DEFAULT_LANG ไม่ใช่ค่าคงที่ของเว็บ
     seo: {
-      tagline: 'อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม',
+      tagline: 'อุปกรณ์ครัวพรีเมียม',
       description:
-        'KOHLER ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม คัดสรรซิงก์ ก๊อก เตา เครื่องใช้บิลท์อิน และสุขภัณฑ์จากแบรนด์ชั้นนำระดับโลก พร้อมโชว์รูมให้สัมผัสจริงในกรุงเทพฯ',
-      ogDescription: 'คัดสรรอุปกรณ์ครัวและสุขภัณฑ์จากแบรนด์ชั้นนำระดับโลก',
-      orgDescription: 'ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม',
+        'KOHLER ดีลเลอร์อุปกรณ์ครัวพรีเมียม คัดสรรอ่างล้างจานและก๊อกครัวจากแบรนด์ชั้นนำระดับโลก พร้อมโชว์รูมให้สัมผัสจริงในกรุงเทพฯ',
+      ogDescription: 'คัดสรรอุปกรณ์ครัวจากแบรนด์ชั้นนำระดับโลก',
+      orgDescription: 'ดีลเลอร์อุปกรณ์ครัวพรีเมียม',
       ogLocale: 'th_TH',
     },
     // ── <title> และ <meta description> ของแต่ละหน้า ──
@@ -132,17 +132,17 @@ const dictSource = {
     // ภาษามีครบเท่ากันเสมอ
     meta: {
       home: {
-        title: 'KOHLER — อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม',
+        title: 'KOHLER — อุปกรณ์ครัวพรีเมียม',
         description:
-          'อุปกรณ์ครัวและสุขภัณฑ์คัดสรรจากแบรนด์ชั้นนำระดับโลก — 182 รายการ สิบเอ็ดเฉดผิวเคลือบ สัมผัสจริงได้ที่โชว์รูม KOHLER กรุงเทพฯ',
+          'อุปกรณ์ครัวคัดสรรจากแบรนด์ชั้นนำระดับโลก — 16 รายการ สี่เฉดผิวเคลือบ สัมผัสจริงได้ที่โชว์รูม KOHLER กรุงเทพฯ',
       },
       about: {
         title: 'เกี่ยวกับเรา — เรื่องราวของ KOHLER',
         description:
-          'กว่า 25 ปีของ KOHLER ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม จากร้านเล็กบนถนนสุขุมวิทสู่โชว์รูมที่ให้คุณสัมผัสของจริงทุกชิ้น',
+          'กว่า 25 ปีของ KOHLER ดีลเลอร์อุปกรณ์ครัวพรีเมียม จากร้านเล็กบนถนนสุขุมวิทสู่โชว์รูมที่ให้คุณสัมผัสของจริงทุกชิ้น',
       },
       products: {
-        title: 'สินค้าทั้งหมด — อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม',
+        title: 'สินค้าทั้งหมด — อุปกรณ์ครัวพรีเมียม',
         description:
           'สินค้าคัดสรร 182 รายการของ KOHLER — กรองตามเฉด หมวด และประเภทสินค้า พร้อมกำแพงสิบเอ็ดเฉดสำหรับเลือกจากผิวเคลือบ',
       },
@@ -164,17 +164,17 @@ const dictSource = {
       articles: {
         title: 'บทความ — ไอเดียครัวสไตล์โชว์รูม',
         description:
-          'รวมบทความไอเดียครัวและห้องน้ำจาก KOHLER — วิธีจัดครัวให้เหมือนโชว์รูม คู่มือเลือกซื้อ และเทรนด์วัสดุพรีเมียม',
+          'รวมบทความไอเดียครัวจาก KOHLER — วิธีจัดครัวให้เหมือนโชว์รูม คู่มือเลือกซื้อ และเทรนด์วัสดุพรีเมียม',
       },
       guides: {
         title: 'คู่มือเลือกซื้อ',
         description:
-          'คู่มือเลือกซื้อของ KOHLER สิบสามชุด ยกมาจาก kohler.co.th ทั้งสองภาษา — ก๊อก อ่างล้างจาน สุขภัณฑ์ ฝักบัว เฟอร์นิเจอร์ห้องน้ำ และอื่น ๆ',
+          'คู่มือเลือกซื้อของ KOHLER ยกมาจาก kohler.co.th ทั้งสองภาษา — ก๊อกครัวและอ่างล้างจาน',
       },
       ideas: {
         title: 'ไอเดียแต่งห้อง',
         description:
-          'ไอเดียห้องน้ำและห้องครัวจาก kohler.co.th ทั้งไทยและอังกฤษ — เรื่องไหนที่เรามีบทความอยู่แล้วจะเปิดอ่านในเว็บนี้ ไม่ต้องออกไปข้างนอก',
+          'ไอเดียห้องครัวจาก kohler.co.th ทั้งไทยและอังกฤษ — เรื่องไหนที่เรามีบทความอยู่แล้วจะเปิดอ่านในเว็บนี้ ไม่ต้องออกไปข้างนอก',
       },
       stores: {
         title: 'ร้านที่มีของจริงให้จับ',
@@ -189,7 +189,7 @@ const dictSource = {
       contact: {
         title: 'ติดต่อเรา — นัดหมายชมโชว์รูม',
         description:
-          'ติดต่อทีมที่ปรึกษา KOHLER สอบถามสินค้า นัดหมายเข้าชมโชว์รูมอุปกรณ์ครัวและสุขภัณฑ์พรีเมียมในกรุงเทพฯ ตอบกลับภายใน 24 ชั่วโมง',
+          'ติดต่อทีมที่ปรึกษา KOHLER สอบถามสินค้า นัดหมายเข้าชมโชว์รูมอุปกรณ์ครัวพรีเมียมในกรุงเทพฯ ตอบกลับภายใน 24 ชั่วโมง',
       },
     },
     common: {
@@ -207,13 +207,19 @@ const dictSource = {
     home: {
       heroKicker: 'PREMIUM KITCHEN & BATH DEALER',
       heroTitle: 'ศิลปะของครัว\nที่คู่ควรกับบ้านคุณ',
-      heroSub: 'คัดสรรอุปกรณ์ครัวและสุขภัณฑ์จากแบรนด์ชั้นนำระดับโลก สำหรับบ้านที่ไม่ประนีประนอมเรื่องดีไซน์',
-      catTitle: 'สองโลกของเรา',
+      heroSub: 'คัดสรรอุปกรณ์ครัวจากแบรนด์ชั้นนำระดับโลก สำหรับบ้านที่ไม่ประนีประนอมเรื่องดีไซน์',
+      catTitle: 'สองด้านของครัว',
       catSub: 'เลือกเดินชมตามหมวดที่คุณกำลังมองหา',
+      // เดิมเป็น catKitchen/catBath คู่กัน — เว็บเหลือเฉพาะห้องครัวแล้ว
+      // (lib/scope.ts) สองแผงจึงแบ่งตามประเภทจริงในครัวแทน อย่างละ 8 ชิ้น
       catKitchen: 'ครัว',
       catKitchenDesc: 'ซิงก์ · ก๊อก · เตา · เครื่องใช้บิลท์อิน · ชุดครัวสั่งตัด',
       catBath: 'ห้องน้ำ',
       catBathDesc: 'สุขภัณฑ์อัจฉริยะ · ฝักบัว · อ่างล้างหน้า · อ่างอาบน้ำ',
+      catKitchenFaucet: 'ก๊อกครัว',
+      catKitchenFaucetDesc: 'ก้านโยก · สายอ่อนดึงออกได้ · หัวฉีดสองจังหวะ · ผิวเคลือบสี่เฉด',
+      catKitchenSink: 'อ่างล้างจาน',
+      catKitchenSinkDesc: 'สเตนเลสหนา · อ่างเดี่ยวและอ่างคู่ · ติดตั้งใต้เคาน์เตอร์และบนเคาน์เตอร์',
       featuredKicker: 'FEATURED COLLECTION',
       featuredTitle: 'สินค้าเด่นประจำฤดูกาล',
       featuredHint: 'เลื่อนลงเพื่อชมสินค้า — แนวนอน',
@@ -237,7 +243,7 @@ const dictSource = {
       storySlides: [
         {
           title: 'เริ่มจากความเชื่อเรื่องงานฝีมือ',
-          body: 'กว่า 25 ปีที่เราคัดสรรอุปกรณ์ครัวและสุขภัณฑ์ด้วยเกณฑ์เดียว — ต้องเป็นชิ้นที่เราอยากใช้ในบ้านของเราเอง',
+          body: 'กว่า 25 ปีที่เราคัดสรรอุปกรณ์ครัวด้วยเกณฑ์เดียว — ต้องเป็นชิ้นที่เราอยากใช้ในบ้านของเราเอง',
         },
         {
           title: 'โชว์รูมที่ให้คุณ "ลองจริง"',
@@ -264,7 +270,7 @@ const dictSource = {
     products: {
       kicker: 'COLLECTION',
       title: 'สินค้าทั้งหมด',
-      sub: (n: number) => `อุปกรณ์ครัวและสุขภัณฑ์คัดสรร ${n} รายการ — ทุกชิ้นสัมผัสจริงได้ที่โชว์รูม`,
+      sub: (n: number) => `อุปกรณ์ครัวคัดสรร ${n} รายการ — ทุกชิ้นสัมผัสจริงได้ที่โชว์รูม`,
       filterLabel: 'หมวดหมู่',
       empty: 'ไม่พบสินค้าในหมวดนี้',
       specs: 'สเปกสินค้า',
@@ -468,7 +474,7 @@ const dictSource = {
       toast: 'ส่งข้อความเรียบร้อย เราจะติดต่อกลับภายใน 24 ชม. (เดโม่ — ยังไม่เชื่อมระบบจริง)',
     },
     footer: {
-      blurb: 'ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม คัดสรรจากแบรนด์ชั้นนำระดับโลก',
+      blurb: 'ดีลเลอร์อุปกรณ์ครัวพรีเมียม คัดสรรจากแบรนด์ชั้นนำระดับโลก',
       nav: 'เมนู',
       contact: 'ติดต่อ',
       rights: 'สงวนลิขสิทธิ์',
@@ -500,26 +506,26 @@ const dictSource = {
       langSwitch: 'Choose language',
     },
     seo: {
-      tagline: 'Premium Kitchen & Bath',
+      tagline: 'Premium Kitchen',
       description:
-        'KOHLER — premium kitchen and bath dealer in Bangkok. Sinks, faucets, hobs, built-in appliances and sanitaryware from the world’s leading brands, with a showroom where every piece can be touched, opened and run.',
-      ogDescription: 'Premium kitchen and bath, curated from the world’s leading brands.',
-      orgDescription: 'Premium kitchen and bath dealer',
+        'KOHLER — premium kitchen dealer in Bangkok. Kitchen sinks and kitchen faucets from the world’s leading brands, with a showroom where every piece can be touched, opened and run.',
+      ogDescription: 'Premium kitchen, curated from the world’s leading brands.',
+      orgDescription: 'Premium kitchen dealer',
       ogLocale: 'en_US',
     },
     meta: {
       home: {
-        title: 'KOHLER — Premium Kitchen & Bath',
+        title: 'KOHLER — Premium Kitchen',
         description:
-          'Kitchen and bath curated from the world’s leading brands — 182 pieces, eleven finishes, all of them on the floor of our Bangkok showroom.',
+          'Kitchen curated from the world’s leading brands — 16 pieces, four finishes, all of them on the floor of our Bangkok showroom.',
       },
       about: {
         title: 'About — the KOHLER story',
         description:
-          '25 years of KOHLER, premium kitchen and bath dealer: from one shophouse on Sukhumvit to a showroom where every piece can be touched, opened and run.',
+          '25 years of KOHLER, premium kitchen dealer: from one shophouse on Sukhumvit to a showroom where every piece can be touched, opened and run.',
       },
       products: {
-        title: 'All products — premium kitchen and bath',
+        title: 'All products — premium kitchen',
         description:
           '182 curated KOHLER pieces — filter by finish, by room and by type, with the eleven-finish wall for choosing from the surface rather than the spec.',
       },
@@ -541,12 +547,12 @@ const dictSource = {
       articles: {
         title: 'Journal — kitchen ideas from the showroom floor',
         description:
-          'Kitchen and bath stories from KOHLER — how to lay out a kitchen like a showroom, how to choose, and what the premium materials actually do.',
+          'Kitchen stories from KOHLER — how to lay out a kitchen like a showroom, how to choose, and what the premium materials actually do.',
       },
       guides: {
         title: 'Shopping guides',
         description:
-          'KOHLER shopping guides taken from kohler.co.th in both languages — 13 guides covering faucets, sinks, toilets, showering, bathroom furniture and more.',
+          'KOHLER shopping guides taken from kohler.co.th in both languages — kitchen faucets and kitchen sinks.',
       },
       ideas: {
         title: 'Ideas',
@@ -566,7 +572,7 @@ const dictSource = {
       contact: {
         title: 'Contact us — book a showroom visit',
         description:
-          'Talk to a KOHLER consultant, ask about a piece, or book a visit to the premium kitchen and bath showroom in Bangkok. We reply within 24 hours.',
+          'Talk to a KOHLER consultant, ask about a piece, or book a visit to the premium kitchen showroom in Bangkok. We reply within 24 hours.',
       },
     },
     common: {
@@ -585,12 +591,16 @@ const dictSource = {
       heroKicker: 'PREMIUM KITCHEN & BATH DEALER',
       heroTitle: 'The Art of the Kitchen,\nWorthy of Your Home',
       heroSub: 'A curated selection of kitchen equipment and sanitary ware from the world’s finest brands — for homes that never compromise on design.',
-      catTitle: 'Two Worlds',
+      catTitle: 'Two halves of a kitchen',
       catSub: 'Browse by the space you are dreaming about',
       catKitchen: 'Kitchen',
       catKitchenDesc: 'Sinks · Faucets · Hobs · Built-in appliances · Bespoke kitchens',
       catBath: 'Bath',
       catBathDesc: 'Intelligent toilets · Showers · Basins · Bathtubs',
+      catKitchenFaucet: 'Kitchen faucets',
+      catKitchenFaucetDesc: 'Lever handles · Pull-down sprays · Two-function heads · Four finishes',
+      catKitchenSink: 'Kitchen sinks',
+      catKitchenSinkDesc: 'Heavy-gauge stainless · Single and double bowl · Under- and top-mount',
       featuredKicker: 'FEATURED COLLECTION',
       featuredTitle: 'This Season’s Highlights',
       featuredHint: 'Keep scrolling — the gallery moves sideways',
@@ -611,7 +621,7 @@ const dictSource = {
       storySlides: [
         {
           title: 'Born from a belief in craft',
-          body: 'For over 25 years we have curated kitchen and bath pieces with a single criterion — would we want this in our own home?',
+          body: 'For over 25 years we have curated kitchen pieces with a single criterion — would we want this in our own home?',
         },
         {
           title: 'A showroom you can actually try',
@@ -638,7 +648,7 @@ const dictSource = {
     products: {
       kicker: 'COLLECTION',
       title: 'All Products',
-      sub: (n: number) => `${n} curated kitchen and bath pieces — every one on display at our showroom.`,
+      sub: (n: number) => `${n} curated kitchen pieces — every one on display at our showroom.`,
       filterLabel: 'Category',
       empty: 'No products in this category',
       specs: 'Specifications',
@@ -815,7 +825,7 @@ const dictSource = {
       toast: 'Message sent — we will get back to you within 24 hours. (Demo only)',
     },
     footer: {
-      blurb: 'Premium kitchen & bath dealer, curated from the world’s finest brands.',
+      blurb: 'Premium kitchen dealer, curated from the world’s finest brands.',
       nav: 'Menu',
       contact: 'Contact',
       rights: 'All rights reserved',
@@ -1065,7 +1075,7 @@ export const aboutContent = {
       kicker: { th: 'SHOWROOM — พื้นที่ของเรา' },
       title: { th: 'โชว์รูมที่ออกแบบเหมือนบ้านจริง' },
       body: {
-        th: 'เราจัดโชว์รูมเป็นห้องครัวและห้องน้ำขนาดเท่าของจริง ไม่ใช่ชั้นวางสินค้า เพื่อให้คุณเห็นว่าซิงก์ตัวนี้อยู่กับท็อปหินสีนี้แล้วเป็นอย่างไร แสงตอนเย็นตกกระทบก๊อกทองเหลืองแล้วให้อารมณ์แบบไหน',
+        th: 'เราจัดโชว์รูมเป็นห้องครัวขนาดเท่าของจริง ไม่ใช่ชั้นวางสินค้า เพื่อให้คุณเห็นว่าซิงก์ตัวนี้อยู่กับท็อปหินสีนี้แล้วเป็นอย่างไร แสงตอนเย็นตกกระทบก๊อกทองเหลืองแล้วให้อารมณ์แบบไหน',
       },
     },
     {

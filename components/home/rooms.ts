@@ -11,7 +11,7 @@
 // ฟังก์ชันนี้จึงไม่อ้างว่าห้องที่เลือกมาเป็นเฉดนั้น มันเลือก "ห้องจริงหนึ่งห้อง"
 // ให้หน้าที่กำลังพูดถึงเฉดนั้นเปิดด้วยภาพถ่าย ไม่ใช่เปิดด้วยกริดสินค้าเปล่า ๆ
 
-import { lifestyleImages, type LifestyleImage, type LifestyleSpace } from '@/lib/lifestyle.generated';
+import { lifestyleImages, type LifestyleImage, type LifestyleSpace } from '@/lib/lifestyle';
 
 /** แฮชสั้น ๆ แบบคงที่ (FNV-1a) — ต้องได้ค่าเดิมทั้งตอน build และตอน hydrate */
 function hash(key: string): number {

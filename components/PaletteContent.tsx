@@ -20,7 +20,7 @@ import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { finishIndex } from './finish-index';
 import { getTile, tileSrc } from '@/lib/tiles.generated';
-import type { PaletteGroup } from '@/lib/palette.generated';
+import type { PaletteGroup } from '@/lib/editorial';
 
 const SWATCH_SLOT = 320;
 const CHILD_SLOT = 420;

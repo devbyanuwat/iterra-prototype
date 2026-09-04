@@ -20,6 +20,7 @@ import FinishWall, { type WallPanel } from './FinishWall';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { TYPE_LABELS, TYPE_ORDER, type ProductType } from '@/app/_routes/parts/facets';
+import { products } from '@/lib/products';
 
 export type ProductItem = {
  slug: string;
@@ -33,6 +34,17 @@ export type ProductItem = {
 };
 
 type CategoryFilter = 'all' | 'kitchen' | 'bath';
+
+/**
+ * หมวดห้องที่มีของจริงในแคตตาล็อกที่ถูกส่งเข้ามา
+ *
+ * คำนวณจากข้อมูล ไม่ใช่รายชื่อคงที่ — เว็บแสดงเฉพาะห้องครัวแล้ว (lib/scope.ts)
+ * ค่านี้จึงเหลือตัวเดียว และแถวปุ่มกรองตามห้องก็หายไปเอง ถ้าพลิกสวิตช์กลับ
+ * มันกลับมาโดยไม่ต้องแก้ที่นี่อีก
+ */
+const CATEGORIES: Exclude<CategoryFilter, 'all'>[] = (['kitchen', 'bath'] as const).filter((c) =>
+  products.some((p) => p.category === c),
+);
 type ViewMode = 'grid' | 'compact';
 
 const VIEW_LABELS: Record<ViewMode, { th: string; en: string }> = {
@@ -159,9 +171,15 @@ export default function ProductsContent({
 
  <section className="px-6 pb-6 pt-10 md:px-[8vw]">
  <div className="flex flex-col gap-6">
+ {/* แถวกรองตามห้องโผล่เฉพาะเมื่อมีมากกว่าหนึ่งห้องให้เลือกจริง ๆ
+ เว็บแสดงเฉพาะห้องครัวแล้ว (lib/scope.ts) ตัวกรองที่มีปุ่มเดียว และปุ่มนั้น
+ เลือกอะไรก็ได้ผลเท่ากัน คือ UI ที่อ้างว่ามีตัวเลือกทั้งที่ไม่มี
+ เงื่อนไขอ่านจากของที่มีจริงในแคตตาล็อก ไม่ได้ฮาร์ดโค้ดว่า "ซ่อน" — พลิก
+ KITCHEN_ONLY กลับเป็น false แถวนี้กลับมาเองพร้อมของห้องน้ำ */}
+ {CATEGORIES.length > 1 && (
  <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t.products.filterLabel}>
  <span className="micro mr-1 w-full md:w-auto">{t.products.filterLabel}</span>
- {(['all', 'kitchen', 'bath'] as CategoryFilter[]).map((c) => (
+ {(['all', ...CATEGORIES] as CategoryFilter[]).map((c) => (
  <button
  key={c}
  type="button"
@@ -174,6 +192,7 @@ export default function ProductsContent({
  </button>
  ))}
  </div>
+ )}
 
  <div className="flex flex-wrap items-center gap-2" role="group" aria-label={COPY.typeFilter[lang]}>
  <span className="micro mr-1 w-full md:w-auto">{COPY.typeFilter[lang]}</span>

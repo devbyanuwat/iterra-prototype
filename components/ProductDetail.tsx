@@ -22,7 +22,7 @@ import Foreign from './Foreign';
 import { useLang } from './LangProvider';
 import { langAttr } from '@/lib/i18n';
 import { roomFor } from './home/rooms';
-import { lifestyleSrc } from '@/lib/lifestyle.generated';
+import { lifestyleSrc } from '@/lib/lifestyle';
 import { getFinishEntry } from './finish-index';
 import { getProduct, relatedProducts } from '@/lib/products';
 

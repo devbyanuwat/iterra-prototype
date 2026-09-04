@@ -19,7 +19,7 @@
 import Link from '@/components/Link';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
-import { posts } from '@/lib/posts';
+import { posts } from '@/lib/editorial';
 import Foreign from './Foreign';
 import { articlesIntro, langAttr, postTitle, resolve } from '@/lib/i18n';
 

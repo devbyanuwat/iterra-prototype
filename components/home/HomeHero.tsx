@@ -29,7 +29,7 @@ import Link from '@/components/Link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLang } from '@/components/LangProvider';
-import { lifestyleImages, lifestyleSrc, type LifestyleImage } from '@/lib/lifestyle.generated';
+import { lifestyleImages, lifestyleSrc, type LifestyleImage } from '@/lib/lifestyle';
 
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -42,8 +42,8 @@ const SLIDE_IDS = [
   'zab64028-1800x800', // ครัวขาวสว่าง
 ];
 
-/** ภาพรองที่วางคู่กับบล็อกข้อความใต้ hero — ห้องน้ำ คู่กับบล็อกที่พูดถึงสองโลก */
-const SECOND_ID = 'zab49013-1800x800';
+/** ภาพรองที่วางคู่กับบล็อกข้อความใต้ hero — ครัวขาวสว่าง คู่กับบล็อกสองปุ่ม */
+const SECOND_ID = 'zab86829-1800x800';
 
 /** มาสเตอร์ที่กว้างกว่านี้ถูกกรอบแนวตั้งของมือถือขยายจนเบลอ (ดูหมายเหตุหัวไฟล์) */
 const PHONE_MAX_ASPECT = 1.6;
@@ -426,16 +426,16 @@ export default function HomeHero() {
           <p className="mt-4 max-w-md text-body text-dim">{t.home.catSub}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href="/products/?cat=kitchen"
+              href="/products/?type=kitchen-faucet"
               className="border border-line-12 px-6 py-3 text-label uppercase tracking-widest2 text-ink transition-colors duration-300 hover:border-accent hover:text-accent"
             >
-              {t.home.catKitchen}
+              {t.home.catKitchenFaucet}
             </Link>
             <Link
-              href="/products/?cat=bath"
+              href="/products/?type=kitchen-sink"
               className="border border-line-12 px-6 py-3 text-label uppercase tracking-widest2 text-ink transition-colors duration-300 hover:border-accent hover:text-accent"
             >
-              {t.home.catBath}
+              {t.home.catKitchenSink}
             </Link>
           </div>
         </div>

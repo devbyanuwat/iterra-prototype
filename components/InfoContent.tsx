@@ -15,9 +15,9 @@ import Reveal from './Reveal';
 import Foreign from './Foreign';
 import { useLang } from './LangProvider';
 import { langAttr, type Lang } from '@/lib/i18n';
-import { contentPages, getContentPage, type ContentPage } from '@/lib/pages.generated';
+import { contentPages, getContentPage, type ContentPage } from '@/lib/pages';
 import { getTile, tileSrc } from '@/lib/tiles.generated';
-import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle.generated';
+import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle';
 
 type Pair = { th: string; en: string };
 // task E1 — หน้าข้อมูลบางหน้ามีเฉพาะฉบับไทยที่ต้นทาง (7 จาก 42 ย่อหน้า และ

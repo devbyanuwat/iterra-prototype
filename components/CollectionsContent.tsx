@@ -16,8 +16,8 @@
 import Link from '@/components/Link';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
-import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle.generated';
-import type { CollectionCard, CollectionFamily } from '@/lib/collections.generated';
+import { lifestyleImages, lifestyleSrc } from '@/lib/lifestyle';
+import type { CollectionCard, CollectionFamily } from '@/lib/editorial';
 
 export type CollectionEntry = {
   card: CollectionCard;
