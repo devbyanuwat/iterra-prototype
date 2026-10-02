@@ -47,9 +47,32 @@ PY
   du -sh "$out" "$out/kohler-kitchens-2026.pdf"
 }
 
+gallery() {
+  local out=public/media/gallery tmp
+  tmp="$(mktemp -d)"
+  mkdir -p "$out"
+  pdfimages -png -p "$PDF_SRC" "$tmp/i"
+  # page-index:name — เลือกจาก contact sheet (ภาพเต็ม ไม่มี mask ดำ)
+  local picks=(
+    049-143:k-dining 021-063:k-timber 024-070:k-dusk 027-077:k-night 031-088:k-blue 041-117:k-stone
+    043-122:w-amber 047-133:w-glass 016-049:w-suite
+  )
+  local src w
+  for p in "${picks[@]}"; do
+    src="$tmp/i-${p%%:*}.png"
+    # ย่อเฉพาะภาพที่กว้างเกิน 2400 — ห้ามขยายภาพ 1490px ขึ้น
+    w=$(python3 -c "from PIL import Image; print(min(2400, Image.open('$src').width))")
+    cwebp -quiet -q 80 -resize "$w" 0 "$src" -o "$out/${p##*:}.webp"
+  done
+  for n in 13 14 15; do cwebp -quiet -q 85 "$STILLS_SRC/$n.png" -o "$out/f-$n.webp"; done
+  rm -rf "$tmp"
+  ls -la "$out"
+}
+
 case "${1:-all}" in
   hero) hero ;;
   catalog) catalog ;;
-  all) hero; catalog ;;
+  gallery) gallery ;;
+  all) hero; catalog; gallery ;;
   *) echo "usage: $0 hero|catalog|gallery|all" >&2; exit 1 ;;
 esac

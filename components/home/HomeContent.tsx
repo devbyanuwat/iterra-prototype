@@ -1,12 +1,13 @@
 'use client';
 
-// หน้าแรก: hero → horizontal gallery → pinned story → สถิติ → แคตตาล็อก → บทความล่าสุด → CTA
+// หน้าแรก: hero → scroll gallery → horizontal gallery → pinned story → สถิติ → แคตตาล็อก → บทความล่าสุด → CTA
 
 import Link from 'next/link';
 import Hero from '@/components/Hero';
 import PinnedStory from '@/components/PinnedStory';
 import CatalogTeaser from '@/components/CatalogTeaser';
 import HorizontalGallery from '@/components/HorizontalGallery';
+import ScrollGallery from '@/components/ScrollGallery';
 import Reveal from '@/components/Reveal';
 import CountUp from '@/components/CountUp';
 import ParallaxImage from '@/components/ParallaxImage';
@@ -97,6 +98,7 @@ export default function HomeContent() {
   return (
     <>
       <Hero />
+      <ScrollGallery />
       <HorizontalGallery items={featuredProducts} />
       <PinnedStory />
       <Stats />
