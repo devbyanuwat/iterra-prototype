@@ -34,7 +34,7 @@ export default async function ProductPage({ params }: Props) {
     name: product.name.th,
     alternateName: product.name.en,
     description: product.desc.th,
-    category: product.category === 'kitchen' ? 'Kitchen Equipment' : 'Bathroom Fixtures',
+    category: 'Kitchen Equipment',
     brand: { '@type': 'Brand', name: SITE_NAME },
     url: `${SITE_URL}/products/${product.slug}/`,
     additionalProperty: product.specs.map((s) => ({

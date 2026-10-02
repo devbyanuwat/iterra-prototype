@@ -4,7 +4,7 @@
 // ฟิลด์ images เป็น "ป้ายชื่อภาพ placeholder" — เมื่อมีภาพจริงให้เปลี่ยนเป็น path รูป
 // แล้วสลับ <Placeholder /> เป็น <Image /> ใน components ที่เกี่ยวข้อง
 
-export type Category = 'kitchen' | 'bath';
+export type Category = 'kitchen';
 
 export type Product = {
   slug: string;
@@ -149,98 +149,6 @@ export const products: Product[] = [
     ],
     price: ASK,
     images: ['ล้างจาน S14 01', 'ล้างจาน S14 02', 'ล้างจาน S14 03', 'ล้างจาน S14 04'],
-  },
-  {
-    slug: 'smart-toilet-one',
-    category: 'bath',
-    name: { th: 'สุขภัณฑ์อัจฉริยะ ONE', en: 'ONE Intelligent Toilet' },
-    desc: {
-      th: 'สุขภัณฑ์อัจฉริยะดีไซน์ไร้ถัง เปิด–ปิดฝาอัตโนมัติ ชำระล้างด้วยน้ำอุ่นปรับระดับได้ พร้อมไฟนำทางกลางคืน',
-      en: 'A tankless intelligent toilet with auto lid, adjustable warm-water cleansing and a soft night light.',
-    },
-    specs: [
-      { label: 'ฝารองนั่ง', value: 'เปิด–ปิดอัตโนมัติ' },
-      { label: 'ระบบชำระล้าง', value: 'น้ำอุ่นปรับ 5 ระดับ' },
-      { label: 'เป่าแห้ง', value: 'ลมอุ่นปรับระดับ' },
-      { label: 'การใช้น้ำ', value: '3 / 4.5 ลิตร' },
-      { label: 'ฟังก์ชันเสริม', value: 'Night Light + ดับกลิ่น' },
-    ],
-    price: ASK,
-    featured: true,
-    images: ['สุขภัณฑ์ ONE 01', 'สุขภัณฑ์ ONE 02', 'สุขภัณฑ์ ONE 03', 'สุขภัณฑ์ ONE 04'],
-  },
-  {
-    slug: 'rain-shower-cloud',
-    category: 'bath',
-    name: { th: 'ชุดฝักบัวเรนชาวเวอร์ Cloud', en: 'Cloud Thermostatic Rain Shower' },
-    desc: {
-      th: 'ชุดฝักบัวเรนชาวเวอร์หัวใหญ่ 300 มม. วาล์วเทอร์โมสตัทคุมอุณหภูมิแม่นยำ สายฝน 3 รูปแบบ ผิว Brushed Nickel',
-      en: 'A 300 mm rain shower with precise thermostatic control, three spray patterns and a brushed-nickel finish.',
-    },
-    specs: [
-      { label: 'หัวฝักบัว', value: '300 มม. Ultra-thin' },
-      { label: 'วาล์ว', value: 'เทอร์โมสตัทกันลวก' },
-      { label: 'รูปแบบน้ำ', value: 'Rain / Mist / Jet' },
-      { label: 'ผิวเคลือบ', value: 'Brushed Nickel PVD' },
-      { label: 'หัวฉีด', value: 'ซิลิโคนกันตะกรัน' },
-    ],
-    price: ASK,
-    featured: true,
-    images: ['ฝักบัว Cloud 01', 'ฝักบัว Cloud 02', 'ฝักบัว Cloud 03', 'ฝักบัว Cloud 04'],
-  },
-  {
-    slug: 'basin-stone-oval',
-    category: 'bath',
-    name: { th: 'อ่างล้างหน้าหินสังเคราะห์ Oval', en: 'Oval Solid-Surface Basin' },
-    desc: {
-      th: 'อ่างล้างหน้าวางบนเคาน์เตอร์ทรงรี ผลิตจากหินสังเคราะห์ solid surface ผิวด้านสัมผัสอุ่น ซ่อมคืนสภาพผิวได้',
-      en: 'An oval countertop basin in warm-touch matte solid surface — renewable finish, timeless form.',
-    },
-    specs: [
-      { label: 'วัสดุ', value: 'Solid Surface' },
-      { label: 'ขนาด', value: '550 × 380 × 130 มม.' },
-      { label: 'ผิวสัมผัส', value: 'Matte ด้านนุ่ม' },
-      { label: 'การดูแล', value: 'ขัดคืนสภาพผิวได้' },
-      { label: 'สะดืออ่าง', value: 'แถมชุดสะดือซ่อน' },
-    ],
-    price: ASK,
-    images: ['อ่าง Oval 01', 'อ่าง Oval 02', 'อ่าง Oval 03', 'อ่าง Oval 04'],
-  },
-  {
-    slug: 'faucet-basin-minimal',
-    category: 'bath',
-    name: { th: 'ก๊อกอ่างล้างหน้า Minimal', en: 'Minimal Basin Mixer' },
-    desc: {
-      th: 'ก๊อกผสมอ่างล้างหน้าเส้นสายเรขาคณิตบริสุทธิ์ ทองเหลืองแท้ชุบ PVD พร้อม aerator กระจายน้ำนุ่มไม่กระเซ็น',
-      en: 'A pure geometric basin mixer in PVD-plated solid brass with a soft, splash-free aerated stream.',
-    },
-    specs: [
-      { label: 'วัสดุ', value: 'ทองเหลืองแท้ชุบ PVD' },
-      { label: 'วาล์ว', value: 'เซรามิก 35 มม.' },
-      { label: 'ความสูง', value: '180 มม.' },
-      { label: 'อัตราไหล', value: '5.7 ลิตร/นาที' },
-      { label: 'รับประกัน', value: '5 ปี' },
-    ],
-    price: ASK,
-    images: ['ก๊อก Minimal 01', 'ก๊อก Minimal 02', 'ก๊อก Minimal 03', 'ก๊อก Minimal 04'],
-  },
-  {
-    slug: 'bathtub-freestand-arc',
-    category: 'bath',
-    name: { th: 'อ่างอาบน้ำลอยตัว Arc', en: 'Arc Freestanding Bathtub' },
-    desc: {
-      th: 'อ่างอาบน้ำลอยตัวทรงโค้งไร้รอยต่อ อะคริลิกเก็บอุณหภูมิหนา 8 มม. น้ำหนักเบา ติดตั้งง่ายไม่ต้องก่อโครง',
-      en: 'A seamless freestanding tub in 8 mm heat-retaining acrylic — light, sculptural, no framing required.',
-    },
-    specs: [
-      { label: 'วัสดุ', value: 'อะคริลิกหนา 8 มม.' },
-      { label: 'ขนาด', value: '1700 × 800 × 580 มม.' },
-      { label: 'ความจุ', value: '260 ลิตร' },
-      { label: 'สะดืออ่าง', value: 'Pop-up โครเมียม' },
-      { label: 'คุณสมบัติ', value: 'เก็บอุณหภูมินาน 2 เท่า' },
-    ],
-    price: ASK,
-    images: ['อ่างอาบน้ำ Arc 01', 'อ่างอาบน้ำ Arc 02', 'อ่างอาบน้ำ Arc 03', 'อ่างอาบน้ำ Arc 04'],
   },
 ];
 

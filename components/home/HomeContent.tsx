@@ -1,7 +1,6 @@
 'use client';
 
-// หน้าแรก: hero parallax → หมวดสินค้า → horizontal gallery →
-// pinned story → สถิติ count-up → บทความล่าสุด → CTA
+// หน้าแรก: hero → horizontal gallery → pinned story → สถิติ → บทความล่าสุด → CTA
 
 import Link from 'next/link';
 import Hero from '@/components/Hero';
@@ -13,39 +12,6 @@ import ParallaxImage from '@/components/ParallaxImage';
 import { useLang } from '@/components/LangProvider';
 import { featuredProducts } from '@/lib/products';
 import { posts } from '@/lib/posts';
-
-function CategoryBand() {
-  const { t } = useLang();
-  const cats = [
-    { key: 'kitchen', title: t.home.catKitchen, desc: t.home.catKitchenDesc, label: 'หมวดครัว 3:2' },
-    { key: 'bath', title: t.home.catBath, desc: t.home.catBathDesc, label: 'หมวดห้องน้ำ 3:2' },
-  ];
-  return (
-    <section className="px-6 py-24 md:px-[8vw] md:py-32">
-      <Reveal className="mb-14">
-        <p className="mb-3 text-[11px] uppercase tracking-widest2 text-warm-500">CATEGORIES</p>
-        <h2 className="text-3xl font-extralight tracking-wide md:text-4xl">{t.home.catTitle}</h2>
-        <p className="mt-3 text-sm font-light text-warm-500">{t.home.catSub}</p>
-      </Reveal>
-      <div className="grid gap-8 md:grid-cols-2">
-        {cats.map((c, i) => (
-          <Reveal key={c.key} delay={i * 0.12}>
-            <Link href={`/products/?cat=${c.key}`} className="group block">
-              <ParallaxImage label={c.label} ratio="3/2" speed={i % 2 ? 7 : -7} />
-              <div className="mt-5 flex items-baseline justify-between">
-                <h3 className="text-2xl font-extralight tracking-wide">{c.title}</h3>
-                <span className="text-[11px] uppercase tracking-widest2 text-warm-500 transition-transform duration-300 group-hover:translate-x-1.5">
-                  →
-                </span>
-              </div>
-              <p className="mt-2 text-[13px] font-light text-warm-500">{c.desc}</p>
-            </Link>
-          </Reveal>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 function Stats() {
   const { t } = useLang();
@@ -130,7 +96,6 @@ export default function HomeContent() {
   return (
     <>
       <Hero />
-      <CategoryBand />
       <HorizontalGallery items={featuredProducts} />
       <PinnedStory />
       <Stats />

@@ -22,18 +22,12 @@ export const dict = {
       readMore: 'อ่านต่อ',
       explore: 'ชมคอลเลกชัน',
       scroll: 'เลื่อนเพื่อชม',
-      category: { all: 'ทั้งหมด', kitchen: 'ครัว', bath: 'ห้องน้ำ' } as Record<string, string>,
+      category: { all: 'ทั้งหมด', kitchen: 'ครัว' } as Record<string, string>,
     },
     home: {
-      heroKicker: 'PREMIUM KITCHEN & BATH DEALER',
+      heroKicker: 'PREMIUM KITCHEN DEALER',
       heroTitle: 'ศิลปะของครัว\nที่คู่ควรกับบ้านคุณ',
-      heroSub: 'คัดสรรอุปกรณ์ครัวและสุขภัณฑ์จากแบรนด์ชั้นนำระดับโลก สำหรับบ้านที่ไม่ประนีประนอมเรื่องดีไซน์',
-      catTitle: 'สองโลกของเรา',
-      catSub: 'เลือกเดินชมตามหมวดที่คุณกำลังมองหา',
-      catKitchen: 'ครัว',
-      catKitchenDesc: 'ซิงก์ · ก๊อก · เตา · เครื่องใช้บิลท์อิน · ชุดครัวสั่งตัด',
-      catBath: 'ห้องน้ำ',
-      catBathDesc: 'สุขภัณฑ์อัจฉริยะ · ฝักบัว · อ่างล้างหน้า · อ่างอาบน้ำ',
+      heroSub: 'คัดสรรชุดครัวและอุปกรณ์ครัวจากแบรนด์ชั้นนำระดับโลก สำหรับบ้านที่ไม่ประนีประนอมเรื่องดีไซน์',
       featuredKicker: 'FEATURED COLLECTION',
       featuredTitle: 'สินค้าเด่นประจำฤดูกาล',
       featuredHint: 'เลื่อนลงเพื่อชมสินค้า — แนวนอน',
@@ -41,11 +35,11 @@ export const dict = {
       storySlides: [
         {
           title: 'เริ่มจากความเชื่อเรื่องงานฝีมือ',
-          body: 'กว่า 25 ปีที่เราคัดสรรอุปกรณ์ครัวและสุขภัณฑ์ด้วยเกณฑ์เดียว — ต้องเป็นชิ้นที่เราอยากใช้ในบ้านของเราเอง',
+          body: 'กว่า 25 ปีที่เราคัดสรรชุดครัวและอุปกรณ์ครัวด้วยเกณฑ์เดียว — ต้องเป็นชิ้นที่เราอยากใช้ในบ้านของเราเอง',
         },
         {
           title: 'โชว์รูมที่ให้คุณ "ลองจริง"',
-          body: 'ทุกก๊อกเปิดได้ ทุกฝักบัวมีน้ำไหล ทุกลิ้นชักเปิดปิดให้ฟังเสียง เพราะของพรีเมียมต้องพิสูจน์ได้ด้วยการสัมผัส',
+          body: 'ทุกก๊อกเปิดได้ ทุกเตาเปิดไฟได้ ทุกลิ้นชักเปิดปิดให้ฟังเสียง เพราะของพรีเมียมต้องพิสูจน์ได้ด้วยการสัมผัส',
         },
         {
           title: 'อยู่ด้วยกันจนหลังการติดตั้ง',
@@ -68,7 +62,7 @@ export const dict = {
     products: {
       kicker: 'COLLECTION',
       title: 'สินค้าทั้งหมด',
-      sub: 'อุปกรณ์ครัวและสุขภัณฑ์คัดสรร 12 รายการ — ทุกชิ้นสัมผัสจริงได้ที่โชว์รูม',
+      sub: 'ชุดครัวและอุปกรณ์ครัวคัดสรร 7 รายการ — ทุกชิ้นสัมผัสจริงได้ที่โชว์รูม',
       filterLabel: 'หมวดหมู่',
       empty: 'ไม่พบสินค้าในหมวดนี้',
       specs: 'สเปกสินค้า',
@@ -85,7 +79,7 @@ export const dict = {
       toast: 'ส่งข้อความเรียบร้อย เราจะติดต่อกลับภายใน 24 ชม. (เดโม่ — ยังไม่เชื่อมระบบจริง)',
     },
     footer: {
-      blurb: 'ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม คัดสรรจากแบรนด์ชั้นนำระดับโลก',
+      blurb: 'ดีลเลอร์ชุดครัวและอุปกรณ์ครัวพรีเมียม คัดสรรจากแบรนด์ชั้นนำระดับโลก',
       nav: 'เมนู',
       contact: 'ติดต่อ',
       rights: 'สงวนลิขสิทธิ์',
@@ -107,18 +101,12 @@ export const dict = {
       readMore: 'Read more',
       explore: 'Explore the collection',
       scroll: 'Scroll to explore',
-      category: { all: 'All', kitchen: 'Kitchen', bath: 'Bath' } as Record<string, string>,
+      category: { all: 'All', kitchen: 'Kitchen' } as Record<string, string>,
     },
     home: {
-      heroKicker: 'PREMIUM KITCHEN & BATH DEALER',
+      heroKicker: 'PREMIUM KITCHEN DEALER',
       heroTitle: 'The Art of the Kitchen,\nWorthy of Your Home',
-      heroSub: 'A curated selection of kitchen equipment and sanitary ware from the world’s finest brands — for homes that never compromise on design.',
-      catTitle: 'Two Worlds',
-      catSub: 'Browse by the space you are dreaming about',
-      catKitchen: 'Kitchen',
-      catKitchenDesc: 'Sinks · Faucets · Hobs · Built-in appliances · Bespoke kitchens',
-      catBath: 'Bath',
-      catBathDesc: 'Intelligent toilets · Showers · Basins · Bathtubs',
+      heroSub: 'A curated selection of kitchens and kitchen equipment from the world’s finest brands — for homes that never compromise on design.',
       featuredKicker: 'FEATURED COLLECTION',
       featuredTitle: 'This Season’s Highlights',
       featuredHint: 'Keep scrolling — the gallery moves sideways',
@@ -126,11 +114,11 @@ export const dict = {
       storySlides: [
         {
           title: 'Born from a belief in craft',
-          body: 'For over 25 years we have curated kitchen and bath pieces with a single criterion — would we want this in our own home?',
+          body: 'For over 25 years we have curated kitchen pieces with a single criterion — would we want this in our own home?',
         },
         {
           title: 'A showroom you can actually try',
-          body: 'Every faucet runs, every shower flows, every drawer glides. Premium quality should be proven by touch.',
+          body: 'Every faucet runs, every hob fires up, every drawer glides. Premium quality should be proven by touch.',
         },
         {
           title: 'With you long after installation',
@@ -153,7 +141,7 @@ export const dict = {
     products: {
       kicker: 'COLLECTION',
       title: 'All Products',
-      sub: 'Twelve curated kitchen and bath pieces — every one on display at our showroom.',
+      sub: 'Seven curated kitchen pieces — every one on display at our showroom.',
       filterLabel: 'Category',
       empty: 'No products in this category',
       specs: 'Specifications',
@@ -170,7 +158,7 @@ export const dict = {
       toast: 'Message sent — we will get back to you within 24 hours. (Demo only)',
     },
     footer: {
-      blurb: 'Premium kitchen & bath dealer, curated from the world’s finest brands.',
+      blurb: 'Premium kitchen dealer, curated from the world’s finest brands.',
       nav: 'Menu',
       contact: 'Contact',
       rights: 'All rights reserved',
