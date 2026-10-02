@@ -29,7 +29,7 @@ export default function ProductsContent() {
             <ParallaxImage label={lead.images[0]} ratio="21/9" speed={-6} dark />
             {/* scrim เฉพาะเดสก์ท็อป: มือถือข้อความอยู่ใต้ภาพบนพื้น paper */}
             <div className="absolute inset-0 hidden bg-gradient-to-t from-black/70 via-black/35 to-transparent md:block" aria-hidden />
-            <div className="pt-6 text-ink md:absolute md:inset-x-0 md:bottom-0 md:p-12 md:text-paper">
+            <div className="pt-6 text-ink md:absolute md:inset-x-0 md:bottom-0 md:p-8 md:text-paper lg:p-12">
               <p className="mb-2 text-[10px] uppercase tracking-widest2 text-warm-500 md:text-paper/70">{t.products.featured}</p>
               <h2 className="text-2xl font-extralight tracking-wide md:text-4xl">{lead.name[lang]}</h2>
               <p className="mt-3 max-w-xl text-sm font-light leading-relaxed text-stone-600 md:text-paper/80">{lead.desc[lang]}</p>

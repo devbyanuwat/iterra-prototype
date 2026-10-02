@@ -74,7 +74,7 @@ export default function PinnedStory() {
   return (
     <section className="bg-ink text-paper">
       {/* ── เดสก์ท็อป: pinned ── */}
-      <div ref={root} className="relative hidden md:block">
+      <div ref={root} className="relative hidden md:motion-safe:block">
         <div className="flex h-screen items-stretch overflow-hidden">
           <div className="relative w-1/2">
             {IMAGE_LABELS.map((label, i) => (
@@ -105,7 +105,7 @@ export default function PinnedStory() {
       </div>
 
       {/* ── มือถือ: บล็อกซ้อนธรรมดา ── */}
-      <div className="space-y-14 px-6 py-20 md:hidden">
+      <div className="space-y-14 px-6 py-20 md:mx-auto md:max-w-3xl md:motion-safe:hidden">
         {slides.map((s, i) => (
           <div key={i}>
             <Placeholder label={IMAGE_LABELS[i]} ratio="3/2" dark className="mb-6" />

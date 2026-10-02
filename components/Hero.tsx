@@ -23,7 +23,7 @@ export default function Hero() {
     const v = video.current;
 
     // วิดีโอ: เล่นเฉพาะตอนอนุญาต motion และฮีโร่อยู่บนจอ
-    // ใช้ ScrollTrigger (เช็กสถานะตอนสร้าง/refresh) แทน IntersectionObserver ที่ไม่ยิงถ้าเริ่มบนจออยู่แล้ว
+    // ใช้ ScrollTrigger onToggle/onRefresh เช็กสถานะตอนสร้างและทุก refresh · เทสต้องใช้หน้าต่างที่มองเห็น — Chrome หยุดวิดีโอเองถ้าแท็บซ่อน
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       if (!v) return;
       const sync = (self: ScrollTrigger) => (self.isActive ? v.play().catch(() => {}) : v.pause());

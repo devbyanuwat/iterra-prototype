@@ -2,7 +2,7 @@
 
 // แถบสินค้าเด่น: scroll แนวตั้งขับการ์ดให้ไหลแนวนอน (pin + scrub)
 // + perspective depth — การ์ดที่ไกลจากกลางจอจะเล็กลง จางลง และเอียงเข้าหากลาง
-// มือถือ: เปลี่ยนเป็น scroll แนวนอนแบบ native (snap) เพื่อความลื่นและเบา
+// มือถือ / reduced-motion: เปลี่ยนเป็น scroll แนวนอนแบบ native (snap) เพื่อความลื่นและเบา
 
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
@@ -26,7 +26,7 @@ export default function HorizontalGallery({ items }: { items: Product[] }) {
     const mm = gsap.matchMedia(rootEl);
     mm.add('(prefers-reduced-motion: no-preference) and (min-width: 768px)', () => {
       const cards = Array.from(trackEl.querySelectorAll<HTMLElement>('[data-gcard]'));
-      const amount = () => trackEl.scrollWidth - window.innerWidth;
+      const amount = () => Math.max(0, trackEl.scrollWidth - window.innerWidth);
 
       const updateDepth = () => {
         const mid = window.innerWidth / 2;
@@ -88,7 +88,7 @@ export default function HorizontalGallery({ items }: { items: Product[] }) {
   return (
     <section aria-label={t.home.featuredTitle}>
       {/* ── เดสก์ท็อป: pinned horizontal ── */}
-      <div ref={root} className="hidden md:block">
+      <div ref={root} className="hidden md:motion-safe:block">
         <div className="flex h-screen flex-col justify-center overflow-hidden">
           <div className="px-[8vw] pb-10">
             <p className="mb-3 text-[11px] uppercase tracking-widest2 text-warm-500">
@@ -121,7 +121,7 @@ export default function HorizontalGallery({ items }: { items: Product[] }) {
       </div>
 
       {/* ── มือถือ: native horizontal snap ── */}
-      <div className="py-16 md:hidden">
+      <div className="py-16 md:motion-safe:hidden">
         <div className="mb-8 px-6">
           <p className="mb-2 text-[11px] uppercase tracking-widest2 text-warm-500">{t.home.featuredKicker}</p>
           <h2 className="text-2xl font-extralight tracking-wide">{t.home.featuredTitle}</h2>

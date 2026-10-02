@@ -19,10 +19,10 @@ function Frame({ item, lang }: { item: GalleryItem; lang: 'th' | 'en' }) {
     <div data-frame className="absolute inset-0 overflow-hidden bg-ink">
       {small ? (
         <div className="flex h-full items-center justify-center">
-          <img data-img src={item.src} alt={item.caption[lang]} className="w-[40vw] max-w-md shadow-2xl shadow-black/50" />
+          <img data-img src={item.src} alt="" className="w-[40vw] max-w-md shadow-2xl shadow-black/50" />
         </div>
       ) : (
-        <img data-img src={item.src} alt={item.caption[lang]} className="h-full w-full object-cover will-change-transform" />
+        <img data-img src={item.src} alt="" className="h-full w-full object-cover" />
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" aria-hidden />
       <p data-cap className="absolute bottom-12 left-[8vw] text-sm font-light tracking-wide text-paper/85">
@@ -100,7 +100,7 @@ export default function ScrollGallery() {
               src={item.src}
               width={item.w}
               height={item.h}
-              alt={item.caption[lang]}
+              alt=""
               loading="lazy"
               className="h-auto w-full"
             />

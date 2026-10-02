@@ -53,7 +53,7 @@ export default function Nav() {
           <Link href="/" className="pointer-events-auto text-lg font-light tracking-widest2">
             ITERRA
           </Link>
-          <nav aria-label="เมนูหลัก" className="pointer-events-auto hidden items-center gap-8 md:flex">
+          <nav aria-label="เมนูหลัก" className="pointer-events-auto hidden items-center gap-6 md:flex lg:gap-8">
             {LINKS.map((l) => (
               <Link
                 key={l.href}

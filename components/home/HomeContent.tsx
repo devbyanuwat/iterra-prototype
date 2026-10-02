@@ -21,7 +21,7 @@ function Stats() {
     <section className="border-y border-warm-200 px-6 py-20 md:px-[8vw] md:py-24">
       <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
         {t.home.stats.map((s, i) => (
-          <Reveal key={s.label} delay={i * 0.1} y={20}>
+          <Reveal key={i} delay={i * 0.1} y={20}>
             <div className="text-center">
               <p className="text-5xl font-extralight tracking-wide md:text-6xl">
                 <CountUp to={s.value} suffix={s.suffix} />
