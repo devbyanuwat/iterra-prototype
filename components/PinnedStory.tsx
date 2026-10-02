@@ -3,6 +3,11 @@
 // Section "เรื่องราวแบรนด์" — pinned + scrub
 // เดสก์ท็อป: ตรึงจอไว้ แล้วให้ภาพ/ข้อความ 3 ชุดสลับตาม scroll progress
 // มือถือ / reduced-motion: แสดงเป็น 3 บล็อกซ้อนกันตามปกติ (markup แยกชุด)
+//
+// key ของสไลด์ต้องเป็นลำดับ ห้ามใช้ข้อความที่แปลแล้ว
+// GSAP เก็บสถานะ opacity ไว้เป็น inline style บน element พวกนี้
+// ถ้า key เปลี่ยนตามภาษา React จะสร้าง element ใหม่ที่ไม่มี style นั้น
+// แล้วทั้ง 3 สไลด์จะโผล่ทับกันหมด (เคสจริง: สลับ TH เป็น EN)
 
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
@@ -86,7 +91,7 @@ export default function PinnedStory() {
             />
             <div className="relative h-48 w-full">
               {slides.map((s, i) => (
-                <div key={s.title} data-story-text className="absolute inset-0">
+                <div key={i} data-story-text className="absolute inset-0">
                   <p className="mb-4 text-[11px] uppercase tracking-widest2 text-paper/50">
                     {t.home.storyKicker} — 0{i + 1}
                   </p>
@@ -102,7 +107,7 @@ export default function PinnedStory() {
       {/* ── มือถือ: บล็อกซ้อนธรรมดา ── */}
       <div className="space-y-14 px-6 py-20 md:hidden">
         {slides.map((s, i) => (
-          <div key={s.title}>
+          <div key={i}>
             <Placeholder label={IMAGE_LABELS[i]} ratio="3/2" dark className="mb-6" />
             <p className="mb-2 text-[11px] uppercase tracking-widest2 text-paper/50">
               {t.home.storyKicker} — 0{i + 1}
