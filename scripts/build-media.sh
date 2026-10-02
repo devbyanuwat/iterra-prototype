@@ -25,8 +25,31 @@ hero() {
   ls -la "$out"
 }
 
+catalog() {
+  local out=public/media/catalog tmp
+  tmp="$(mktemp -d)"
+  mkdir -p "$out"
+  pdftoppm -r 150 -jpeg -jpegopt quality=82 "$PDF_SRC" "$tmp/p"
+  local i=0
+  for f in "$tmp"/p-*.jpg; do
+    i=$((i+1)); n=$(printf '%02d' "$i")
+    cwebp -quiet -q 78 -resize 1600 0 "$f" -o "$out/p$n.webp"
+    cwebp -quiet -q 70 -resize 360 0 "$f" -o "$out/t$n.webp"
+  done
+  # PDF สำหรับดาวน์โหลด: ประกอบจากภาพหน้า 150dpi (ไม่มี Ghostscript — ข้อความเลือกไม่ได้)
+  python3 - "$tmp" "$out/kohler-kitchens-2026.pdf" <<'PY'
+import sys, glob
+from PIL import Image
+pages = [Image.open(f).convert('RGB') for f in sorted(glob.glob(sys.argv[1] + '/p-*.jpg'))]
+pages[0].save(sys.argv[2], save_all=True, append_images=pages[1:], resolution=150, quality=80)
+PY
+  rm -rf "$tmp"
+  du -sh "$out" "$out/kohler-kitchens-2026.pdf"
+}
+
 case "${1:-all}" in
   hero) hero ;;
-  all) hero ;;
+  catalog) catalog ;;
+  all) hero; catalog ;;
   *) echo "usage: $0 hero|catalog|gallery|all" >&2; exit 1 ;;
 esac
