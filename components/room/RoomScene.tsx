@@ -247,8 +247,6 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       dirty = true;
     }
 
-    // จอแคบ: การ์ดเป็นแถบล่างของฉาก จึงเลื่อนภาพขึ้นครึ่งความสูงการ์ด ให้ชิ้นที่เจาะดูอยู่กลางส่วนที่ยังมองเห็น
-    let lift = 0;
     const resize = () => {
       const { clientWidth: w, clientHeight: h } = el;
       if (!w || !h) return;
@@ -257,15 +255,12 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       camera.aspect = w / h;
       // จอแนวตั้ง: ขยายมุมกล้องแนวตั้งให้ความกว้างที่เห็นเท่าเดิม ครัวจะไม่ตกขอบ
       camera.fov = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(0.4245 / camera.aspect)), 38, 70);
-      lift = 0; // ขนาดฉากเปลี่ยน: ตั้ง view offset ใหม่ในเฟรมถัดไป
-      camera.clearViewOffset();
       camera.updateProjectionMatrix();
       dirty = true;
     };
     // วาดทันทีหลังเปลี่ยนขนาด: setSize ล้าง canvas ถ้ารอเฟรมถัดไปจะเห็นจอดำวูบตอนลากขอบหน้าต่าง
     const watcher = new ResizeObserver(() => {
       resize();
-      fitCard();
       renderer.render(scene, camera);
       drawGuide();
     });
@@ -308,14 +303,6 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     }
     // เส้นชี้: จุดบนชิ้นส่วน (at ของครัวที่ดูอยู่) ลากหักมุมฉากไปหาป้าย หรือขอบการ์ดตอนเจาะดู · วาดใหม่ทุกครั้งที่ฉากวาด
     const anchor = new THREE.Vector3();
-    const fitCard = () => {
-      const card = focused ? el.parentElement!.querySelector('[data-focus-card]') : null;
-      const strip = card && card.clientWidth > el.clientWidth * 0.9 ? Math.round(card.clientHeight / 2) : 0;
-      if (strip === lift) return;
-      lift = strip;
-      if (lift) camera.setViewOffset(el.clientWidth, el.clientHeight, 0, lift, el.clientWidth, el.clientHeight);
-      else camera.clearViewOffset();
-    };
     const drawGuide = () => {
       const svg = guide.current;
       const label = tip.current;
@@ -353,7 +340,12 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       }
       const path = points.map((p) => p.map(Math.round).join(',')).join(' ');
       svg.querySelectorAll('polyline').forEach((line) => line.setAttribute('points', path));
-      svg.querySelector('circle')!.setAttribute('transform', `translate(${Math.round(x)} ${Math.round(y)})`);
+      const [dot, cap] = svg.querySelectorAll('circle');
+      dot.setAttribute('transform', `translate(${Math.round(x)} ${Math.round(y)})`);
+      // จุดปลายเส้นตรงขอบการ์ด: เส้นไม่หายเข้าไปในการ์ดเฉย ๆ
+      const end = card && points.length ? points[points.length - 1] : null;
+      cap.style.display = end ? '' : 'none';
+      if (end) cap.setAttribute('transform', `translate(${Math.round(end[0])} ${Math.round(end[1])})`);
     };
     let moved: PointerEvent | null = null; // pointermove ล่าสุด · ยิง ray เฟรมละครั้งใน tick
     let down: { x: number; y: number } | null = null;
@@ -425,7 +417,6 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       if (!dirty) return;
       dirty = false;
       const start = performance.now();
-      fitCard();
       renderer.render(scene, camera);
       drawGuide();
       stats.renderMs = performance.now() - start;
@@ -551,11 +542,12 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       data-lenis-prevent
       className="absolute inset-0 cursor-grab touch-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:cursor-grabbing [&>canvas]:block"
     >
-      {/* เส้นชี้: เส้น ink บนเส้นรอง paper ให้อ่านออกทั้งบนวัสดุเข้มและอ่อน */}
-      <svg ref={guide} aria-hidden className="pointer-events-none absolute inset-0 z-10 h-full w-full opacity-0 transition-opacity duration-300" fill="none">
+      {/* เส้นชี้: เส้น ink บนเส้นรอง paper ให้อ่านออกทั้งบนวัสดุเข้มและอ่อน · อยู่เหนือการ์ด (z-20) จุดปลายจึงนั่งคร่อมขอบการ์ด */}
+      <svg ref={guide} aria-hidden className="pointer-events-none absolute inset-0 z-20 h-full w-full opacity-0 transition-opacity duration-300" fill="none">
         <polyline className="stroke-paper" strokeWidth="2" strokeLinejoin="round" />
         <polyline className="stroke-ink" strokeWidth="1" />
         <circle r="4" className="fill-ink stroke-paper" strokeWidth="1.5" />
+        <circle r="3" className="fill-ink stroke-paper" strokeWidth="1.5" />
       </svg>
       <div ref={tip} aria-hidden className="pointer-events-none absolute left-0 top-0 z-10 whitespace-nowrap bg-ink px-2.5 py-1.5 text-xs text-paper opacity-0 transition-opacity duration-200" />
     </div>
