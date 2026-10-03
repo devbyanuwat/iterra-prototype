@@ -6,7 +6,6 @@ cd "$(dirname "$0")/.."
 
 VIDEO_SRC="$HOME/Downloads/All VDO /Serier B - NaturaLux.m4v"
 PDF_SRC="$HOME/Downloads/KOHLER KITCHENS 2026 (Kitchens & Wardrobes Thailand by DP Ceramic).pdf"
-STILLS_SRC="$HOME/Downloads/drive-download-20261002T172632Z-1-001"
 
 # ช่วงครัวล้วน (เขียง ลิ้นชักหม้อ ลิ้นชักขนมปัง) — ไม่มีโลโก้/ซับจีน
 HERO_START=42
@@ -55,7 +54,6 @@ gallery() {
   # page-index:name — เลือกจาก contact sheet (ภาพเต็ม ไม่มี mask ดำ)
   local picks=(
     049-143:k-dining 021-063:k-timber 024-070:k-dusk 027-077:k-night 031-088:k-blue 041-117:k-stone
-    043-122:w-amber 047-133:w-glass 016-049:w-suite
   )
   local src w
   for p in "${picks[@]}"; do
@@ -64,7 +62,6 @@ gallery() {
     w=$(python3 -c "from PIL import Image; print(min(2400, Image.open('$src').width))")
     cwebp -quiet -q 80 -resize "$w" 0 "$src" -o "$out/${p##*:}.webp"
   done
-  for n in 13 14 15; do cwebp -quiet -q 85 "$STILLS_SRC/$n.png" -o "$out/f-$n.webp"; done
   rm -rf "$tmp"
   ls -la "$out"
 }

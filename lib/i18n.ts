@@ -30,7 +30,7 @@ export const dict = {
       heroTitle: 'ศิลปะของครัว\nที่คู่ควรกับบ้านคุณ',
       heroSub: 'คัดสรรชุดครัวและอุปกรณ์ครัวจากแบรนด์ชั้นนำระดับโลก สำหรับบ้านที่ไม่ประนีประนอมเรื่องดีไซน์',
       featuredTitle: 'สินค้าเด่นประจำฤดูกาล',
-      galleryTitle: 'พื้นที่ที่ออกแบบมาเพื่อชีวิตจริง',
+      galleryTitle: 'ครัวที่ออกแบบมาให้ใช้ทุกวัน',
       storySlides: [
         {
           title: 'เริ่มจากความเชื่อเรื่องงานฝีมือ',
@@ -119,7 +119,7 @@ export const dict = {
       heroTitle: 'The Art of the Kitchen,\nWorthy of Your Home',
       heroSub: 'A curated selection of kitchens and kitchen equipment from the world’s finest brands — for homes that never compromise on design.',
       featuredTitle: 'This Season’s Highlights',
-      galleryTitle: 'Spaces designed for real life',
+      galleryTitle: 'Kitchens made for everyday cooking',
       storySlides: [
         {
           title: 'Born from a belief in craft',

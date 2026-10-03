@@ -2,14 +2,12 @@
 
 // หน้าแรก: ผนังภาพจากแคตตาล็อก แต่ละคอลัมน์เลื่อนด้วยความเร็วไม่เท่ากันตาม scroll (ไม่มี pin)
 // เดสก์ท็อป 3 คอลัมน์: ซ้ายช้า กลางเร็ว ขวากลาง · มือถือ 1 คอลัมน์ภาพนิ่ง · reduced-motion = grid นิ่ง
-// ?scope= กำหนดจำนวนภาพ (6 / 9 / 12) ผ่าน useScope
 
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLang } from './LangProvider';
-import { useScope } from '@/lib/scope';
-import { galleryFor, type GalleryItem } from '@/lib/gallery';
+import { GALLERY, type GalleryItem } from '@/lib/gallery';
 
 // ระยะเลื่อนต่อคอลัมน์ (px ต่อความสูงจอ 1000px) เดินจาก +d ไป -d จึงตรงกันพอดีตอนกลาง section
 const TRAVEL = [60, 180, 110];
@@ -19,9 +17,8 @@ const split = (items: GalleryItem[], n: number) =>
   Array.from({ length: n }, (_, c) => items.filter((_, i) => i % n === c));
 
 function Tile({ item, lang }: { item: GalleryItem; lang: 'th' | 'en' }) {
-  // ภาพ flooring ต้นฉบับ 375px ห้ามขยายเกินขนาดจริง
   return (
-    <figure className={item.group === 'flooring' ? 'mx-auto w-full max-w-[375px]' : undefined}>
+    <figure>
       <img src={item.src} width={item.w} height={item.h} alt="" loading="lazy" className="h-auto w-full" />
       <figcaption className="mt-3 text-[12px] font-light text-paper/70">{item.caption[lang]}</figcaption>
     </figure>
@@ -31,7 +28,7 @@ function Tile({ item, lang }: { item: GalleryItem; lang: 'th' | 'en' }) {
 export default function ImageWall() {
   const root = useRef<HTMLElement>(null);
   const { lang, t } = useLang();
-  const items = galleryFor(useScope());
+  const items = GALLERY;
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -53,10 +50,8 @@ export default function ImageWall() {
         );
       });
     });
-    // ?scope= เปลี่ยนจำนวนภาพหลัง mount ความสูง section จึงเปลี่ยน ต้อง refresh ให้ trigger ด้านล่างนับตำแหน่งใหม่
-    ScrollTrigger.refresh();
     return () => mm.revert();
-  }, [items.length]);
+  }, []);
 
   return (
     // overflow-hidden: คอลัมน์ที่เลื่อนเกินขอบจะไม่ทับ section ถัดไป
