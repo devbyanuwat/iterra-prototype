@@ -180,8 +180,8 @@ function sink(g: THREE.Group, m: Mats, x0: number, x1: number) {
 // gooseneck = คอโค้งสูง, square = ทรงเหลี่ยม, spring = สปริงแบบครัวมืออาชีพ
 function faucet(g: THREE.Group, m: Mats, cx: number) {
   const z = 0.07;
-  // พื้นที่กดที่มองไม่เห็น ครอบก๊อกทั้งตัว
-  const hit = mesh(g, new THREE.BoxGeometry(0.2, 0.56, 0.3), m.hit, cx, TOP + 0.28, z + 0.1, false);
+  // พื้นที่กดที่มองไม่เห็น ครอบแกนก๊อก (ไม่ยื่นออกมาเหนืออ่าง ไม่งั้นจะบังการกดซิงก์)
+  const hit = mesh(g, new THREE.BoxGeometry(0.2, 0.56, 0.12), m.hit, cx, TOP + 0.28, z, false);
   hit.userData.part = 'faucet';
   const tube = (v: THREE.Group, points: number[][], radius: number) =>
     mesh(v, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(([y, pz]) => new THREE.Vector3(cx, y, pz))), 48, radius, 16), m.faucet, 0, 0, 0);

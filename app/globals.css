@@ -31,6 +31,14 @@ html.lenis body {
   overflow: hidden;
 }
 
+/* การ์ดเจาะดูของห้องจำลอง: ค่อย ๆ ลอยขึ้นมา */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

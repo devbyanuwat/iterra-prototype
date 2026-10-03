@@ -18,7 +18,10 @@ export type RoomHandle = { zoom: (step: number) => void; rotate: (step: number) 
 type Props = { layout: LayoutId; focus: Part | null; picks: Picks; light: LightId; label: string; tipText: (part: Part) => string; onPick: (part: Part) => void; onReady: () => void; onError: () => void };
 type Api = { touch: () => void; setPicks: (p: Picks) => void; setLight: (l: LightId) => void; goTo: (l: LayoutId, part: Part | null, jump?: boolean) => void; orbit: (dAzimuth: number, dZoom: number) => void };
 
-const FLIGHT = 1.2; // วินาทีที่กล้องใช้เลื่อนไปครัวอื่น
+const FLIGHT = 1.4; // วินาทีที่กล้องใช้เลื่อนไปครัวอื่นหรือเข้าเจาะดู
+const NUDGE = 0.5; // วินาทีที่กล้องใช้ตอนกดปุ่มหมุนหรือซูม
+// ออกตัวนุ่ม จบนุ่ม: ความเร็วเป็นศูนย์ทั้งหัวและท้าย กล้องจึงไม่กระชาก
+const ease = (t: number) => (t < 0.5 ? 16 * t ** 5 : 1 - (-2 * t + 2) ** 5 / 2);
 const FADE = 0.6; // วินาทีที่แสงใช้ไล่ไปโทนใหม่
 const layoutOf = (id: LayoutId) => LAYOUTS.find((l) => l.id === id)!;
 const presetOf = (id: LightId) => LIGHTS.find((l) => l.id === id)!;
@@ -121,7 +124,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false;
     controls.enableDamping = !still;
-    controls.dampingFactor = 0.08;
+    controls.dampingFactor = 0.06;
     controls.minAzimuthAngle = -ORBIT.azimuth;
     controls.maxAzimuthAngle = ORBIT.azimuth;
     controls.minPolarAngle = ORBIT.polarMin;
@@ -140,7 +143,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     };
 
     // ── กล้องเลื่อนไปครัวอื่น ──
-    const flight = { t: 1, fromTarget: new THREE.Vector3(), toTarget: new THREE.Vector3(), from: new THREE.Spherical(), to: new THREE.Spherical() };
+    const flight = { t: 1, time: FLIGHT, fromTarget: new THREE.Vector3(), toTarget: new THREE.Vector3(), from: new THREE.Spherical(), to: new THREE.Spherical() };
     let ledOn = 4; // จำนวนไฟใต้ตู้ที่ใช้กับครัวปัจจุบัน
     // ย้ายไฟใต้ตู้ไปครัวที่จะดู · ตอนกล้องเลื่อน ย้ายที่ครึ่งทาง ครัวเดิมจึงไม่มืดทันทีที่กด
     let lightsFor: Layout | null = null;
@@ -190,6 +193,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       flight.fromTarget.copy(controls.target);
       flight.from.setFromVector3(camera.position.clone().sub(controls.target));
       flight.t = 0;
+      flight.time = FLIGHT;
       controls.enabled = false;
     };
 
@@ -356,6 +360,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     const spherical = new THREE.Spherical();
     let raf = 0;
     let last = performance.now();
+    const drop = new Set<THREE.Object3D>();
     const tick = (time: number) => {
       raf = requestAnimationFrame(tick);
       const dt = Math.min(0.05, (time - last) / 1000);
@@ -368,8 +373,8 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
         applyLight();
       }
       if (flight.t < 1) {
-        flight.t = Math.min(1, flight.t + dt / FLIGHT);
-        const k = 1 - Math.pow(1 - flight.t, 3);
+        flight.t = Math.min(1, flight.t + dt / flight.time);
+        const k = ease(flight.t);
         target.lerpVectors(flight.fromTarget, flight.toTarget, k);
         spherical.set(
           THREE.MathUtils.lerp(flight.from.radius, flight.to.radius, k),
@@ -380,6 +385,12 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
         if (lightsFor && flight.t >= 0.5) moveLights(lightsFor);
         if (flight.t === 1) controls.enabled = true;
       } else controls.update();
+      // ก๊อกทรงใหม่ค่อย ๆ ลงมานั่งบนท็อป
+      for (const o of drop) {
+        o.position.y = o.position.y < 0.0005 ? 0 : o.position.y * Math.exp(-dt * 9);
+        if (!o.position.y) drop.delete(o);
+        dirty = true;
+      }
       if (moved) {
         setHover(flight.t === 1 ? partAt(moved) : null);
         moved = null;
@@ -409,7 +420,11 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
         // ทรงก๊อกและซิงก์: ทุกทรงปั้นไว้แล้ว เปิดให้เห็นเฉพาะทรงที่เลือก
         scene.traverse((o) => {
           if (o.userData.sink) o.visible = o.userData.sink === p.sink;
-          if (o.userData.faucet) o.visible = o.userData.faucet === p.faucetShape;
+          if (o.userData.faucet) {
+            const on = o.userData.faucet === p.faucetShape;
+            if (on && !o.visible && !still) drop.add(o), (o.position.y = 0.06);
+            o.visible = on;
+          }
         });
         dirty = true;
       },
@@ -420,12 +435,25 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       },
       goTo,
       orbit: (dAzimuth, dZoom) => {
-        if (flight.t < 1) return;
-        spherical.setFromVector3(camera.position.clone().sub(controls.target));
+        // กดซ้ำระหว่างที่กล้องยังขยับจากปุ่ม: ต่อจากปลายทางเดิม ไม่ใช่จากตำแหน่งกลางทาง
+        const nudging = flight.t < 1 && flight.time === NUDGE;
+        if (flight.t < 1 && !nudging) return;
+        const here = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+        spherical.copy(nudging ? flight.to : here);
         spherical.theta = THREE.MathUtils.clamp(spherical.theta + dAzimuth, limit.azimuthMin, limit.azimuthMax);
         spherical.radius = THREE.MathUtils.clamp(spherical.radius * (1 - dZoom), limit.zoomMin, limit.zoomMax);
-        place(controls.target.clone(), spherical);
-        controls.update();
+        if (still) {
+          place(controls.target.clone(), spherical);
+          controls.update();
+          return;
+        }
+        flight.fromTarget.copy(controls.target);
+        flight.toTarget.copy(controls.target);
+        flight.from.copy(here);
+        flight.to.copy(spherical);
+        flight.t = 0;
+        flight.time = NUDGE;
+        controls.enabled = false;
       },
     };
     api.current.setPicks(picks);
@@ -489,12 +517,12 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       className="absolute inset-0 cursor-grab touch-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:cursor-grabbing [&>canvas]:block"
     >
       {/* เส้นชี้: เส้น ink บนเส้นรอง paper ให้อ่านออกทั้งบนวัสดุเข้มและอ่อน */}
-      <svg ref={guide} aria-hidden className="pointer-events-none absolute inset-0 z-10 h-full w-full opacity-0" fill="none">
+      <svg ref={guide} aria-hidden className="pointer-events-none absolute inset-0 z-10 h-full w-full opacity-0 transition-opacity duration-300" fill="none">
         <polyline className="stroke-paper" strokeWidth="2" strokeLinejoin="round" />
         <polyline className="stroke-ink" strokeWidth="1" />
         <circle r="4" className="fill-ink stroke-paper" strokeWidth="1.5" />
       </svg>
-      <div ref={tip} aria-hidden className="pointer-events-none absolute left-0 top-0 z-10 whitespace-nowrap bg-ink px-2.5 py-1.5 text-xs text-paper opacity-0" />
+      <div ref={tip} aria-hidden className="pointer-events-none absolute left-0 top-0 z-10 whitespace-nowrap bg-ink px-2.5 py-1.5 text-xs text-paper opacity-0 transition-opacity duration-200" />
     </div>
   );
 });
