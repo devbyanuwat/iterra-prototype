@@ -74,6 +74,7 @@ products() {
   mkdir -p "$out"
   # asset|ไฟล์|query — ขอเท่าต้นฉบับหรือ 1600 อันที่เล็กกว่า (scene7 ขยายภาพเล็กให้ ห้ามใช้)
   # K-21370T สูง 6000px ขอด้วย wid แล้วโดน 403 จึงขอด้วย hei
+  # ชื่อ asset ตามที่ pdpData ของ kohler.co.th ระบุจริง (K-15609T-B4-CP_01, 3644X, K-3676T-2KD-NA_01 ดูเหมือนพิมพ์ผิดแต่ไม่ใช่ ห้ามแก้)
   local cuts=(
     "PAWEB/zaa61880_rgb|elate-13963t-c4-1|wid=1600"
     "PAWEB/zab59994_rgb|kumin-99480t-4-1|wid=1600"

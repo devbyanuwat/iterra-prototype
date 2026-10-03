@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: 'th_TH',
     title: `${SITE_NAME} — ${SITE_TAGLINE_TH}`,
-    description: 'คัดสรรชุดครัวและอุปกรณ์ครัวจากแบรนด์ชั้นนำระดับโลก',
+    description: 'คัดสรรก๊อกและซิงก์ครัวพรีเมียมจาก KOHLER',
   },
 };
 
@@ -29,7 +29,7 @@ const organizationJsonLd = {
   '@type': 'Organization',
   name: SITE_NAME,
   url: SITE_URL,
-  description: 'ดีลเลอร์ชุดครัวและอุปกรณ์ครัวพรีเมียม',
+  description: 'ดีลเลอร์อุปกรณ์ครัวพรีเมียม',
   telephone: CONTACT.phone,
   email: CONTACT.email,
   address: {

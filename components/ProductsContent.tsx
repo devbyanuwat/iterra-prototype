@@ -11,6 +11,7 @@ import { products } from '@/lib/products';
 
 export default function ProductsContent() {
   const { lang, t } = useLang();
+  // สินค้าเด่นตัวแรกใน lib/products.ts ขึ้นเวทีสีเข้ม: ต้องเป็นภาพตัดที่ไม่มีรูโหว่ (ซิงก์มีรูก๊อกและรูน้ำทิ้งที่ Vision อุดเป็นสีขาว)
   const [lead, ...rest] = [...products].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
 
   return (

@@ -28,7 +28,7 @@ kitchen photo from the KOHLER Kitchens 2026 catalog PDF already used for the gal
 ## Products
 
 Slug = Kohler's slug. Category is now `'faucet' | 'sink'` (was `'kitchen'`); `t.common.category` gets
-`faucet` / `sink` labels. Featured (4, lead first): Elate 13963T, Indio, Taut 21366T, Toccata 3645X.
+`faucet` / `sink` labels. Featured (4, lead first): Elate 13963T, Taut 21366T, Indio, Toccata 3645X.
 Exact names, descriptions and spec rows live in the plan (Task 2).
 
 | slug | category | images | scenes |
@@ -77,10 +77,12 @@ Scene images are decorative next to their headline (`alt=""`), like the ImageWal
 
 - `Placeholder` gains `src?: string` and `fit?: 'cover' | 'contain'` (default `cover`). With `src` it renders an
   `<img alt={label} loading="lazy" decoding="async">` in the same ratio box: `object-cover`, or `object-contain`
-  with `p-[10%]` on `bg-warm-100` (`bg-ink` when `dark`). Without `src` it stays the labeled placeholder.
+  inset 18% on every side (ParallaxImage scales 1.18× and moves ±7%) on `bg-warm-100` (`bg-ink` when `dark`). Without `src`
+  it stays the labeled placeholder.
 - `ParallaxImage` passes `src` and `fit` through. No other prop or motion change.
 - Product type: `images: string[]` (cut-outs, `contain`) + `scenes?: string[]` (lifestyle, `cover`).
-  ProductCard, the home featured list, the products page and the detail gallery use them; alt is the product name.
+  ProductCard, the home featured list, the products page and the detail gallery use them. The detail gallery's alt is
+  the product name; an image inside a link that already names the product gets alt="".
 - Post type: `cover` becomes a path, new `inline: [string, string]` replaces the label strings the article page
   built from the cover.
 
@@ -97,7 +99,7 @@ Scene images are decorative next to their headline (`alt=""`), like the ImageWal
 
 `tsc` (ignoring stale `.next/types`), `npm run build`, `npm run check:overflow` (all pages × 375/768/1024/1200 ×
 motion/reduced), plus screenshots in visible Chrome of home (featured + story), `/products/`, one faucet and one
-sink detail page, `/articles/` + one article, `/about/`, TH and EN. Zero 404s for media (the overflow gate fails on
+sink detail page, `/articles/` + one article, `/about/`, TH and EN. Zero 404s for media (the overflow gate HEAD-checks every img, video and source on each page and fails on
 console errors).
 
 ## Deferred (owner decides later)
@@ -108,6 +110,12 @@ console errors).
 - Showing Kohler's list prices.
 - The products page now has 9 zigzag rows (was 6); taste-skill caps zigzag at 2, out of scope here.
 - Elate lifestyle photos are 679 px wide: soft on 2× screens.
+- Copy that still describes a multi-brand store or finishes the store does not list: "12 แบรนด์" on the about page and
+  the 12-brand stat in `lib/i18n.ts`, the brass faucet on the about page, and the matte-black faucet and sink tip in the
+  matte-black-kitchen article.
+- Sharper cut-outs: most are under 700 px wide, soft on 2× screens in the products-page rows. Elate 13963T, Elate 15609X
+  and both Kumin faucets have originals larger than the 1600 px `build-media.sh` asks for; re-fetching them at native
+  size would help, the rest are limited by Kohler's own image size.
 - Rights: product photos and model names belong to Kohler; fine for the prototype, production use needs the
   dealer agreement.
 
