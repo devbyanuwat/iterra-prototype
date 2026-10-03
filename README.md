@@ -9,6 +9,7 @@ npm run dev -- -p 4100   # http://localhost:4100 (ด่าน check:overflow �
 npm run build      # static export → โฟลเดอร์ out/
 npm run check:overflow   # ทุกหน้า × 375/768/1024/1200 × motion/reduced-motion ต้องไม่ล้นจอ ไม่มี console error ภาพทุกไฟล์โหลดได้ (เปิด dev server ก่อน · Node 22+)
 npm run check:filter     # ตรรกะตัวกรองหน้าสินค้ารวม (ไม่ต้องเปิด server · Node 22.6+)
+npm run check:room       # ตัวเลขผังครัวและตัวเลือกของหน้า /room/ (ไม่ต้องเปิด server · Node 22.6+)
 ```
 
 ## ภาพ
@@ -19,6 +20,8 @@ npm run check:filter     # ตรรกะตัวกรองหน้าส�
 |---|---|
 | `lib/products.ts` | สินค้า (ชื่อ TH/EN, สเปก, หมวด, path ภาพ) |
 | `lib/finishes.ts` | สีผิวตัวอย่างเพื่อเดโม (`demo: true`) → เปลี่ยนเป็นสีที่มีจำหน่ายจริง หรือลบออก |
+| `lib/room.ts` | ตัวเลือกวัสดุ โทนแสง และผังครัวของห้องจำลอง `/room/` (MOCK) → เปลี่ยนเป็นวัสดุที่ร้านมีจริง และลายจากผู้ผลิต |
+| `components/room/` | ห้องจำลอง 3D ที่ `/room/` (ไม่อยู่ในเมนู, noindex) · ครัวปั้นด้วยโค้ด ก๊อกเป็นทรงตัวอย่าง → ใส่ลิงก์ในเมนูเมื่อพร้อมเปิดจริง |
 | `lib/posts.ts` | บทความ (ภาพปก + ภาพในเนื้อหา 2 ภาพ) |
 | `lib/site.ts` | โดเมนจริง, ชื่อ, ที่อยู่, เบอร์ติดต่อ (มีผลกับ SEO/sitemap/JSON-LD) |
 | `lib/i18n.ts` | คำแปล TH/EN ทั้งเว็บ |

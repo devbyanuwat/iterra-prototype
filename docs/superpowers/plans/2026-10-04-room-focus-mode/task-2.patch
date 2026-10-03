@@ -1,0 +1,495 @@
+--- a/components/room/RoomScene.tsx
++++ b/components/room/RoomScene.tsx
+@@ -9,14 +9,14 @@
+ import * as THREE from 'three';
+ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+-import { FAUCET_LOOKS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, type Layout, type LayoutId, type LightId, type Look, type Picks } from '@/lib/room';
++import { FAUCET_LOOKS, FOCUS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, type Layout, type LayoutId, type LightId, type Look, type Part, type Picks } from '@/lib/room';
+ import { buildKitchen, ledPositions, makeMaterials } from './kitchen';
+ import { applyLook, disposeTextures } from './textures';
+ 
+-export type RoomHandle = { zoom: (step: number) => void; rotate: (step: number) => void; reset: () => void };
+-export type Part = keyof Picks;
+-type Props = { layout: LayoutId; picks: Picks; light: LightId; label: string; tipText: (part: Part) => string; onPick: (part: Part) => void; onReady: () => void; onError: () => void };
+-type Api = { setPicks: (p: Picks) => void; setLight: (l: LightId) => void; goTo: (l: LayoutId, jump?: boolean) => void; orbit: (dAzimuth: number, dZoom: number) => void };
++export type RoomHandle = { zoom: (step: number) => void; rotate: (step: number) => void; reset: () => void; focusScene: () => void };
++// focus = หมวดที่กำลังเจาะดู (null = มุมกว้าง) · onPick = ผู้ใช้กดชิ้นส่วนในฉาก
++type Props = { layout: LayoutId; focus: Part | null; picks: Picks; light: LightId; label: string; tipText: (part: Part) => string; onPick: (part: Part) => void; onReady: () => void; onError: () => void };
++type Api = { setPicks: (p: Picks) => void; setLight: (l: LightId) => void; goTo: (l: LayoutId, part: Part | null, jump?: boolean) => void; orbit: (dAzimuth: number, dZoom: number) => void };
+ 
+ const FLIGHT = 1.2; // วินาทีที่กล้องใช้เลื่อนไปครัวอื่น
+ const FADE = 0.6; // วินาทีที่แสงใช้ไล่ไปโทนใหม่
+@@ -28,9 +28,10 @@
+   return look === 'top' ? lookOf('top', picks) : look;
+ };
+ 
+-const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, picks, light, label, tipText, onPick, onReady, onError }, ref) {
++const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, focus, picks, light, label, tipText, onPick, onReady, onError }, ref) {
+   const host = useRef<HTMLDivElement>(null);
+   const tip = useRef<HTMLDivElement>(null);
++  const guide = useRef<SVGSVGElement>(null);
+   // ฉากสร้างครั้งเดียว จึงอ่าน callback ล่าสุดผ่าน ref (ข้อความป้ายเปลี่ยนตามภาษาและตัวเลือก)
+   const live = useRef({ tipText, onPick });
+   live.current = { tipText, onPick };
+@@ -40,7 +41,8 @@
+   useImperativeHandle(ref, () => ({
+     zoom: (step) => api.current?.orbit(0, step),
+     rotate: (step) => api.current?.orbit(step, 0),
+-    reset: () => api.current?.goTo(layout, true),
++    reset: () => api.current?.goTo(layout, null, true),
++    focusScene: () => host.current?.focus({ preventScroll: true }),
+   }));
+ 
+   useEffect(() => {
+@@ -151,12 +153,33 @@
+       lightsFor = null;
+       applyLight();
+     };
+-    const goTo = (id: LayoutId, jump = false) => {
++    // ขอบเขตหมุนและซูม: มุมกว้างใช้ ORBIT · เจาะดูใช้ FOCUS รอบมุมเจาะของชิ้นนั้น
++    const limit = { azimuthMin: -ORBIT.azimuth, azimuthMax: ORBIT.azimuth, zoomMin: ORBIT.zoomMin, zoomMax: ORBIT.zoomMax };
++    let current: Layout | undefined; // ครัวที่กำลังดู
++    let focused: Part | null = null;
++    const goTo = (id: LayoutId, part: Part | null, jump = false) => {
+       const l = layoutOf(id);
+-      if (jump || still) moveLights(l);
+-      else lightsFor = l;
+-      flight.toTarget.set(l.x, l.home.target[0], l.home.target[1]);
+-      flight.to.set(l.home.distance, l.home.polar, l.home.azimuth);
++      if (l !== current) {
++        if (jump || still) moveLights(l);
++        else lightsFor = l;
++      }
++      current = l;
++      focused = part;
++      setHover(null);
++      const f = part && l.focus[part];
++      if (f) {
++        flight.toTarget.set(l.x + f.at[0], f.at[1], f.at[2]);
++        flight.to.set(f.distance, f.polar, f.azimuth);
++        Object.assign(limit, { azimuthMin: f.azimuth - FOCUS.azimuth, azimuthMax: f.azimuth + FOCUS.azimuth, zoomMin: FOCUS.zoomMin, zoomMax: FOCUS.zoomMax });
++      } else {
++        flight.toTarget.set(l.x, l.home.target[0], l.home.target[1]);
++        flight.to.set(l.home.distance, l.home.polar, l.home.azimuth);
++        Object.assign(limit, { azimuthMin: -ORBIT.azimuth, azimuthMax: ORBIT.azimuth, zoomMin: ORBIT.zoomMin, zoomMax: ORBIT.zoomMax });
++      }
++      controls.minAzimuthAngle = limit.azimuthMin;
++      controls.maxAzimuthAngle = limit.azimuthMax;
++      controls.minDistance = limit.zoomMin;
++      controls.maxDistance = limit.zoomMax;
+       if (jump || still) {
+         flight.t = 1;
+         controls.enabled = true;
+@@ -213,6 +236,7 @@
+     const watcher = new ResizeObserver(() => {
+       resize();
+       renderer.render(scene, camera);
++      drawGuide();
+     });
+     watcher.observe(el);
+     resize();
+@@ -237,20 +261,52 @@
+       return (hit && parts.get((hit.object as THREE.Mesh).material as THREE.Material)) ?? null;
+     };
+     let hover: Part | null = null;
+-    const setHover = (part: Part | null, e?: PointerEvent) => {
+-      const label = tip.current!;
+-      if (part && e) {
+-        const box = el.getBoundingClientRect();
+-        label.style.transform = `translate(${Math.min(e.clientX - box.left + 14, box.width - label.offsetWidth - 8)}px, ${Math.max(e.clientY - box.top - 34, 8)}px)`;
+-      }
++    // ชี้ที่ชิ้นส่วน: วัสดุสว่างขึ้น + ป้ายชื่อ (ตอนเจาะดูอยู่ไม่ขึ้นป้าย เพราะการ์ดบอกชื่อแล้ว)
++    function setHover(part: Part | null) {
+       if (part === hover) return;
+       if (hover) matOf(hover).emissive.set(0);
+       if (part) matOf(part).emissive.set('#2b2620');
+       hover = part;
+-      label.textContent = part ? live.current.tipText(part) : '';
+-      label.style.opacity = part ? '1' : '0';
++      tip.current!.textContent = part && !focused ? live.current.tipText(part) : '';
+       el.style.cursor = part ? 'pointer' : '';
+       dirty = true;
++    }
++    // เส้นชี้: จุดบนชิ้นส่วน (at ของครัวที่ดูอยู่) ลากหักมุมฉากไปหาป้าย หรือขอบการ์ดตอนเจาะดู · วาดใหม่ทุกครั้งที่ฉากวาด
++    const anchor = new THREE.Vector3();
++    const drawGuide = () => {
++      const svg = guide.current!;
++      const label = tip.current!;
++      const part = focused ?? hover;
++      const f = part && current?.focus[part];
++      if (f) anchor.set(current!.x + f.at[0], f.at[1], f.at[2]).project(camera);
++      const w = el.clientWidth;
++      const h = el.clientHeight;
++      const x = ((anchor.x + 1) / 2) * w;
++      const y = ((1 - anchor.y) / 2) * h;
++      const seen = !!f && flight.t === 1 && anchor.z < 1 && x > 0 && x < w && y > 0 && y < h;
++      label.style.opacity = seen && !focused ? '1' : '0';
++      svg.style.opacity = seen ? '1' : '0';
++      if (!seen) return;
++      let points: number[][];
++      const card = focused && el.parentElement!.querySelector('[data-focus-card]')?.getBoundingClientRect();
++      if (card) {
++        const box = el.getBoundingClientRect();
++        const left = card.left - box.left;
++        const top = card.top - box.top;
++        const right = left + card.width;
++        if (x >= left && x <= right) points = y < top ? [[x, y], [x, top]] : [];
++        else points = [[x, y], [x, Math.max(y, top + 24)], [x < left ? left : right, Math.max(y, top + 24)]];
++      } else {
++        // ป้ายอยู่เฉียงขึ้นทางขวาของจุด · ชนขอบขวาให้พลิกไปซ้าย ชนขอบบนให้ลงล่าง
++        const lw = label.offsetWidth;
++        const side = x + 48 + lw > w - 8 ? -1 : 1;
++        const ly = y - 56 < 8 ? y + 56 : y - 56;
++        label.style.transform = `translate(${side === 1 ? x + 48 : x - 48 - lw}px, ${ly - label.offsetHeight / 2}px)`;
++        points = [[x, y], [x, ly], [x + side * 48, ly]];
++      }
++      const path = points.map((p) => p.map(Math.round).join(',')).join(' ');
++      svg.querySelectorAll('polyline').forEach((line) => line.setAttribute('points', path));
++      svg.querySelector('circle')!.setAttribute('transform', `translate(${Math.round(x)} ${Math.round(y)})`);
+     };
+     let moved: PointerEvent | null = null; // pointermove ล่าสุด · ยิง ray เฟรมละครั้งใน tick
+     let down: { x: number; y: number } | null = null;
+@@ -261,15 +317,12 @@
+       down = { x: e.clientX, y: e.clientY };
+       setHover(null);
+     };
+-    // ขยับไม่เกิน 5px = กด ไม่ใช่ลากหมุนกล้อง
++    // ขยับไม่เกิน 5px = กด ไม่ใช่ลากหมุนกล้อง · กดชิ้นส่วน = ขอเจาะดูชิ้นนั้น
+     const onUp = (e: PointerEvent) => {
+       const tap = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5;
+       down = null;
+       const part = tap && flight.t === 1 ? partAt(e) : null;
+-      if (!part) return;
+-      setHover(part, e.pointerType === 'mouse' ? e : undefined);
+-      if (e.pointerType !== 'mouse') tip.current!.style.opacity = '0'; // จอสัมผัส: ไฮไลต์อย่างเดียว ป้ายจะบังนิ้ว
+-      live.current.onPick(part);
++      if (part) live.current.onPick(part);
+     };
+     const onLeave = () => {
+       moved = null;
+@@ -310,13 +363,14 @@
+         if (flight.t === 1) controls.enabled = true;
+       } else controls.update();
+       if (moved) {
+-        setHover(flight.t === 1 ? partAt(moved) : null, moved);
++        setHover(flight.t === 1 ? partAt(moved) : null);
+         moved = null;
+       }
+       if (!dirty) return;
+       dirty = false;
+       const start = performance.now();
+       renderer.render(scene, camera);
++      drawGuide();
+       stats.renderMs = performance.now() - start;
+       stats.frames++;
+     };
+@@ -339,14 +393,14 @@
+       orbit: (dAzimuth, dZoom) => {
+         if (flight.t < 1) return;
+         spherical.setFromVector3(camera.position.clone().sub(controls.target));
+-        spherical.theta = THREE.MathUtils.clamp(spherical.theta + dAzimuth, -ORBIT.azimuth, ORBIT.azimuth);
+-        spherical.radius = THREE.MathUtils.clamp(spherical.radius * (1 - dZoom), ORBIT.zoomMin, ORBIT.zoomMax);
++        spherical.theta = THREE.MathUtils.clamp(spherical.theta + dAzimuth, limit.azimuthMin, limit.azimuthMax);
++        spherical.radius = THREE.MathUtils.clamp(spherical.radius * (1 - dZoom), limit.zoomMin, limit.zoomMax);
+         place(controls.target.clone(), spherical);
+         controls.update();
+       },
+     };
+     api.current.setPicks(picks);
+-    goTo(layout, true);
++    goTo(layout, focus, true);
+     raf = requestAnimationFrame(tick);
+     onReady();
+ 
+@@ -378,8 +432,8 @@
+   useEffect(() => api.current?.setLight(light), [light]);
+   useEffect(() => {
+     if (first.current) first.current = false;
+-    else api.current?.goTo(layout);
+-  }, [layout]);
++    else api.current?.goTo(layout, focus);
++  }, [layout, focus]);
+ 
+   const onKey = (e: React.KeyboardEvent) => {
+     if (e.metaKey || e.ctrlKey || e.altKey) return; // ปล่อยคีย์ลัดของเบราว์เซอร์ (ซูมหน้า ย้อนกลับ)
+@@ -400,11 +454,13 @@
+       data-lenis-prevent
+       className="absolute inset-0 cursor-grab touch-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:cursor-grabbing [&>canvas]:block"
+     >
+-      <div
+-        ref={tip}
+-        aria-hidden
+-        className="pointer-events-none absolute left-0 top-0 z-10 whitespace-nowrap bg-ink px-2.5 py-1.5 text-xs text-paper opacity-0 transition-opacity motion-reduce:transition-none"
+-      />
++      {/* เส้นชี้: เส้น ink บนเส้นรอง paper ให้อ่านออกทั้งบนวัสดุเข้มและอ่อน */}
++      <svg ref={guide} aria-hidden className="pointer-events-none absolute inset-0 z-10 h-full w-full opacity-0" fill="none">
++        <polyline stroke="#faf9f7" strokeWidth="3" strokeLinejoin="round" />
++        <polyline stroke="#1c1917" strokeWidth="1" />
++        <circle r="4" fill="#1c1917" stroke="#faf9f7" strokeWidth="1.5" />
++      </svg>
++      <div ref={tip} aria-hidden className="pointer-events-none absolute left-0 top-0 z-10 whitespace-nowrap bg-ink px-2.5 py-1.5 text-xs text-paper opacity-0" />
+     </div>
+   );
+ });
+--- /dev/null
++++ b/components/room/FocusCard.tsx
+@@ -0,0 +1,77 @@
++'use client';
++
++// การ์ดบนฉากตอนเจาะดูชิ้นส่วน: ชื่อหมวด ตัวเลือกที่เลือกอยู่ คำอธิบาย จุดสี และปุ่มกลับมุมกว้าง
++// ไม่มี three.js ในไฟล์นี้ · data-focus-card ให้ RoomScene หาเจอเพื่อลากเส้นชี้มาที่ขอบการ์ด
++
++import { useEffect, useRef } from 'react';
++
++export type Choice = { id: string; label: string; swatch: string };
++type Props = {
++  part: string; // เปลี่ยนเมื่อย้ายไปเจาะชิ้นอื่น ใช้ย้าย focus
++  title: string;
++  name: string;
++  tag?: string;
++  note: string;
++  choices: Choice[];
++  value: string;
++  onChange: (id: string) => void;
++  back: string;
++  onBack: () => void;
++};
++
++export default function FocusCard({ part, title, name, tag, note, choices, value, onChange, back, onBack }: Props) {
++  const root = useRef<HTMLDivElement>(null);
++  // เข้าโหมดเจาะดู หรือย้ายไปชิ้นอื่น: ย้าย focus มาที่ตัวเลือกที่เลือกอยู่
++  useEffect(() => {
++    root.current?.querySelector<HTMLElement>('[aria-pressed="true"]')?.focus({ preventScroll: true });
++  }, [part]);
++
++  return (
++    <div
++      ref={root}
++      data-focus-card
++      role="group"
++      aria-label={title}
++      className="absolute inset-x-0 bottom-0 z-10 border-t border-warm-300 bg-paper px-3 pb-2 pt-3 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:w-[300px] lg:border lg:p-4"
++    >
++      <div className="flex items-start justify-between gap-3">
++        <p className="text-xs font-normal text-warm-500">
++          {title}
++          <span className="mt-0.5 block text-sm text-ink">
++            {name}
++            {tag && <span className="ml-2 text-xs text-warm-500">{tag}</span>}
++          </span>
++        </p>
++        <button
++          type="button"
++          onClick={onBack}
++          className="shrink-0 border border-warm-300 px-3 py-2 text-xs text-ink transition-[border-color,transform] hover:border-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink active:scale-[0.98] motion-reduce:transition-none"
++        >
++          {back}
++        </button>
++      </div>
++      <div className="-ml-2 mt-1 flex">
++        {choices.map((c) => (
++          <button
++            key={c.id}
++            type="button"
++            aria-pressed={c.id === value}
++            aria-label={c.label}
++            title={c.label}
++            onClick={() => onChange(c.id)}
++            className="flex h-11 w-11 items-center justify-center transition-transform focus-visible:outline focus-visible:outline-1 focus-visible:outline-ink active:scale-[0.92] motion-reduce:transition-none"
++          >
++            <span
++              aria-hidden
++              className={`block h-7 w-7 rounded-full border border-warm-300 ${c.id === value ? 'ring-1 ring-ink ring-offset-2 ring-offset-paper' : ''}`}
++              style={{ background: c.swatch }}
++            />
++          </button>
++        ))}
++      </div>
++      <p aria-live="polite" className="mt-1 line-clamp-2 text-xs font-normal leading-relaxed text-stone-600 lg:mt-2 lg:line-clamp-none">
++        {note}
++      </p>
++    </div>
++  );
++}
+--- a/components/room/RoomContent.tsx
++++ b/components/room/RoomContent.tsx
+@@ -6,11 +6,12 @@
+ import dynamic from 'next/dynamic';
+ import Link from 'next/link';
+ import { useRef, useState } from 'react';
++import FocusCard from './FocusCard';
+ import { useLang } from '@/components/LangProvider';
+ import FinishDots from '@/components/FinishDots';
+ import { FAUCET } from '@/lib/finishes';
+-import { DEFAULT_PICKS, LAYOUTS, LIGHTS, PARTS, type LayoutId, type LightId, type PartId, type Picks } from '@/lib/room';
+-import type { Part, RoomHandle } from './RoomScene';
++import { DEFAULT_PICKS, FAUCET_NOTES, LAYOUTS, LIGHTS, PARTS, type LayoutId, type LightId, type Part, type PartId, type Picks } from '@/lib/room';
++import type { RoomHandle } from './RoomScene';
+ 
+ const Skeleton = () => <div className="absolute inset-0 animate-pulse bg-warm-200 motion-reduce:animate-none" aria-hidden />;
+ const RoomScene = dynamic(() => import('./RoomScene'), { ssr: false, loading: Skeleton });
+@@ -29,34 +30,27 @@
+   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+   const scene = useRef<RoomHandle>(null);
+   const faucet = FAUCET.find((f) => f.id === picks.faucet)!;
+-  const groups = useRef<Partial<Record<Part, HTMLFieldSetElement | null>>>({});
+-  const [flash, setFlash] = useState<Part | null>(null);
+-  const flashOff = useRef(0);
++  const [focus, setFocus] = useState<Part | null>(null); // หมวดที่กำลังเจาะดูในฉาก
++  const stage = useRef<HTMLDivElement>(null);
+   const nameOf = (part: Part) => (part === 'faucet' ? faucet : PARTS[part].find((o) => o.id === picks[part])!).name[lang];
+-  // กดชิ้นส่วนในฉาก: เลื่อนแผงไปหมวดนั้น เน้นพื้นหลังชั่วครู่ แล้วย้าย focus ไปตัวเลือกที่เลือกอยู่
+-  const jumpTo = (part: Part) => {
+-    const group = groups.current[part];
+-    if (!group) return;
+-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+-    const behavior = still ? 'auto' : 'smooth';
+-    const panel = group.parentElement!;
+-    // lg ขึ้นไปแผงเลื่อนในตัวเอง: เลื่อนเฉพาะแผง (scrollIntoView จะพาทั้งหน้าเลื่อนไปด้วย)
+-    if (getComputedStyle(panel).overflowY === 'auto') panel.scrollTo({ top: panel.scrollTop + group.getBoundingClientRect().top - panel.getBoundingClientRect().top - 16, behavior });
+-    else group.scrollIntoView({ behavior, block: 'start' });
+-    group.querySelector<HTMLElement>('[aria-pressed="true"]')?.focus({ preventScroll: true });
+-    setFlash(part);
+-    window.clearTimeout(flashOff.current);
+-    flashOff.current = window.setTimeout(() => setFlash(null), 1400);
++  const demoName = (f: (typeof FAUCET)[number]) => (f.demo ? `${f.name[lang]} (${t.products.finishDemo})` : f.name[lang]);
++  // ออกจากโหมดเจาะดู · ถ้า focus อยู่ในการ์ด (ซึ่งกำลังจะหายไป) ให้ย้ายกลับไปที่ฉาก
++  const leave = () => {
++    if (stage.current?.querySelector('[data-focus-card]')?.contains(document.activeElement)) scene.current?.focusScene();
++    setFocus(null);
+   };
+-  // scroll-mt: ต่ำกว่า lg ฉากติดบนจอ (เมนู 5rem + ฉาก 45dvh) หมวดที่เลื่อนมาต้องหยุดใต้ฉาก
+-  const group = (part: Part) =>
+-    `scroll-mt-[calc(max(45dvh,280px)+7.5rem)] transition-[background-color,box-shadow] duration-500 motion-reduce:transition-none ${flash === part ? 'bg-warm-200 shadow-[0_0_0_8px_theme(colors.warm.200)]' : 'shadow-[0_0_0_8px_transparent]'}`;
+ 
+   return (
+     <section className="px-6 pb-16 md:px-[4vw] lg:grid lg:h-[100dvh] lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-[minmax(0,1fr)] lg:gap-10 lg:pb-8 lg:pt-24">
+       {/* ต่ำกว่า lg: ฉากติดบนจอ แผงเลื่อนอยู่ข้างใต้ · ตัวห่อพื้นทึบสูงถึงขอบบนจอ บังข้อความที่เลื่อนผ่านใต้เมนู (เมนูโปร่งใส) */}
+       <div className="sticky top-0 z-10 mx-[-1.5rem] bg-paper px-6 pt-20 md:mx-[-4vw] md:px-[4vw] lg:static lg:mx-0 lg:min-h-0 lg:p-0">
+-      <div className="relative h-[45dvh] min-h-[280px] overflow-hidden bg-warm-200 lg:h-full">
++      <div
++        ref={stage}
++        onKeyDown={(e) => {
++          if (e.key === 'Escape' && focus) leave();
++        }}
++        className="relative h-[45dvh] min-h-[280px] overflow-hidden bg-warm-200 lg:h-full"
++      >
+         {state === 'error' ? (
+           <p className="absolute inset-0 flex items-center justify-center px-8 text-center text-sm text-stone-600">{t.room.noWebgl}</p>
+         ) : (
+@@ -64,15 +58,30 @@
+             <RoomScene
+               ref={scene}
+               layout={layout}
++              focus={focus}
+               picks={picks}
+               light={light}
+               label={t.room.sceneLabel}
+               tipText={(part) => `${t.room[part]} · ${nameOf(part)}`}
+-              onPick={jumpTo}
++              onPick={setFocus}
+               onReady={() => setState('ready')}
+               onError={() => setState('error')}
+             />
+             {state === 'loading' && <Skeleton />}
++            {focus && state === 'ready' && (
++              <FocusCard
++                part={focus}
++                title={t.room[focus]}
++                name={nameOf(focus)}
++                tag={focus === 'faucet' && faucet.demo ? t.products.finishDemo : undefined}
++                note={(focus === 'faucet' ? FAUCET_NOTES[picks.faucet] : PARTS[focus].find((o) => o.id === picks[focus])!.note)[lang]}
++                choices={focus === 'faucet' ? FAUCET.map((f) => ({ id: f.id, label: demoName(f), swatch: f.swatch })) : PARTS[focus].map((o) => ({ id: o.id, label: o.name[lang], swatch: o.swatch }))}
++                value={picks[focus]}
++                onChange={(id) => setPicks((p) => ({ ...p, [focus]: id }))}
++                back={t.room.back}
++                onBack={leave}
++              />
++            )}
+           </>
+         )}
+       </div>
+@@ -88,7 +97,10 @@
+           <legend className={legend}>{t.room.layout}</legend>
+           <div className="flex flex-wrap gap-2">
+             {LAYOUTS.map((l) => (
+-              <button key={l.id} type="button" aria-pressed={layout === l.id} onClick={() => setLayout(l.id)} className={`${button} ${picked(layout === l.id)}`}>
++              <button key={l.id} type="button" aria-pressed={layout === l.id} onClick={() => {
++                  setFocus(null);
++                  setLayout(l.id);
++                }} className={`${button} ${picked(layout === l.id)}`}>
+                 {l.name[lang]}
+               </button>
+             ))}
+@@ -98,7 +110,7 @@
+         {PART_ORDER.map((part) => {
+           const current = PARTS[part].find((o) => o.id === picks[part])!;
+           return (
+-            <fieldset key={part} ref={(node) => { groups.current[part] = node; }} className={group(part)}>
++            <fieldset key={part}>
+               <legend className={`${legend} w-full`}>
+                 <span>{t.room[part]}</span>
+                 <span className="text-ink">{current.name[lang]}</span>
+@@ -126,7 +138,7 @@
+           );
+         })}
+ 
+-        <fieldset ref={(node) => { groups.current.faucet = node; }} className={group('faucet')}>
++        <fieldset>
+           <legend className={`${legend} w-full`}>
+             <span>{t.room.faucet}</span>
+             <span className="text-ink">
+@@ -157,7 +169,7 @@
+             <button type="button" aria-label={t.room.zoomIn} onClick={() => scene.current?.zoom(0.15)} className={`${button} ${picked(false)}`}>
+               +
+             </button>
+-            <button type="button" onClick={() => scene.current?.reset()} className={`${button} ${picked(false)}`}>
++            <button type="button" onClick={() => (focus ? setFocus(null) : scene.current?.reset())} className={`${button} ${picked(false)}`}>
+               {t.room.reset}
+             </button>
+           </div>
+--- a/lib/i18n.ts
++++ b/lib/i18n.ts
+@@ -84,7 +84,7 @@
+     },
+     room: {
+       title: 'จำลองห้องครัว',
+-      help: 'เลือกผังครัว แล้วลองสีและวัสดุกับแสงแต่ละแบบ ลากที่ภาพเพื่อหมุน เลื่อนล้อเมาส์หรือจีบนิ้วเพื่อซูม กดที่ชิ้นส่วนในภาพเพื่อไปยังตัวเลือกของชิ้นนั้น',
++      help: 'เลือกผังครัว แล้วลองสีและวัสดุกับแสงแต่ละแบบ ลากที่ภาพเพื่อหมุน เลื่อนล้อเมาส์หรือจีบนิ้วเพื่อซูม กดที่ชิ้นส่วนในภาพเพื่อดูใกล้ ๆ และเปลี่ยนวัสดุ',
+       layout: 'ผังครัว',
+       doors: 'หน้าบานตู้',
+       top: 'ท็อปเคาน์เตอร์',
+@@ -96,9 +96,10 @@
+       zoomIn: 'ซูมเข้า',
+       zoomOut: 'ซูมออก',
+       reset: 'มุมเริ่มต้น',
++      back: 'กลับมุมกว้าง',
+       note: 'ภาพจำลองเพื่อประกอบการตัดสินใจ สีและผิววัสดุจริงอาจต่างจากที่เห็นบนจอ ก๊อกในภาพเป็นทรงตัวอย่าง ไม่ใช่รุ่นที่จำหน่าย',
+       noWebgl: 'อุปกรณ์นี้แสดงภาพ 3 มิติไม่ได้ ลองเปิดด้วยเบราว์เซอร์รุ่นใหม่หรืออุปกรณ์เครื่องอื่น',
+-      sceneLabel: 'ห้องครัวจำลอง 3 มิติ กดลูกศรซ้ายขวาเพื่อหมุน กดบวกลบเพื่อซูม',
++      sceneLabel: 'ห้องครัวจำลอง 3 มิติ กดลูกศรซ้ายขวาเพื่อหมุน กดบวกลบเพื่อซูม กด Esc เพื่อกลับมุมกว้าง',
+     },
+     catalog: {
+       kicker: 'KOHLER KITCHENS 2026',
+@@ -207,7 +208,7 @@
+     },
+     room: {
+       title: 'Kitchen studio',
+-      help: 'Pick a layout, then try colours and materials under each light. Drag the scene to look around, scroll or pinch to zoom. Click a part in the scene to jump to its options.',
++      help: 'Pick a layout, then try colours and materials under each light. Drag the scene to look around, scroll or pinch to zoom. Click a part in the scene to see it up close and change its material.',
+       layout: 'Layout',
+       doors: 'Cabinet doors',
+       top: 'Countertop',
+@@ -219,9 +220,10 @@
+       zoomIn: 'Zoom in',
+       zoomOut: 'Zoom out',
+       reset: 'Reset view',
++      back: 'Back to full view',
+       note: 'A simulation to help you decide. Real colours and surfaces can differ from what the screen shows. The faucet shape is a sample, not a model on sale.',
+       noWebgl: 'This device cannot show 3D. Try a newer browser or another device.',
+-      sceneLabel: '3D kitchen studio. Press the left and right arrow keys to look around, plus and minus to zoom.',
++      sceneLabel: '3D kitchen studio. Press the left and right arrow keys to look around, plus and minus to zoom, Escape to return to the full view.',
+     },
+     catalog: {
+       kicker: 'KOHLER KITCHENS 2026',
