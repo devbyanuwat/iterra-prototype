@@ -64,7 +64,7 @@ Exact names, descriptions and spec rows live in the plan (Task 2).
 | slot | PDF image | used by |
 |---|---|---|
 | story-1 / story-2 / story-3 | 022-066 / 022-065 / 020-061 | home StoryRows (3/2, 3/2, 21/9) |
-| about-hero, about-1..4 | 001-000, 023-068, 028-078, 033-093, 025-073 | about page (21/9, then 4/5 ×4) |
+| about-hero, about-1..4 | 001-000, 023-068, 028-078, 021-064, 025-073 | about page (21/9, then 4/5 ×4) |
 | showroom-kitchen-at-home (+ -1, -2) | 035-099, 023-067, 025-072 | post cover 16/9, inline 3/2 ×2 |
 | matte-black-kitchen | 041-115, 007-030, 042-118 | same |
 | induction-vs-gas | 036-101, 032-090, 019-055 | same |

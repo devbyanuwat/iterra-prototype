@@ -107,7 +107,7 @@ scenes() {
   # page-index:ชื่อไฟล์ — ภาพครัว ไม่มีคน ไม่ใช่ภาพปะต่อ ไม่ซ้ำกับ gallery
   local picks=(
     022-066:story-1 022-065:story-2 020-061:story-3
-    001-000:about-hero 023-068:about-1 028-078:about-2 033-093:about-3 025-073:about-4
+    001-000:about-hero 023-068:about-1 028-078:about-2 021-064:about-3 025-073:about-4
     035-099:showroom-kitchen-at-home 023-067:showroom-kitchen-at-home-1 025-072:showroom-kitchen-at-home-2
     041-115:matte-black-kitchen 007-030:matte-black-kitchen-1 042-118:matte-black-kitchen-2
     036-101:induction-vs-gas 032-090:induction-vs-gas-1 019-055:induction-vs-gas-2
