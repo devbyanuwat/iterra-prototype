@@ -10,7 +10,7 @@ import { useLang } from '@/components/LangProvider';
 import FinishDots from '@/components/FinishDots';
 import { FAUCET } from '@/lib/finishes';
 import { DEFAULT_PICKS, LAYOUTS, LIGHTS, PARTS, type LayoutId, type LightId, type PartId, type Picks } from '@/lib/room';
-import type { RoomHandle } from './RoomScene';
+import type { Part, RoomHandle } from './RoomScene';
 
 const Skeleton = () => <div className="absolute inset-0 animate-pulse bg-warm-200 motion-reduce:animate-none" aria-hidden />;
 const RoomScene = dynamic(() => import('./RoomScene'), { ssr: false, loading: Skeleton });
@@ -29,6 +29,28 @@ export default function RoomContent() {
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const scene = useRef<RoomHandle>(null);
   const faucet = FAUCET.find((f) => f.id === picks.faucet)!;
+  const groups = useRef<Partial<Record<Part, HTMLFieldSetElement | null>>>({});
+  const [flash, setFlash] = useState<Part | null>(null);
+  const flashOff = useRef(0);
+  const nameOf = (part: Part) => (part === 'faucet' ? faucet : PARTS[part].find((o) => o.id === picks[part])!).name[lang];
+  // กดชิ้นส่วนในฉาก: เลื่อนแผงไปหมวดนั้น เน้นพื้นหลังชั่วครู่ แล้วย้าย focus ไปตัวเลือกที่เลือกอยู่
+  const jumpTo = (part: Part) => {
+    const group = groups.current[part];
+    if (!group) return;
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const behavior = still ? 'auto' : 'smooth';
+    const panel = group.parentElement!;
+    // lg ขึ้นไปแผงเลื่อนในตัวเอง: เลื่อนเฉพาะแผง (scrollIntoView จะพาทั้งหน้าเลื่อนไปด้วย)
+    if (getComputedStyle(panel).overflowY === 'auto') panel.scrollTo({ top: panel.scrollTop + group.getBoundingClientRect().top - panel.getBoundingClientRect().top - 16, behavior });
+    else group.scrollIntoView({ behavior, block: 'start' });
+    group.querySelector<HTMLElement>('[aria-pressed="true"]')?.focus({ preventScroll: true });
+    setFlash(part);
+    window.clearTimeout(flashOff.current);
+    flashOff.current = window.setTimeout(() => setFlash(null), 1400);
+  };
+  // scroll-mt: ต่ำกว่า lg ฉากติดบนจอ (เมนู 5rem + ฉาก 45dvh) หมวดที่เลื่อนมาต้องหยุดใต้ฉาก
+  const group = (part: Part) =>
+    `scroll-mt-[calc(max(45dvh,280px)+7.5rem)] transition-[background-color,box-shadow] duration-500 motion-reduce:transition-none ${flash === part ? 'bg-warm-200 shadow-[0_0_0_8px_theme(colors.warm.200)]' : 'shadow-[0_0_0_8px_transparent]'}`;
 
   return (
     <section className="px-6 pb-16 md:px-[4vw] lg:grid lg:h-[100dvh] lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-[minmax(0,1fr)] lg:gap-10 lg:pb-8 lg:pt-24">
@@ -45,6 +67,8 @@ export default function RoomContent() {
               picks={picks}
               light={light}
               label={t.room.sceneLabel}
+              tipText={(part) => `${t.room[part]} · ${nameOf(part)}`}
+              onPick={jumpTo}
               onReady={() => setState('ready')}
               onError={() => setState('error')}
             />
@@ -74,7 +98,7 @@ export default function RoomContent() {
         {PART_ORDER.map((part) => {
           const current = PARTS[part].find((o) => o.id === picks[part])!;
           return (
-            <fieldset key={part}>
+            <fieldset key={part} ref={(node) => { groups.current[part] = node; }} className={group(part)}>
               <legend className={`${legend} w-full`}>
                 <span>{t.room[part]}</span>
                 <span className="text-ink">{current.name[lang]}</span>
@@ -102,7 +126,7 @@ export default function RoomContent() {
           );
         })}
 
-        <fieldset>
+        <fieldset ref={(node) => { groups.current.faucet = node; }} className={group('faucet')}>
           <legend className={`${legend} w-full`}>
             <span>{t.room.faucet}</span>
             <span className="text-ink">

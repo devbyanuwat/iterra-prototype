@@ -14,7 +14,8 @@ import { buildKitchen, ledPositions, makeMaterials } from './kitchen';
 import { applyLook, disposeTextures } from './textures';
 
 export type RoomHandle = { zoom: (step: number) => void; rotate: (step: number) => void; reset: () => void };
-type Props = { layout: LayoutId; picks: Picks; light: LightId; label: string; onReady: () => void; onError: () => void };
+export type Part = keyof Picks;
+type Props = { layout: LayoutId; picks: Picks; light: LightId; label: string; tipText: (part: Part) => string; onPick: (part: Part) => void; onReady: () => void; onError: () => void };
 type Api = { setPicks: (p: Picks) => void; setLight: (l: LightId) => void; goTo: (l: LayoutId, jump?: boolean) => void; orbit: (dAzimuth: number, dZoom: number) => void };
 
 const FLIGHT = 1.2; // วินาทีที่กล้องใช้เลื่อนไปครัวอื่น
@@ -27,8 +28,12 @@ const lookOf = (part: keyof typeof PARTS, picks: Picks): Look => {
   return look === 'top' ? lookOf('top', picks) : look;
 };
 
-const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, picks, light, label, onReady, onError }, ref) {
+const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, picks, light, label, tipText, onPick, onReady, onError }, ref) {
   const host = useRef<HTMLDivElement>(null);
+  const tip = useRef<HTMLDivElement>(null);
+  // ฉากสร้างครั้งเดียว จึงอ่าน callback ล่าสุดผ่าน ref (ข้อความป้ายเปลี่ยนตามภาษาและตัวเลือก)
+  const live = useRef({ tipText, onPick });
+  live.current = { tipText, onPick };
   const api = useRef<Api | null>(null);
   const first = useRef(true);
 
@@ -218,6 +223,64 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
     const onRestore = () => { dirty = true; };
     renderer.domElement.addEventListener('webglcontextrestored', onRestore);
 
+    // ── ชี้และกดที่ชิ้นส่วน: วัสดุที่เปลี่ยนได้ 5 ตัวคือ 5 หมวดในแผง ──
+    // ไฮไลต์ทำที่วัสดุ จึงสว่างทุกชิ้นที่ใช้วัสดุนั้นทั้ง 3 ครัว (ตัวเลือกก็ใช้ร่วมกันทั้งห้องเหมือนกัน)
+    const parts = new Map<THREE.Material, Part>([[m.door, 'doors'], [m.top, 'top'], [m.splash, 'splash'], [m.floor, 'floor'], [m.faucet, 'faucet']]);
+    const matOf = (part: Part) => [...parts].find(([, p]) => p === part)![0] as THREE.MeshStandardMaterial;
+    const ray = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    const partAt = (e: PointerEvent): Part | null => {
+      const box = renderer.domElement.getBoundingClientRect();
+      ndc.set(((e.clientX - box.left) / box.width) * 2 - 1, -((e.clientY - box.top) / box.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      const hit = ray.intersectObjects(scene.children, true)[0];
+      return (hit && parts.get((hit.object as THREE.Mesh).material as THREE.Material)) ?? null;
+    };
+    let hover: Part | null = null;
+    const setHover = (part: Part | null, e?: PointerEvent) => {
+      const label = tip.current!;
+      if (part && e) {
+        const box = el.getBoundingClientRect();
+        label.style.transform = `translate(${Math.min(e.clientX - box.left + 14, box.width - label.offsetWidth - 8)}px, ${Math.max(e.clientY - box.top - 34, 8)}px)`;
+      }
+      if (part === hover) return;
+      if (hover) matOf(hover).emissive.set(0);
+      if (part) matOf(part).emissive.set('#2b2620');
+      hover = part;
+      label.textContent = part ? live.current.tipText(part) : '';
+      label.style.opacity = part ? '1' : '0';
+      el.style.cursor = part ? 'pointer' : '';
+      dirty = true;
+    };
+    let moved: PointerEvent | null = null; // pointermove ล่าสุด · ยิง ray เฟรมละครั้งใน tick
+    let down: { x: number; y: number } | null = null;
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse' && !e.buttons) moved = e;
+    };
+    const onDown = (e: PointerEvent) => {
+      down = { x: e.clientX, y: e.clientY };
+      setHover(null);
+    };
+    // ขยับไม่เกิน 5px = กด ไม่ใช่ลากหมุนกล้อง
+    const onUp = (e: PointerEvent) => {
+      const tap = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5;
+      down = null;
+      const part = tap && flight.t === 1 ? partAt(e) : null;
+      if (!part) return;
+      setHover(part, e.pointerType === 'mouse' ? e : undefined);
+      if (e.pointerType !== 'mouse') tip.current!.style.opacity = '0'; // จอสัมผัส: ไฮไลต์อย่างเดียว ป้ายจะบังนิ้ว
+      live.current.onPick(part);
+    };
+    const onLeave = () => {
+      moved = null;
+      setHover(null);
+    };
+    const canvas = renderer.domElement;
+    canvas.addEventListener('pointermove', onMove);
+    canvas.addEventListener('pointerdown', onDown);
+    canvas.addEventListener('pointerup', onUp);
+    canvas.addEventListener('pointerleave', onLeave);
+
     const target = new THREE.Vector3();
     const spherical = new THREE.Spherical();
     let raf = 0;
@@ -246,6 +309,10 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
         if (lightsFor && flight.t >= 0.5) moveLights(lightsFor);
         if (flight.t === 1) controls.enabled = true;
       } else controls.update();
+      if (moved) {
+        setHover(flight.t === 1 ? partAt(moved) : null, moved);
+        moved = null;
+      }
       if (!dirty) return;
       dirty = false;
       const start = performance.now();
@@ -332,7 +399,13 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       onKeyDown={onKey}
       data-lenis-prevent
       className="absolute inset-0 cursor-grab touch-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:cursor-grabbing [&>canvas]:block"
-    />
+    >
+      <div
+        ref={tip}
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-0 z-10 whitespace-nowrap bg-ink px-2.5 py-1.5 text-xs text-paper opacity-0 transition-opacity motion-reduce:transition-none"
+      />
+    </div>
   );
 });
 
