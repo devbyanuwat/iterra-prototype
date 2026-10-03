@@ -32,7 +32,6 @@ export const dict = {
       featuredKicker: 'FEATURED COLLECTION',
       featuredTitle: 'สินค้าเด่นประจำฤดูกาล',
       featuredHint: 'เลื่อนลงเพื่อชมสินค้า — แนวนอน',
-      galleryKicker: 'KOHLER KITCHENS',
       galleryTitle: 'พื้นที่ที่ออกแบบมาเพื่อชีวิตจริง',
       storyKicker: 'OUR STORY',
       storySlides: [
@@ -125,7 +124,6 @@ export const dict = {
       featuredKicker: 'FEATURED COLLECTION',
       featuredTitle: 'This Season’s Highlights',
       featuredHint: 'Keep scrolling — the gallery moves sideways',
-      galleryKicker: 'KOHLER KITCHENS',
       galleryTitle: 'Spaces designed for real life',
       storyKicker: 'OUR STORY',
       storySlides: [
