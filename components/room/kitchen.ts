@@ -6,6 +6,7 @@
 
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type { Layout, Module, Run } from '@/lib/room';
 
 export type Mats = ReturnType<typeof makeMaterials>;
@@ -307,8 +308,36 @@ function buildRun(run: Run, m: Mats) {
 export function buildKitchen(layout: Layout, m: Mats) {
   const kitchen = new THREE.Group();
   layout.runs.forEach((run) => kitchen.add(buildRun(run, m)));
+  mergeStatic(kitchen);
   kitchen.position.x = layout.x;
   return kitchen;
+}
+
+// รวมชิ้นนิ่งของครัวเป็น mesh เดียวต่อวัสดุ: มองจากด้านข้างเห็นครัวครบ 3 ชุด ถ้าไม่รวมจะเกินงบ draw call
+// ไม่รวม: ทรงก๊อกและซิงก์ (เปิดปิดทีละทรง) กับชิ้นที่มี userData.part (พื้นที่กดก๊อก สะดืออ่าง)
+function mergeStatic(kitchen: THREE.Group) {
+  kitchen.updateMatrixWorld(true);
+  const bags = new Map<string, { mat: THREE.Material; shadow: boolean; from: THREE.Mesh[] }>();
+  kitchen.traverse((o) => {
+    const part = o as THREE.Mesh;
+    if (!part.isMesh || part.userData.part) return;
+    for (let p = part.parent; p && p !== kitchen; p = p.parent) if (p.userData.sink || p.userData.faucet) return;
+    const mat = part.material as THREE.Material;
+    const key = `${mat.uuid}${part.castShadow}`;
+    if (!bags.has(key)) bags.set(key, { mat, shadow: part.castShadow, from: [] });
+    bags.get(key)!.from.push(part);
+  });
+  bags.forEach(({ mat, shadow, from }) => {
+    const parts = from.map((part) => (part.geometry.index ? part.geometry.toNonIndexed() : part.geometry.clone()).applyMatrix4(part.matrixWorld));
+    const merged = mergeGeometries(parts);
+    parts.forEach((geo) => geo.dispose());
+    if (!merged) return; // attribute ไม่เข้ากัน: คงชิ้นเดิมไว้
+    from.forEach((part) => (part.geometry.dispose(), part.removeFromParent()));
+    const all = new THREE.Mesh(merged, mat);
+    all.castShadow = shadow;
+    all.receiveShadow = true;
+    kitchen.add(all);
+  });
 }
 
 // ตำแหน่งไฟส่องใต้ตู้แขวนของครัวนี้ (x ในพิกัดห้อง) ไม่เกิน 4 ดวง: กลางตู้แขวนทุกช่องที่ไม่ใช่ฮูด

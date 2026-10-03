@@ -68,9 +68,15 @@ three.js stays in `components/room/` scene files only. No new dependency, no dow
 
 ## Budget
 
-After all three tasks, with any choice of shapes: at most 200 draw calls and 45,000 triangles (limit 300 / 80,000),
-still 6 lights. Read from `window.__room.info` in the browser and reported per task. Repeated small meshes (spot heads,
-fruit, leaves) are merged or instanced when the count would pass the target.
+Limit: 300 draw calls, 80,000 triangles, 6 lights, in every view the camera can reach. Read from
+`window.__room.info.render`.
+
+Found while building: the limit was only ever measured at a home view. From the side (orbit extreme, all three
+kitchens in frame) the kitchens alone drew about 425 calls, because every cabinet part was its own mesh. So the static
+parts of each kitchen are now merged per material too (`mergeStatic` in `kitchen.ts`); faucet and sink variants and
+the click targets stay separate. Measured on 2026-10-04 at 1280 px with the default choices: home view of kitchen I
+36 calls and 25,446 triangles; side view from kitchen U 88 calls and 71,324 triangles. The first draft's target of
+45,000 triangles is not met in the side view: merged kitchens are drawn whole. It stays under the 80,000 limit.
 
 ## Verification
 
