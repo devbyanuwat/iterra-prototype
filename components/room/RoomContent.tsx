@@ -10,13 +10,17 @@ import FocusCard from './FocusCard';
 import { useLang } from '@/components/LangProvider';
 import FinishDots from '@/components/FinishDots';
 import { FAUCET } from '@/lib/finishes';
-import { DEFAULT_PICKS, FAUCET_NOTES, FAUCET_SHAPES, LAYOUTS, LIGHTS, PARTS, SINKS, type LayoutId, type LightId, type Part, type PartId, type Picks } from '@/lib/room';
+import { DEFAULT_PICKS, FAUCET_NOTES, FAUCET_SHAPES, LAYOUTS, LIGHTS, PARTS, SINKS, SINK_COLORS, type LayoutId, type LightId, type Part, type PartId, type Picks } from '@/lib/room';
 import type { RoomHandle } from './RoomScene';
 
 const Skeleton = () => <div className="absolute inset-0 animate-pulse bg-warm-200 motion-reduce:animate-none" aria-hidden />;
 const RoomScene = dynamic(() => import('./RoomScene'), { ssr: false, loading: Skeleton });
 
 const PART_ORDER: PartId[] = ['doors', 'top', 'splash', 'floor'];
+// หมวดของแผงตัวเลือก · จอแคบกว่า lg โชว์ทีละหมวด เลือกด้วยแถวปุ่มหมวดใต้ฉาก · จอกว้างโชว์ทุกหมวด
+type Tab = 'layout' | Part | 'light';
+const TABS: Tab[] = ['layout', 'doors', 'top', 'splash', 'floor', 'faucet', 'sink', 'light'];
+const isPart = (tab: Tab): tab is Part => tab !== 'layout' && tab !== 'light';
 const legend = 'mb-2 flex items-baseline justify-between gap-3 text-xs font-normal text-warm-500';
 const button =
   'border px-4 py-2.5 text-sm transition-[color,background-color,border-color,transform] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink active:scale-[0.98] motion-reduce:transition-none';
@@ -31,24 +35,39 @@ export default function RoomContent() {
   const scene = useRef<RoomHandle>(null);
   const faucet = FAUCET.find((f) => f.id === picks.faucet)!;
   const [focus, setFocus] = useState<Part | null>(null); // หมวดที่กำลังเจาะดูในฉาก
+  const [tab, setTab] = useState<Tab>('layout'); // หมวดที่โชว์บนจอแคบ
+  const only = (id: Tab) => (tab === id ? '' : 'max-lg:hidden');
   const [cardOpen, setCardOpen] = useState(true); // การ์ดเจาะดูกางอยู่ไหม · ผู้ใช้ย่อได้เมื่อการ์ดบังชิ้นส่วน
   const stage = useRef<HTMLDivElement>(null);
   const sink = SINKS.find((s) => s.id === picks.sink)!;
+  const sinkColor = SINK_COLORS.find((o) => o.id === picks.sinkColor)!;
   const faucetShape = FAUCET_SHAPES.find((s) => s.id === picks.faucetShape)!;
-  const nameOf = (part: Part) => (part === 'faucet' ? faucet : part === 'sink' ? sink : PARTS[part].find((o) => o.id === picks[part])!).name[lang];
+  const nameOf = (part: Part) => (part === 'faucet' ? faucet : part === 'sink' ? sinkColor : PARTS[part].find((o) => o.id === picks[part])!).name[lang];
   const shapeButtons = (list: typeof SINKS) => list.map((s) => ({ id: s.id, label: s.name[lang] }));
-  // สิ่งที่การ์ดเจาะดูแสดงต่อหมวด: ก๊อก = สีผิว + ทรง · ซิงก์ = ทรงอย่างเดียว · หมวดอื่น = สี/วัสดุ
+  // สิ่งที่การ์ดเจาะดูแสดงต่อหมวด: ก๊อกและซิงก์ = สี + ทรง · หมวดอื่น = สี/วัสดุ
   const cardOf = (part: Part) => {
-    if (part === 'sink') return { note: sink.note[lang], choices: [], shapes: shapeButtons(SINKS), shape: picks.sink, onShape: (id: string) => setPicks((p) => ({ ...p, sink: id })) };
+    const set = (key: keyof Picks) => (id: string) => setPicks((p) => ({ ...p, [key]: id }));
+    if (part === 'sink')
+      return {
+        note: `${sink.note[lang]} ${sinkColor.note[lang]}`,
+        choices: SINK_COLORS.map((o) => ({ id: o.id, label: o.name[lang], swatch: o.swatch })),
+        value: picks.sinkColor,
+        onChange: set('sinkColor'),
+        shapes: shapeButtons(SINKS),
+        shape: picks.sink,
+        onShape: set('sink'),
+      };
     if (part === 'faucet')
       return {
         note: `${faucetShape.note[lang]} ${FAUCET_NOTES[picks.faucet][lang]}`,
         choices: FAUCET.map((f) => ({ id: f.id, label: demoName(f), swatch: f.swatch })),
         shapes: shapeButtons(FAUCET_SHAPES),
+        value: picks.faucet,
+        onChange: set('faucet'),
         shape: picks.faucetShape,
-        onShape: (id: string) => setPicks((p) => ({ ...p, faucetShape: id })),
+        onShape: set('faucetShape'),
       };
-    return { note: PARTS[part].find((o) => o.id === picks[part])!.note[lang], choices: PARTS[part].map((o) => ({ id: o.id, label: o.name[lang], swatch: o.swatch })) };
+    return { note: PARTS[part].find((o) => o.id === picks[part])!.note[lang], choices: PARTS[part].map((o) => ({ id: o.id, label: o.name[lang], swatch: o.swatch })), value: picks[part], onChange: set(part) };
   };
   const demoName = (f: (typeof FAUCET)[number]) => (f.demo ? `${f.name[lang]} (${t.products.finishDemo})` : f.name[lang]);
   // ออกจากโหมดเจาะดู · ถ้า focus อยู่ในการ์ด (ซึ่งกำลังจะหายไป) ให้ย้ายกลับไปที่ฉาก
@@ -81,7 +100,10 @@ export default function RoomContent() {
               lang={lang}
               label={t.room.sceneLabel}
               tipText={(part) => `${t.room[part]} · ${nameOf(part)}`}
-              onPick={setFocus}
+              onPick={(part) => {
+                setFocus(part);
+                setTab(part); // จอแคบ: แผงสลับไปหมวดของชิ้นที่แตะ แทนการ์ดบนฉาก
+              }}
               onReady={() => setState('ready')}
               onError={() => setState('error')}
             />
@@ -93,8 +115,6 @@ export default function RoomContent() {
                 name={nameOf(focus)}
                 tag={focus === 'faucet' && faucet.demo ? t.products.finishDemo : undefined}
                 {...cardOf(focus)}
-                value={picks[focus]}
-                onChange={(id) => setPicks((p) => ({ ...p, [focus]: id }))}
                 back={t.room.back}
                 onBack={leave}
                 open={cardOpen}
@@ -103,18 +123,42 @@ export default function RoomContent() {
                 onToggle={() => setCardOpen((o) => !o)}
               />
             )}
+            {/* จอแคบไม่มีการ์ดบนฉาก: ปุ่มกลับมุมกว้างอยู่มุมบนขวาของฉาก */}
+            {focus && state === 'ready' && (
+              <button type="button" onClick={leave} className="absolute right-2 top-2 z-10 min-h-11 border border-warm-300 bg-paper px-3 text-xs text-ink transition-transform active:scale-[0.98] motion-reduce:transition-none lg:hidden">
+                {t.room.back}
+              </button>
+            )}
           </>
         )}
       </div>
       </div>
 
-      <div className="flex flex-col gap-7 pt-8 lg:-ml-2 lg:min-h-0 lg:overflow-y-auto lg:pl-2 lg:pr-1 lg:pt-1" data-lenis-prevent>
+      <div className="flex flex-col gap-7 pt-5 lg:-ml-2 lg:min-h-0 lg:overflow-y-auto lg:pl-2 lg:pr-1 lg:pt-1" data-lenis-prevent>
         <div>
-          <h1 className="text-3xl font-extralight leading-snug tracking-wide md:text-4xl">{t.room.title}</h1>
-          <p className="mt-3 text-sm font-light leading-relaxed text-stone-600">{t.room.help}</p>
+          <h1 className="text-2xl font-extralight leading-snug tracking-wide md:text-4xl">{t.room.title}</h1>
+          <p className="mt-3 hidden text-sm font-light leading-relaxed text-stone-600 lg:block">{t.room.help}</p>
         </div>
 
-        <fieldset>
+        {/* แถวปุ่มหมวด (จอแคบ): เลื่อนซ้ายขวาได้ · ตอนเจาะดูอยู่ กดหมวดของชิ้นอื่น กล้องย้ายไปชิ้นนั้น */}
+        <div role="group" aria-label={t.room.groups} className="-mx-6 -mb-2 flex gap-5 overflow-x-auto px-6 [scrollbar-width:none] md:-mx-[4vw] md:px-[4vw] lg:hidden">
+          {TABS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={tab === id}
+              onClick={() => {
+                setTab(id);
+                if (focus && isPart(id)) setFocus(id);
+              }}
+              className={`min-h-11 shrink-0 border-b text-sm transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink ${tab === id ? 'border-ink text-ink' : 'border-transparent text-warm-500'}`}
+            >
+              {t.room[id]}
+            </button>
+          ))}
+        </div>
+
+        <fieldset className={only('layout')}>
           <legend className={legend}>{t.room.layout}</legend>
           <div className="flex flex-wrap gap-2">
             {LAYOUTS.map((l) => (
@@ -131,7 +175,7 @@ export default function RoomContent() {
         {PART_ORDER.map((part) => {
           const current = PARTS[part].find((o) => o.id === picks[part])!;
           return (
-            <fieldset key={part}>
+            <fieldset key={part} className={only(part)}>
               <legend className={`${legend} w-full`}>
                 <span>{t.room[part]}</span>
                 <span className="text-ink">{current.name[lang]}</span>
@@ -159,7 +203,7 @@ export default function RoomContent() {
           );
         })}
 
-        <fieldset>
+        <fieldset className={only('faucet')}>
           <legend className={`${legend} w-full`}>
             <span>{t.room.faucet}</span>
             <span className="text-ink">
@@ -170,25 +214,47 @@ export default function RoomContent() {
           <FinishDots finishes={FAUCET} value={picks.faucet} onChange={(id) => setPicks((p) => ({ ...p, faucet: id }))} />
         </fieldset>
 
-        {(
-          [
-            ['faucetShape', FAUCET_SHAPES, t.room.faucetShape, faucetShape],
-            ['sink', SINKS, t.room.sink, sink],
-          ] as const
-        ).map(([key, list, label, current]) => (
-          <fieldset key={key}>
-            <legend className={legend}>{label}</legend>
+        <fieldset className={only('faucet')}>
+          <legend className={legend}>{t.room.faucetShape}</legend>
             <div className="flex flex-wrap gap-2">
-              {list.map((s) => (
-                <button key={s.id} type="button" aria-pressed={s.id === current.id} onClick={() => setPicks((p) => ({ ...p, [key]: s.id }))} className={`${button} ${picked(s.id === current.id)}`}>
+              {FAUCET_SHAPES.map((s) => (
+                <button key={s.id} type="button" aria-pressed={s.id === faucetShape.id} onClick={() => setPicks((p) => ({ ...p, faucetShape: s.id }))} className={`${button} ${picked(s.id === faucetShape.id)}`}>
                   {s.name[lang]}
                 </button>
               ))}
             </div>
-          </fieldset>
-        ))}
+        </fieldset>
 
-        <fieldset>
+        <fieldset className={only('sink')}>
+          <legend className={`${legend} w-full`}>
+            <span>{t.room.sink}</span>
+            <span className="text-ink">{sinkColor.name[lang]}</span>
+          </legend>
+              <div className="-ml-2 flex">
+                {SINK_COLORS.map((o) => (
+                  <button
+                    key={o.id}
+                    type="button"
+                    aria-pressed={o.id === sinkColor.id}
+                    aria-label={o.name[lang]}
+                    title={o.name[lang]}
+                    onClick={() => setPicks((p) => ({ ...p, sinkColor: o.id }))}
+                    className="flex h-11 w-11 items-center justify-center transition-transform focus-visible:outline focus-visible:outline-1 focus-visible:outline-ink active:scale-[0.92] motion-reduce:transition-none"
+                  >
+                    <span aria-hidden className={`block h-7 w-7 rounded-full border border-warm-300 ${o.id === sinkColor.id ? 'ring-1 ring-ink ring-offset-2 ring-offset-paper' : ''}`} style={{ background: o.swatch }} />
+                  </button>
+                ))}
+              </div>
+            <div className="flex flex-wrap gap-2">
+              {SINKS.map((s) => (
+                <button key={s.id} type="button" aria-pressed={s.id === sink.id} onClick={() => setPicks((p) => ({ ...p, sink: s.id }))} className={`${button} ${picked(s.id === sink.id)}`}>
+                  {s.name[lang]}
+                </button>
+              ))}
+            </div>
+        </fieldset>
+
+        <fieldset className={only('light')}>
           <legend className={legend}>{t.room.light}</legend>
           <div className="flex flex-wrap gap-2">
             {LIGHTS.map((l) => (
@@ -198,6 +264,13 @@ export default function RoomContent() {
             ))}
           </div>
         </fieldset>
+
+        {/* จอแคบ: คำอธิบายของตัวเลือกที่เลือกอยู่ในหมวดนี้ (จอกว้างอยู่ในการ์ดบนฉาก) */}
+        {isPart(tab) && (
+          <p aria-live="polite" className="-mt-3 text-xs font-normal leading-relaxed text-stone-600 lg:hidden">
+            {cardOf(tab).note}
+          </p>
+        )}
 
         <fieldset>
           <legend className={legend}>{t.room.view}</legend>
@@ -217,6 +290,7 @@ export default function RoomContent() {
         <Link href="/contact/" className={`${button} border-ink text-center font-normal text-ink hover:bg-ink hover:text-paper`}>
           {t.nav.showroom}
         </Link>
+        <p className="text-sm font-light leading-relaxed text-stone-600 lg:hidden">{t.room.help}</p>
         <p className="text-xs font-normal leading-relaxed text-warm-500">{t.room.note}</p>
       </div>
     </section>

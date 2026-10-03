@@ -1,7 +1,7 @@
 // เช็กข้อมูลห้องจำลอง (lib/room.ts): npm run check:room
 // ผังครัววาดจากตัวเลขล้วน ๆ ตัวเลขผิดนิดเดียวตู้จะซ้อนกันหรือลอยจากผนัง ด่านนี้จับก่อนเปิดเบราว์เซอร์
 import assert from 'node:assert/strict';
-import { PARTS, FAUCET_LOOKS, FAUCET_NOTES, FAUCET_SHAPES, SINKS, DEFAULT_PICKS, LIGHTS, LAYOUTS, BAY_PITCH, HALL, ORBIT, FOCUS, SHOWROOM, runLength } from '../lib/room.ts';
+import { PARTS, FAUCET_LOOKS, FAUCET_NOTES, FAUCET_SHAPES, SINKS, SINK_COLORS, DEFAULT_PICKS, LIGHTS, LAYOUTS, BAY_PITCH, HALL, ORBIT, FOCUS, SHOWROOM, runLength } from '../lib/room.ts';
 import { FAUCET } from '../lib/finishes.ts';
 
 const named = (what, name) => assert.ok(name?.th?.trim() && name?.en?.trim(), `${what}: ต้องมีชื่อ th และ en`);
@@ -25,6 +25,14 @@ for (const [part, options] of Object.entries(PARTS)) {
   assert.ok(options.some((o) => o.id === DEFAULT_PICKS[part]), `${part}: ค่าเริ่มต้น ${DEFAULT_PICKS[part]} ไม่อยู่ในตัวเลือก`);
 }
 // สีก๊อกต้องตรงกับ lib/finishes.ts ทุกตัว ไม่ขาดไม่เกิน
+// สีซิงก์: ชื่อ คำอธิบาย สีจุด และ look ครบ · ค่าเริ่มต้นอยู่ในตัวเลือก
+unique('SINK_COLORS', SINK_COLORS.map((o) => o.id));
+for (const o of SINK_COLORS) {
+  named(`sinkColor.${o.id}`, o.name);
+  noted(`sinkColor.${o.id}.note`, o.note);
+  assert.ok(o.swatch && typeof o.look === 'object' && o.look.color, `sinkColor.${o.id}: ต้องมี swatch และ look`);
+}
+assert.ok(SINK_COLORS.some((o) => o.id === DEFAULT_PICKS.sinkColor), 'ค่าเริ่มต้นของสีซิงก์ไม่อยู่ใน SINK_COLORS');
 assert.deepEqual(Object.keys(FAUCET_LOOKS).sort(), FAUCET.map((f) => f.id).sort(), 'FAUCET_LOOKS ไม่ตรงกับ FAUCET ใน lib/finishes.ts');
 assert.ok(FAUCET_LOOKS[DEFAULT_PICKS.faucet], 'ค่าเริ่มต้นของก๊อกไม่อยู่ใน FAUCET_LOOKS');
 assert.deepEqual(Object.keys(FAUCET_NOTES).sort(), FAUCET.map((f) => f.id).sort(), 'FAUCET_NOTES ไม่ตรงกับ FAUCET ใน lib/finishes.ts');

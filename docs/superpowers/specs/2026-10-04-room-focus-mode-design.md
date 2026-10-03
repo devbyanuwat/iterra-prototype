@@ -146,3 +146,18 @@ Requested in chat by anuwat ("ออกแบบ layout ใหม่ แล้�
   The state is kept while moving between parts.
 - Below the header: colour dots, shape buttons, description. The card is 264 px wide at `lg` and up, and as wide as its
   header when minimised.
+
+## Addendum 2026-10-04 (3): sink colour, tabs on small screens, line end cap
+
+Requested in chat by anuwat ("ทำเพิ่มสีซิงค์ด้วย"; "ใน mobile แบ่งเป็น button group ดีไหม"; "เส้นนำสายตาโดนกลืนไป"), plan approved
+("ทำได้").
+
+- **Sink colour.** `SINK_COLORS` in `lib/room.ts` (stainless, matte black, matte white, gunmetal; MOCK), `Picks.sinkColor`.
+  The sink group in the panel and the sink's card show colour dots and shape buttons.
+- **Below `lg` the card is gone.** The panel shows one group at a time, chosen from a scrolling row of tabs under the
+  scene (layout, doors, countertop, backsplash, floor, faucet, sink, light). Tapping a part moves the camera close and
+  switches to its tab; while focused, pressing another part's tab moves the camera to that part. A "Back to full view"
+  button sits on the scene's top-right corner, the choice's description shows under the group, and only the dot marks
+  the part (no line). This replaces the bottom-strip card and the view shift described earlier in this document.
+- **`lg` and up.** The guide line ends in a small dot on the card's edge and is drawn above the card, so it no longer
+  disappears into it.

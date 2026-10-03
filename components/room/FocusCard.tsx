@@ -1,6 +1,6 @@
 'use client';
 
-// การ์ดบนฉากตอนเจาะดูชิ้นส่วน: แถวหัว (ชื่อหมวด ตัวเลือกที่เลือกอยู่ ปุ่มย่อ ปุ่มปิด) จุดสี ปุ่มทรง คำอธิบาย
+// การ์ดบนฉากตอนเจาะดูชิ้นส่วน (จอ lg ขึ้นไป · จอแคบใช้แผงใต้ฉากแทน): แถวหัว (ชื่อหมวด ตัวเลือกที่เลือกอยู่ ปุ่มย่อ ปุ่มปิด) จุดสี ปุ่มทรง คำอธิบาย
 // ไม่มี three.js ในไฟล์นี้ · data-focus-card ให้ RoomScene หาเจอเพื่อลากเส้นชี้มาที่ขอบการ์ด
 
 import { useEffect, useRef } from 'react';
@@ -45,7 +45,7 @@ export default function FocusCard({ part, title, name, tag, note, choices, value
       data-focus-card
       role="group"
       aria-label={title}
-      className={`absolute inset-x-0 bottom-0 z-10 animate-[card-in_0.5s_cubic-bezier(0.16,1,0.3,1)] border-t border-warm-300 bg-paper pl-3 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:border lg:pl-4 ${open ? 'pb-2 lg:w-[264px] lg:pb-4' : ''}`}
+      className={`absolute bottom-4 left-4 z-10 animate-[card-in_0.5s_cubic-bezier(0.16,1,0.3,1)] border border-warm-300 bg-paper pl-4 max-lg:hidden ${open ? 'w-[264px] pb-4' : ''}`}
     >
       {/* แถวหัว: ชื่อหมวดกับตัวเลือก · ปุ่มย่อ/กาง · ปุ่มปิด (กลับมุมกว้าง) */}
       <div className="flex items-center gap-1">
@@ -64,7 +64,7 @@ export default function FocusCard({ part, title, name, tag, note, choices, value
         </button>
       </div>
       {open && (
-        <div className="pr-3 lg:pr-4">
+        <div className="pr-4">
           {choices.length > 0 && (
             <div className="-ml-2 flex items-center">
               {choices.map((c) => (
@@ -101,7 +101,7 @@ export default function FocusCard({ part, title, name, tag, note, choices, value
               ))}
             </div>
           )}
-          <p aria-live="polite" className="mt-1 line-clamp-2 text-xs font-normal leading-relaxed text-stone-600 lg:line-clamp-none">
+          <p aria-live="polite" className="mt-1 text-xs font-normal leading-relaxed text-stone-600">
             {note}
           </p>
         </div>
