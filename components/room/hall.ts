@@ -114,7 +114,7 @@ export function buildHall(m: Mats, lang: Lang): Hall {
   {
     const { x, z } = plant;
     put(solid, m.ceramic, new THREE.CylinderGeometry(0.21, 0.16, 0.42, 24), x, 0.21, z);
-    put(solid, m.kick, new THREE.CylinderGeometry(0.19, 0.19, 0.01, 24), x, 0.4, z);
+    put(solid, m.kick, new THREE.CylinderGeometry(0.19, 0.19, 0.01, 24), x, 0.424, z); // ดินในกระถาง
     put(solid, m.wood, new THREE.CylinderGeometry(0.016, 0.026, 0.95, 8), x, 0.87, z);
     for (const [dx, y, dz, r] of [[0, 1.5, 0, plant.r], [0.2, 1.34, 0.05, 0.2], [-0.17, 1.36, -0.06, 0.22], [0.04, 1.72, 0.08, 0.18], [-0.05, 1.22, 0.14, 0.16]]) {
       put(solid, m.leaf, new THREE.IcosahedronGeometry(r, 1), x + dx, y, z + dz);
@@ -150,9 +150,10 @@ export function buildHall(m: Mats, lang: Lang): Hall {
       if (prop.kind === 'vase') {
         put(solid, m.kick, lathe([[0.001, 0], [0.05, 0], [0.066, 0.07], [0.05, 0.17], [0.024, 0.22], [0.03, 0.25]]), x, y, z);
         for (const [tilt, turn] of [[0.16, 0], [-0.2, 2.1], [0.24, 4.2]]) {
-          const stem = new THREE.CylinderGeometry(0.003, 0.003, 0.36, 6).translate(0, 0.18, 0).rotateZ(tilt).rotateY(turn);
+          const stem = new THREE.CylinderGeometry(0.003, 0.003, 0.26, 6).translate(0, 0.13, 0).rotateZ(tilt).rotateY(turn);
           put(solid, m.wood, stem, x, y + 0.2, z);
-          const tip = new THREE.Vector3(0, 0.36, 0).applyAxisAngle(new THREE.Vector3(0, 0, 1), tilt).applyAxisAngle(new THREE.Vector3(0, 1, 0), turn);
+          const tip = new THREE.Vector3(0, 0.26, 0) // ก้านสั้นพอให้ปลายอยู่ใต้ตู้แขวน
+            .applyAxisAngle(new THREE.Vector3(0, 0, 1), tilt).applyAxisAngle(new THREE.Vector3(0, 1, 0), turn);
           put(solid, m.leaf, new THREE.IcosahedronGeometry(0.03, 0), x + tip.x, y + 0.2 + tip.y, z + tip.z);
         }
       }
@@ -184,7 +185,7 @@ export function buildHall(m: Mats, lang: Lang): Hall {
     return { layout, canvas, texture, material };
   });
   const setSigns = (to: Lang) => {
-    const family = getComputedStyle(document.body).fontFamily; // ฟอนต์ของหน้าเว็บ (next/font ตั้งชื่อเอง)
+    const family = getComputedStyle(document.body).fontFamily; // ฟอนต์ชุดเดียวกับหน้าเว็บ
     for (const { layout, canvas, texture } of signs) {
       const c = canvas.getContext('2d')!;
       const { width: w, height: h } = canvas;

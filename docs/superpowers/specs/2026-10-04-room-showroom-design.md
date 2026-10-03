@@ -15,8 +15,7 @@ how the page is used: the same camera, the same parts to point at, the same choi
 **Hall structure**
 
 - A dark skirting board along the back wall and both end walls.
-- A ceiling at `HALL.height`, with three black track-light rails running the length of the hall and spot heads above
-  each kitchen. The heads are scenery (a dark body and a small bright face); they add no light source.
+- A ceiling at `HALL.height`, with one black track-light rail hanging above each kitchen, three spot heads on each. The heads are scenery (a dark body and a small bright face); they add no light source.
 - Shallow pilasters (0.4 m deep, full height) on the back wall between the kitchens. Shallow, because a deep partition
   would block the camera when it orbits to the side.
 - A sign above each kitchen: the layout's name in the page language ("ครัวตัว I", "I-shaped") over a short rule, drawn
@@ -58,8 +57,8 @@ how the page is used: the same camera, the same parts to point at, the same choi
 
 | file | change |
 |---|---|
-| `components/room/hall.ts` (new) | builds skirting, ceiling, rails, pilasters, signs, windows, furniture and counter props; exports `buildHall`, `buildProps`, `setSigns(lang)` and the view material |
-| `components/room/RoomScene.tsx` | calls `buildHall` in place of the bare wall and floor planes; adds props to each kitchen; fades the view with the light preset; redraws signs on language change |
+| `components/room/hall.ts` (new) | builds skirting, ceiling, rails, pilasters, signs, windows, furniture and counter props; exports `buildHall(m, lang)`, which returns `{ group, setSigns, dispose }` |
+| `components/room/RoomScene.tsx` | calls `buildHall` after the wall and floor planes and the kitchens (props are part of the hall group); fades the view with the light preset; redraws signs on language change |
 | `components/room/kitchen.ts` | `makeMaterials` gains the few fixed materials the hall needs (frame, wood, leaf, view) |
 | `lib/room.ts`, `scripts/check-room.mjs` | data and checks above |
 | `lib/i18n.ts` | nothing new: signs reuse the layout names already there |

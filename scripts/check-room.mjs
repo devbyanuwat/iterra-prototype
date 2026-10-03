@@ -93,7 +93,7 @@ LAYOUTS.forEach((layout, index) => {
   assert.ok(h.polar >= ORBIT.polarMin && h.polar <= ORBIT.polarMax, `${at}: home.polar เกินขอบเขต`);
   assert.ok(h.distance >= ORBIT.zoomMin && h.distance <= ORBIT.zoomMax, `${at}: home.distance เกินขอบเขต`);
 
-  // ของบนเคาน์เตอร์: ครบ 4 อย่าง และแต่ละชิ้นอยู่ลึกเข้ามาในท็อปของตู้ที่ไม่ใช่ซิงก์ เตา หรือตู้สูง อย่างน้อย 0.1 ม.
+  // ของบนเคาน์เตอร์: ครบ 4 อย่าง และแต่ละชิ้นอยู่บนท็อปของตู้ที่ไม่ใช่ซิงก์ เตา หรือตู้สูง ทั้งชิ้น และไม่ทับกัน
   assert.deepEqual(layout.props.map((p) => p.kind).sort(), ['board', 'books', 'bowl', 'vase'], `${at}: props ต้องมีครบ 4 อย่าง อย่างละ 1`);
   // พื้นที่ท็อปของแต่ละตู้ในพิกัด bay (ดูคำอธิบาย turn ใน lib/room.ts)
   const tops = layout.runs.flatMap((run) => {
@@ -105,9 +105,12 @@ LAYOUTS.forEach((layout, index) => {
       return { kind: m.kind, x0: run.x - 0.6, x1: run.x, z0: run.z + a, z1: run.z + b };
     });
   });
+  const REACH = { board: 0.16, bowl: 0.14, books: 0.12, vase: 0.07 }; // ครึ่งกว้างของแต่ละชิ้น (ตรงกับที่ hall.ts ปั้น)
   for (const p of layout.props) {
-    const ok = tops.some((t) => !['sink', 'hob', 'tall'].includes(t.kind) && p.x >= t.x0 + 0.1 && p.x <= t.x1 - 0.1 && p.z >= t.z0 + 0.1 && p.z <= t.z1 - 0.1);
-    assert.ok(ok, `${at} props.${p.kind}: ไม่ได้อยู่บนท็อปที่ว่าง (${p.x}, ${p.z})`);
+    const r = REACH[p.kind];
+    const ok = tops.some((t) => !['sink', 'hob', 'tall'].includes(t.kind) && p.x - r >= t.x0 && p.x + r <= t.x1 && p.z - r >= t.z0 && p.z + r <= t.z1);
+    assert.ok(ok, `${at} props.${p.kind}: ไม่ได้อยู่บนท็อปที่ว่างทั้งชิ้น (${p.x}, ${p.z})`);
+    for (const q of layout.props) if (p !== q) assert.ok(Math.hypot(p.x - q.x, p.z - q.z) >= r + REACH[q.kind], `${at} props.${p.kind} ทับ ${q.kind}`);
   }
 
   // มุมเจาะดูชิ้นส่วน: ครบ 6 หมวด อยู่ในขอบเขตกล้อง และจุดชี้อยู่ในครัวของตัวเอง
@@ -132,7 +135,7 @@ const span = (name, x, w) => ({ name, a: x - w / 2, b: x + w / 2 });
 const kitchens = LAYOUTS.map((l) => ({ name: `ครัว ${l.id}`, a: l.x + l.runs[0].x, b: l.x + l.runs[0].x + runLength(l.runs[0]) }));
 const { pilasters, windows, bench, plant, table } = SHOWROOM;
 const onWall = [...pilasters.xs.map((x, i) => span(`เสา ${i}`, x, pilasters.w)), ...windows.xs.map((x, i) => span(`หน้าต่าง ${i}`, x, windows.w))];
-const onFloor = [span('ม้านั่ง', bench.x, bench.w), span('ต้นไม้', plant.x, plant.r * 2), span('โต๊ะตัวอย่าง', table.x, table.w)];
+const onFloor = [span('ม้านั่ง', bench.x, bench.w), span('ต้นไม้', plant.x, plant.spread * 2), span('โต๊ะตัวอย่าง', table.x, table.w)];
 const apart = (list, others) => {
   for (const p of list) {
     assert.ok(p.a >= -HALL.width / 2 && p.b <= HALL.width / 2, `${p.name}: อยู่นอกห้อง`);
