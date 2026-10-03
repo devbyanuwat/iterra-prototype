@@ -1,47 +1,101 @@
 'use client';
 
-// หน้าแรก: hero parallax → หมวดสินค้า → horizontal gallery →
-// pinned story → สถิติ count-up → บทความล่าสุด → CTA
+// หน้าแรก: hero → ผนังภาพ parallax → เรื่องราว → สินค้าเด่น → สถิติ → แคตตาล็อก → บทความล่าสุด → CTA (ไม่มี section ไหน pin)
 
 import Link from 'next/link';
 import Hero from '@/components/Hero';
-import PinnedStory from '@/components/PinnedStory';
-import HorizontalGallery from '@/components/HorizontalGallery';
+import CatalogTeaser from '@/components/CatalogTeaser';
+import ImageWall from '@/components/ImageWall';
 import Reveal from '@/components/Reveal';
 import CountUp from '@/components/CountUp';
 import ParallaxImage from '@/components/ParallaxImage';
+import ProductCard from '@/components/ProductCard';
+import Placeholder from '@/components/Placeholder';
 import { useLang } from '@/components/LangProvider';
 import { featuredProducts } from '@/lib/products';
 import { posts } from '@/lib/posts';
 
-function CategoryBand() {
-  const { t } = useLang();
-  const cats = [
-    { key: 'kitchen', title: t.home.catKitchen, desc: t.home.catKitchenDesc, label: 'หมวดครัว 3:2' },
-    { key: 'bath', title: t.home.catBath, desc: t.home.catBathDesc, label: 'หมวดห้องน้ำ 3:2' },
-  ];
+// ภาพเรื่องราวจากแคตตาล็อก KOHLER Kitchens 2026 (ลำดับตรงกับ t.home.storySlides) · scripts/build-media.sh scenes
+const STORY_IMAGES = [1, 2, 3].map((n) => `/media/scenes/story-${n}.webp`);
+
+function StoryText({ title, body }: { title: string; body: string }) {
   return (
-    <section className="px-6 py-24 md:px-[8vw] md:py-32">
-      <Reveal className="mb-14">
-        <p className="mb-3 text-[11px] uppercase tracking-widest2 text-warm-500">CATEGORIES</p>
-        <h2 className="text-3xl font-extralight tracking-wide md:text-4xl">{t.home.catTitle}</h2>
-        <p className="mt-3 text-sm font-light text-warm-500">{t.home.catSub}</p>
-      </Reveal>
-      <div className="grid gap-8 md:grid-cols-2">
-        {cats.map((c, i) => (
-          <Reveal key={c.key} delay={i * 0.12}>
-            <Link href={`/products/?cat=${c.key}`} className="group block">
-              <ParallaxImage label={c.label} ratio="3/2" speed={i % 2 ? 7 : -7} />
-              <div className="mt-5 flex items-baseline justify-between">
-                <h3 className="text-2xl font-extralight tracking-wide">{c.title}</h3>
-                <span className="text-[11px] uppercase tracking-widest2 text-warm-500 transition-transform duration-300 group-hover:translate-x-1.5">
-                  →
-                </span>
-              </div>
-              <p className="mt-2 text-[13px] font-light text-warm-500">{c.desc}</p>
-            </Link>
+    <>
+      <h2 className="mb-4 text-2xl font-extralight tracking-wide md:text-3xl">{title}</h2>
+      <p className="text-sm font-light leading-relaxed text-warm-500">{body}</p>
+    </>
+  );
+}
+
+// เรื่องราว: 2 แถวแรกภาพสลับซ้าย-ขวา แถวที่ 3 ภาพเต็มความกว้างแล้วข้อความใต้ภาพ (ไม่ zigzag เกิน 2 แถว)
+// ภาพ parallax ในกรอบ (เหตุผล: ภาพเลื่อนช้ากว่ากรอบให้ความลึกเหมือนผนังภาพด้านบน) + ข้อความ reveal (เหตุผล: เล่าเรื่องทีละแถวตามที่เลื่อนถึง)
+function StoryRows() {
+  const { t } = useLang();
+  const slides = t.home.storySlides;
+  const last = slides[slides.length - 1];
+  return (
+    <section className="space-y-24 px-6 py-24 md:space-y-40 md:px-[8vw] md:py-40">
+      {slides.slice(0, -1).map((s, i) => (
+        <div key={i} className="grid items-center gap-8 md:grid-cols-12 md:gap-6 lg:gap-12">
+          <ParallaxImage
+            src={STORY_IMAGES[i]}
+            ratio="3/2"
+            className={`md:col-span-7 ${i % 2 ? 'md:order-2 md:col-start-6' : ''}`}
+          />
+          <Reveal className={`md:col-span-4 ${i % 2 ? 'md:order-1 md:col-start-1' : 'md:col-start-9'}`}>
+            <StoryText title={s.title} body={s.body} />
           </Reveal>
-        ))}
+        </div>
+      ))}
+      <div>
+        <ParallaxImage src={STORY_IMAGES[slides.length - 1]} ratio="21/9" />
+        <Reveal className="mt-8 max-w-[65ch]">
+          <StoryText title={last.title} body={last.body} />
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// สินค้าเด่น: สินค้าหลักใบใหญ่ + อีก 3 ชิ้นเป็นรายการ (ไม่ซ้ำแบบการ์ดเท่ากันของบทความ)
+// reveal หัวข้อ ใบหลัก แล้วรายการทีละแถว (เหตุผล: ลำดับความสำคัญ สินค้าหลักมาก่อน) · รูปย่อขยายตอน hover (เหตุผล: บอกว่าแถวนี้กดได้)
+function FeaturedProducts() {
+  const { lang, t } = useLang();
+  const [lead, ...rest] = featuredProducts;
+  return (
+    <section className="border-t border-warm-200 px-6 py-24 md:px-[8vw] md:py-32">
+      <Reveal className="mb-14 flex items-end justify-between gap-6">
+        <h2 className="text-3xl font-extralight tracking-wide md:text-4xl">{t.home.featuredTitle}</h2>
+        <Link
+          href="/products/"
+          className="shrink-0 text-[11px] uppercase tracking-widest2 underline-offset-8 hover:underline"
+        >
+          {t.common.viewAll} <span aria-hidden>→</span>
+        </Link>
+      </Reveal>
+      <div className="grid gap-12 md:grid-cols-[7fr_5fr] lg:gap-16">
+        <Reveal>
+          <ProductCard product={lead} />
+        </Reveal>
+        <ul className="divide-y divide-warm-200 md:self-center">
+          {rest.map((p, i) => (
+            <li key={p.slug}>
+              <Reveal delay={i * 0.1} y={20}>
+                <Link href={`/products/${p.slug}/`} className="group flex items-center gap-5 py-6">
+                  <div className="w-24 shrink-0 overflow-hidden md:w-28">
+                    <div className="transition-transform duration-700 ease-out group-hover:scale-105">
+                      <Placeholder src={p.images[0]} fit="contain" ratio="1/1" />
+                    </div>
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-base font-light tracking-wide">{p.name[lang]}</h3>
+                    <p className="mt-1 text-[12px] font-light text-warm-500">{p.price[lang]}</p>
+                  </div>
+                </Link>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
@@ -53,7 +107,7 @@ function Stats() {
     <section className="border-y border-warm-200 px-6 py-20 md:px-[8vw] md:py-24">
       <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
         {t.home.stats.map((s, i) => (
-          <Reveal key={s.label} delay={i * 0.1} y={20}>
+          <Reveal key={i} delay={i * 0.1} y={20}>
             <div className="text-center">
               <p className="text-5xl font-extralight tracking-wide md:text-6xl">
                 <CountUp to={s.value} suffix={s.suffix} />
@@ -90,7 +144,7 @@ function LatestPosts() {
             <Link href={`/articles/${post.slug}/`} className="group block">
               <div className="overflow-hidden">
                 <div className="transition-transform duration-700 ease-out group-hover:scale-105">
-                  <ParallaxImage label={post.cover} ratio="16/9" speed={i % 2 ? 5 : -5} />
+                  <ParallaxImage src={post.cover} ratio="16/9" speed={i % 2 ? 5 : -5} />
                 </div>
               </div>
               <p className="mt-5 text-[10px] uppercase tracking-widest2 text-warm-500">
@@ -130,10 +184,11 @@ export default function HomeContent() {
   return (
     <>
       <Hero />
-      <CategoryBand />
-      <HorizontalGallery items={featuredProducts} />
-      <PinnedStory />
+      <ImageWall />
+      <StoryRows />
+      <FeaturedProducts />
       <Stats />
+      <CatalogTeaser />
       <LatestPosts />
       <ContactCta />
     </>

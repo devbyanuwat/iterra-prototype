@@ -1,48 +1,69 @@
 // ── จุดเปลี่ยนเป็นของจริง #4 ──
-// ทุกตำแหน่งที่เห็น <Placeholder label="..." /> คือจุดที่รอภาพจริง
-// ตอนนี้วาดภาพจำลองด้วย SVG (components/artwork.tsx) แทนกล่องเปล่า
-// เมื่อได้ภาพแล้ว แทนที่ component นี้ด้วย <Image /> ของ next/image แล้วลบ artwork.tsx ทิ้ง
-// (สัดส่วนภาพถูกล็อกไว้แล้ว: hero 16:9, สินค้า 4:5, บทความ 16:9)
-
-import { Artwork } from './artwork';
+// ไม่มี src = กล่อง placeholder มีป้ายชื่อ (จุดที่ยังรอภาพจริง)
+// มี src = ภาพจริงในกรอบสัดส่วนเดิม · label ใช้เป็น alt ('' = ภาพประกอบ ข้อความข้าง ๆ บอกครบแล้ว)
+// fit="contain" สำหรับภาพสินค้าตัดพื้นหลัง: วางกลางกรอบ เว้นขอบ 18% บนพื้น warm-100 (dark = ink)
+// (ParallaxImage ขยายภาพ 1.18 เท่าและเลื่อน ±7% ขอบน้อยกว่านี้สินค้าจะชนขอบกรอบ)
+// ภาพ contain อ่านค่า --tint จากตัวห่อ (สีตัวอย่างใน lib/finishes.ts) · ไม่กำหนด = ไม่ปรับสี
 
 type Props = {
-  label: string;
+  label?: string;
+  src?: string;
+  fit?: 'cover' | 'contain';
   ratio?: '16/9' | '4/5' | '1/1' | '3/2' | '21/9' | '3/4';
   fill?: boolean;
   dark?: boolean;
   className?: string;
-  /** ซ่อนป้ายชื่อภาพ — ใช้ตอนพรีวิวให้ลูกค้าดูโดยไม่มีข้อความกำกับ */
-  hideLabel?: boolean;
 };
 
 export default function Placeholder({
-  label,
+  label = '',
+  src,
+  fit = 'cover',
   ratio = '4/5',
   fill = false,
   dark = false,
   className = '',
-  hideLabel = false,
 }: Props) {
+  const box = fill ? 'absolute inset-0 h-full w-full' : 'relative w-full';
+  const style = fill ? undefined : { aspectRatio: ratio.replace('/', ' / ') };
+
+  if (src) {
+    const contain = fit === 'contain';
+    const surface = dark ? 'bg-ink' : contain ? 'bg-warm-100' : 'bg-warm-200';
+    return (
+      <div className={`${box} overflow-hidden ${surface} ${className}`} style={style}>
+        <img
+          src={src}
+          alt={label}
+          loading="lazy"
+          decoding="async"
+          className={
+            contain
+              ? 'absolute left-[18%] top-[18%] h-[64%] w-[64%] object-contain transition-[filter] duration-500 [filter:var(--tint,none)] motion-reduce:transition-none'
+              : 'absolute inset-0 h-full w-full object-cover'
+          }
+        />
+      </div>
+    );
+  }
+
+  const tone = dark
+    ? 'from-stone-700 via-stone-800 to-stone-900 text-stone-400'
+    : 'from-stone-200 via-stone-300 to-stone-400 text-stone-600';
   return (
     <div
-      className={`${fill ? 'absolute inset-0 h-full w-full' : 'relative w-full'} overflow-hidden ${className}`}
-      style={fill ? undefined : { aspectRatio: ratio.replace('/', ' / ') }}
+      className={`${box} overflow-hidden bg-gradient-to-br ${tone} ${className}`}
+      style={style}
       role="img"
       aria-label={`ภาพประกอบ: ${label}`}
     >
-      <Artwork label={label} dark={dark} />
-
-      {!hideLabel && (
-        <span
-          className={`pointer-events-none absolute bottom-3 left-3 text-[9px] uppercase tracking-widest2 ${
-            dark ? 'text-stone-400/50' : 'text-stone-600/45'
-          }`}
-          aria-hidden
-        >
+      <div className="absolute inset-x-0 top-1/2 h-px bg-current opacity-10" aria-hidden />
+      <div className="absolute inset-y-0 left-1/2 w-px bg-current opacity-10" aria-hidden />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="border border-current px-3 py-1.5 text-[10px] font-normal uppercase tracking-widest2 opacity-60">
           {label}
         </span>
-      )}
+      </div>
     </div>
   );
 }

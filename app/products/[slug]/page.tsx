@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import JsonLd from '@/components/JsonLd';
 import ProductDetail from '@/components/ProductDetail';
 import { getProduct, products } from '@/lib/products';
-import { SITE_NAME, SITE_URL } from '@/lib/site';
+import { SITE_URL } from '@/lib/site';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -34,8 +34,8 @@ export default async function ProductPage({ params }: Props) {
     name: product.name.th,
     alternateName: product.name.en,
     description: product.desc.th,
-    category: product.category === 'kitchen' ? 'Kitchen Equipment' : 'Bathroom Fixtures',
-    brand: { '@type': 'Brand', name: SITE_NAME },
+    category: 'Kitchen Equipment',
+    brand: { '@type': 'Brand', name: 'KOHLER' },
     url: `${SITE_URL}/products/${product.slug}/`,
     additionalProperty: product.specs.map((s) => ({
       '@type': 'PropertyValue',

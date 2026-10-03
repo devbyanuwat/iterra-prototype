@@ -1,18 +1,17 @@
 'use client';
 
-// Hero parallax 3 ชั้น: พื้นหลัง (depth 0.15) → ภาพสินค้า (0.4) → ตัวหนังสือ (0.75)
-// + พื้นหลัง scale 1.0 → 1.08 ตาม scroll
-// มือถือ: ตัด parallax เหลือ intro fade · reduced-motion: นิ่งทั้งหมด
+// Hero: วิดีโอครัวเล่นวน (ไม่มีเสียง) เป็นพื้นหลัง + parallax/scale ตาม scroll
+// มือถือ: ตัด parallax เหลือ intro fade · reduced-motion: แสดง poster นิ่ง ไม่เล่นวิดีโอ · เลื่อนพ้นจอแล้วหยุดเล่น
 
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Placeholder from './Placeholder';
 import { useLang } from './LangProvider';
 
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
+  const video = useRef<HTMLVideoElement>(null);
   const { t } = useLang();
 
   useEffect(() => {
@@ -21,6 +20,16 @@ export default function Hero() {
     if (!el) return;
 
     const mm = gsap.matchMedia(el);
+    const v = video.current;
+
+    // วิดีโอ: เล่นเฉพาะตอนอนุญาต motion และฮีโร่อยู่บนจอ
+    // ใช้ ScrollTrigger onToggle/onRefresh เช็กสถานะตอนสร้างและทุก refresh · เทสต้องใช้หน้าต่างที่มองเห็น — Chrome หยุดวิดีโอเองถ้าแท็บซ่อน
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      if (!v) return;
+      const sync = (self: ScrollTrigger) => (self.isActive ? v.play().catch(() => {}) : v.pause());
+      ScrollTrigger.create({ trigger: el, start: 'top bottom', end: 'bottom top', onToggle: sync, onRefresh: sync });
+      return () => v.pause();
+    });
 
     // intro: ตัวหนังสือ fade-up ทีละบรรทัด
     mm.add('(prefers-reduced-motion: no-preference)', () => {
@@ -50,23 +59,31 @@ export default function Hero() {
 
   return (
     <section ref={root} className="relative h-[100svh] min-h-[560px] overflow-hidden bg-ink">
-      {/* ชั้น 1: ภาพพื้นหลังเต็มจอ */}
+      {/* ชั้น 1: วิดีโอพื้นหลังเต็มจอ */}
       <div data-depth="0.15" className="absolute inset-0 will-change-transform">
         <div data-hero-scale className="absolute inset-0 origin-center will-change-transform">
-          <Placeholder fill dark label="ภาพครัว HERO 16:9" />
+          <video
+            ref={video}
+            className="absolute inset-0 h-full w-full object-cover"
+            poster="/media/hero/hero.jpg"
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden
+          >
+            <source src="/media/hero/hero.webm" type="video/webm" />
+            <source src="/media/hero/hero.mp4" type="video/mp4" />
+          </video>
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-black/25" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/25" aria-hidden />
+        {/* ม่านซ้ายหลังบล็อกตัวหนังสือ ให้อ่านออกแม้เฟรมสว่าง */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/20 to-transparent" aria-hidden />
+        {/* ม่านบน ให้ nav (mix-blend-difference) อ่านออกแม้เฟรมสว่าง */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-black/70 via-black/45 to-transparent" aria-hidden />
       </div>
 
-      {/* ชั้น 2: ภาพสินค้าลอย */}
-      <div
-        data-depth="0.4"
-        className="absolute bottom-[16vh] right-[7vw] hidden w-[24vw] max-w-sm will-change-transform md:block"
-      >
-        <Placeholder label="ภาพสินค้า HERO 4:5" ratio="4/5" className="shadow-2xl shadow-black/40" />
-      </div>
-
-      {/* ชั้น 3: ตัวหนังสือ */}
+      {/* ชั้น 2: ตัวหนังสือ */}
       <div
         data-depth="0.75"
         className="relative z-10 flex h-full flex-col items-start justify-end px-6 pb-28 text-white will-change-transform md:px-[8vw]"

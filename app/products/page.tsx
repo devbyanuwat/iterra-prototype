@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import ProductsContent from '@/components/ProductsContent';
 
 export const metadata: Metadata = {
-  title: 'สินค้าทั้งหมด — อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม',
+  title: 'สินค้าทั้งหมด: ก๊อกและซิงก์ครัว KOHLER',
   description:
-    'ชมสินค้าคัดสรรทั้ง 12 รายการของ ITERRA — ซิงก์สเตนเลส ก๊อกครัว เตาแม่เหล็กไฟฟ้า ชุดครัวบิลท์อิน สุขภัณฑ์อัจฉริยะ ฝักบัวเรนชาวเวอร์ และอีกมากมาย',
+    'ก๊อกและซิงก์ครัว KOHLER ทุกรุ่นในโชว์รูม ITERRA: ก๊อกผสม ก๊อกเดี่ยว ซิงก์สเตนเลส และซิงก์เหล็กหล่อ',
   alternates: { canonical: '/products/' },
 };
 

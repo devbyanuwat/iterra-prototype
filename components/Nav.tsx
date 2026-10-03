@@ -13,6 +13,7 @@ const LINKS = [
   { href: '/', key: 'home' },
   { href: '/about/', key: 'about' },
   { href: '/products/', key: 'products' },
+  { href: '/catalog/', key: 'catalog' },
   { href: '/articles/', key: 'articles' },
   { href: '/contact/', key: 'contact' },
 ] as const;
@@ -24,8 +25,8 @@ function LangSwitch({ className = '' }: { className?: string }) {
       type="button"
       onClick={() => setLang(code)}
       aria-pressed={lang === code}
-      className={`px-1.5 py-0.5 text-[11px] uppercase tracking-widest transition-opacity ${
-        lang === code ? 'opacity-100 underline underline-offset-4' : 'opacity-50 hover:opacity-80'
+      className={`px-1.5 py-0.5 text-[11px] font-normal uppercase tracking-widest transition-opacity ${
+        lang === code ? 'opacity-100 underline underline-offset-4' : 'opacity-80 hover:opacity-100'
       }`}
     >
       {code}
@@ -52,13 +53,13 @@ export default function Nav() {
           <Link href="/" className="pointer-events-auto text-lg font-light tracking-widest2">
             ITERRA
           </Link>
-          <nav aria-label="เมนูหลัก" className="pointer-events-auto hidden items-center gap-8 md:flex">
+          <nav aria-label="เมนูหลัก" className="pointer-events-auto hidden items-center gap-6 md:flex lg:gap-8">
             {LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`text-[11px] uppercase tracking-widest2 transition-opacity ${
-                  pathname === l.href ? 'opacity-100 underline underline-offset-8' : 'opacity-60 hover:opacity-100'
+                className={`text-[11px] font-normal uppercase tracking-widest2 transition-opacity ${
+                  pathname === l.href ? 'opacity-100 underline underline-offset-8' : 'opacity-85 hover:opacity-100'
                 }`}
               >
                 {t.nav[l.key]}

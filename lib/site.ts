@@ -2,8 +2,8 @@
 // เปลี่ยน SITE_URL เป็นโดเมนจริงก่อน deploy (มีผลกับ sitemap, robots, JSON-LD, OG)
 export const SITE_URL = 'https://iterra-demo.example.com';
 export const SITE_NAME = 'ITERRA';
-export const SITE_TAGLINE_TH = 'อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม';
-export const SITE_TAGLINE_EN = 'Premium Kitchen & Bath';
+export const SITE_TAGLINE_TH = 'อุปกรณ์และชุดครัวพรีเมียม';
+export const SITE_TAGLINE_EN = 'Premium Kitchens';
 export const CONTACT = {
   phone: '02-000-0000',
   email: 'hello@iterra.example.com',

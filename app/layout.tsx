@@ -14,13 +14,13 @@ export const metadata: Metadata = {
     template: `%s — ${SITE_NAME}`,
   },
   description:
-    'ITERRA ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม คัดสรรซิงก์ ก๊อก เตา เครื่องใช้บิลท์อิน และสุขภัณฑ์จากแบรนด์ชั้นนำระดับโลก พร้อมโชว์รูมให้สัมผัสจริงในกรุงเทพฯ',
+    'ITERRA ดีลเลอร์อุปกรณ์ครัวพรีเมียม คัดสรรก๊อกและซิงก์ครัวจาก KOHLER พร้อมโชว์รูมให้สัมผัสจริงในกรุงเทพฯ',
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,
     locale: 'th_TH',
     title: `${SITE_NAME} — ${SITE_TAGLINE_TH}`,
-    description: 'คัดสรรอุปกรณ์ครัวและสุขภัณฑ์จากแบรนด์ชั้นนำระดับโลก',
+    description: 'คัดสรรก๊อกและซิงก์ครัวพรีเมียมจาก KOHLER',
   },
 };
 
@@ -29,7 +29,7 @@ const organizationJsonLd = {
   '@type': 'Organization',
   name: SITE_NAME,
   url: SITE_URL,
-  description: 'ดีลเลอร์อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม',
+  description: 'ดีลเลอร์อุปกรณ์ครัวพรีเมียม',
   telephone: CONTACT.phone,
   email: CONTACT.email,
   address: {

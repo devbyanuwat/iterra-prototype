@@ -14,14 +14,9 @@ export default function ContactContent() {
   const { t } = useLang();
   const [toast, setToast] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const [interest, setInterest] = useState('kitchen');
 
-  useEffect(() => {
-    // ถ้ามาจากปุ่ม "สอบถามสินค้านี้" — เติมหมวดให้เอง
-    const p = new URLSearchParams(window.location.search).get('product');
-    if (p) setInterest(p.includes('bath') || p.includes('basin') || p.includes('toilet') || p.includes('shower') ? 'bath' : 'kitchen');
-    return () => clearTimeout(timer.current);
-  }, []);
+  // เคลียร์ timer ของ toast ตอน unmount
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -65,21 +60,6 @@ export default function ContactContent() {
                   required
                   className="w-full border-b border-warm-300 bg-transparent py-3 text-sm font-light outline-none transition-colors focus:border-ink"
                 />
-              </div>
-              <div>
-                <label htmlFor="interest" className="mb-2 block text-[11px] uppercase tracking-widest2 text-warm-500">
-                  {t.contact.interest}
-                </label>
-                <select
-                  id="interest"
-                  name="interest"
-                  value={interest}
-                  onChange={(e) => setInterest(e.target.value)}
-                  className="w-full border-b border-warm-300 bg-transparent py-3 text-sm font-light outline-none focus:border-ink"
-                >
-                  <option value="kitchen">{t.common.category.kitchen}</option>
-                  <option value="bath">{t.common.category.bath}</option>
-                </select>
               </div>
               <div>
                 <label htmlFor="message" className="mb-2 block text-[11px] uppercase tracking-widest2 text-warm-500">

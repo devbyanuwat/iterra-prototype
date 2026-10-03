@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import HomeContent from '@/components/home/HomeContent';
+import { SITE_TAGLINE_TH, SITE_TAGLINE_EN } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'ITERRA — อุปกรณ์ครัวและสุขภัณฑ์พรีเมียม | Premium Kitchen & Bath',
+  title: `ITERRA — ${SITE_TAGLINE_TH} | ${SITE_TAGLINE_EN}`,
   description:
-    'คัดสรรซิงก์ ก๊อกครัว เตาแม่เหล็กไฟฟ้า ชุดครัวบิลท์อิน และสุขภัณฑ์พรีเมียมจากแบรนด์ชั้นนำระดับโลก สัมผัสจริงได้ที่โชว์รูม ITERRA กรุงเทพฯ',
+    'คัดสรรก๊อกและซิงก์ครัวพรีเมียมจาก KOHLER สัมผัสจริงได้ที่โชว์รูม ITERRA กรุงเทพฯ',
   alternates: { canonical: '/' },
 };
 

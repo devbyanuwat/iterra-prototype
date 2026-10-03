@@ -1,246 +1,241 @@
-// ── MOCK DATA ──
-// จุดเปลี่ยนเป็นของจริง #1: แทนที่ข้อมูลในไฟล์นี้ด้วยสินค้าจริงทั้งหมด
-// โครงสร้าง type ด้านล่างออกแบบให้ map ตรงกับ CMS/สเปรดชีตได้ทันที
-// ฟิลด์ images เป็น "ป้ายชื่อภาพ placeholder" — เมื่อมีภาพจริงให้เปลี่ยนเป็น path รูป
-// แล้วสลับ <Placeholder /> เป็น <Image /> ใน components ที่เกี่ยวข้อง
+// สินค้าจริงจาก kohler.co.th หมวดครัว (อ่านเมื่อ 2026-10-03): ก๊อก 6 รุ่น ซิงก์ 4 รุ่น ครบทุกรุ่นที่เว็บมี
+// ทุกรหัสมีสี/วัสดุเดียว (ก๊อก = โครเมียมขัดเงา) เว็บ Kohler ไม่มีตัวเลือกสี · จุดสีในหน้าเว็บเป็นสีตัวอย่างเพื่อเดโม ดู lib/finishes.ts
+// ภาพ: scripts/build-media.sh products · images = ภาพตัดพื้นหลัง (contain) · scenes = ภาพใช้งานจริง (cover)
 
-export type Category = 'kitchen' | 'bath';
+export type Category = 'faucet' | 'sink';
+export type Material = 'brass' | 'stainless' | 'castIron';
 
 export type Product = {
-  slug: string;
+  slug: string; // ตรงกับ slug บน kohler.co.th
   category: Category;
+  series: string; // ซีรีส์ของ Kohler (ProductBrandName)
+  material?: Material; // ไม่มี = Kohler ไม่ระบุวัสดุ (Kumin 99480T)
   name: { th: string; en: string };
   desc: { th: string; en: string };
   specs: { label: string; value: string }[];
   price: { th: string; en: string };
   featured?: boolean;
-  images: string[]; // ป้ายชื่อภาพ placeholder (สัดส่วน 4:5)
+  images: string[];
+  scenes?: string[];
 };
 
 const ASK = { th: 'สอบถามราคา', en: 'Price on request' };
+const CHROME = { label: 'สี', value: 'โครเมียมขัดเงา (Polished Chrome)' };
+const img = (slug: string) => [`/media/products/${slug}-1.webp`];
 
 export const products: Product[] = [
   {
-    slug: 'sink-pro-duo',
-    category: 'kitchen',
-    name: { th: 'ซิงก์สเตนเลส 2 หลุม ProDuo', en: 'ProDuo Double-Bowl Stainless Sink' },
+    slug: 'elate-13963t-c4',
+    category: 'faucet',
+    series: 'Elate',
+    material: 'brass',
+    name: { th: 'Elate™ ก๊อกผสมอ่างล้างจาน หัวฝักบัวดึงได้', en: 'Elate™ Pull-Out Kitchen Faucet' },
     desc: {
-      th: 'ซิงก์สเตนเลส 304 ขึ้นรูปชิ้นเดียว หลุมลึกพิเศษพร้อมระบบซับเสียง เหมาะกับครัวที่ใช้งานจริงทุกวันแต่ไม่ยอมลดทอนความงาม',
-      en: 'One-piece formed 304 stainless sink with extra-deep bowls and sound-dampening pads — built for daily use without compromising on looks.',
+      th: 'ก๊อกผสมทองเหลืองก้านโยกเดี่ยว หัวฝักบัวดึงออกได้ สลับได้ 2 แบบระหว่างสายน้ำนุ่มกับสเปรย์ Sweep® สายถัก ProMotion® ดึงเบาและเงียบ',
+      en: 'Single-lever brass faucet with a two-function pull-out sprayhead that switches between an aerated stream and Sweep® spray. The ProMotion® braided hose keeps the pull-out light and quiet.',
     },
     specs: [
-      { label: 'วัสดุ', value: 'สเตนเลส 304 หนา 1.2 มม.' },
-      { label: 'ขนาด', value: '820 × 450 × 220 มม.' },
-      { label: 'ระบบซับเสียง', value: 'NoiseGuard 4 จุด' },
-      { label: 'ผิวสัมผัส', value: 'Brushed กันรอยขนแมว' },
-      { label: 'รับประกัน', value: '10 ปี' },
+      { label: 'รหัสรุ่น', value: 'K-13963T-C4-CP' },
+      { label: 'วัสดุ', value: 'ทองเหลือง' },
+      CHROME,
+      { label: 'การติดตั้ง', value: 'ตั้งบนเคาน์เตอร์ รูเดียว' },
+      { label: 'ระยะยื่นปากก๊อก', value: '229 มม.' },
+      { label: 'อัตราการไหลสูงสุด', value: '7.5 ลิตร/นาที ที่ 3 บาร์' },
+      { label: 'ขนาด', value: 'สูง 306 × กว้าง 121 มม.' },
     ],
     price: ASK,
     featured: true,
-    images: ['ซิงก์ ProDuo 01', 'ซิงก์ ProDuo 02', 'ซิงก์ ProDuo 03', 'ซิงก์ ProDuo 04'],
+    images: img('elate-13963t-c4'),
+    scenes: [2, 3, 4].map((n) => `/media/products/elate-13963t-c4-scene-${n}.webp`),
   },
   {
-    slug: 'faucet-pullout-arc',
-    category: 'kitchen',
-    name: { th: 'ก๊อกครัวดึงได้ Arc', en: 'Arc Pull-Out Kitchen Faucet' },
+    slug: 'kumin-99480t-4',
+    category: 'faucet',
+    series: 'Kumin',
+    name: { th: 'Kumin™ ก๊อกผสมอ่างล้างจาน', en: 'Kumin™ Single-Control Kitchen Faucet' },
     desc: {
-      th: 'ก๊อกครัวหัวดึงสายยาว โค้งสถาปัตยกรรมเรียบนิ่ง ผิวเคลือบ PVD Gunmetal ทนรอยนิ้วมือ พร้อมโหมดน้ำ 2 ระดับ',
-      en: 'Architectural high-arc pull-out faucet in fingerprint-resistant PVD gunmetal, with dual spray modes.',
+      th: 'ก๊อกผสมก้านโยกเดี่ยว คอหมุนได้ 360 องศา ระยะยื่น 227 มม. วาล์วเซรามิกของ Kohler ทนทานเกินมาตรฐานอุตสาหกรรม 2 เท่า',
+      en: 'Single-lever mixer with a 360° swivel spout and a 227 mm reach. KOHLER ceramic disc valves are built to twice the industry longevity standard.',
     },
     specs: [
-      { label: 'วาล์ว', value: 'เซรามิกเกรดยุโรป' },
-      { label: 'สายดึง', value: 'ยาว 60 ซม. คืนตัวอัตโนมัติ' },
-      { label: 'โหมดน้ำ', value: 'Stream / Spray' },
-      { label: 'ผิวเคลือบ', value: 'PVD Gunmetal' },
-      { label: 'อัตราไหล', value: 'ประหยัดน้ำ 30%' },
+      { label: 'รหัสรุ่น', value: 'K-99480T-4-CP' },
+      CHROME,
+      { label: 'การติดตั้ง', value: 'ตั้งบนเคาน์เตอร์' },
+      { label: 'ระยะยื่นปากก๊อก', value: '227 มม.' },
+      { label: 'คอก๊อก', value: 'หมุนได้ 360°' },
+    ],
+    price: ASK,
+    images: img('kumin-99480t-4'),
+  },
+  {
+    slug: 'elate-15609x-4',
+    category: 'faucet',
+    series: 'Elate',
+    material: 'brass',
+    name: { th: 'Elate™ ก๊อกผสมอ่างล้างจาน', en: 'Elate™ Single-Control Kitchen Faucet' },
+    desc: {
+      th: 'ก๊อกผสมทองเหลือง ติดตั้งรูเดียว วาล์วเซรามิกชิ้นเดียวคุมทั้งปริมาณน้ำและอุณหภูมิ ระยะยื่น 210 มม.',
+      en: 'Brass single-hole mixer with a one-piece ceramic disc valve for volume and temperature, and a 210 mm spout reach.',
+    },
+    specs: [
+      { label: 'รหัสรุ่น', value: 'K-15609X-4-CP' },
+      { label: 'วัสดุ', value: 'ทองเหลือง' },
+      CHROME,
+      { label: 'การติดตั้ง', value: 'ตั้งบนเคาน์เตอร์ รูเดียว' },
+      { label: 'ระยะยื่นปากก๊อก', value: '210 มม.' },
+    ],
+    price: ASK,
+    images: img('elate-15609x-4'),
+  },
+  {
+    slug: 'taut-21370t-4cd',
+    category: 'faucet',
+    series: 'Taut',
+    material: 'brass',
+    name: { th: 'Taut™ ก๊อกเดี่ยวอ่างล้างจาน', en: 'Taut™ Cold-Water Swing-Spout Kitchen Faucet' },
+    desc: {
+      th: 'ก๊อกน้ำเย็นทองเหลือง คอสวิง ระยะยื่น 178 มม. เซรามิกวาล์วหมุน 1/4 รอบ รับประกันตลอดอายุการใช้งาน',
+      en: 'Brass cold-water faucet with a swing spout, a 178 mm reach and a quarter-turn ceramic disc valve with a lifetime warranty.',
+    },
+    specs: [
+      { label: 'รหัสรุ่น', value: 'K-21370T-4CD-CP' },
+      { label: 'วัสดุ', value: 'ทองเหลือง' },
+      CHROME,
+      { label: 'น้ำ', value: 'น้ำเย็นอย่างเดียว' },
+      { label: 'การติดตั้ง', value: 'ตั้งบนเคาน์เตอร์' },
+      { label: 'ระยะยื่นปากก๊อก', value: '178 มม.' },
+      { label: 'สายน้ำดี', value: 'G1/2"' },
+    ],
+    price: ASK,
+    images: img('taut-21370t-4cd'),
+  },
+  {
+    slug: 'kumin-30946t-4',
+    category: 'faucet',
+    series: 'Kumin',
+    material: 'brass',
+    name: { th: 'Kumin™ ก๊อกเดี่ยวอ่างล้างจาน', en: 'Kumin™ Cold-Water Kitchen Faucet' },
+    desc: {
+      th: 'ก๊อกน้ำเย็นทองเหลืองก้านโยกข้าง คอหมุน 360 องศา ระยะยื่น 192 มม. สายน้ำผสมอากาศ',
+      en: 'Brass cold-water faucet with a side lever, a 360° rotating spout, a 192 mm reach and an aerated flow.',
+    },
+    specs: [
+      { label: 'รหัสรุ่น', value: 'K-30946T-4-CP' },
+      { label: 'วัสดุ', value: 'ทองเหลือง' },
+      CHROME,
+      { label: 'น้ำ', value: 'น้ำเย็นอย่างเดียว' },
+      { label: 'ระยะยื่นปากก๊อก', value: '192 มม.' },
+      { label: 'อัตราการไหลสูงสุด', value: '8.3 ลิตร/นาที ที่ 4.14 บาร์' },
+      { label: 'ขนาด', value: 'สูง 267 × กว้าง 46 มม.' },
+    ],
+    price: ASK,
+    images: img('kumin-30946t-4'),
+  },
+  {
+    slug: 'taut-21366t-4',
+    category: 'faucet',
+    series: 'Taut',
+    material: 'brass',
+    name: { th: 'Taut™ ก๊อกผสมอ่างล้างจาน หัวฝักบัวดึงลง', en: 'Taut™ Pull-Down Kitchen Faucet' },
+    desc: {
+      th: 'ก๊อกผสมทองเหลือง หัวฝักบัวดึงลงปรับได้ 2 แบบ ระยะยื่น 222 มม. เซรามิกวาล์วรับประกันตลอดอายุการใช้งาน',
+      en: 'Brass pull-down faucet with a two-function spray, a 222 mm reach and a ceramic disc valve with a lifetime warranty.',
+    },
+    specs: [
+      { label: 'รหัสรุ่น', value: 'K-21366T-4-CP' },
+      { label: 'วัสดุ', value: 'ทองเหลือง' },
+      CHROME,
+      { label: 'การติดตั้ง', value: 'ตั้งบนเคาน์เตอร์' },
+      { label: 'ระยะยื่นปากก๊อก', value: '222 มม.' },
+      { label: 'หัวฉีด', value: 'ดึงลง ปรับได้ 2 แบบ' },
     ],
     price: ASK,
     featured: true,
-    images: ['ก๊อก Arc 01', 'ก๊อก Arc 02', 'ก๊อก Arc 03', 'ก๊อก Arc 04'],
+    images: img('taut-21366t-4'),
   },
   {
-    slug: 'induction-flex-90',
-    category: 'kitchen',
-    name: { th: 'เตาแม่เหล็กไฟฟ้า FlexZone 90', en: 'FlexZone 90 Induction Hob' },
+    slug: 'toccata-3644x-2kd',
+    category: 'sink',
+    series: 'Toccata',
+    material: 'stainless',
+    name: { th: 'Toccata™ ซิงก์สเตนเลส 1 หลุม', en: 'Toccata™ Single-Bowl Stainless Sink' },
     desc: {
-      th: 'เตาแม่เหล็กไฟฟ้า 90 ซม. 5 หัวเตา เชื่อมโซนซ้ายเป็นพื้นที่เดียวสำหรับภาชนะใหญ่ กระจก Schott ผิวเรียบไร้รอยต่อ',
-      en: 'A 90 cm five-zone induction hob with bridgeable FlexZone and a seamless Schott glass surface.',
+      th: 'ซิงก์สเตนเลสหลุมเดี่ยวขนาด 31 นิ้ว ติดตั้งแบบฝังบนเคาน์เตอร์',
+      en: '31-inch single-bowl stainless steel sink for self-rimming installation.',
     },
     specs: [
-      { label: 'หัวเตา', value: '5 โซน + FlexZone' },
-      { label: 'กำลังไฟรวม', value: '11,000 วัตต์' },
-      { label: 'ฟังก์ชัน', value: 'Booster / Keep Warm' },
-      { label: 'ความปลอดภัย', value: 'ล็อกกันเด็ก, ตัดไฟอัตโนมัติ' },
-      { label: 'พื้นผิว', value: 'กระจก Schott Ceran' },
+      { label: 'รหัสรุ่น', value: 'K-3644X-2KD-NA' },
+      { label: 'วัสดุ', value: 'สเตนเลสสตีล' },
+      { label: 'แบบหลุม', value: '1 หลุม' },
+      { label: 'การติดตั้ง', value: 'ฝังบนเคาน์เตอร์' },
+      { label: 'ความยาว', value: '31 นิ้ว' },
+    ],
+    price: ASK,
+    images: img('toccata-3644x-2kd'),
+  },
+  {
+    slug: 'indio-3885x-2sd',
+    category: 'sink',
+    series: 'Indio',
+    material: 'castIron',
+    name: { th: 'Indio™ ซิงก์เหล็กหล่อ 2 หลุม', en: 'Indio™ Smart Divide Cast-Iron Double Sink' },
+    desc: {
+      th: 'ซิงก์เหล็กหล่อสีขาว 33 นิ้ว 2 หลุมใหญ่และกลางแบบ Smart Divide พร้อมที่กดสบู่ ติดตั้งได้ทั้งฝังบนและใต้เคาน์เตอร์',
+      en: '33-inch white cast-iron sink with Smart Divide large and medium bowls and a soap dispenser, for self-rimming or undermount installation.',
+    },
+    specs: [
+      { label: 'รหัสรุ่น', value: 'K-3885X-2SD-0' },
+      { label: 'วัสดุ', value: 'เหล็กหล่อ' },
+      { label: 'สี', value: 'ขาว' },
+      { label: 'แบบหลุม', value: '2 หลุม ใหญ่และกลาง (Smart Divide)' },
+      { label: 'การติดตั้ง', value: 'ฝังบนหรือใต้เคาน์เตอร์' },
+      { label: 'ความยาว', value: '33 นิ้ว' },
+      { label: 'อุปกรณ์', value: 'ที่กดสบู่' },
     ],
     price: ASK,
     featured: true,
-    images: ['เตา FlexZone 01', 'เตา FlexZone 02', 'เตา FlexZone 03', 'เตา FlexZone 04'],
+    images: img('indio-3885x-2sd'),
   },
   {
-    slug: 'builtin-kitchen-set',
-    category: 'kitchen',
-    name: { th: 'ชุดครัวบิลท์อินสั่งตัด Bespoke', en: 'Bespoke Built-in Kitchen' },
+    slug: 'toccata-3645x-2kd',
+    category: 'sink',
+    series: 'Toccata',
+    material: 'stainless',
+    name: { th: 'Toccata™ ซิงก์สเตนเลส 2 หลุม', en: 'Toccata™ Double-Bowl Stainless Sink' },
     desc: {
-      th: 'ชุดครัวบิลท์อินออกแบบเฉพาะบ้านคุณ โครงกันน้ำ ท็อปควอตซ์ บานพับซอฟต์โคลสทุกจุด พร้อมบริการออกแบบ 3D โดยทีมสถาปนิก',
-      en: 'A made-to-measure kitchen with waterproof carcass, quartz worktop and soft-close hardware throughout — 3D design service included.',
+      th: 'ซิงก์สเตนเลส 31 นิ้ว 2 หลุมใหญ่และกลาง ติดตั้งแบบฝังบนเคาน์เตอร์',
+      en: '31-inch stainless steel sink with large and medium bowls for self-rimming installation.',
     },
     specs: [
-      { label: 'โครงตู้', value: 'HMR กันความชื้น' },
-      { label: 'หน้าบาน', value: 'Acrylic / Laminate / Veneer' },
-      { label: 'ท็อป', value: 'ควอตซ์หนา 20 มม.' },
-      { label: 'อุปกรณ์', value: 'บานพับ–รางลิ้นชัก soft-close' },
-      { label: 'บริการ', value: 'ออกแบบ 3D + ติดตั้งฟรี' },
+      { label: 'รหัสรุ่น', value: 'K-3645X-2KD-NA' },
+      { label: 'วัสดุ', value: 'สเตนเลสสตีล' },
+      { label: 'แบบหลุม', value: '2 หลุม ใหญ่และกลาง' },
+      { label: 'การติดตั้ง', value: 'ฝังบนเคาน์เตอร์' },
+      { label: 'ความยาว', value: '31 นิ้ว' },
     ],
     price: ASK,
     featured: true,
-    images: ['ครัวบิลท์อิน 01', 'ครัวบิลท์อิน 02', 'ครัวบิลท์อิน 03', 'ครัวบิลท์อิน 04'],
+    images: img('toccata-3645x-2kd'),
   },
   {
-    slug: 'hood-slim-t90',
-    category: 'kitchen',
-    name: { th: 'เครื่องดูดควันสลิม T90', en: 'T90 Slimline Cooker Hood' },
+    slug: 'marcato-3676x-2kd',
+    category: 'sink',
+    series: 'Marcato',
+    material: 'stainless',
+    name: { th: 'Marcato™ ซิงก์สเตนเลส 1 หลุมครึ่ง', en: 'Marcato™ 1.5-Bowl Stainless Sink' },
     desc: {
-      th: 'เครื่องดูดควันดีไซน์บางเฉียบ แรงดูดสูงแต่เงียบผิดคาด ควบคุมด้วยระบบสัมผัส พร้อมไฟ LED ส่องพื้นที่ปรุงอาหาร',
-      en: 'An ultra-slim hood with high extraction yet remarkably quiet operation, touch controls and LED task lighting.',
+      th: 'ซิงก์สเตนเลส 30 นิ้ว หลุมใหญ่คู่หลุมกลาง ติดตั้งแบบฝังบนเคาน์เตอร์',
+      en: '30-inch stainless steel sink with a large and a medium bowl for self-rimming installation.',
     },
     specs: [
-      { label: 'แรงดูด', value: '1,200 ลบ.ม./ชม.' },
-      { label: 'ระดับเสียง', value: '52 เดซิเบล' },
-      { label: 'ควบคุม', value: 'Touch + รีโมต' },
-      { label: 'ไฟส่องสว่าง', value: 'LED 2 จุด' },
-      { label: 'แผ่นกรอง', value: 'อะลูมิเนียมล้างได้' },
+      { label: 'รหัสรุ่น', value: 'K-3676X-2KD-NA' },
+      { label: 'วัสดุ', value: 'สเตนเลสสตีล' },
+      { label: 'แบบหลุม', value: '1 หลุมครึ่ง' },
+      { label: 'การติดตั้ง', value: 'ฝังบนเคาน์เตอร์' },
+      { label: 'ความยาว', value: '30 นิ้ว' },
     ],
     price: ASK,
-    images: ['ดูดควัน T90 01', 'ดูดควัน T90 02', 'ดูดควัน T90 03', 'ดูดควัน T90 04'],
-  },
-  {
-    slug: 'oven-steam-pro',
-    category: 'kitchen',
-    name: { th: 'เตาอบไอน้ำบิลท์อิน SteamPro', en: 'SteamPro Built-in Steam Oven' },
-    desc: {
-      th: 'เตาอบบิลท์อินพร้อมระบบไอน้ำ 3 ระดับ อบขนมปังกรอบนอกนุ่มใน ทำความสะอาดตัวเองด้วยระบบ Pyrolytic',
-      en: 'A built-in oven with three-level steam assist and pyrolytic self-cleaning — bakery-grade results at home.',
-    },
-    specs: [
-      { label: 'ความจุ', value: '70 ลิตร' },
-      { label: 'โปรแกรมอบ', value: '12 โปรแกรม' },
-      { label: 'ระบบไอน้ำ', value: '3 ระดับ' },
-      { label: 'ทำความสะอาด', value: 'Pyrolytic self-clean' },
-      { label: 'ประตู', value: 'กระจก 3 ชั้นกันร้อน' },
-    ],
-    price: ASK,
-    images: ['เตาอบ SteamPro 01', 'เตาอบ SteamPro 02', 'เตาอบ SteamPro 03', 'เตาอบ SteamPro 04'],
-  },
-  {
-    slug: 'dishwasher-s14',
-    category: 'kitchen',
-    name: { th: 'เครื่องล้างจานบิลท์อิน S14', en: 'S14 Built-in Dishwasher' },
-    desc: {
-      th: 'เครื่องล้างจานความจุ 14 ชุดมาตรฐาน เงียบเพียง 42 เดซิเบล พร้อมระบบเปิดประตูอบแห้งอัตโนมัติหลังจบรอบล้าง',
-      en: 'A 14-place-setting dishwasher running at just 42 dB, with auto-open drying at the end of every cycle.',
-    },
-    specs: [
-      { label: 'ความจุ', value: '14 ชุดมาตรฐาน' },
-      { label: 'โปรแกรมล้าง', value: '8 โปรแกรม' },
-      { label: 'ระดับเสียง', value: '42 เดซิเบล' },
-      { label: 'ระบบอบแห้ง', value: 'AutoOpen Dry' },
-      { label: 'ประหยัดพลังงาน', value: 'ระดับ A+++' },
-    ],
-    price: ASK,
-    images: ['ล้างจาน S14 01', 'ล้างจาน S14 02', 'ล้างจาน S14 03', 'ล้างจาน S14 04'],
-  },
-  {
-    slug: 'smart-toilet-one',
-    category: 'bath',
-    name: { th: 'สุขภัณฑ์อัจฉริยะ ONE', en: 'ONE Intelligent Toilet' },
-    desc: {
-      th: 'สุขภัณฑ์อัจฉริยะดีไซน์ไร้ถัง เปิด–ปิดฝาอัตโนมัติ ชำระล้างด้วยน้ำอุ่นปรับระดับได้ พร้อมไฟนำทางกลางคืน',
-      en: 'A tankless intelligent toilet with auto lid, adjustable warm-water cleansing and a soft night light.',
-    },
-    specs: [
-      { label: 'ฝารองนั่ง', value: 'เปิด–ปิดอัตโนมัติ' },
-      { label: 'ระบบชำระล้าง', value: 'น้ำอุ่นปรับ 5 ระดับ' },
-      { label: 'เป่าแห้ง', value: 'ลมอุ่นปรับระดับ' },
-      { label: 'การใช้น้ำ', value: '3 / 4.5 ลิตร' },
-      { label: 'ฟังก์ชันเสริม', value: 'Night Light + ดับกลิ่น' },
-    ],
-    price: ASK,
-    featured: true,
-    images: ['สุขภัณฑ์ ONE 01', 'สุขภัณฑ์ ONE 02', 'สุขภัณฑ์ ONE 03', 'สุขภัณฑ์ ONE 04'],
-  },
-  {
-    slug: 'rain-shower-cloud',
-    category: 'bath',
-    name: { th: 'ชุดฝักบัวเรนชาวเวอร์ Cloud', en: 'Cloud Thermostatic Rain Shower' },
-    desc: {
-      th: 'ชุดฝักบัวเรนชาวเวอร์หัวใหญ่ 300 มม. วาล์วเทอร์โมสตัทคุมอุณหภูมิแม่นยำ สายฝน 3 รูปแบบ ผิว Brushed Nickel',
-      en: 'A 300 mm rain shower with precise thermostatic control, three spray patterns and a brushed-nickel finish.',
-    },
-    specs: [
-      { label: 'หัวฝักบัว', value: '300 มม. Ultra-thin' },
-      { label: 'วาล์ว', value: 'เทอร์โมสตัทกันลวก' },
-      { label: 'รูปแบบน้ำ', value: 'Rain / Mist / Jet' },
-      { label: 'ผิวเคลือบ', value: 'Brushed Nickel PVD' },
-      { label: 'หัวฉีด', value: 'ซิลิโคนกันตะกรัน' },
-    ],
-    price: ASK,
-    featured: true,
-    images: ['ฝักบัว Cloud 01', 'ฝักบัว Cloud 02', 'ฝักบัว Cloud 03', 'ฝักบัว Cloud 04'],
-  },
-  {
-    slug: 'basin-stone-oval',
-    category: 'bath',
-    name: { th: 'อ่างล้างหน้าหินสังเคราะห์ Oval', en: 'Oval Solid-Surface Basin' },
-    desc: {
-      th: 'อ่างล้างหน้าวางบนเคาน์เตอร์ทรงรี ผลิตจากหินสังเคราะห์ solid surface ผิวด้านสัมผัสอุ่น ซ่อมคืนสภาพผิวได้',
-      en: 'An oval countertop basin in warm-touch matte solid surface — renewable finish, timeless form.',
-    },
-    specs: [
-      { label: 'วัสดุ', value: 'Solid Surface' },
-      { label: 'ขนาด', value: '550 × 380 × 130 มม.' },
-      { label: 'ผิวสัมผัส', value: 'Matte ด้านนุ่ม' },
-      { label: 'การดูแล', value: 'ขัดคืนสภาพผิวได้' },
-      { label: 'สะดืออ่าง', value: 'แถมชุดสะดือซ่อน' },
-    ],
-    price: ASK,
-    images: ['อ่าง Oval 01', 'อ่าง Oval 02', 'อ่าง Oval 03', 'อ่าง Oval 04'],
-  },
-  {
-    slug: 'faucet-basin-minimal',
-    category: 'bath',
-    name: { th: 'ก๊อกอ่างล้างหน้า Minimal', en: 'Minimal Basin Mixer' },
-    desc: {
-      th: 'ก๊อกผสมอ่างล้างหน้าเส้นสายเรขาคณิตบริสุทธิ์ ทองเหลืองแท้ชุบ PVD พร้อม aerator กระจายน้ำนุ่มไม่กระเซ็น',
-      en: 'A pure geometric basin mixer in PVD-plated solid brass with a soft, splash-free aerated stream.',
-    },
-    specs: [
-      { label: 'วัสดุ', value: 'ทองเหลืองแท้ชุบ PVD' },
-      { label: 'วาล์ว', value: 'เซรามิก 35 มม.' },
-      { label: 'ความสูง', value: '180 มม.' },
-      { label: 'อัตราไหล', value: '5.7 ลิตร/นาที' },
-      { label: 'รับประกัน', value: '5 ปี' },
-    ],
-    price: ASK,
-    images: ['ก๊อก Minimal 01', 'ก๊อก Minimal 02', 'ก๊อก Minimal 03', 'ก๊อก Minimal 04'],
-  },
-  {
-    slug: 'bathtub-freestand-arc',
-    category: 'bath',
-    name: { th: 'อ่างอาบน้ำลอยตัว Arc', en: 'Arc Freestanding Bathtub' },
-    desc: {
-      th: 'อ่างอาบน้ำลอยตัวทรงโค้งไร้รอยต่อ อะคริลิกเก็บอุณหภูมิหนา 8 มม. น้ำหนักเบา ติดตั้งง่ายไม่ต้องก่อโครง',
-      en: 'A seamless freestanding tub in 8 mm heat-retaining acrylic — light, sculptural, no framing required.',
-    },
-    specs: [
-      { label: 'วัสดุ', value: 'อะคริลิกหนา 8 มม.' },
-      { label: 'ขนาด', value: '1700 × 800 × 580 มม.' },
-      { label: 'ความจุ', value: '260 ลิตร' },
-      { label: 'สะดืออ่าง', value: 'Pop-up โครเมียม' },
-      { label: 'คุณสมบัติ', value: 'เก็บอุณหภูมินาน 2 เท่า' },
-    ],
-    price: ASK,
-    images: ['อ่างอาบน้ำ Arc 01', 'อ่างอาบน้ำ Arc 02', 'อ่างอาบน้ำ Arc 03', 'อ่างอาบน้ำ Arc 04'],
+    images: img('marcato-3676x-2kd'),
   },
 ];
 
@@ -254,4 +249,14 @@ export function relatedProducts(slug: string, n = 3) {
   const cur = getProduct(slug);
   if (!cur) return [];
   return products.filter((p) => p.category === cur.category && p.slug !== slug).slice(0, n);
+}
+
+// ── ตัวกรองหน้าสินค้ารวม ──
+export type FacetKey = 'category' | 'series' | 'material';
+export type Picked = Record<FacetKey, string[]>;
+export const FACETS: FacetKey[] = ['category', 'series', 'material'];
+
+// ในกลุ่มเดียวกัน = หรือ · ข้ามกลุ่ม = และ · กลุ่มที่ไม่ได้เลือก = ไม่กรอง · สินค้าที่ไม่มีค่าในกลุ่มที่เลือก = ไม่ผ่าน
+export function filterProducts(list: Product[], picked: Picked): Product[] {
+  return list.filter((p) => FACETS.every((k) => picked[k].length === 0 || picked[k].includes(p[k] ?? '')));
 }
