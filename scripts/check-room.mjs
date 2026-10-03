@@ -1,10 +1,15 @@
 // เช็กข้อมูลห้องจำลอง (lib/room.ts): npm run check:room
 // ผังครัววาดจากตัวเลขล้วน ๆ ตัวเลขผิดนิดเดียวตู้จะซ้อนกันหรือลอยจากผนัง ด่านนี้จับก่อนเปิดเบราว์เซอร์
 import assert from 'node:assert/strict';
-import { PARTS, FAUCET_LOOKS, DEFAULT_PICKS, LIGHTS, LAYOUTS, BAY_PITCH, HALL, ORBIT, runLength } from '../lib/room.ts';
+import { PARTS, FAUCET_LOOKS, FAUCET_NOTES, DEFAULT_PICKS, LIGHTS, LAYOUTS, BAY_PITCH, HALL, ORBIT, FOCUS, runLength } from '../lib/room.ts';
 import { FAUCET } from '../lib/finishes.ts';
 
 const named = (what, name) => assert.ok(name?.th?.trim() && name?.en?.trim(), `${what}: ต้องมีชื่อ th และ en`);
+// คำอธิบายตัวเลือก: ครบสองภาษา ไม่มีไม้ตรีเพี้ยน (U+0E4E) ไม่มีขีดยาว
+const noted = (what, note) => {
+  named(what, note);
+  for (const text of [note.th, note.en]) assert.ok(!/[\u0E4E\u2013\u2014]/.test(text), `${what}: note มีอักขระต้องห้าม`);
+};
 const unique = (what, ids) => assert.equal(new Set(ids).size, ids.length, `${what}: id ซ้ำ`);
 const near = (a, b) => Math.abs(a - b) < 1e-6;
 
@@ -13,6 +18,7 @@ for (const [part, options] of Object.entries(PARTS)) {
   unique(part, options.map((o) => o.id));
   for (const o of options) {
     named(`${part}.${o.id}`, o.name);
+    noted(`${part}.${o.id}.note`, o.note);
     assert.ok(o.swatch, `${part}.${o.id}: ไม่มี swatch`);
     if (o.look === 'top') assert.equal(part, 'splash', `${part}.${o.id}: look 'top' ใช้ได้เฉพาะผนังกันเปื้อน`);
   }
@@ -21,6 +27,8 @@ for (const [part, options] of Object.entries(PARTS)) {
 // สีก๊อกต้องตรงกับ lib/finishes.ts ทุกตัว ไม่ขาดไม่เกิน
 assert.deepEqual(Object.keys(FAUCET_LOOKS).sort(), FAUCET.map((f) => f.id).sort(), 'FAUCET_LOOKS ไม่ตรงกับ FAUCET ใน lib/finishes.ts');
 assert.ok(FAUCET_LOOKS[DEFAULT_PICKS.faucet], 'ค่าเริ่มต้นของก๊อกไม่อยู่ใน FAUCET_LOOKS');
+assert.deepEqual(Object.keys(FAUCET_NOTES).sort(), FAUCET.map((f) => f.id).sort(), 'FAUCET_NOTES ไม่ตรงกับ FAUCET ใน lib/finishes.ts');
+for (const [id, note] of Object.entries(FAUCET_NOTES)) noted(`faucet.${id}.note`, note);
 
 // ── แสง ──
 unique('LIGHTS', LIGHTS.map((l) => l.id));
@@ -77,6 +85,18 @@ LAYOUTS.forEach((layout, index) => {
   assert.ok(Math.abs(h.azimuth) <= ORBIT.azimuth, `${at}: home.azimuth เกินขอบเขต`);
   assert.ok(h.polar >= ORBIT.polarMin && h.polar <= ORBIT.polarMax, `${at}: home.polar เกินขอบเขต`);
   assert.ok(h.distance >= ORBIT.zoomMin && h.distance <= ORBIT.zoomMax, `${at}: home.distance เกินขอบเขต`);
+
+  // มุมเจาะดูชิ้นส่วน: ครบ 5 หมวด อยู่ในขอบเขตกล้อง และจุดชี้อยู่ในครัวของตัวเอง
+  assert.deepEqual(Object.keys(layout.focus).sort(), Object.keys(DEFAULT_PICKS).sort(), `${at}: focus ต้องมีครบทุกหมวด`);
+  const reach = Math.max(Math.abs(back.x), Math.abs(backEnd));
+  for (const [part, f] of Object.entries(layout.focus)) {
+    const where = `${at} focus.${part}`;
+    assert.ok(f.distance >= FOCUS.zoomMin && f.distance <= FOCUS.zoomMax, `${where}: distance เกินขอบเขต`);
+    assert.ok(f.polar >= ORBIT.polarMin && f.polar <= ORBIT.polarMax, `${where}: polar เกินขอบเขต`);
+    assert.ok(Math.abs(f.azimuth) + FOCUS.azimuth <= ORBIT.azimuth, `${where}: หมุนสุดแล้วเกิน 90 องศา`);
+    const [x, y, z] = f.at;
+    assert.ok(Math.abs(x) <= reach && y >= 0 && y <= 2.4 && z >= 0 && z <= HALL.depth, `${where}: จุดชี้อยู่นอกครัว`);
+  }
 });
 
 // กล้องซูมออกสุดแล้วหมุนไปด้านข้าง ต้องไม่เข้าไปอยู่ในตู้ของครัวข้าง ๆ
