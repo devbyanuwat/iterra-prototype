@@ -132,7 +132,7 @@ function bowl(g: THREE.Group, m: Mats, a: number, b: number, z0: number, z1: num
   box(g, m.sink, a - 0.01, a, floor, BASE, z0, z1);
   box(g, m.sink, b, b + 0.01, floor, BASE, z0, z1);
   box(g, m.sink, a, b, floor, BASE, z0 - 0.01, z0);
-  box(g, m.sink, a, b, floor, TOP - 0.005, z1, z1 + 0.01);
+  box(g, m.sink, a, b, floor, BASE, z1, z1 + 0.01);
   mesh(g, new THREE.CylinderGeometry(0.03, 0.03, 0.004, 24), m.kick, (a + b) / 2, floor + 0.012, (z0 + z1) / 2, false).userData.part = 'sink';
 }
 
