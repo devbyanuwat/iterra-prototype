@@ -83,7 +83,7 @@ images from the supplier replace them later (out of scope).
 - On portrait screens the vertical field of view widens so the kitchen keeps its width in frame.
 - Parts in the scene respond (added 2026-10-03, owner's request): pointing at doors, countertop, backsplash, floor or
   faucet brightens every piece that shares that material and shows a label with the part and its current choice; a
-  click or tap (under 5 px of movement, so a drag still orbits) scrolls the panel to that part's options. Fixed parts
+  click or tap (under 5 px of movement, so a drag still orbits) scrolls the panel to that part's options. (Superseded: a click now enters the part focus mode, see `2026-10-04-room-focus-mode-design.md`.) Fixed parts
   (hob, oven, sink, walls) do not respond.
 - The wheel zooms the scene while the pointer is over it (`data-lenis-prevent`); a touch drag on the scene orbits
   instead of scrolling the page.

@@ -50,8 +50,9 @@ the scene. The side panel remains a complete keyboard path to every choice; focu
 cannot reach there.
 
 **Layout of the card.** `lg` and up: bottom-left of the scene, 300 px wide, `bg-paper`, 1 px `warm-300` border, sharp
-corners, no shadow. Below `lg`: a strip along the bottom edge of the scene, full width, with the choice name, the dots
-and the back button on one row and the description under it, at most two lines. The sticky scene height does not
+corners, no shadow. Below `lg`: a strip along the bottom edge of the scene, full width, with the part and choice name on the first row, the dots
+and the back button on the second row and the description under them. The view shifts up by half the strip's height so
+the focused part stays clear of it. The sticky scene height does not
 change.
 
 ## Data (`lib/room.ts`, still import-free, MOCK)
@@ -115,3 +116,21 @@ pane: reduced motion, a real phone.
 Dressing the hall (job A), linking parts to Kohler products or the product pages, prices, focusing fixed parts (hob,
 oven, sink), per-kitchen materials, 3D text, a tour that visits parts automatically, saving a configuration, PR,
 merge, deploy.
+
+## Addendum 2026-10-04: faucet and sink shapes, motion
+
+Requested in chat by anuwat during execution ("ลองปั้นก๊อกและซิงก์ในแต่ละรูปแบบ แล้วให้ user เลือกเปลี่ยนได้", then
+"ใส่ motion ultrasmooth"). Built without a separate approval round because both arrived with or during "ลุยเลย".
+
+- **Shapes.** `FAUCET_SHAPES` (gooseneck, square, spring) and `SINKS` (single, double, round) in `lib/room.ts`, names and
+  notes in Thai and English, MOCK. `Picks` gains `faucetShape` and `sink`. All shapes are built once in `kitchen.ts`
+  and `RoomScene` shows the chosen one. They are sample forms, not models on sale; the page note says so.
+- **Sink is now a focusable part** (this replaces "sink" in the list of fixed parts and in Out of scope). Its card has
+  shape buttons and no colour dots. The faucet card has both colour dots and shape buttons. The side panel has two new
+  groups, "Faucet shape" and "Sink".
+- **The faucet has an invisible hit box** around its stem so a thin spout is easy to click.
+- **Motion.** Flights last 1.4 s and ease in and out (this replaces 1.2 s). The zoom and rotate buttons glide over
+  0.5 s. The card rises in over 0.5 s, the guide line and label fade, and a newly chosen faucet settles onto the
+  counter. Under reduced motion everything still jumps.
+- Not done: a cross-fade between materials when a colour changes (the swap is instant), and a transition for the sink
+  shape (its countertop cut-out changes with it).
