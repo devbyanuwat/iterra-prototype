@@ -7,7 +7,6 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { useScope } from '@/lib/scope';
 import { galleryFor, type GalleryItem } from '@/lib/gallery';
@@ -63,9 +62,7 @@ export default function ImageWall() {
     // overflow-hidden: คอลัมน์ที่เลื่อนเกินขอบจะไม่ทับ section ถัดไป
     <section ref={root} className="overflow-hidden bg-ink text-paper">
       <div className="px-6 pb-12 pt-24 md:px-[8vw] md:pb-16 md:pt-32">
-        <Reveal>
-          <h2 className="text-3xl font-extralight tracking-wide md:text-4xl">{t.home.galleryTitle}</h2>
-        </Reveal>
+        <h2 className="text-3xl font-extralight tracking-wide md:text-4xl">{t.home.galleryTitle}</h2>
       </div>
       {/* เดสก์ท็อป: 3 คอลัมน์ parallax */}
       <div className="hidden grid-cols-3 items-start gap-8 px-[8vw] pb-40 md:grid">

@@ -31,14 +31,6 @@ html.lenis body {
   overflow: hidden;
 }
 
-/* Thin elegant scrollbar for the horizontal gallery on mobile */
-.snap-gallery::-webkit-scrollbar {
-  height: 3px;
-}
-.snap-gallery::-webkit-scrollbar-thumb {
-  background: #d6d3cc;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

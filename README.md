@@ -22,8 +22,7 @@ npm run build      # static export → โฟลเดอร์ out/
 ## โครง motion
 - `components/SmoothScroll.tsx` — Lenis lerp 0.08 ผูก gsap.ticker
 - `components/Hero.tsx` — parallax 3 ชั้น + scale 1→1.08
-- `components/PinnedStory.tsx` — pin + scrub 3 สไลด์ (มือถือ = บล็อกธรรมดา)
-- `components/HorizontalGallery.tsx` — vertical scroll ขับการ์ดแนวนอน + perspective depth
+- `components/ImageWall.tsx` — ผนังภาพ 3 คอลัมน์ เลื่อนเร็วไม่เท่ากันตาม scroll (มือถือ = คอลัมน์เดียวภาพนิ่ง)
 - `components/TiltCard.tsx` — 3D tilt ±6° + เงาขยับ
 - `components/Reveal.tsx` / `CountUp.tsx` / `ParallaxImage.tsx`
 

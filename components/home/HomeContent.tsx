@@ -28,7 +28,7 @@ function StoryText({ title, body }: { title: string; body: string }) {
 }
 
 // เรื่องราว: 2 แถวแรกภาพสลับซ้าย-ขวา แถวที่ 3 ภาพเต็มความกว้างแล้วข้อความใต้ภาพ (ไม่ zigzag เกิน 2 แถว)
-// ภาพ parallax ในกรอบ + ข้อความ reveal (เหตุผล: ภาพเลื่อนช้ากว่ากรอบให้ความลึกเหมือนผนังภาพด้านบน)
+// ภาพ parallax ในกรอบ (เหตุผล: ภาพเลื่อนช้ากว่ากรอบให้ความลึกเหมือนผนังภาพด้านบน) + ข้อความ reveal (เหตุผล: เล่าเรื่องทีละแถวตามที่เลื่อนถึง)
 function StoryRows() {
   const { t } = useLang();
   const slides = t.home.storySlides;
@@ -36,7 +36,7 @@ function StoryRows() {
   return (
     <section className="space-y-24 px-6 py-24 md:space-y-40 md:px-[8vw] md:py-40">
       {slides.slice(0, -1).map((s, i) => (
-        <div key={i} className="grid items-center gap-8 md:grid-cols-12 md:gap-12">
+        <div key={i} className="grid items-center gap-8 md:grid-cols-12 md:gap-6 lg:gap-12">
           <ParallaxImage
             label={STORY_IMAGES[i]}
             ratio="3/2"
@@ -58,7 +58,7 @@ function StoryRows() {
 }
 
 // สินค้าเด่น: สินค้าหลักใบใหญ่ + อีก 3 ชิ้นเป็นรายการ (ไม่ซ้ำแบบการ์ดเท่ากันของบทความ)
-// reveal ใบหลักก่อนแล้วรายการทีละแถว (เหตุผล: ลำดับความสำคัญ สินค้าหลักมาก่อน)
+// reveal หัวข้อ ใบหลัก แล้วรายการทีละแถว (เหตุผล: ลำดับความสำคัญ สินค้าหลักมาก่อน) · รูปย่อขยายตอน hover (เหตุผล: บอกว่าแถวนี้กดได้)
 function FeaturedProducts() {
   const { lang, t } = useLang();
   const [lead, ...rest] = featuredProducts;
@@ -70,14 +70,14 @@ function FeaturedProducts() {
           href="/products/"
           className="shrink-0 text-[11px] uppercase tracking-widest2 underline-offset-8 hover:underline"
         >
-          {t.common.viewAll} →
+          {t.common.viewAll} <span aria-hidden>→</span>
         </Link>
       </Reveal>
-      <div className="grid gap-12 md:grid-cols-12 md:gap-16">
-        <Reveal className="md:col-span-7">
+      <div className="grid gap-12 md:grid-cols-[7fr_5fr] lg:gap-16">
+        <Reveal>
           <ProductCard product={lead} />
         </Reveal>
-        <ul className="divide-y divide-warm-200 md:col-span-5 md:self-center">
+        <ul className="divide-y divide-warm-200 md:self-center">
           {rest.map((p, i) => (
             <li key={p.slug}>
               <Reveal delay={i * 0.1} y={20}>
