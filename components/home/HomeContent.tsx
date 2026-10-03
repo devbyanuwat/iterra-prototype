@@ -15,8 +15,8 @@ import { useLang } from '@/components/LangProvider';
 import { featuredProducts } from '@/lib/products';
 import { posts } from '@/lib/posts';
 
-// ภาพประกอบเรื่องราวยังเป็น placeholder (ลำดับตรงกับ t.home.storySlides)
-const STORY_IMAGES = ['เรื่องราว ภาพ 01 (โชว์รูม)', 'เรื่องราว ภาพ 02 (สัมผัสจริง)', 'เรื่องราว ภาพ 03 (ทีมติดตั้ง)'];
+// ภาพเรื่องราวจากแคตตาล็อก KOHLER Kitchens 2026 (ลำดับตรงกับ t.home.storySlides) · scripts/build-media.sh scenes
+const STORY_IMAGES = [1, 2, 3].map((n) => `/media/scenes/story-${n}.webp`);
 
 function StoryText({ title, body }: { title: string; body: string }) {
   return (
@@ -38,7 +38,7 @@ function StoryRows() {
       {slides.slice(0, -1).map((s, i) => (
         <div key={i} className="grid items-center gap-8 md:grid-cols-12 md:gap-6 lg:gap-12">
           <ParallaxImage
-            label={STORY_IMAGES[i]}
+            src={STORY_IMAGES[i]}
             ratio="3/2"
             className={`md:col-span-7 ${i % 2 ? 'md:order-2 md:col-start-6' : ''}`}
           />
@@ -48,7 +48,7 @@ function StoryRows() {
         </div>
       ))}
       <div>
-        <ParallaxImage label={STORY_IMAGES[slides.length - 1]} ratio="21/9" />
+        <ParallaxImage src={STORY_IMAGES[slides.length - 1]} ratio="21/9" />
         <Reveal className="mt-8 max-w-[65ch]">
           <StoryText title={last.title} body={last.body} />
         </Reveal>
@@ -144,7 +144,7 @@ function LatestPosts() {
             <Link href={`/articles/${post.slug}/`} className="group block">
               <div className="overflow-hidden">
                 <div className="transition-transform duration-700 ease-out group-hover:scale-105">
-                  <ParallaxImage label={post.cover} ratio="16/9" speed={i % 2 ? 5 : -5} />
+                  <ParallaxImage src={post.cover} ratio="16/9" speed={i % 2 ? 5 : -5} />
                 </div>
               </div>
               <p className="mt-5 text-[10px] uppercase tracking-widest2 text-warm-500">

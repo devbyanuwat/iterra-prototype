@@ -63,10 +63,10 @@ Exact names, descriptions and spec rows live in the plan (Task 2).
 
 | slot | PDF image | used by |
 |---|---|---|
-| story-1 / story-2 / story-3 | 022-066 / 022-065 / 020-061 | home StoryRows (3/2, 3/2, 21/9) |
+| story-1 / story-2 / story-3 | 022-066 / 023-067 / 020-061 | home StoryRows (3/2, 3/2, 21/9) |
 | about-hero, about-1..4 | 001-000, 023-068, 028-078, 021-064, 025-073 | about page (21/9, then 4/5 ×4) |
-| showroom-kitchen-at-home (+ -1, -2) | 035-099, 023-067, 025-072 | post cover 16/9, inline 3/2 ×2 |
-| matte-black-kitchen | 041-115, 007-030, 042-118 | same |
+| showroom-kitchen-at-home (+ -1, -2) | 035-099, 034-096, 025-072 | post cover 16/9, inline 3/2 ×2 |
+| matte-black-kitchen | 007-030, 018-054, 041-115 | same |
 | induction-vs-gas | 036-101, 032-090, 019-055 | same |
 | small-condo-kitchen | 015-048, 032-091, 030-084 | same |
 | stainless-sink-guide | 020-059, 036-100, 027-076 | same |
@@ -102,8 +102,9 @@ console errors).
 
 ## Deferred (owner decides later)
 
-- Copy that still names products the store no longer lists: story body "ทุกเตาเปิดไฟได้ / every hob fires up",
-  the `induction-vs-gas` article, the condo article's built-in appliance tips.
+- Article content about products the store no longer lists: the `induction-vs-gas` article and the condo
+  article's built-in appliance tips. (Product-describing copy that counted 7 items or listed hobs, ovens,
+  dishwashers or built-in kitchens is fixed in Tasks 2-3: products page, site and home descriptions, story body.)
 - Showing Kohler's list prices.
 - The products page now has 9 zigzag rows (was 6); taste-skill caps zigzag at 2, out of scope here.
 - Elate lifestyle photos are 679 px wide: soft on 2× screens.

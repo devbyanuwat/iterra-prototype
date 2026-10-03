@@ -7,7 +7,8 @@ export type Post = {
   title: { th: string; en: string };
   excerpt: { th: string; en: string };
   date: string; // ISO
-  cover: string; // ป้ายชื่อภาพ placeholder (16:9)
+  cover: string; // ภาพปก 16:9 จาก scripts/build-media.sh scenes
+  inline: [string, string]; // ภาพประกอบหลังย่อหน้าที่ 2 และ 4
   tag: string;
   body: string[]; // ย่อหน้าภาษาไทย
 };
@@ -24,7 +25,8 @@ export const posts: Post[] = [
       en: 'Why do showroom kitchens always look expensive? The answer is discipline: negative space and no more than three materials.',
     },
     date: '2026-08-12',
-    cover: 'ปกบทความ ครัวโชว์รูม',
+    cover: '/media/scenes/showroom-kitchen-at-home.webp',
+    inline: ['/media/scenes/showroom-kitchen-at-home-1.webp', '/media/scenes/showroom-kitchen-at-home-2.webp'],
     tag: 'ไอเดียครัว',
     body: [
       'ลองนึกถึงครั้งล่าสุดที่คุณเดินเข้าโชว์รูมครัวระดับพรีเมียม สิ่งแรกที่สัมผัสได้ไม่ใช่ตู้หรือเครื่องใช้ไฟฟ้า แต่คือ "อากาศ" — ที่ว่างรอบชิ้นงานที่ทำให้ทุกอย่างดูมีราคา หลักการเดียวกันนี้นำกลับมาใช้ที่บ้านได้ โดยไม่ต้องเพิ่มงบสักบาท',
@@ -45,7 +47,8 @@ export const posts: Post[] = [
       en: 'Matte black is the most forgiving finish in the kitchen — no fingerprints, no expiry date.',
     },
     date: '2026-07-30',
-    cover: 'ปกบทความ ครัวดำด้าน',
+    cover: '/media/scenes/matte-black-kitchen.webp',
+    inline: ['/media/scenes/matte-black-kitchen-1.webp', '/media/scenes/matte-black-kitchen-2.webp'],
     tag: 'วัสดุ',
     body: [
       'ในบรรดาเทรนด์สีครัวที่ผ่านมาแล้วผ่านไป สีดำด้านคือข้อยกเว้น มันอยู่ในครัวระดับไฮเอนด์มาเกินสิบปีและยังไม่มีทีท่าจะไปไหน เหตุผลเรียบง่าย: สีดำด้านไม่แข่งกับใคร แต่ขับให้ทุกอย่างรอบตัวเด่นขึ้น',
@@ -66,7 +69,8 @@ export const posts: Post[] = [
       en: 'The most asked question in our showroom, answered honestly: look at your three most-cooked dishes.',
     },
     date: '2026-07-18',
-    cover: 'ปกบทความ เตา Induction',
+    cover: '/media/scenes/induction-vs-gas.webp',
+    inline: ['/media/scenes/induction-vs-gas-1.webp', '/media/scenes/induction-vs-gas-2.webp'],
     tag: 'คู่มือเลือกซื้อ',
     body: [
       'ไม่มีคำตอบตายตัวว่าเตาแบบไหน "ดีกว่า" มีแต่คำตอบว่าแบบไหนเหมาะกับวิธีทำอาหารของบ้านคุณ วิธีคิดที่เราแนะนำลูกค้าเสมอคือ ให้นึกถึงสามเมนูที่ทำบ่อยที่สุดในรอบเดือน แล้วค่อยเลือกเตาจากเมนูเหล่านั้น',
@@ -87,7 +91,8 @@ export const posts: Post[] = [
       en: 'A small footprint is not a limit on luxury — it forces every piece to earn its place.',
     },
     date: '2026-06-25',
-    cover: 'ปกบทความ ครัวคอนโด',
+    cover: '/media/scenes/small-condo-kitchen.webp',
+    inline: ['/media/scenes/small-condo-kitchen-1.webp', '/media/scenes/small-condo-kitchen-2.webp'],
     tag: 'ไอเดียครัว',
     body: [
       'ครัวคอนโดขนาด 4 ตารางเมตรมีข้อได้เปรียบหนึ่งที่ครัวใหญ่ไม่มี: ทุกชิ้นที่คุณเลือกจะถูกมองเห็นเสมอ นั่นแปลว่างบเท่าเดิมสามารถลงกับของน้อยชิ้นที่คุณภาพสูงขึ้นได้ และผลลัพธ์จะชัดกว่าการเกลี่ยงบในครัวใหญ่',
@@ -108,7 +113,8 @@ export const posts: Post[] = [
       en: 'The one number to remember is 304 — then thickness, depth, and the sound you will hear every day.',
     },
     date: '2026-05-14',
-    cover: 'ปกบทความ คู่มือซิงก์',
+    cover: '/media/scenes/stainless-sink-guide.webp',
+    inline: ['/media/scenes/stainless-sink-guide-1.webp', '/media/scenes/stainless-sink-guide-2.webp'],
     tag: 'คู่มือเลือกซื้อ',
     body: [
       'ซิงก์คืออุปกรณ์ที่ถูกใช้งานหนักที่สุดในครัว — เฉลี่ยวันละไม่ต่ำกว่าสามสิบครั้ง แต่กลับเป็นชิ้นที่คนใช้เวลาเลือกน้อยที่สุด คู่มือนี้สรุปสิ่งที่ต้องดูให้เหลือสี่ข้อ อ่านจบเลือกได้เลย',

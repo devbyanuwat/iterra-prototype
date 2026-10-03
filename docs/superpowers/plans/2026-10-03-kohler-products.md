@@ -106,10 +106,10 @@ scenes() {
   pdfimages -png -p "$PDF_SRC" "$tmp/i"
   # page-index:ชื่อไฟล์ — ภาพครัว ไม่มีคน ไม่ใช่ภาพปะต่อ ไม่ซ้ำกับ gallery
   local picks=(
-    022-066:story-1 022-065:story-2 020-061:story-3
+    022-066:story-1 023-067:story-2 020-061:story-3
     001-000:about-hero 023-068:about-1 028-078:about-2 021-064:about-3 025-073:about-4
-    035-099:showroom-kitchen-at-home 023-067:showroom-kitchen-at-home-1 025-072:showroom-kitchen-at-home-2
-    041-115:matte-black-kitchen 007-030:matte-black-kitchen-1 042-118:matte-black-kitchen-2
+    035-099:showroom-kitchen-at-home 034-096:showroom-kitchen-at-home-1 025-072:showroom-kitchen-at-home-2
+    007-030:matte-black-kitchen 018-054:matte-black-kitchen-1 041-115:matte-black-kitchen-2
     036-101:induction-vs-gas 032-090:induction-vs-gas-1 019-055:induction-vs-gas-2
     015-048:small-condo-kitchen 032-091:small-condo-kitchen-1 030-084:small-condo-kitchen-2
     020-059:stainless-sink-guide 036-100:stainless-sink-guide-1 027-076:stainless-sink-guide-2

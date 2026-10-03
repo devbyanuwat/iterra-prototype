@@ -43,10 +43,7 @@ export default async function ArticlePage({ params }: Props) {
   };
 
   // แทรกภาพ parallax หลังย่อหน้าที่ 2 และ 4
-  const imageAfter: Record<number, string> = {
-    1: `${post.cover} — ภาพแทรก 01`,
-    3: `${post.cover} — ภาพแทรก 02`,
-  };
+  const imageAfter: Record<number, string> = { 1: post.inline[0], 3: post.inline[1] };
 
   return (
     <article className="px-6 pb-28 pt-36 md:pt-44">
@@ -67,7 +64,7 @@ export default async function ArticlePage({ params }: Props) {
       </div>
 
       <Reveal className="mx-auto mt-12 max-w-4xl">
-        <ParallaxImage label={post.cover} ratio="16/9" speed={-6} />
+        <ParallaxImage src={post.cover} ratio="16/9" speed={-6} />
       </Reveal>
 
       <div className="mx-auto mt-14 max-w-2xl">
@@ -78,7 +75,7 @@ export default async function ArticlePage({ params }: Props) {
             </Reveal>
             {imageAfter[i] && (
               <Reveal className="mb-10">
-                <ParallaxImage label={imageAfter[i]} ratio="3/2" speed={i % 2 ? 6 : -6} />
+                <ParallaxImage src={imageAfter[i]} ratio="3/2" speed={i % 2 ? 6 : -6} />
               </Reveal>
             )}
           </div>

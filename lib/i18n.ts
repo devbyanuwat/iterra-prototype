@@ -38,7 +38,7 @@ export const dict = {
         },
         {
           title: 'โชว์รูมที่ให้คุณ "ลองจริง"',
-          body: 'ทุกก๊อกเปิดได้ ทุกเตาเปิดไฟได้ ทุกลิ้นชักเปิดปิดให้ฟังเสียง เพราะของพรีเมียมต้องพิสูจน์ได้ด้วยการสัมผัส',
+          body: 'ทุกก๊อกเปิดน้ำได้ ทุกซิงก์ลองล้างได้ ทุกลิ้นชักเปิดปิดให้ฟังเสียง เพราะของพรีเมียมต้องพิสูจน์ได้ด้วยการสัมผัส',
         },
         {
           title: 'อยู่ด้วยกันจนหลังการติดตั้ง',
@@ -127,7 +127,7 @@ export const dict = {
         },
         {
           title: 'A showroom you can actually try',
-          body: 'Every faucet runs, every hob fires up, every drawer glides. Premium quality should be proven by touch.',
+          body: 'Every faucet runs, every sink is plumbed, every drawer glides. Premium quality should be proven by touch.',
         },
         {
           title: 'With you long after installation',

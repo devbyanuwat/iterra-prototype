@@ -31,7 +31,7 @@ export default function ArticlesPage() {
               <Link href={`/articles/${post.slug}/`} className="group block">
                 <div className="overflow-hidden">
                   <div className="transition-transform duration-700 ease-out group-hover:scale-105">
-                    <ParallaxImage label={post.cover} ratio="16/9" speed={i % 2 ? 5 : -5} />
+                    <ParallaxImage src={post.cover} ratio="16/9" speed={i % 2 ? 5 : -5} />
                   </div>
                 </div>
                 <p className="mt-5 text-[10px] uppercase tracking-widest2 text-warm-500">

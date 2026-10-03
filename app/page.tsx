@@ -5,7 +5,7 @@ import { SITE_TAGLINE_TH, SITE_TAGLINE_EN } from '@/lib/site';
 export const metadata: Metadata = {
   title: `ITERRA — ${SITE_TAGLINE_TH} | ${SITE_TAGLINE_EN}`,
   description:
-    'คัดสรรซิงก์ ก๊อกครัว เตาแม่เหล็กไฟฟ้า และชุดครัวบิลท์อินพรีเมียมจากแบรนด์ชั้นนำระดับโลก สัมผัสจริงได้ที่โชว์รูม ITERRA กรุงเทพฯ',
+    'คัดสรรก๊อกและซิงก์ครัวพรีเมียมจาก KOHLER สัมผัสจริงได้ที่โชว์รูม ITERRA กรุงเทพฯ',
   alternates: { canonical: '/' },
 };
 
