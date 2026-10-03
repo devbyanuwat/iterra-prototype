@@ -7,6 +7,7 @@
 npm install
 npm run dev        # http://localhost:3000
 npm run build      # static export → โฟลเดอร์ out/
+npm run check:overflow   # ทุกหน้า × 375/768/1024/1200 × motion/reduced-motion ต้องไม่ล้นจอ ไม่มี console error (ต้องเปิด dev server ก่อน)
 ```
 
 ## จุดเปลี่ยน mock → ของจริง

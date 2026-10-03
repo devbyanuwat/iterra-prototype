@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "check:overflow": "node scripts/check-overflow.mjs"
   },
   "dependencies": {
     "gsap": "^3.12.5",
