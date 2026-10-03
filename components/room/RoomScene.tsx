@@ -9,7 +9,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { FAUCET_LOOKS, FOCUS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, type Layout, type LayoutId, type LightId, type Look, type Part, type Picks } from '@/lib/room';
+import { FAUCET_LOOKS, FOCUS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, SHOWROOM, type Layout, type LayoutId, type LightId, type Look, type Part, type Picks } from '@/lib/room';
 import { buildKitchen, ledPositions, makeMaterials } from './kitchen';
 import { applyLook, disposeTextures } from './textures';
 import { buildHall } from './hall';
@@ -23,6 +23,7 @@ const FLIGHT = 1.4; // วินาทีที่กล้องใช้เล
 const NUDGE = 0.5; // วินาทีที่กล้องใช้ตอนกดปุ่มหมุนหรือซูม
 // ออกตัวนุ่ม จบนุ่ม: ความเร็วเป็นศูนย์ทั้งหัวและท้าย กล้องจึงไม่กระชาก
 const ease = (t: number) => (t < 0.5 ? 16 * t ** 5 : 1 - (-2 * t + 2) ** 5 / 2);
+const TRACK = 22; // ความแรงของไฟรางตอนเปิดเต็ม
 const FADE = 0.6; // วินาทีที่แสงใช้ไล่ไปโทนใหม่
 const layoutOf = (id: LayoutId) => LAYOUTS.find((l) => l.id === id)!;
 const presetOf = (id: LightId) => LIGHTS.find((l) => l.id === id)!;
@@ -104,8 +105,8 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     // ป้ายชื่อผังวาดด้วยฟอนต์ของหน้าเว็บ: ฟอนต์โหลดเสร็จแล้ววาดใหม่อีกรอบ
     document.fonts.ready.then(() => api.current?.signs(live.current.lang));
 
-    // ── ไฟ: แสงหลักดวงเดียวคลุมทั้งห้อง · ไฟใต้ตู้ 4 ดวง ย้ายตามครัวที่กำลังดู ──
-    // ติดพร้อมกันไม่เกิน 6 ดวง: hemi + ไฟใต้ตู้ 4 + แสงหลัก (lib/room.ts กำหนด, check:room ตรวจ)
+    // ── ไฟ: แสงหลักดวงเดียวคลุมทั้งห้อง · ไฟใต้ตู้ 3 ดวง กับไฟราง 1 ดวง ย้ายตามครัวที่กำลังดู ──
+    // ติดพร้อมกันไม่เกิน 6 ดวง: hemi + ไฟใต้ตู้ 3 + ไฟราง 1 + แสงหลัก (lib/room.ts กำหนด, check:room ตรวจ)
     const small = window.innerWidth < 768;
     const sun = new THREE.DirectionalLight();
     sun.position.set(10.5, 11.5, 10.7); // แดดเฉียงจากหน้าขวา · อยู่ไกลพอให้เงาคลุมทั้งห้อง
@@ -116,14 +117,18 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     sun.shadow.normalBias = 0.02;
     Object.assign(sun.shadow.camera, { left: -15, right: 15, top: 11, bottom: -11, near: 1, far: 40 }); // แดดเฉียง 45 องศา ห้องยาว 27 ม. จึงต้องกว้างทั้งสองแกน
     const hemi = new THREE.HemisphereLight('#ffffff', '#b9ad9c');
-    const leds = [0, 1, 2, 3].map(() => {
+    const leds = [0, 1, 2].map(() => {
       const spot = new THREE.SpotLight('#ffffff', 0, 2.2, 1.15, 0.6, 2); // ส่องลงอย่างเดียว ไม่ย้อนขึ้นโดนขอบหน้าบาน
       spot.position.set(0, 1.43, 0.26);
       spot.target.position.set(0, 0.9, 0.3);
       scene.add(spot, spot.target);
       return spot;
     });
-    scene.add(sun, sun.target, hemi);
+    // ไฟรางเหนือครัวที่ดูอยู่: ไฟจริงดวงเดียวแทนหัวไฟทั้งราง ส่องลงเคาน์เตอร์ ไม่ทอดเงา
+    const track = new THREE.SpotLight('#ffffff', 0, 6, 0.95, 0.9, 1.6);
+    track.position.set(0, SHOWROOM.rails.y - 0.17, SHOWROOM.rails.zs[0]);
+    track.target.position.set(0, 0.9, 0.5);
+    scene.add(sun, sun.target, hemi, track, track.target);
 
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 60);
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -149,7 +154,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
 
     // ── กล้องเลื่อนไปครัวอื่น ──
     const flight = { t: 1, time: FLIGHT, fromTarget: new THREE.Vector3(), toTarget: new THREE.Vector3(), from: new THREE.Spherical(), to: new THREE.Spherical() };
-    let ledOn = 4; // จำนวนไฟใต้ตู้ที่ใช้กับครัวปัจจุบัน
+    let ledOn = 3; // จำนวนไฟใต้ตู้ที่ใช้กับครัวปัจจุบัน
     // ย้ายไฟใต้ตู้ไปครัวที่จะดู · ตอนกล้องเลื่อน ย้ายที่ครึ่งทาง ครัวเดิมจึงไม่มืดทันทีที่กด
     let lightsFor: Layout | null = null;
     const moveLights = (l: Layout) => {
@@ -158,6 +163,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       leds.forEach((spot, i) => {
         spot.position.x = spot.target.position.x = xs[i] ?? l.x;
       });
+      track.position.x = track.target.position.x = l.x;
       lightsFor = null;
       applyLight();
     };
@@ -209,8 +215,8 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     };
 
     // ── แสง: ไล่จากค่าตอนกดไปค่าเป้าหมาย ──
-    type Mix = { sun: number; hemi: number; env: number; led: number; exposure: number; view: number; sunColor: THREE.Color; ledColor: THREE.Color; bg: THREE.Color };
-    const NUMBERS = ['sun', 'hemi', 'env', 'led', 'exposure', 'view'] as const;
+    type Mix = { sun: number; hemi: number; env: number; led: number; exposure: number; view: number; track: number; sunColor: THREE.Color; ledColor: THREE.Color; bg: THREE.Color };
+    const NUMBERS = ['sun', 'hemi', 'env', 'led', 'exposure', 'view', 'track'] as const;
     const COLORS = ['sunColor', 'ledColor', 'bg'] as const;
     const mix = (id: LightId): Mix => {
       const p = presetOf(id);
@@ -232,6 +238,10 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       });
       m.led.color.copy(now.ledColor).multiplyScalar(Math.min(1, now.led / 6));
       m.view.color.setScalar(now.view);
+      // ไฟราง: สีเดียวกับไฟใต้ตู้ · หน้าหัวไฟและไฟจริง สว่างตาม track
+      m.lamp.color.copy(now.ledColor).multiplyScalar(now.track);
+      track.intensity = now.track * TRACK;
+      track.color.copy(now.ledColor);
       background.copy(now.bg);
       renderer.toneMappingExposure = now.exposure;
       dirty = true;
@@ -493,6 +503,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       hall.dispose();
       sun.dispose();
       leds.forEach((spot) => spot.dispose());
+      track.dispose();
       scene.environment?.dispose();
       pmrem.dispose();
       renderer.domElement.removeEventListener('webglcontextrestored', onRestore);

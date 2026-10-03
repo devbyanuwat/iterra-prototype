@@ -41,9 +41,10 @@ unique('LIGHTS', LIGHTS.map((l) => l.id));
 assert.deepEqual(LIGHTS.map((l) => l.id), ['day', 'warm', 'cool', 'night']);
 LIGHTS.forEach((l) => named(`light.${l.id}`, l.name));
 LIGHTS.forEach((l) => assert.ok(l.view >= 0 && l.view <= 1, `light.${l.id}: view ต้องอยู่ระหว่าง 0 ถึง 1`));
-// ไฟติดพร้อมกันไม่เกิน 6 ดวง: hemi 1 + ไฟใต้ตู้ 4 + (แดด หรือ ไฟเพดาน) 1
+// ไฟติดพร้อมกันไม่เกิน 6 ดวง: hemi 1 + ไฟใต้ตู้ 3 + ไฟราง 1 + (แดด หรือ ไฟเพดาน) 1
 for (const l of LIGHTS) {
-  const on = [l.sun, l.hemi].filter((v) => v > 0).length + (l.led > 0 ? 4 : 0);
+  const on = [l.sun, l.hemi, l.track].filter((v) => v > 0).length + (l.led > 0 ? 3 : 0);
+  assert.ok(l.track >= 0 && l.track <= 1, `light.${l.id}: track ต้องอยู่ระหว่าง 0 ถึง 1`);
   assert.ok(on <= 6, `light.${l.id}: ไฟติดพร้อมกัน ${on} ดวง เกิน 6`);
 }
 

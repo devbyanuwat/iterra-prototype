@@ -36,6 +36,7 @@ export function makeMaterials() {
     fruit: standard('#c9a43a', 0.55),
     paper: standard('#cfc6b6', 0.9),
     view: new THREE.MeshBasicMaterial({ color: '#ffffff' }), // วิวนอกหน้าต่าง (สว่างตามโทนแสง)
+    lamp: new THREE.MeshBasicMaterial({ color: '#000000' }), // หน้าหัวไฟราง (สีและความสว่างตามโทนแสง)
   };
 }
 
@@ -340,7 +341,8 @@ function mergeStatic(kitchen: THREE.Group) {
   });
 }
 
-// ตำแหน่งไฟส่องใต้ตู้แขวนของครัวนี้ (x ในพิกัดห้อง) ไม่เกิน 4 ดวง: กลางตู้แขวนทุกช่องที่ไม่ใช่ฮูด
+// ตำแหน่งไฟส่องใต้ตู้แขวนของครัวนี้ (x ในพิกัดห้อง) ไม่เกิน 3 ดวง: กลางตู้แขวนทุกช่องที่ไม่ใช่ฮูด
+// เกิน 3 ช่อง: กระจาย 3 ดวงเท่า ๆ กันจากช่องแรกถึงช่องสุดท้าย (งบไฟอีก 1 ดวงเป็นของไฟราง)
 export function ledPositions(layout: Layout) {
   const back = layout.runs[0];
   const xs: number[] = [];
@@ -349,5 +351,7 @@ export function ledPositions(layout: Layout) {
     if (mod.kind !== 'tall' && mod.kind !== 'hob') xs.push(x + mod.w / 2);
     x += mod.w;
   }
-  return xs.slice(0, 4);
+  if (xs.length <= 3) return xs;
+  const [a, b] = [xs[0], xs[xs.length - 1]];
+  return [a, (a + b) / 2, b];
 }

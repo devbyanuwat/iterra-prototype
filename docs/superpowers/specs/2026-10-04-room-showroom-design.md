@@ -15,7 +15,10 @@ how the page is used: the same camera, the same parts to point at, the same choi
 **Hall structure**
 
 - A dark skirting board along the back wall and both end walls.
-- A ceiling at `HALL.height`, with one black track-light rail hanging above each kitchen, three spot heads on each. The heads are scenery (a dark body and a small bright face); they add no light source.
+- A ceiling at `HALL.height`, with one black track-light rail hanging above each kitchen, three spot heads on each. Revised 2026-10-04 after the owner said the lights were not on ("ไฟไม่ติดอะ"): each head's face glows (drawn, no light
+  source; a drawn beam was tried and dropped at the owner's request), and one real spotlight above the kitchen being viewed lights its
+  counter, moving with the kitchen. To stay at 6 lights the under-cabinet lights went from 4 to 3, spread evenly. All
+  of it follows a new `track` number per light preset (0.3 by day, 1 otherwise) and the preset's lamp colour.
 - Shallow pilasters (0.4 m deep, full height) on the back wall between the kitchens. Shallow, because a deep partition
   would block the camera when it orbits to the side.
 - A sign above each kitchen: the layout's name in the page language ("ครัวตัว I", "I-shaped") over a short rule, drawn
@@ -94,7 +97,7 @@ owner after task 1 as the first checkpoint.
 ## Decisions made without asking (say so in review if any is wrong)
 
 1. Pilasters, not deep partitions, between kitchens.
-2. Track lights are scenery; lighting stays as tuned on 2026-10-03.
+2. (Superseded, see Hall structure.) Track lights were scenery only.
 3. The view is drawn in code, generic sky and trees, not a photograph of a real place.
 4. Windows go in the back wall between kitchens, not in the end walls (the end walls are rarely in frame).
 5. Props and furniture are fixed: no choices, no hover, no focus.

@@ -152,7 +152,7 @@ export const DEFAULT_PICKS: Picks = { doors: 'white', top: 'quartz-grey', splash
 
 // ── แสง ──
 // sun = แสงจากหน้าต่าง, hemi = แสงฟ้า, env = แรงของเงาสะท้อน, led = ไฟใต้ตู้แขวน
-// ไฟติดพร้อมกันได้ไม่เกิน 6 ดวง (hemi 1 + led 4 + sun 1) · check:room ตรวจ
+// ไฟติดพร้อมกันได้ไม่เกิน 6 ดวง (hemi 1 + led 3 + sun 1 + ไฟราง 1) · check:room ตรวจ
 // วอร์มไวท์กับคูลไวท์ใช้ sun เป็นแสงหลักย้อมสีตามโทน ห้องจึงมีเงาและไม่แบน
 export type LightId = 'day' | 'warm' | 'cool' | 'night';
 export type LightPreset = {
@@ -167,12 +167,13 @@ export type LightPreset = {
   bg: string;
   exposure: number;
   view: number; // ความสว่างของวิวนอกหน้าต่าง 0 ถึง 1
+  track: number; // ไฟรางเหนือครัว 0 ถึง 1 (หัวไฟเรืองแสง และไฟจริง 1 ดวงเหนือครัวที่ดูอยู่)
 };
 export const LIGHTS: LightPreset[] = [
-  { id: 'day', name: { th: 'กลางวัน', en: 'Daylight' }, sun: 3.1, sunColor: '#fff1dc', hemi: 0.38, env: 0.5, led: 0, ledColor: '#ffc98f', bg: '#e9e6e1', exposure: 0.82, view: 1 },
-  { id: 'warm', name: { th: 'วอร์มไวท์ 3000K', en: 'Warm White 3000K' }, sun: 1.7, sunColor: '#ffd2a0', hemi: 0.22, env: 0.3, led: 6, ledColor: '#ffc98f', bg: '#2a2420', exposure: 1, view: 0.35 },
-  { id: 'cool', name: { th: 'คูลไวท์ 6000K', en: 'Cool White 6000K' }, sun: 1.9, sunColor: '#e6eeff', hemi: 0.26, env: 0.34, led: 6, ledColor: '#e4eeff', bg: '#22262b', exposure: 1, view: 0.4 },
-  { id: 'night', name: { th: 'กลางคืน', en: 'Night' }, sun: 0, sunColor: '#ffd9a8', hemi: 0.09, env: 0.14, led: 7, ledColor: '#ffc98f', bg: '#141210', exposure: 1.05, view: 0.06 },
+  { id: 'day', name: { th: 'กลางวัน', en: 'Daylight' }, sun: 3.1, sunColor: '#fff1dc', hemi: 0.38, env: 0.5, led: 0, ledColor: '#ffc98f', bg: '#e9e6e1', exposure: 0.82, view: 1, track: 0.3 },
+  { id: 'warm', name: { th: 'วอร์มไวท์ 3000K', en: 'Warm White 3000K' }, sun: 1.7, sunColor: '#ffd2a0', hemi: 0.22, env: 0.3, led: 6, ledColor: '#ffc98f', bg: '#2a2420', exposure: 1, view: 0.35, track: 1 },
+  { id: 'cool', name: { th: 'คูลไวท์ 6000K', en: 'Cool White 6000K' }, sun: 1.9, sunColor: '#e6eeff', hemi: 0.26, env: 0.34, led: 6, ledColor: '#e4eeff', bg: '#22262b', exposure: 1, view: 0.4, track: 1 },
+  { id: 'night', name: { th: 'กลางคืน', en: 'Night' }, sun: 0, sunColor: '#ffd9a8', hemi: 0.09, env: 0.14, led: 7, ledColor: '#ffc98f', bg: '#141210', exposure: 1.05, view: 0.06, track: 1 },
 ];
 
 // ── ผังครัว ──

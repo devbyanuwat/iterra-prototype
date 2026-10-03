@@ -1,7 +1,7 @@
 // แต่งโถงให้เป็นโชว์รูมแบบแกลเลอรี: บัวพื้น ฝ้า รางไฟ เสาอิงผนัง ป้ายชื่อผัง หน้าต่างพร้อมวิว เฟอร์นิเจอร์ ของบนเคาน์เตอร์
 // ตำแหน่งทั้งหมดมาจาก SHOWROOM ใน lib/room.ts · ทุกชิ้นเป็นของประกอบฉาก ชี้และกดไม่ได้ (userData.inert)
 // ชิ้นนิ่งรวมเป็น mesh เดียวต่อวัสดุ (mergeGeometries) ทั้งโถงจึงใช้ draw call ราววัสดุละ 1 ครั้ง
-// รางไฟเป็นของประกอบฉาก ไม่มีไฟจริง (งบไฟ 6 ดวงเต็มแล้ว)
+// รางไฟ: หน้าหัวไฟเรืองแสงเป็นของปลอม · ไฟจริงมีดวงเดียว อยู่ใน RoomScene ย้ายตามครัวที่ดูอยู่ (งบไฟ 6 ดวง)
 
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -83,7 +83,7 @@ export function buildHall(m: Mats, lang: Lang): Hall {
       for (const o of [-1.5, 1.5]) slab(flat, m.kick, layout.x + o - 0.006, layout.x + o + 0.006, rails.y + 0.03, HALL.height, z - 0.006, z + 0.006);
       for (const o of rails.heads) {
         put(flat, m.kick, new THREE.CylinderGeometry(0.05, 0.042, 0.15, 16), layout.x + o, rails.y - 0.085, z);
-        put(flat, m.ceramic, new THREE.CylinderGeometry(0.034, 0.034, 0.004, 16), layout.x + o, rails.y - 0.162, z);
+        put(flat, m.lamp, new THREE.CylinderGeometry(0.034, 0.034, 0.004, 16), layout.x + o, rails.y - 0.162, z);
       }
     }
   }
