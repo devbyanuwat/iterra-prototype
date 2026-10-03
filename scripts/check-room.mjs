@@ -1,7 +1,7 @@
 // เช็กข้อมูลห้องจำลอง (lib/room.ts): npm run check:room
 // ผังครัววาดจากตัวเลขล้วน ๆ ตัวเลขผิดนิดเดียวตู้จะซ้อนกันหรือลอยจากผนัง ด่านนี้จับก่อนเปิดเบราว์เซอร์
 import assert from 'node:assert/strict';
-import { PARTS, FAUCET_LOOKS, FAUCET_NOTES, DEFAULT_PICKS, LIGHTS, LAYOUTS, BAY_PITCH, HALL, ORBIT, FOCUS, runLength } from '../lib/room.ts';
+import { PARTS, FAUCET_LOOKS, FAUCET_NOTES, FAUCET_SHAPES, SINKS, DEFAULT_PICKS, LIGHTS, LAYOUTS, BAY_PITCH, HALL, ORBIT, FOCUS, runLength } from '../lib/room.ts';
 import { FAUCET } from '../lib/finishes.ts';
 
 const named = (what, name) => assert.ok(name?.th?.trim() && name?.en?.trim(), `${what}: ต้องมีชื่อ th และ en`);
@@ -29,6 +29,12 @@ assert.deepEqual(Object.keys(FAUCET_LOOKS).sort(), FAUCET.map((f) => f.id).sort(
 assert.ok(FAUCET_LOOKS[DEFAULT_PICKS.faucet], 'ค่าเริ่มต้นของก๊อกไม่อยู่ใน FAUCET_LOOKS');
 assert.deepEqual(Object.keys(FAUCET_NOTES).sort(), FAUCET.map((f) => f.id).sort(), 'FAUCET_NOTES ไม่ตรงกับ FAUCET ใน lib/finishes.ts');
 for (const [id, note] of Object.entries(FAUCET_NOTES)) noted(`faucet.${id}.note`, note);
+// ทรงก๊อกและซิงก์: id ต้องตรงกับที่ kitchen.ts ปั้น (userData.faucet / userData.sink)
+for (const [what, shapes, ids, pick] of [['faucetShape', FAUCET_SHAPES, ['gooseneck', 'square', 'spring'], DEFAULT_PICKS.faucetShape], ['sink', SINKS, ['single', 'double', 'round'], DEFAULT_PICKS.sink]]) {
+  assert.deepEqual(shapes.map((s) => s.id), ids, `${what}: id ไม่ตรงกับทรงที่ปั้นไว้`);
+  shapes.forEach((s) => (named(`${what}.${s.id}`, s.name), noted(`${what}.${s.id}.note`, s.note)));
+  assert.ok(ids.includes(pick), `${what}: ค่าเริ่มต้นไม่อยู่ในตัวเลือก`);
+}
 
 // ── แสง ──
 unique('LIGHTS', LIGHTS.map((l) => l.id));
@@ -87,7 +93,7 @@ LAYOUTS.forEach((layout, index) => {
   assert.ok(h.distance >= ORBIT.zoomMin && h.distance <= ORBIT.zoomMax, `${at}: home.distance เกินขอบเขต`);
 
   // มุมเจาะดูชิ้นส่วน: ครบ 5 หมวด อยู่ในขอบเขตกล้อง และจุดชี้อยู่ในครัวของตัวเอง
-  assert.deepEqual(Object.keys(layout.focus).sort(), Object.keys(DEFAULT_PICKS).sort(), `${at}: focus ต้องมีครบทุกหมวด`);
+  assert.deepEqual(Object.keys(layout.focus).sort(), ['doors', 'faucet', 'floor', 'sink', 'splash', 'top'], `${at}: focus ต้องมีครบทุกหมวด`);
   const reach = Math.max(Math.abs(back.x), Math.abs(backEnd));
   for (const [part, f] of Object.entries(layout.focus)) {
     const where = `${at} focus.${part}`;

@@ -6,6 +6,8 @@
 import { useEffect, useRef } from 'react';
 
 export type Choice = { id: string; label: string; swatch: string };
+// ทรง (ก๊อก ซิงก์) เลือกด้วยปุ่มข้อความ ไม่ใช่จุดสี
+export type ShapeChoice = { id: string; label: string };
 type Props = {
   part: string; // เปลี่ยนเมื่อย้ายไปเจาะชิ้นอื่น ใช้ย้าย focus
   title: string;
@@ -15,11 +17,14 @@ type Props = {
   choices: Choice[];
   value: string;
   onChange: (id: string) => void;
+  shapes?: ShapeChoice[];
+  shape?: string;
+  onShape?: (id: string) => void;
   back: string;
   onBack: () => void;
 };
 
-export default function FocusCard({ part, title, name, tag, note, choices, value, onChange, back, onBack }: Props) {
+export default function FocusCard({ part, title, name, tag, note, choices, value, onChange, shapes, shape, onShape, back, onBack }: Props) {
   const root = useRef<HTMLDivElement>(null);
   // เข้าโหมดเจาะดู หรือย้ายไปชิ้นอื่น: ย้าย focus มาที่ตัวเลือกที่เลือกอยู่
   useEffect(() => {
@@ -68,6 +73,21 @@ export default function FocusCard({ part, title, name, tag, note, choices, value
           {back}
         </button>
       </div>
+      {shapes && (
+        <div className="mt-1 flex flex-wrap gap-1.5 pb-1">
+          {shapes.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              aria-pressed={s.id === shape}
+              onClick={() => onShape?.(s.id)}
+              className={`min-h-11 border px-3 text-xs transition-[color,background-color,border-color,transform] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink active:scale-[0.98] motion-reduce:transition-none ${s.id === shape ? 'border-ink bg-ink text-paper' : 'border-warm-300 text-ink hover:border-ink'}`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
       <p aria-live="polite" className="line-clamp-2 text-xs font-normal leading-relaxed text-stone-600 lg:mt-2 lg:line-clamp-none">
         {note}
       </p>

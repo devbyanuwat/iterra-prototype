@@ -133,9 +133,22 @@ export const FAUCET_NOTES: Record<string, Name> = {
   steel: { th: 'สเตนเลสแปรง ผิวด้านเข้าชุดกับซิงก์ ไม่ค่อยเห็นรอยนิ้วมือ', en: 'Brushed stainless that matches the sink and hides fingerprints.' },
 };
 
-export type Picks = Record<PartId, string> & { faucet: string };
-export type Part = keyof Picks; // หมวดที่ผู้ใช้เปลี่ยนได้ = ชิ้นส่วนที่ชี้และเจาะดูได้ในฉาก
-export const DEFAULT_PICKS: Picks = { doors: 'white', top: 'quartz-grey', splash: 'tile-white', floor: 'oak-light', faucet: 'chrome' };
+// ทรงของก๊อกและซิงก์ (ปั้นใน components/room/kitchen.ts ตาม id) · เป็นทรงตัวอย่าง ไม่ใช่รุ่นที่จำหน่าย
+export type Shape = { id: string; name: Name; note: Name };
+export const FAUCET_SHAPES: Shape[] = [
+  { id: 'gooseneck', name: { th: 'คอโค้งสูง', en: 'High Arc' }, note: { th: 'คอโค้งสูง วางหม้อใบใหญ่ใต้ก๊อกได้สบาย', en: 'A high arc that leaves room for a tall pot under the spout.' } },
+  { id: 'square', name: { th: 'ทรงเหลี่ยม', en: 'Square' }, note: { th: 'เส้นตรงเหลี่ยมคม เข้ากับครัวแนวเรียบ', en: 'Straight lines and sharp corners for a clean, flat-fronted kitchen.' } },
+  { id: 'spring', name: { th: 'สปริงดึงสาย', en: 'Spring Pull-down' }, note: { th: 'หัวฉีดดึงลงมาล้างได้ทั่วอ่าง แบบที่ใช้ในครัวร้านอาหาร', en: 'A pull-down spray head that reaches the whole bowl, as in a restaurant kitchen.' } },
+];
+export const SINKS: Shape[] = [
+  { id: 'single', name: { th: 'หลุมเดียว', en: 'Single Bowl' }, note: { th: 'อ่างสเตนเลสหลุมเดียวกว้าง วางกระทะใบใหญ่ล้างได้ทั้งใบ', en: 'One wide stainless bowl that takes a large pan flat.' } },
+  { id: 'double', name: { th: 'สองหลุม', en: 'Double Bowl' }, note: { th: 'สองหลุมแยกล้างกับพัก หลุมขวาตื้นกว่าไว้ล้างผัก', en: 'Two bowls to wash and to rest. The shallower right bowl is for rinsing vegetables.' } },
+  { id: 'round', name: { th: 'หลุมกลม', en: 'Round Bowl' }, note: { th: 'อ่างกลมขนาดกะทัดรัด เหลือพื้นที่ท็อปสองข้างมากขึ้น', en: 'A compact round bowl that leaves more countertop on both sides.' } },
+];
+
+export type Picks = Record<PartId, string> & { faucet: string; faucetShape: string; sink: string };
+export type Part = PartId | 'faucet' | 'sink'; // ชิ้นส่วนที่ชี้และเจาะดูได้ในฉาก
+export const DEFAULT_PICKS: Picks = { doors: 'white', top: 'quartz-grey', splash: 'tile-white', floor: 'oak-light', faucet: 'chrome', faucetShape: 'gooseneck', sink: 'single' };
 
 // ── แสง ──
 // sun = แสงจากหน้าต่าง, hemi = แสงฟ้า, env = แรงของเงาสะท้อน, led = ไฟใต้ตู้แขวน
@@ -218,6 +231,7 @@ export const LAYOUTS: Layout[] = [
       splash: { at: [0.4, 1.17, 0.01], azimuth: 0.25, polar: 1.4, distance: 2 },
       floor: { at: [0, 0, 1.6], azimuth: 0.3, polar: 1.05, distance: 3 },
       faucet: { at: [-0.2, 1.1, 0.07], azimuth: 0.4, polar: 1.3, distance: 1.4 },
+      sink: { at: [-0.2, 0.9, 0.32], azimuth: 0.2, polar: 1.05, distance: 1.5 },
     },
   },
   {
@@ -241,6 +255,7 @@ export const LAYOUTS: Layout[] = [
       splash: { at: [-0.6, 1.17, 0.01], azimuth: 0.4, polar: 1.4, distance: 2 },
       floor: { at: [0.4, 0, 1.8], azimuth: 0.3, polar: 1.05, distance: 3 },
       faucet: { at: [-1.43, 1.1, 2], azimuth: 0.9, polar: 1.3, distance: 1.4 },
+      sink: { at: [-1.18, 0.9, 2], azimuth: 0.9, polar: 1.05, distance: 1.5 },
     },
   },
   {
@@ -268,6 +283,7 @@ export const LAYOUTS: Layout[] = [
       splash: { at: [0.7, 1.17, 0.01], azimuth: -0.15, polar: 1.4, distance: 2 },
       floor: { at: [0, 0, 2], azimuth: 0, polar: 1.05, distance: 3 },
       faucet: { at: [-1.53, 1.1, 1.8], azimuth: 0.9, polar: 1.3, distance: 1.4 },
+      sink: { at: [-1.28, 0.9, 1.8], azimuth: 0.9, polar: 1.05, distance: 1.5 },
     },
   },
 ];

@@ -253,7 +253,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
 
     // ── ชี้และกดที่ชิ้นส่วน: วัสดุที่เปลี่ยนได้ 5 ตัวคือ 5 หมวดในแผง ──
     // ไฮไลต์ทำที่วัสดุ จึงสว่างทุกชิ้นที่ใช้วัสดุนั้นทั้ง 3 ครัว (ตัวเลือกก็ใช้ร่วมกันทั้งห้องเหมือนกัน)
-    const parts = new Map<THREE.Material, Part>([[m.door, 'doors'], [m.top, 'top'], [m.splash, 'splash'], [m.floor, 'floor'], [m.faucet, 'faucet']]);
+    const parts = new Map<THREE.Material, Part>([[m.door, 'doors'], [m.top, 'top'], [m.splash, 'splash'], [m.floor, 'floor'], [m.faucet, 'faucet'], [m.sink, 'sink']]);
     const matOf = (part: Part) => [...parts].find(([, p]) => p === part)![0] as THREE.MeshStandardMaterial;
     const ray = new THREE.Raycaster();
     const ndc = new THREE.Vector2();
@@ -261,8 +261,12 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       const box = renderer.domElement.getBoundingClientRect();
       ndc.set(((e.clientX - box.left) / box.width) * 2 - 1, -((e.clientY - box.top) / box.height) * 2 + 1);
       ray.setFromCamera(ndc, camera);
-      const hit = ray.intersectObjects(scene.children, true)[0];
-      return (hit && parts.get((hit.object as THREE.Mesh).material as THREE.Material)) ?? null;
+      // ทรงก๊อกและซิงก์ที่ไม่ได้เลือกถูกซ่อนไว้ แต่ raycaster ยังยิงโดน จึงข้ามชิ้นที่ตัวเองหรือกลุ่มแม่ถูกซ่อน
+      const shown = (o: THREE.Object3D | null): boolean => !o || (o.visible && shown(o.parent));
+      const hit = ray.intersectObjects(scene.children, true).find((h) => shown(h.object));
+      if (!hit) return null;
+      // userData.part = พื้นที่กดที่มองไม่เห็นของก๊อก (kitchen.ts)
+      return (hit.object.userData.part as Part | undefined) ?? parts.get((hit.object as THREE.Mesh).material as THREE.Material) ?? null;
     };
     let hover: Part | null = null;
     // ชี้ที่ชิ้นส่วน: วัสดุสว่างขึ้น + ป้ายชื่อ (ตอนเจาะดูอยู่ไม่ขึ้นป้าย เพราะการ์ดบอกชื่อแล้ว)
@@ -402,6 +406,11 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
         applyLook(m.splash, lookOf('splash', p));
         applyLook(m.floor, lookOf('floor', p));
         applyLook(m.faucet, FAUCET_LOOKS[p.faucet]);
+        // ทรงก๊อกและซิงก์: ทุกทรงปั้นไว้แล้ว เปิดให้เห็นเฉพาะทรงที่เลือก
+        scene.traverse((o) => {
+          if (o.userData.sink) o.visible = o.userData.sink === p.sink;
+          if (o.userData.faucet) o.visible = o.userData.faucet === p.faucetShape;
+        });
         dirty = true;
       },
       setLight: (id) => {

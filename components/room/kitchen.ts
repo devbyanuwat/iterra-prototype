@@ -1,7 +1,8 @@
 // ปั้นครัว 1 ชุดจากผังใน lib/room.ts · รูปทรงสร้างในโค้ดทั้งหมด ไม่มีไฟล์โมเดล
 // แต่ละ run ปั้นในพิกัดของตัวเอง: x = ตามแนว run (0 ถึงความยาว), z = 0 คือหลังตู้ 0.6 คือขอบท็อปด้านหน้า
 // แล้วค่อยวางและหมุนทั้ง run ตาม run.x, run.z, run.turn
-// ก๊อกเป็นทรงคอสูงทั่วไป ไม่ใช่รุ่นจริงของ KOHLER
+// ก๊อกและซิงก์มีหลายทรงให้เลือก (lib/room.ts: FAUCET_SHAPES, SINKS) เป็นทรงตัวอย่าง ไม่ใช่รุ่นจริงของ KOHLER
+// ทุกทรงปั้นไว้พร้อมกัน แล้ว RoomScene เปิดให้เห็นเฉพาะทรงที่เลือก (userData.sink / userData.faucet)
 
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
@@ -10,6 +11,7 @@ import type { Layout, Module, Run } from '@/lib/room';
 export type Mats = ReturnType<typeof makeMaterials>;
 
 // วัสดุชุดเดียวใช้ร่วมกันทั้ง 3 ครัว · door, top, splash, floor, faucet เปลี่ยนตามที่ผู้ใช้เลือก (applyLook)
+// sink แยกจาก steel เพื่อให้ชี้และไฮไลต์ซิงก์ได้โดยมือจับไม่สว่างตาม
 export function makeMaterials() {
   const standard = (color: string, roughness: number, metalness = 0) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
   return {
@@ -20,7 +22,9 @@ export function makeMaterials() {
     faucet: standard('#f1f2f3', 0.08, 1),
     wall: standard('#dcd7cf', 0.95),
     kick: standard('#2a2725', 0.8), // ขาตู้ และพื้นมืดหลังร่องหน้าบาน
-    steel: standard('#c8cacc', 0.32, 1), // ซิงก์ มือจับ ฮูด
+    steel: standard('#c8cacc', 0.32, 1), // มือจับ ฮูด
+    sink: standard('#c8cacc', 0.32, 1), // อ่างซิงก์
+    hit: new THREE.MeshBasicMaterial({ visible: false }), // พื้นที่กดที่มองไม่เห็น (ก๊อกเส้นบาง กดโดนยาก)
     glass: standard('#0d0d0e', 0.06, 0.4), // เตา หน้าเตาอบ
     ring: new THREE.MeshBasicMaterial({ color: '#5a5a5c' }), // วงหัวเตา
     led: new THREE.MeshBasicMaterial({ color: '#000000' }), // เส้นไฟใต้ตู้แขวน (สีเปลี่ยนตามโทนแสง)
@@ -114,37 +118,96 @@ function drawers(g: THREE.Group, m: Mats, x0: number, x1: number, rows: number[]
   }
 }
 
-// ซิงก์ฝังใต้ท็อป: ท็อป 4 ชิ้นรอบช่อง + อ่างสเตนเลส + ก๊อก
+// กลุ่มย่อยของทรงหนึ่ง · RoomScene เปิดปิดตาม userData
+function variant(g: THREE.Group, key: 'sink' | 'faucet', id: string) {
+  const v = new THREE.Group();
+  v.userData[key] = id;
+  g.add(v);
+  return v;
+}
+
+// อ่างสี่เหลี่ยมฝังใต้ท็อป: ก้น + ผนัง 4 ด้าน + สะดืออ่าง
+function bowl(g: THREE.Group, m: Mats, a: number, b: number, z0: number, z1: number, floor: number) {
+  box(g, m.sink, a, b, floor, floor + 0.01, z0, z1);
+  box(g, m.sink, a - 0.01, a, floor, TOP - 0.005, z0, z1);
+  box(g, m.sink, b, b + 0.01, floor, TOP - 0.005, z0, z1);
+  box(g, m.sink, a, b, floor, TOP - 0.005, z0 - 0.01, z0);
+  box(g, m.sink, a, b, floor, TOP - 0.005, z1, z1 + 0.01);
+  mesh(g, new THREE.CylinderGeometry(0.03, 0.03, 0.004, 24), m.kick, (a + b) / 2, floor + 0.012, (z0 + z1) / 2, false);
+}
+
+// ซิงก์ 3 ทรง: single = หลุมเดียว, double = สองหลุม, round = หลุมกลม · แต่ละทรงมีท็อปที่เจาะช่องของตัวเอง
 function sink(g: THREE.Group, m: Mats, x0: number, x1: number) {
   const cx = (x0 + x1) / 2;
-  const [a, b, z0, z1, floor] = [cx - 0.25, cx + 0.25, 0.12, 0.52, 0.68];
-  box(g, m.top, x0, a, BASE, TOP, 0, COUNTER);
-  box(g, m.top, b, x1, BASE, TOP, 0, COUNTER);
-  box(g, m.top, a, b, BASE, TOP, 0, z0);
-  box(g, m.top, a, b, BASE, TOP, z1, COUNTER);
-  // ตัวตู้ช่วงบน (จากก้นอ่างถึงใต้ท็อป) เป็นกรอบ 4 ด้านรอบอ่าง ไม่ทับตัวอ่าง
+  const [z0, z1, floor] = [0.12, 0.52, 0.68];
+  // ตัวตู้ช่วงบน (จากก้นอ่างถึงใต้ท็อป) เป็นกรอบ 4 ด้าน กว้างพอสำหรับอ่างทุกทรง
+  const [fa, fb] = [cx - 0.36, cx + 0.36];
   box(g, m.door, x0, x1, floor, BASE, 0, z0 - 0.01);
   box(g, m.door, x0, x1, floor, BASE, z1 + 0.01, DEPTH);
-  box(g, m.door, x0, a - 0.01, floor, BASE, z0 - 0.01, z1 + 0.01);
-  box(g, m.door, b + 0.01, x1, floor, BASE, z0 - 0.01, z1 + 0.01);
-  box(g, m.steel, a, b, floor, floor + 0.01, z0, z1);
-  box(g, m.steel, a - 0.01, a, floor, TOP - 0.005, z0, z1);
-  box(g, m.steel, b, b + 0.01, floor, TOP - 0.005, z0, z1);
-  box(g, m.steel, a, b, floor, TOP - 0.005, z0 - 0.01, z0);
-  box(g, m.steel, a, b, floor, TOP - 0.005, z1, z1 + 0.01);
-  mesh(g, new THREE.CylinderGeometry(0.03, 0.03, 0.004, 24), m.kick, cx, floor + 0.012, 0.32, false);
+  box(g, m.door, x0, fa, floor, BASE, z0 - 0.01, z1 + 0.01);
+  box(g, m.door, fb, x1, floor, BASE, z0 - 0.01, z1 + 0.01);
+  // ท็อปรอบช่องสี่เหลี่ยม a ถึง b
+  const cutTop = (v: THREE.Group, a: number, b: number) => {
+    box(v, m.top, x0, a, BASE, TOP, 0, COUNTER);
+    box(v, m.top, b, x1, BASE, TOP, 0, COUNTER);
+    box(v, m.top, a, b, BASE, TOP, 0, z0);
+    box(v, m.top, a, b, BASE, TOP, z1, COUNTER);
+  };
 
-  mesh(g, new THREE.CylinderGeometry(0.024, 0.027, 0.05, 24), m.faucet, cx, TOP + 0.025, 0.07);
-  const neck = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(cx, 0.94, 0.07),
-    new THREE.Vector3(cx, 1.2, 0.07),
-    new THREE.Vector3(cx, 1.31, 0.12),
-    new THREE.Vector3(cx, 1.31, 0.22),
-    new THREE.Vector3(cx, 1.22, 0.265),
-  ]);
-  mesh(g, new THREE.TubeGeometry(neck, 48, 0.013, 16), m.faucet, 0, 0, 0);
-  mesh(g, new THREE.CylinderGeometry(0.016, 0.014, 0.05, 20), m.faucet, cx, 1.2, 0.268).rotation.x = -0.35;
-  mesh(g, new THREE.CylinderGeometry(0.006, 0.008, 0.11, 12), m.faucet, cx + 0.065, 0.975, 0.07).rotation.z = -1.05;
+  const single = variant(g, 'sink', 'single');
+  cutTop(single, cx - 0.25, cx + 0.25);
+  bowl(single, m, cx - 0.25, cx + 0.25, z0, z1, floor);
+
+  const double = variant(g, 'sink', 'double');
+  cutTop(double, cx - 0.35, cx + 0.35);
+  bowl(double, m, cx - 0.35, cx - 0.02, z0, z1, floor);
+  bowl(double, m, cx + 0.02, cx + 0.35, z0, z1, floor + 0.04); // หลุมขวาตื้นกว่า ไว้ล้างผัก
+  box(double, m.sink, cx - 0.01, cx + 0.01, floor, TOP - 0.005, z0, z1); // สันกลางระหว่างสองหลุม
+
+  // หลุมกลม: ท็อปเป็นแผ่นเจาะรูกลม (ExtrudeGeometry) · อ่างเป็นทรงหมุน ไล่จุดจากขอบบนลงก้น ผิวจึงหันเข้าด้านใน
+  const round = variant(g, 'sink', 'round');
+  const [r, cz] = [0.2, 0.32];
+  const slab = new THREE.Shape().moveTo(x0, 0).lineTo(x1, 0).lineTo(x1, COUNTER).lineTo(x0, COUNTER).closePath();
+  slab.holes.push(new THREE.Path().absarc(cx, cz, r, 0, Math.PI * 2, true));
+  const top = mesh(round, new THREE.ExtrudeGeometry(slab, { depth: TOP - BASE, bevelEnabled: false, curveSegments: 40 }), m.top, 0, TOP, 0);
+  top.rotation.x = Math.PI / 2; // แผ่นวาดในระนาบ x-y แล้วพลิกลงนอน: y ของแผ่น = z ของตู้ หนาลงไปถึง BASE
+  const profile = [[r + 0.01, TOP - 0.005], [r, TOP - 0.005], [r, floor + 0.03], [r - 0.03, floor], [0.001, floor]].map(([x, y]) => new THREE.Vector2(x, y));
+  mesh(round, new THREE.LatheGeometry(profile, 48), m.sink, cx, 0, cz);
+  mesh(round, new THREE.CylinderGeometry(0.03, 0.03, 0.004, 24), m.kick, cx, floor + 0.004, cz, false);
+}
+
+// ก๊อก 3 ทรง ฐานอยู่จุดเดียวกัน (หลังอ่าง) ปลายน้ำออกเหนือกลางอ่าง
+// gooseneck = คอโค้งสูง, square = ทรงเหลี่ยม, spring = สปริงแบบครัวมืออาชีพ
+function faucet(g: THREE.Group, m: Mats, cx: number) {
+  const z = 0.07;
+  // พื้นที่กดที่มองไม่เห็น ครอบก๊อกทั้งตัว
+  const hit = mesh(g, new THREE.BoxGeometry(0.2, 0.56, 0.3), m.hit, cx, TOP + 0.28, z + 0.1, false);
+  hit.userData.part = 'faucet';
+  const tube = (v: THREE.Group, points: number[][], radius: number) =>
+    mesh(v, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map(([y, pz]) => new THREE.Vector3(cx, y, pz))), 48, radius, 16), m.faucet, 0, 0, 0);
+  const lever = (v: THREE.Group, y: number) => (mesh(v, new THREE.CylinderGeometry(0.006, 0.008, 0.11, 12), m.faucet, cx + 0.065, y, z).rotation.z = -1.05);
+
+  const goose = variant(g, 'faucet', 'gooseneck');
+  mesh(goose, new THREE.CylinderGeometry(0.024, 0.027, 0.05, 24), m.faucet, cx, TOP + 0.025, z);
+  tube(goose, [[0.94, z], [1.2, z], [1.31, 0.12], [1.31, 0.22], [1.22, 0.265]], 0.013);
+  mesh(goose, new THREE.CylinderGeometry(0.016, 0.014, 0.05, 20), m.faucet, cx, 1.2, 0.268).rotation.x = -0.35;
+  lever(goose, 0.975);
+
+  const square = variant(g, 'faucet', 'square');
+  box(square, m.faucet, cx - 0.022, cx + 0.022, TOP, TOP + 0.04, z - 0.022, z + 0.022);
+  box(square, m.faucet, cx - 0.014, cx + 0.014, TOP + 0.04, 1.26, z - 0.014, z + 0.014);
+  box(square, m.faucet, cx - 0.014, cx + 0.014, 1.236, 1.26, z - 0.014, 0.29);
+  box(square, m.faucet, cx - 0.012, cx + 0.012, 1.205, 1.236, 0.262, 0.286);
+  box(square, m.faucet, cx + 0.014, cx + 0.08, 0.99, 1.002, z - 0.012, z + 0.012); // ก้านเปิดน้ำแบบแผ่น
+
+  const spring = variant(g, 'faucet', 'spring');
+  mesh(spring, new THREE.CylinderGeometry(0.022, 0.026, 0.06, 24), m.faucet, cx, TOP + 0.03, z);
+  mesh(spring, new THREE.CylinderGeometry(0.012, 0.012, 0.2, 16), m.faucet, cx, 1.06, z);
+  tube(spring, [[1.14, z], [1.34, z], [1.44, 0.11], [1.42, 0.2], [1.3, 0.25], [1.2, 0.255]], 0.007);
+  for (let y = 1.16; y < 1.335; y += 0.014) mesh(spring, new THREE.TorusGeometry(0.012, 0.0028, 6, 16), m.faucet, cx, y, z, false).rotation.x = Math.PI / 2;
+  mesh(spring, new THREE.CylinderGeometry(0.017, 0.02, 0.08, 20), m.faucet, cx, 1.17, 0.255);
+  box(spring, m.faucet, cx - 0.006, cx + 0.006, 1.145, 1.157, z, 0.24); // แขนยึดหัวฉีด
+  lever(spring, 0.99);
 }
 
 function hob(g: THREE.Group, m: Mats, x0: number, x1: number) {
@@ -200,8 +263,10 @@ function buildModule(g: THREE.Group, m: Mats, mod: Module, x0: number, run: Run,
     return;
   }
   carcass(g, m, x0, x1, mod.kind !== 'corner', mod.kind === 'sink' ? 0.68 : BASE, mod.kind === 'corner' ? COUNTER : DEPTH);
-  if (mod.kind === 'sink') sink(g, m, x0, x1);
-  else counter(g, m, x0, x1);
+  if (mod.kind === 'sink') {
+    sink(g, m, x0, x1);
+    faucet(g, m, (x0 + x1) / 2);
+  } else counter(g, m, x0, x1);
 
   if (mod.kind === 'door') doors(g, m, x0, x1, mod.doors);
   if (mod.kind === 'sink') doors(g, m, x0, x1, 2);

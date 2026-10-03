@@ -10,7 +10,7 @@ import FocusCard from './FocusCard';
 import { useLang } from '@/components/LangProvider';
 import FinishDots from '@/components/FinishDots';
 import { FAUCET } from '@/lib/finishes';
-import { DEFAULT_PICKS, FAUCET_NOTES, LAYOUTS, LIGHTS, PARTS, type LayoutId, type LightId, type Part, type PartId, type Picks } from '@/lib/room';
+import { DEFAULT_PICKS, FAUCET_NOTES, FAUCET_SHAPES, LAYOUTS, LIGHTS, PARTS, SINKS, type LayoutId, type LightId, type Part, type PartId, type Picks } from '@/lib/room';
 import type { RoomHandle } from './RoomScene';
 
 const Skeleton = () => <div className="absolute inset-0 animate-pulse bg-warm-200 motion-reduce:animate-none" aria-hidden />;
@@ -32,7 +32,23 @@ export default function RoomContent() {
   const faucet = FAUCET.find((f) => f.id === picks.faucet)!;
   const [focus, setFocus] = useState<Part | null>(null); // หมวดที่กำลังเจาะดูในฉาก
   const stage = useRef<HTMLDivElement>(null);
-  const nameOf = (part: Part) => (part === 'faucet' ? faucet : PARTS[part].find((o) => o.id === picks[part])!).name[lang];
+  const sink = SINKS.find((s) => s.id === picks.sink)!;
+  const faucetShape = FAUCET_SHAPES.find((s) => s.id === picks.faucetShape)!;
+  const nameOf = (part: Part) => (part === 'faucet' ? faucet : part === 'sink' ? sink : PARTS[part].find((o) => o.id === picks[part])!).name[lang];
+  const shapeButtons = (list: typeof SINKS) => list.map((s) => ({ id: s.id, label: s.name[lang] }));
+  // สิ่งที่การ์ดเจาะดูแสดงต่อหมวด: ก๊อก = สีผิว + ทรง · ซิงก์ = ทรงอย่างเดียว · หมวดอื่น = สี/วัสดุ
+  const cardOf = (part: Part) => {
+    if (part === 'sink') return { note: sink.note[lang], choices: [], shapes: shapeButtons(SINKS), shape: picks.sink, onShape: (id: string) => setPicks((p) => ({ ...p, sink: id })) };
+    if (part === 'faucet')
+      return {
+        note: `${faucetShape.note[lang]} ${FAUCET_NOTES[picks.faucet][lang]}`,
+        choices: FAUCET.map((f) => ({ id: f.id, label: demoName(f), swatch: f.swatch })),
+        shapes: shapeButtons(FAUCET_SHAPES),
+        shape: picks.faucetShape,
+        onShape: (id: string) => setPicks((p) => ({ ...p, faucetShape: id })),
+      };
+    return { note: PARTS[part].find((o) => o.id === picks[part])!.note[lang], choices: PARTS[part].map((o) => ({ id: o.id, label: o.name[lang], swatch: o.swatch })) };
+  };
   const demoName = (f: (typeof FAUCET)[number]) => (f.demo ? `${f.name[lang]} (${t.products.finishDemo})` : f.name[lang]);
   // ออกจากโหมดเจาะดู · ถ้า focus อยู่ในการ์ด (ซึ่งกำลังจะหายไป) ให้ย้ายกลับไปที่ฉาก
   const leave = () => {
@@ -74,8 +90,7 @@ export default function RoomContent() {
                 title={t.room[focus]}
                 name={nameOf(focus)}
                 tag={focus === 'faucet' && faucet.demo ? t.products.finishDemo : undefined}
-                note={(focus === 'faucet' ? FAUCET_NOTES[picks.faucet] : PARTS[focus].find((o) => o.id === picks[focus])!.note)[lang]}
-                choices={focus === 'faucet' ? FAUCET.map((f) => ({ id: f.id, label: demoName(f), swatch: f.swatch })) : PARTS[focus].map((o) => ({ id: o.id, label: o.name[lang], swatch: o.swatch }))}
+                {...cardOf(focus)}
                 value={picks[focus]}
                 onChange={(id) => setPicks((p) => ({ ...p, [focus]: id }))}
                 back={t.room.back}
@@ -148,6 +163,24 @@ export default function RoomContent() {
           </legend>
           <FinishDots finishes={FAUCET} value={picks.faucet} onChange={(id) => setPicks((p) => ({ ...p, faucet: id }))} />
         </fieldset>
+
+        {(
+          [
+            ['faucetShape', FAUCET_SHAPES, t.room.faucetShape, faucetShape],
+            ['sink', SINKS, t.room.sink, sink],
+          ] as const
+        ).map(([key, list, label, current]) => (
+          <fieldset key={key}>
+            <legend className={legend}>{label}</legend>
+            <div className="flex flex-wrap gap-2">
+              {list.map((s) => (
+                <button key={s.id} type="button" aria-pressed={s.id === current.id} onClick={() => setPicks((p) => ({ ...p, [key]: s.id }))} className={`${button} ${picked(s.id === current.id)}`}>
+                  {s.name[lang]}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        ))}
 
         <fieldset>
           <legend className={legend}>{t.room.light}</legend>
