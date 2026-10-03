@@ -78,6 +78,7 @@ export default function RoomContent() {
               focus={focus}
               picks={picks}
               light={light}
+              lang={lang}
               label={t.room.sceneLabel}
               tipText={(part) => `${t.room[part]} · ${nameOf(part)}`}
               onPick={setFocus}

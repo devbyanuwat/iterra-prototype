@@ -166,12 +166,13 @@ export type LightPreset = {
   ledColor: string;
   bg: string;
   exposure: number;
+  view: number; // ความสว่างของวิวนอกหน้าต่าง 0 ถึง 1
 };
 export const LIGHTS: LightPreset[] = [
-  { id: 'day', name: { th: 'กลางวัน', en: 'Daylight' }, sun: 3.1, sunColor: '#fff1dc', hemi: 0.38, env: 0.5, led: 0, ledColor: '#ffc98f', bg: '#e9e6e1', exposure: 0.82 },
-  { id: 'warm', name: { th: 'วอร์มไวท์ 3000K', en: 'Warm White 3000K' }, sun: 1.7, sunColor: '#ffd2a0', hemi: 0.22, env: 0.3, led: 6, ledColor: '#ffc98f', bg: '#2a2420', exposure: 1 },
-  { id: 'cool', name: { th: 'คูลไวท์ 6000K', en: 'Cool White 6000K' }, sun: 1.9, sunColor: '#e6eeff', hemi: 0.26, env: 0.34, led: 6, ledColor: '#e4eeff', bg: '#22262b', exposure: 1 },
-  { id: 'night', name: { th: 'กลางคืน', en: 'Night' }, sun: 0, sunColor: '#ffd9a8', hemi: 0.09, env: 0.14, led: 7, ledColor: '#ffc98f', bg: '#141210', exposure: 1.05 },
+  { id: 'day', name: { th: 'กลางวัน', en: 'Daylight' }, sun: 3.1, sunColor: '#fff1dc', hemi: 0.38, env: 0.5, led: 0, ledColor: '#ffc98f', bg: '#e9e6e1', exposure: 0.82, view: 1 },
+  { id: 'warm', name: { th: 'วอร์มไวท์ 3000K', en: 'Warm White 3000K' }, sun: 1.7, sunColor: '#ffd2a0', hemi: 0.22, env: 0.3, led: 6, ledColor: '#ffc98f', bg: '#2a2420', exposure: 1, view: 0.35 },
+  { id: 'cool', name: { th: 'คูลไวท์ 6000K', en: 'Cool White 6000K' }, sun: 1.9, sunColor: '#e6eeff', hemi: 0.26, env: 0.34, led: 6, ledColor: '#e4eeff', bg: '#22262b', exposure: 1, view: 0.4 },
+  { id: 'night', name: { th: 'กลางคืน', en: 'Night' }, sun: 0, sunColor: '#ffd9a8', hemi: 0.09, env: 0.14, led: 7, ledColor: '#ffc98f', bg: '#141210', exposure: 1.05, view: 0.06 },
 ];
 
 // ── ผังครัว ──
@@ -210,6 +211,19 @@ export const BAY_PITCH = 9; // ระยะห่างกลาง bay ถึ�
 export const HALL = { width: 27, depth: 5, height: 4.6 }; // สูงเผื่อจอแนวตั้งที่มุมกล้องกว้าง ไม่ให้เห็นขอบบนผนัง
 // ขอบเขตกล้อง: หมุนซ้ายขวาข้างละ azimuth (รวม 180 องศา) · polar วัดจากแนวดิ่ง · zoom เป็นเมตร · polarMin 1.05 = กล้องซูมออกสุดยังอยู่ต่ำกว่าขอบบนผนัง
 export const ORBIT = { azimuth: Math.PI / 2, polarMin: 1.05, polarMax: 1.52, zoomMin: 2.8, zoomMax: 7 };
+
+// ── โถงโชว์รูม (ของประกอบฉาก ชี้และกดไม่ได้) ──
+// x = ตำแหน่งกลางชิ้นบนแกน x ของห้อง · z = ระยะจากผนังหลัง · ปั้นใน components/room/hall.ts · check:room ตรวจว่าไม่ทับครัว
+export const SHOWROOM = {
+  skirting: 0.1, // ความสูงบัวพื้น
+  pilasters: { xs: [-6.7, -2.0, 2.0, 6.9], w: 0.4, d: 0.4 }, // เสาอิงผนัง คั่นระหว่างครัว
+  windows: { xs: [-4.35, 4.45], w: 2.4, y0: 0.5, y1: 2.9 },
+  rails: { y: 3.0, zs: [1.4], heads: [-0.9, 0, 0.9] }, // รางไฟแขวนเหนือครัวแต่ละชุด · heads = ระยะหัวไฟจากกลาง bay
+  sign: { y: 2.62, w: 1.2, h: 0.42 }, // ป้ายชื่อผังเหนือครัว
+  bench: { x: -4.35, z: 0.9, w: 1.6, d: 0.4 },
+  plant: { x: -6.0, z: 0.55, r: 0.3 },
+  table: { x: 4.45, z: 0.9, w: 1.6, d: 0.7 },
+};
 
 const door = (w: number, doors: 1 | 2 = 1): Module => ({ kind: 'door', w, doors });
 

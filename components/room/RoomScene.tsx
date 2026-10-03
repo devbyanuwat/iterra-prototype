@@ -12,11 +12,12 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import { FAUCET_LOOKS, FOCUS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, type Layout, type LayoutId, type LightId, type Look, type Part, type Picks } from '@/lib/room';
 import { buildKitchen, ledPositions, makeMaterials } from './kitchen';
 import { applyLook, disposeTextures } from './textures';
+import { buildHall } from './hall';
 
 export type RoomHandle = { zoom: (step: number) => void; rotate: (step: number) => void; reset: () => void; focusScene: () => void };
 // focus = หมวดที่กำลังเจาะดู (null = มุมกว้าง) · onPick = ผู้ใช้กดชิ้นส่วนในฉาก
-type Props = { layout: LayoutId; focus: Part | null; picks: Picks; light: LightId; label: string; tipText: (part: Part) => string; onPick: (part: Part) => void; onReady: () => void; onError: () => void };
-type Api = { touch: () => void; setPicks: (p: Picks) => void; setLight: (l: LightId) => void; goTo: (l: LayoutId, part: Part | null, jump?: boolean) => void; orbit: (dAzimuth: number, dZoom: number) => void };
+type Props = { layout: LayoutId; focus: Part | null; picks: Picks; light: LightId; lang: 'th' | 'en'; label: string; tipText: (part: Part) => string; onPick: (part: Part) => void; onReady: () => void; onError: () => void };
+type Api = { touch: () => void; setPicks: (p: Picks) => void; setLight: (l: LightId) => void; goTo: (l: LayoutId, part: Part | null, jump?: boolean) => void; orbit: (dAzimuth: number, dZoom: number) => void; signs: (lang: 'th' | 'en') => void };
 
 const FLIGHT = 1.4; // วินาทีที่กล้องใช้เลื่อนไปครัวอื่นหรือเข้าเจาะดู
 const NUDGE = 0.5; // วินาทีที่กล้องใช้ตอนกดปุ่มหมุนหรือซูม
@@ -31,13 +32,13 @@ const lookOf = (part: keyof typeof PARTS, picks: Picks): Look => {
   return look === 'top' ? lookOf('top', picks) : look;
 };
 
-const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, focus, picks, light, label, tipText, onPick, onReady, onError }, ref) {
+const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, focus, picks, light, lang, label, tipText, onPick, onReady, onError }, ref) {
   const host = useRef<HTMLDivElement>(null);
   const tip = useRef<HTMLDivElement>(null);
   const guide = useRef<SVGSVGElement>(null);
   // ฉากสร้างครั้งเดียว จึงอ่าน callback ล่าสุดผ่าน ref (ข้อความป้ายเปลี่ยนตามภาษาและตัวเลือก)
-  const live = useRef({ tipText, onPick });
-  live.current = { tipText, onPick };
+  const live = useRef({ tipText, onPick, lang });
+  live.current = { tipText, onPick, lang };
   const api = useRef<Api | null>(null);
   const first = useRef(true);
 
@@ -98,6 +99,10 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       end.rotation.y = (-side * Math.PI) / 2;
     }
     LAYOUTS.forEach((l) => scene.add(buildKitchen(l, m)));
+    const hall = buildHall(m, lang);
+    scene.add(hall.group);
+    // ป้ายชื่อผังวาดด้วยฟอนต์ของหน้าเว็บ: ฟอนต์โหลดเสร็จแล้ววาดใหม่อีกรอบ
+    document.fonts.ready.then(() => api.current?.signs(live.current.lang));
 
     // ── ไฟ: แสงหลักดวงเดียวคลุมทั้งห้อง · ไฟใต้ตู้ 4 ดวง ย้ายตามครัวที่กำลังดู ──
     // ติดพร้อมกันไม่เกิน 6 ดวง: hemi + ไฟใต้ตู้ 4 + แสงหลัก (lib/room.ts กำหนด, check:room ตรวจ)
@@ -204,8 +209,8 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     };
 
     // ── แสง: ไล่จากค่าตอนกดไปค่าเป้าหมาย ──
-    type Mix = { sun: number; hemi: number; env: number; led: number; exposure: number; sunColor: THREE.Color; ledColor: THREE.Color; bg: THREE.Color };
-    const NUMBERS = ['sun', 'hemi', 'env', 'led', 'exposure'] as const;
+    type Mix = { sun: number; hemi: number; env: number; led: number; exposure: number; view: number; sunColor: THREE.Color; ledColor: THREE.Color; bg: THREE.Color };
+    const NUMBERS = ['sun', 'hemi', 'env', 'led', 'exposure', 'view'] as const;
     const COLORS = ['sunColor', 'ledColor', 'bg'] as const;
     const mix = (id: LightId): Mix => {
       const p = presetOf(id);
@@ -226,6 +231,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
         spot.color.copy(now.ledColor);
       });
       m.led.color.copy(now.ledColor).multiplyScalar(Math.min(1, now.led / 6));
+      m.view.color.setScalar(now.view);
       background.copy(now.bg);
       renderer.toneMappingExposure = now.exposure;
       dirty = true;
@@ -275,7 +281,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       // ทรงก๊อกและซิงก์ที่ไม่ได้เลือกถูกซ่อนไว้ แต่ raycaster ยังยิงโดน จึงข้ามชิ้นที่ตัวเองหรือกลุ่มแม่ถูกซ่อน
       const shown = (o: THREE.Object3D | null): boolean => !o || (o.visible && shown(o.parent));
       const hit = ray.intersectObjects(scene.children, true).find((h) => shown(h.object));
-      if (!hit) return null;
+      if (!hit || hit.object.userData.inert) return null; // ของประกอบฉากในโถง (hall.ts) ชี้ไม่ได้
       // userData.part = พื้นที่กดที่มองไม่เห็นของก๊อก (kitchen.ts)
       return (hit.object.userData.part as Part | undefined) ?? parts.get((hit.object as THREE.Mesh).material as THREE.Material) ?? null;
     };
@@ -442,6 +448,10 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
         fade = 0;
       },
       goTo,
+      signs: (to) => {
+        hall.setSigns(to);
+        dirty = true;
+      },
       orbit: (dAzimuth, dZoom) => {
         // กดซ้ำระหว่างที่กล้องยังขยับจากปุ่ม: ต่อจากปลายทางเดิม ไม่ใช่จากตำแหน่งกลางทาง
         const nudging = flight.t < 1 && flight.time === NUDGE;
@@ -480,6 +490,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       scene.traverse((o) => (o as THREE.Mesh).geometry?.dispose());
       Object.values(m).forEach((mat) => mat.dispose());
       disposeTextures();
+      hall.dispose();
       sun.dispose();
       leds.forEach((spot) => spot.dispose());
       scene.environment?.dispose();
@@ -500,6 +511,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
   useEffect(() => api.current?.touch());
   useEffect(() => api.current?.setPicks(picks), [picks]);
   useEffect(() => api.current?.setLight(light), [light]);
+  useEffect(() => api.current?.signs(lang), [lang]);
   useEffect(() => {
     if (first.current) first.current = false;
     else api.current?.goTo(layout, focus);

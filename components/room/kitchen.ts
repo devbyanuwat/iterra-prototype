@@ -28,6 +28,13 @@ export function makeMaterials() {
     glass: standard('#0d0d0e', 0.06, 0.4), // เตา หน้าเตาอบ
     ring: new THREE.MeshBasicMaterial({ color: '#5a5a5c' }), // วงหัวเตา
     led: new THREE.MeshBasicMaterial({ color: '#000000' }), // เส้นไฟใต้ตู้แขวน (สีเปลี่ยนตามโทนแสง)
+    // โถงโชว์รูม (hall.ts)
+    wood: standard('#a98a63', 0.6),
+    leaf: standard('#5f6e52', 0.85),
+    ceramic: standard('#e6e1d8', 0.5),
+    fruit: standard('#c9a43a', 0.55),
+    paper: standard('#cfc6b6', 0.9),
+    view: new THREE.MeshBasicMaterial({ color: '#ffffff' }), // วิวนอกหน้าต่าง (สว่างตามโทนแสง)
   };
 }
 
@@ -44,7 +51,7 @@ const GAP = 0.002; // ร่องรอบหน้าบาน
 
 // BoxGeometry ให้ UV 0..1 ต่อหน้า → คูณด้วยขนาดจริงให้เป็นหน่วยเมตร ลายจะไม่ยืด
 // ลำดับหน้าของ BoxGeometry: +x, -x, +y, -y, +z, -z (หน้าละ 4 จุด)
-function metreUV(geo: THREE.BoxGeometry, w: number, h: number, d: number) {
+export function metreUV(geo: THREE.BoxGeometry, w: number, h: number, d: number) {
   const uv = geo.attributes.uv;
   const faces = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
   for (let i = 0; i < uv.count; i++) {

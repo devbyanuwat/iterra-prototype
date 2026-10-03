@@ -19,8 +19,8 @@ how the page is used: the same camera, the same parts to point at, the same choi
   each kitchen. The heads are scenery (a dark body and a small bright face); they add no light source.
 - Shallow pilasters (0.4 m deep, full height) on the back wall between the kitchens. Shallow, because a deep partition
   would block the camera when it orbits to the side.
-- A sign above each kitchen: the layout letter ("I", "L", "U") and the layout's name in the page language, drawn on a
-  canvas texture.
+- A sign above each kitchen: the layout's name in the page language ("ครัวตัว I", "I-shaped") over a short rule, drawn
+  on a canvas texture. (A separate large letter was dropped: a lone "I" reads as a stray bar.)
 
 **Windows and view**
 

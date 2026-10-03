@@ -1,7 +1,7 @@
 // เช็กข้อมูลห้องจำลอง (lib/room.ts): npm run check:room
 // ผังครัววาดจากตัวเลขล้วน ๆ ตัวเลขผิดนิดเดียวตู้จะซ้อนกันหรือลอยจากผนัง ด่านนี้จับก่อนเปิดเบราว์เซอร์
 import assert from 'node:assert/strict';
-import { PARTS, FAUCET_LOOKS, FAUCET_NOTES, FAUCET_SHAPES, SINKS, DEFAULT_PICKS, LIGHTS, LAYOUTS, BAY_PITCH, HALL, ORBIT, FOCUS, runLength } from '../lib/room.ts';
+import { PARTS, FAUCET_LOOKS, FAUCET_NOTES, FAUCET_SHAPES, SINKS, DEFAULT_PICKS, LIGHTS, LAYOUTS, BAY_PITCH, HALL, ORBIT, FOCUS, SHOWROOM, runLength } from '../lib/room.ts';
 import { FAUCET } from '../lib/finishes.ts';
 
 const named = (what, name) => assert.ok(name?.th?.trim() && name?.en?.trim(), `${what}: ต้องมีชื่อ th และ en`);
@@ -40,6 +40,7 @@ for (const [what, shapes, ids, pick] of [['faucetShape', FAUCET_SHAPES, ['goosen
 unique('LIGHTS', LIGHTS.map((l) => l.id));
 assert.deepEqual(LIGHTS.map((l) => l.id), ['day', 'warm', 'cool', 'night']);
 LIGHTS.forEach((l) => named(`light.${l.id}`, l.name));
+LIGHTS.forEach((l) => assert.ok(l.view >= 0 && l.view <= 1, `light.${l.id}: view ต้องอยู่ระหว่าง 0 ถึง 1`));
 // ไฟติดพร้อมกันไม่เกิน 6 ดวง: hemi 1 + ไฟใต้ตู้ 4 + (แดด หรือ ไฟเพดาน) 1
 for (const l of LIGHTS) {
   const on = [l.sun, l.hemi].filter((v) => v > 0).length + (l.led > 0 ? 4 : 0);
@@ -108,5 +109,25 @@ LAYOUTS.forEach((layout, index) => {
 // กล้องซูมออกสุดแล้วหมุนไปด้านข้าง ต้องไม่เข้าไปอยู่ในตู้ของครัวข้าง ๆ
 assert.ok(BAY_PITCH - ORBIT.zoomMax >= halfWidth, `bay ชิดกันเกินไป: ${BAY_PITCH} - ${ORBIT.zoomMax} < ${halfWidth}`);
 assert.ok(HALL.width >= 2 * (BAY_PITCH + halfWidth), 'ห้องสั้นกว่าครัว 3 ชุด');
+
+// ── โถงโชว์รูม: ของติดผนังและของวางพื้นต้องไม่ทับครัว ไม่ทับกันเอง และอยู่ในห้อง ──
+const span = (name, x, w) => ({ name, a: x - w / 2, b: x + w / 2 });
+const kitchens = LAYOUTS.map((l) => ({ name: `ครัว ${l.id}`, a: l.x + l.runs[0].x, b: l.x + l.runs[0].x + runLength(l.runs[0]) }));
+const { pilasters, windows, bench, plant, table } = SHOWROOM;
+const onWall = [...pilasters.xs.map((x, i) => span(`เสา ${i}`, x, pilasters.w)), ...windows.xs.map((x, i) => span(`หน้าต่าง ${i}`, x, windows.w))];
+const onFloor = [span('ม้านั่ง', bench.x, bench.w), span('ต้นไม้', plant.x, plant.r * 2), span('โต๊ะตัวอย่าง', table.x, table.w)];
+const apart = (list, others) => {
+  for (const p of list) {
+    assert.ok(p.a >= -HALL.width / 2 && p.b <= HALL.width / 2, `${p.name}: อยู่นอกห้อง`);
+    for (const q of others) if (p !== q) assert.ok(p.b <= q.a || q.b <= p.a, `${p.name} ทับ ${q.name}`);
+  }
+};
+apart(onWall, [...onWall, ...kitchens]);
+apart(onFloor, [...onFloor, ...kitchens, ...onWall.filter((p) => p.name.startsWith('เสา'))]);
+// ของวางพื้นอยู่ชิดผนัง ไม่ขวางแนวมองของกล้องตอนหมุนไปด้านข้าง
+for (const [name, z, d] of [['ม้านั่ง', bench.z, bench.d], ['ต้นไม้', plant.z, plant.r * 2], ['โต๊ะตัวอย่าง', table.z, table.d]]) {
+  assert.ok(z - d / 2 >= 0.2 && z + d / 2 <= 1.5, `${name}: z ต้องอยู่ระหว่าง 0.2 ถึง 1.5 จากผนัง`);
+}
+assert.ok(windows.y0 > SHOWROOM.skirting && windows.y1 < SHOWROOM.rails.y && SHOWROOM.rails.y < HALL.height, 'หน้าต่างหรือรางไฟอยู่ผิดระดับ');
 
 console.log('ผ่าน: ข้อมูลห้องจำลอง');
