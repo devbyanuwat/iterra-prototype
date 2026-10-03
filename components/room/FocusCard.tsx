@@ -45,7 +45,7 @@ export default function FocusCard({ part, title, name, tag, note, choices, value
       data-focus-card
       role="group"
       aria-label={title}
-      className={`absolute inset-x-0 bottom-0 z-10 animate-[card-in_0.5s_cubic-bezier(0.16,1,0.3,1)] border-t border-warm-300 bg-paper pl-3 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:border lg:pl-4 ${open ? 'pb-2 lg:w-[264px] lg:pb-4' : ''}`}
+      className={`absolute inset-x-0 bottom-0 z-10 max-lg:hidden animate-[card-in_0.5s_cubic-bezier(0.16,1,0.3,1)] border-t border-warm-300 bg-paper pl-3 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:border lg:pl-4 ${open ? 'pb-2 lg:w-[264px] lg:pb-4' : ''}`}
     >
       {/* แถวหัว: ชื่อหมวดกับตัวเลือก · ปุ่มย่อ/กาง · ปุ่มปิด (กลับมุมกว้าง) */}
       <div className="flex items-center gap-1">

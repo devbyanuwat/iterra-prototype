@@ -85,6 +85,7 @@ export const dict = {
     room: {
       title: 'จำลองห้องครัว',
       help: 'เลือกผังครัว แล้วลองสีและวัสดุกับแสงแต่ละแบบ ลากที่ภาพเพื่อหมุน เลื่อนล้อเมาส์หรือจีบนิ้วเพื่อซูม กดที่ชิ้นส่วนในภาพเพื่อดูใกล้ ๆ และเปลี่ยนวัสดุ',
+      groups: 'หมวดตัวเลือก',
       layout: 'ผังครัว',
       doors: 'หน้าบานตู้',
       top: 'ท็อปเคาน์เตอร์',
@@ -213,6 +214,7 @@ export const dict = {
     room: {
       title: 'Kitchen studio',
       help: 'Pick a layout, then try colours and materials under each light. Drag the scene to look around, scroll or pinch to zoom. Click a part in the scene to see it up close and change its material.',
+      groups: 'Option groups',
       layout: 'Layout',
       doors: 'Cabinet doors',
       top: 'Countertop',

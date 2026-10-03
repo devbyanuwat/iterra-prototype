@@ -332,8 +332,11 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       svg.style.opacity = seen ? '1' : '0';
       if (!seen) return;
       let points: number[][];
-      const card = focused && el.parentElement!.querySelector('[data-focus-card]')?.getBoundingClientRect();
-      if (card) {
+      // จอแคบการ์ดถูกซ่อน (ตัวเลือกอยู่ในแผงใต้ฉาก): เหลือจุดบนชิ้นส่วน ไม่มีเส้น
+      const cardEl = focused ? el.parentElement!.querySelector<HTMLElement>('[data-focus-card]') : null;
+      const card = cardEl?.offsetWidth ? cardEl.getBoundingClientRect() : null;
+      if (focused && !card) points = [];
+      else if (card) {
         const box = el.getBoundingClientRect();
         const left = card.left - box.left;
         const top = card.top - box.top;
