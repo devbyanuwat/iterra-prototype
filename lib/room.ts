@@ -201,7 +201,10 @@ export type Layout = {
   runs: Run[];
   home: { azimuth: number; polar: number; distance: number; target: [number, number] };
   focus: Record<Part, Focus>;
+  props: Prop[];
 };
+// ของวางบนเคาน์เตอร์ (ของประกอบฉาก) · x, z = จุดกลางชิ้น นับจากกลาง bay · check:room ตรวจว่าอยู่บนท็อป ไม่ทับซิงก์หรือเตา
+export type Prop = { kind: 'board' | 'bowl' | 'vase' | 'books'; x: number; z: number };
 // มุมเจาะดูชิ้นส่วน: at = จุดบนชิ้นส่วน [x จากกลาง bay, y, z] เป็นทั้งจุดปลายเส้นชี้และจุดที่กล้องมอง
 export type Focus = { at: [number, number, number]; azimuth: number; polar: number; distance: number };
 // ขอบเขตกล้องตอนเจาะดู: หมุนได้ข้างละ azimuth จากมุมเจาะ · zoom เป็นเมตร
@@ -247,6 +250,7 @@ export const LAYOUTS: Layout[] = [
       faucet: { at: [-0.2, 1.1, 0.07], azimuth: 0.4, polar: 1.3, distance: 1.4 },
       sink: { at: [-0.2, 0.9, 0.32], azimuth: 0.2, polar: 1.05, distance: 1.5 },
     },
+    props: [{ kind: 'board', x: -0.9, z: 0.36 }, { kind: 'vase', x: -1.05, z: 0.14 }, { kind: 'bowl', x: 1.36, z: 0.36 }, { kind: 'books', x: 1.62, z: 0.18 }],
   },
   {
     id: 'l',
@@ -271,6 +275,7 @@ export const LAYOUTS: Layout[] = [
       faucet: { at: [-1.43, 1.1, 2], azimuth: 0.9, polar: 1.3, distance: 1.4 },
       sink: { at: [-1.18, 0.9, 2], azimuth: 0.9, polar: 1.05, distance: 1.5 },
     },
+    props: [{ kind: 'bowl', x: -1.2, z: 0.3 }, { kind: 'vase', x: 0.6, z: 0.15 }, { kind: 'board', x: -1.2, z: 2.7 }, { kind: 'books', x: -1.2, z: 0.9 }],
   },
   {
     id: 'u',
@@ -299,6 +304,7 @@ export const LAYOUTS: Layout[] = [
       faucet: { at: [-1.53, 1.1, 1.8], azimuth: 0.9, polar: 1.3, distance: 1.4 },
       sink: { at: [-1.28, 0.9, 1.8], azimuth: 0.9, polar: 1.05, distance: 1.5 },
     },
+    props: [{ kind: 'vase', x: -1.3, z: 0.25 }, { kind: 'bowl', x: 1.3, z: 0.3 }, { kind: 'board', x: 1.3, z: 2.1 }, { kind: 'books', x: -1.3, z: 2.5 }],
   },
 ];
 

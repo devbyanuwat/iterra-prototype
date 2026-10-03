@@ -1,4 +1,4 @@
-// แต่งโถงให้เป็นโชว์รูมแบบแกลเลอรี: บัวพื้น ฝ้า รางไฟ เสาอิงผนัง ป้ายชื่อผัง หน้าต่างพร้อมวิว เฟอร์นิเจอร์
+// แต่งโถงให้เป็นโชว์รูมแบบแกลเลอรี: บัวพื้น ฝ้า รางไฟ เสาอิงผนัง ป้ายชื่อผัง หน้าต่างพร้อมวิว เฟอร์นิเจอร์ ของบนเคาน์เตอร์
 // ตำแหน่งทั้งหมดมาจาก SHOWROOM ใน lib/room.ts · ทุกชิ้นเป็นของประกอบฉาก ชี้และกดไม่ได้ (userData.inert)
 // ชิ้นนิ่งรวมเป็น mesh เดียวต่อวัสดุ (mergeGeometries) ทั้งโถงจึงใช้ draw call ราววัสดุละ 1 ครั้ง
 // รางไฟเป็นของประกอบฉาก ไม่มีไฟจริง (งบไฟ 6 ดวงเต็มแล้ว)
@@ -9,6 +9,7 @@ import { HALL, LAYOUTS, SHOWROOM } from '@/lib/room';
 import { metreUV, type Mats } from './kitchen';
 
 type Lang = 'th' | 'en';
+const COUNTER_TOP = 0.9; // ระดับผิวท็อป (ตรงกับ TOP ใน kitchen.ts)
 export type Hall = { group: THREE.Group; setSigns: (lang: Lang) => void; dispose: () => void };
 
 // ถุงเก็บ geometry แยกตามวัสดุ · solid = ทอดเงา, flat = ไม่ทอดเงา (ฝ้า รางไฟ วิว)
@@ -128,6 +129,34 @@ export function buildHall(m: Mats, lang: Lang): Hall {
       const x = table.x + (i - 1.5) * 0.36;
       slab(solid, mat, x - 0.13, x + 0.13, 0.76, 0.778, table.z - 0.17, table.z + 0.17);
     });
+  }
+
+  // ── ของบนเคาน์เตอร์ของครัวแต่ละชุด (ตำแหน่งจาก layout.props) ──
+  const lathe = (points: number[][]) => new THREE.LatheGeometry(points.map(([r, y]) => new THREE.Vector2(r, y)), 24);
+  for (const layout of LAYOUTS) {
+    for (const prop of layout.props) {
+      const [x, y, z] = [layout.x + prop.x, COUNTER_TOP, prop.z];
+      if (prop.kind === 'board') slab(solid, m.wood, x - 0.16, x + 0.16, y, y + 0.02, z - 0.11, z + 0.11);
+      if (prop.kind === 'books') {
+        slab(solid, m.paper, x - 0.12, x + 0.12, y, y + 0.03, z - 0.085, z + 0.085);
+        slab(solid, m.leaf, x - 0.11, x + 0.1, y + 0.03, y + 0.055, z - 0.08, z + 0.075);
+        slab(solid, m.kick, x - 0.095, x + 0.1, y + 0.055, y + 0.085, z - 0.075, z + 0.07);
+      }
+      if (prop.kind === 'bowl') {
+        // ไล่จุดจากก้นด้านนอกขึ้นขอบ แล้ววนลงก้นด้านใน ได้ผิวทั้งนอกและใน
+        put(solid, m.ceramic, lathe([[0.001, 0], [0.06, 0], [0.12, 0.04], [0.14, 0.085], [0.132, 0.085], [0.112, 0.045], [0.055, 0.012], [0.001, 0.012]]), x, y, z);
+        for (const [dx, dy, dz] of [[-0.045, 0.045, 0.01], [0.04, 0.045, -0.03], [0.012, 0.05, 0.05]]) put(solid, m.fruit, new THREE.SphereGeometry(0.036, 14, 10), x + dx, y + dy, z + dz);
+      }
+      if (prop.kind === 'vase') {
+        put(solid, m.kick, lathe([[0.001, 0], [0.05, 0], [0.066, 0.07], [0.05, 0.17], [0.024, 0.22], [0.03, 0.25]]), x, y, z);
+        for (const [tilt, turn] of [[0.16, 0], [-0.2, 2.1], [0.24, 4.2]]) {
+          const stem = new THREE.CylinderGeometry(0.003, 0.003, 0.36, 6).translate(0, 0.18, 0).rotateZ(tilt).rotateY(turn);
+          put(solid, m.wood, stem, x, y + 0.2, z);
+          const tip = new THREE.Vector3(0, 0.36, 0).applyAxisAngle(new THREE.Vector3(0, 0, 1), tilt).applyAxisAngle(new THREE.Vector3(0, 1, 0), turn);
+          put(solid, m.leaf, new THREE.IcosahedronGeometry(0.03, 0), x + tip.x, y + 0.2 + tip.y, z + tip.z);
+        }
+      }
+    }
   }
 
   for (const [bag, shadow] of [[solid, true], [flat, false]] as const) {

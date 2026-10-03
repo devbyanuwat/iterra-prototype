@@ -93,6 +93,23 @@ LAYOUTS.forEach((layout, index) => {
   assert.ok(h.polar >= ORBIT.polarMin && h.polar <= ORBIT.polarMax, `${at}: home.polar เกินขอบเขต`);
   assert.ok(h.distance >= ORBIT.zoomMin && h.distance <= ORBIT.zoomMax, `${at}: home.distance เกินขอบเขต`);
 
+  // ของบนเคาน์เตอร์: ครบ 4 อย่าง และแต่ละชิ้นอยู่ลึกเข้ามาในท็อปของตู้ที่ไม่ใช่ซิงก์ เตา หรือตู้สูง อย่างน้อย 0.1 ม.
+  assert.deepEqual(layout.props.map((p) => p.kind).sort(), ['board', 'books', 'bowl', 'vase'], `${at}: props ต้องมีครบ 4 อย่าง อย่างละ 1`);
+  // พื้นที่ท็อปของแต่ละตู้ในพิกัด bay (ดูคำอธิบาย turn ใน lib/room.ts)
+  const tops = layout.runs.flatMap((run) => {
+    let o = 0;
+    return run.modules.map((m) => {
+      const [a, b] = [o, (o += m.w)];
+      if (run.turn === 0) return { kind: m.kind, x0: run.x + a, x1: run.x + b, z0: 0, z1: 0.6 };
+      if (run.turn === 1) return { kind: m.kind, x0: run.x, x1: run.x + 0.6, z0: run.z - b, z1: run.z - a };
+      return { kind: m.kind, x0: run.x - 0.6, x1: run.x, z0: run.z + a, z1: run.z + b };
+    });
+  });
+  for (const p of layout.props) {
+    const ok = tops.some((t) => !['sink', 'hob', 'tall'].includes(t.kind) && p.x >= t.x0 + 0.1 && p.x <= t.x1 - 0.1 && p.z >= t.z0 + 0.1 && p.z <= t.z1 - 0.1);
+    assert.ok(ok, `${at} props.${p.kind}: ไม่ได้อยู่บนท็อปที่ว่าง (${p.x}, ${p.z})`);
+  }
+
   // มุมเจาะดูชิ้นส่วน: ครบ 6 หมวด อยู่ในขอบเขตกล้อง และจุดชี้อยู่ในครัวของตัวเอง
   assert.deepEqual(Object.keys(layout.focus).sort(), ['doors', 'faucet', 'floor', 'sink', 'splash', 'top'], `${at}: focus ต้องมีครบทุกหมวด`);
   const reach = Math.max(Math.abs(back.x), Math.abs(backEnd));
