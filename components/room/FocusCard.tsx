@@ -34,23 +34,15 @@ export default function FocusCard({ part, title, name, tag, note, choices, value
       aria-label={title}
       className="absolute inset-x-0 bottom-0 z-10 border-t border-warm-300 bg-paper px-3 pb-2 pt-3 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:w-[300px] lg:border lg:p-4"
     >
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-normal text-warm-500">
-          {title}
-          <span className="mt-0.5 block text-sm text-ink">
-            {name}
-            {tag && <span className="ml-2 text-xs text-warm-500">{tag}</span>}
-          </span>
-        </p>
-        <button
-          type="button"
-          onClick={onBack}
-          className="shrink-0 border border-warm-300 px-3 py-2 text-xs text-ink transition-[border-color,transform] hover:border-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink active:scale-[0.98] motion-reduce:transition-none"
-        >
-          {back}
-        </button>
-      </div>
-      <div className="-ml-2 mt-1 flex">
+      <p className="flex flex-wrap items-baseline gap-x-2 text-xs font-normal text-warm-500 lg:block">
+        {title}
+        <span className="text-sm text-ink lg:mt-0.5 lg:block">
+          {name}
+          {tag && <span className="ml-2 text-xs text-warm-500">{tag}</span>}
+        </span>
+      </p>
+      {/* จุดสีกับปุ่มกลับอยู่แถวเดียวกัน ให้แถบบนจอแคบเตี้ยที่สุด */}
+      <div className="-ml-2 flex items-center">
         {choices.map((c) => (
           <button
             key={c.id}
@@ -68,8 +60,15 @@ export default function FocusCard({ part, title, name, tag, note, choices, value
             />
           </button>
         ))}
+        <button
+          type="button"
+          onClick={onBack}
+          className="ml-auto min-h-11 shrink-0 border border-warm-300 px-3 text-xs text-ink transition-[border-color,transform] hover:border-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink active:scale-[0.98] motion-reduce:transition-none"
+        >
+          {back}
+        </button>
       </div>
-      <p aria-live="polite" className="mt-1 line-clamp-2 text-xs font-normal leading-relaxed text-stone-600 lg:mt-2 lg:line-clamp-none">
+      <p aria-live="polite" className="line-clamp-2 text-xs font-normal leading-relaxed text-stone-600 lg:mt-2 lg:line-clamp-none">
         {note}
       </p>
     </div>

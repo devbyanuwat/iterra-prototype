@@ -98,7 +98,7 @@ export default function RoomContent() {
           <div className="flex flex-wrap gap-2">
             {LAYOUTS.map((l) => (
               <button key={l.id} type="button" aria-pressed={layout === l.id} onClick={() => {
-                  setFocus(null);
+                  leave();
                   setLayout(l.id);
                 }} className={`${button} ${picked(layout === l.id)}`}>
                 {l.name[lang]}
@@ -169,7 +169,7 @@ export default function RoomContent() {
             <button type="button" aria-label={t.room.zoomIn} onClick={() => scene.current?.zoom(0.15)} className={`${button} ${picked(false)}`}>
               +
             </button>
-            <button type="button" onClick={() => (focus ? setFocus(null) : scene.current?.reset())} className={`${button} ${picked(false)}`}>
+            <button type="button" onClick={() => (focus ? leave() : scene.current?.reset())} className={`${button} ${picked(false)}`}>
               {t.room.reset}
             </button>
           </div>

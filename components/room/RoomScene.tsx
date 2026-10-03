@@ -16,7 +16,7 @@ import { applyLook, disposeTextures } from './textures';
 export type RoomHandle = { zoom: (step: number) => void; rotate: (step: number) => void; reset: () => void; focusScene: () => void };
 // focus = หมวดที่กำลังเจาะดู (null = มุมกว้าง) · onPick = ผู้ใช้กดชิ้นส่วนในฉาก
 type Props = { layout: LayoutId; focus: Part | null; picks: Picks; light: LightId; label: string; tipText: (part: Part) => string; onPick: (part: Part) => void; onReady: () => void; onError: () => void };
-type Api = { setPicks: (p: Picks) => void; setLight: (l: LightId) => void; goTo: (l: LayoutId, part: Part | null, jump?: boolean) => void; orbit: (dAzimuth: number, dZoom: number) => void };
+type Api = { touch: () => void; setPicks: (p: Picks) => void; setLight: (l: LightId) => void; goTo: (l: LayoutId, part: Part | null, jump?: boolean) => void; orbit: (dAzimuth: number, dZoom: number) => void };
 
 const FLIGHT = 1.2; // วินาทีที่กล้องใช้เลื่อนไปครัวอื่น
 const FADE = 0.6; // วินาทีที่แสงใช้ไล่ไปโทนใหม่
@@ -159,10 +159,10 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     let focused: Part | null = null;
     const goTo = (id: LayoutId, part: Part | null, jump = false) => {
       const l = layoutOf(id);
-      if (l !== current) {
-        if (jump || still) moveLights(l);
-        else lightsFor = l;
-      }
+      // เปลี่ยนครัว หรือมีการย้ายไฟค้างอยู่จากการเลื่อนที่ถูกตัดจบ: ย้ายไฟทันทีถ้ากล้องกระโดด ไม่งั้นย้ายที่ครึ่งทาง
+      if (jump || still) {
+        if (l !== current || lightsFor) moveLights(l);
+      } else if (l !== current) lightsFor = l;
       current = l;
       focused = part;
       setHover(null);
@@ -221,6 +221,8 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       dirty = true;
     }
 
+    // จอแคบ: การ์ดเป็นแถบล่างของฉาก จึงเลื่อนภาพขึ้นครึ่งความสูงการ์ด ให้ชิ้นที่เจาะดูอยู่กลางส่วนที่ยังมองเห็น
+    let lift = 0;
     const resize = () => {
       const { clientWidth: w, clientHeight: h } = el;
       if (!w || !h) return;
@@ -229,6 +231,8 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       camera.aspect = w / h;
       // จอแนวตั้ง: ขยายมุมกล้องแนวตั้งให้ความกว้างที่เห็นเท่าเดิม ครัวจะไม่ตกขอบ
       camera.fov = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(0.4245 / camera.aspect)), 38, 70);
+      lift = 0; // ขนาดฉากเปลี่ยน: ตั้ง view offset ใหม่ในเฟรมถัดไป
+      camera.clearViewOffset();
       camera.updateProjectionMatrix();
       dirty = true;
     };
@@ -267,15 +271,24 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       if (hover) matOf(hover).emissive.set(0);
       if (part) matOf(part).emissive.set('#2b2620');
       hover = part;
-      tip.current!.textContent = part && !focused ? live.current.tipText(part) : '';
+      if (tip.current) tip.current.textContent = part && !focused ? live.current.tipText(part) : '';
       el.style.cursor = part ? 'pointer' : '';
       dirty = true;
     }
     // เส้นชี้: จุดบนชิ้นส่วน (at ของครัวที่ดูอยู่) ลากหักมุมฉากไปหาป้าย หรือขอบการ์ดตอนเจาะดู · วาดใหม่ทุกครั้งที่ฉากวาด
     const anchor = new THREE.Vector3();
+    const fitCard = () => {
+      const card = focused ? el.parentElement!.querySelector('[data-focus-card]') : null;
+      const strip = card && card.clientWidth > el.clientWidth * 0.9 ? Math.round(card.clientHeight / 2) : 0;
+      if (strip === lift) return;
+      lift = strip;
+      if (lift) camera.setViewOffset(el.clientWidth, el.clientHeight, 0, lift, el.clientWidth, el.clientHeight);
+      else camera.clearViewOffset();
+    };
     const drawGuide = () => {
-      const svg = guide.current!;
-      const label = tip.current!;
+      const svg = guide.current;
+      const label = tip.current;
+      if (!svg || !label) return;
       const part = focused ?? hover;
       const f = part && current?.focus[part];
       if (f) anchor.set(current!.x + f.at[0], f.at[1], f.at[2]).project(camera);
@@ -319,6 +332,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     };
     // ขยับไม่เกิน 5px = กด ไม่ใช่ลากหมุนกล้อง · กดชิ้นส่วน = ขอเจาะดูชิ้นนั้น
     const onUp = (e: PointerEvent) => {
+      if (e.button !== 0) return;
       const tap = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5;
       down = null;
       const part = tap && flight.t === 1 ? partAt(e) : null;
@@ -369,6 +383,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       if (!dirty) return;
       dirty = false;
       const start = performance.now();
+      fitCard();
       renderer.render(scene, camera);
       drawGuide();
       stats.renderMs = performance.now() - start;
@@ -376,6 +391,11 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     };
 
     api.current = {
+      // RoomScene render ใหม่ (เปลี่ยนภาษา เปลี่ยนตัวเลือก การ์ดขึ้นหรือหาย): ป้ายและเส้นชี้ต้องวาดใหม่
+      touch: () => {
+        if (hover && !focused && tip.current) tip.current.textContent = live.current.tipText(hover);
+        dirty = true;
+      },
       setPicks: (p) => {
         applyLook(m.door, lookOf('doors', p));
         applyLook(m.top, lookOf('top', p));
@@ -407,6 +427,10 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     return () => {
       cancelAnimationFrame(raf);
       watcher.disconnect();
+      canvas.removeEventListener('pointermove', onMove);
+      canvas.removeEventListener('pointerdown', onDown);
+      canvas.removeEventListener('pointerup', onUp);
+      canvas.removeEventListener('pointerleave', onLeave);
       controls.dispose();
       scene.traverse((o) => (o as THREE.Mesh).geometry?.dispose());
       Object.values(m).forEach((mat) => mat.dispose());
@@ -428,6 +452,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
   }, []);
 
   // effect ของ picks กับ light ทำงานตอน mount ด้วย แต่ค่าเท่ากับที่ฉากเพิ่งตั้ง จึงไม่มีผล · ของ layout ข้ามรอบแรก (first)
+  useEffect(() => api.current?.touch());
   useEffect(() => api.current?.setPicks(picks), [picks]);
   useEffect(() => api.current?.setLight(light), [light]);
   useEffect(() => {
@@ -456,9 +481,9 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     >
       {/* เส้นชี้: เส้น ink บนเส้นรอง paper ให้อ่านออกทั้งบนวัสดุเข้มและอ่อน */}
       <svg ref={guide} aria-hidden className="pointer-events-none absolute inset-0 z-10 h-full w-full opacity-0" fill="none">
-        <polyline stroke="#faf9f7" strokeWidth="3" strokeLinejoin="round" />
-        <polyline stroke="#1c1917" strokeWidth="1" />
-        <circle r="4" fill="#1c1917" stroke="#faf9f7" strokeWidth="1.5" />
+        <polyline className="stroke-paper" strokeWidth="2" strokeLinejoin="round" />
+        <polyline className="stroke-ink" strokeWidth="1" />
+        <circle r="4" className="fill-ink stroke-paper" strokeWidth="1.5" />
       </svg>
       <div ref={tip} aria-hidden className="pointer-events-none absolute left-0 top-0 z-10 whitespace-nowrap bg-ink px-2.5 py-1.5 text-xs text-paper opacity-0" />
     </div>
