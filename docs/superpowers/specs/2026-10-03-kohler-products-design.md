@@ -84,6 +84,15 @@ Scene images are decorative next to their headline (`alt=""`), like the ImageWal
 - Post type: `cover` becomes a path, new `inline: [string, string]` replaces the label strings the article page
   built from the cover.
 
+## Kitchen-only home wall (added in chat, approved)
+
+- The ImageWall keeps only its 6 kitchen photos. The 3 wardrobe and 3 WATERSHIELD flooring photos, their files, the
+  `group` field and the `?scope=kitchen|wardrobe|all` switch (`lib/scope.ts`) are deleted: with one group left there
+  is nothing to switch.
+- Wall heading "พื้นที่ที่ออกแบบมาเพื่อชีวิตจริง / Spaces designed for real life" (doubled "ที่ที่", and "space" is
+  wider than kitchens) becomes **"ครัวที่ออกแบบมาให้ใช้ทุกวัน / Kitchens made for everyday cooking"** (owner's pick).
+- The catalog page and PDF stay exactly as they are (owner: "แคตตาล็อกคงไว้แบบเดิม").
+
 ## Verification (every task)
 
 `tsc` (ignoring stale `.next/types`), `npm run build`, `npm run check:overflow` (all pages × 375/768/1024/1200 ×
@@ -103,5 +112,5 @@ console errors).
 
 ## Out of scope
 
-Hero, Nav, ImageWall, CatalogTeaser, contact map, `main`, `preview-initial`, `preview-parallax-wall`, new npm
+Hero, Nav, ImageWall motion and kitchen photos, CatalogTeaser, the catalog page and PDF, contact map, `main`, `preview-initial`, `preview-parallax-wall`, new npm
 dependencies, deploy, PR.
