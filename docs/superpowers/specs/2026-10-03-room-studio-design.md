@@ -32,10 +32,11 @@ changes, reduced motion respected, a loading skeleton and a no-WebGL message.
 Units are metres. `x` runs along the back wall, `y` is up, `z` comes out of the wall toward the camera. The back wall
 is at `z = 0`.
 
-- One hall, back wall 21 m long, 3.6 m high, floor 5 m deep. Walls are single-sided planes so the camera can sit
+- One hall, back wall 27 m long, 3.6 m high, floor 5 m deep. Walls are single-sided planes so the camera can sit
   outside the hall and still see in.
-- Three bays along the back wall, centres 6.5 m apart: I at `x = -6.5`, L at `x = 0`, U at `x = 6.5`. No partitions
-  between bays; from the side a neighbouring kitchen is visible in the background, as in a real showroom.
+- Three bays along the back wall, centres 9 m apart: I at `x = -9`, L at `x = 0`, U at `x = 9`. No partitions
+  between bays; from the side a neighbouring kitchen is visible in the background, as in a real showroom. 9 m keeps a
+  camera that is zoomed all the way out and turned fully sideways (7 m from its target) outside the next kitchen.
 
 Kitchens are built from **runs**. A run is a line of modules with an origin and a direction. Wall cabinets, the tall
 oven unit, the hood and the backsplash exist **only on the back run**. Leg runs are base units and countertop only, so
@@ -48,7 +49,7 @@ a side view always looks over a 0.9 m counter instead of into the back of a cabi
 | U | back 3.2 m + left leg 2.2 m + right leg 2.2 m | hob on the back run, sink on the left leg, tall oven unit replaced by an under-counter oven on the right leg |
 
 Module kinds: door (1 or 2 doors), drawers (2 or 3), sink base, hob base, oven base, corner (blind, no front), tall
-oven unit, wall cabinet. Fronts have 2 mm gaps on a dark backing, bar handles, a recessed toe kick. Where two runs meet,
+oven unit, wall cabinet. Legs stand free like a peninsula (finished backs, no wall behind them). Fronts have 2 mm gaps on a dark backing, bar handles, a recessed toe kick. Where two runs meet,
 the countertops share the corner square.
 
 The faucet is a generic gooseneck, not a Kohler model. The page says so in its note line.
@@ -88,7 +89,8 @@ images from the supplier replace them later (out of scope).
 Each preset sets sun, sky, environment reflection, under-cabinet lights, ceiling light, background colour and
 exposure. A preset change fades over 0.6 s (instant under reduced motion). A material change swaps at once.
 
-Cost rule: the sun covers the whole hall with one shadow map (4096 × 1024, 2048 × 512 below 768 px). Under-cabinet
+Cost rule: the sun covers the whole hall with one shadow map (4096 × 4096, 2048 × 2048 below 768 px; the sun is
+diagonal, so the map has to be wide on both axes). Under-cabinet
 and ceiling lights exist only for the active bay; they move with the camera flight. No more than 6 lights are on at
 any time.
 
