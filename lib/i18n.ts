@@ -29,15 +29,12 @@ export const dict = {
       heroKicker: 'PREMIUM KITCHEN DEALER',
       heroTitle: 'ศิลปะของครัว\nที่คู่ควรกับบ้านคุณ',
       heroSub: 'คัดสรรชุดครัวและอุปกรณ์ครัวจากแบรนด์ชั้นนำระดับโลก สำหรับบ้านที่ไม่ประนีประนอมเรื่องดีไซน์',
-      featuredKicker: 'FEATURED COLLECTION',
       featuredTitle: 'สินค้าเด่นประจำฤดูกาล',
-      featuredHint: 'เลื่อนลงเพื่อชมสินค้า — แนวนอน',
       galleryTitle: 'พื้นที่ที่ออกแบบมาเพื่อชีวิตจริง',
-      storyKicker: 'OUR STORY',
       storySlides: [
         {
           title: 'เริ่มจากความเชื่อเรื่องงานฝีมือ',
-          body: 'กว่า 25 ปีที่เราคัดสรรชุดครัวและอุปกรณ์ครัวด้วยเกณฑ์เดียว — ต้องเป็นชิ้นที่เราอยากใช้ในบ้านของเราเอง',
+          body: 'กว่า 25 ปีที่เราคัดสรรชุดครัวและอุปกรณ์ครัวด้วยเกณฑ์เดียว คือต้องเป็นชิ้นที่เราอยากใช้ในบ้านของเราเอง',
         },
         {
           title: 'โชว์รูมที่ให้คุณ "ลองจริง"',
@@ -45,7 +42,7 @@ export const dict = {
         },
         {
           title: 'อยู่ด้วยกันจนหลังการติดตั้ง',
-          body: 'ทีมช่างของเราเองดูแลตั้งแต่วัดหน้างาน ติดตั้ง จนถึงบริการหลังการขาย — รับประกันชิ้นงานสูงสุด 10 ปี',
+          body: 'ทีมช่างของเราเองดูแลตั้งแต่วัดหน้างาน ติดตั้ง จนถึงบริการหลังการขาย พร้อมรับประกันชิ้นงานสูงสุด 10 ปี',
         },
       ],
       statsTitle: 'ตัวเลขที่เราภูมิใจ',
@@ -121,15 +118,12 @@ export const dict = {
       heroKicker: 'PREMIUM KITCHEN DEALER',
       heroTitle: 'The Art of the Kitchen,\nWorthy of Your Home',
       heroSub: 'A curated selection of kitchens and kitchen equipment from the world’s finest brands — for homes that never compromise on design.',
-      featuredKicker: 'FEATURED COLLECTION',
       featuredTitle: 'This Season’s Highlights',
-      featuredHint: 'Keep scrolling — the gallery moves sideways',
       galleryTitle: 'Spaces designed for real life',
-      storyKicker: 'OUR STORY',
       storySlides: [
         {
           title: 'Born from a belief in craft',
-          body: 'For over 25 years we have curated kitchen pieces with a single criterion — would we want this in our own home?',
+          body: 'For over 25 years we have curated kitchen pieces with a single criterion: would we want this in our own home?',
         },
         {
           title: 'A showroom you can actually try',
@@ -137,7 +131,7 @@ export const dict = {
         },
         {
           title: 'With you long after installation',
-          body: 'Our own team handles survey, installation and after-sales care — with warranties of up to 10 years.',
+          body: 'Our own team handles survey, installation and after-sales care, with warranties of up to 10 years.',
         },
       ],
       statsTitle: 'Numbers we are proud of',
