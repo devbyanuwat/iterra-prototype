@@ -8,6 +8,7 @@ npm install
 npm run dev -- -p 4100   # http://localhost:4100 (ด่าน check:overflow ใช้พอร์ตนี้)
 npm run build      # static export → โฟลเดอร์ out/
 npm run check:overflow   # ทุกหน้า × 375/768/1024/1200 × motion/reduced-motion ต้องไม่ล้นจอ ไม่มี console error ภาพทุกไฟล์โหลดได้ (เปิด dev server ก่อน · Node 22+)
+npm run check:filter     # ตรรกะตัวกรองหน้าสินค้ารวม (ไม่ต้องเปิด server · Node 22.6+)
 ```
 
 ## ภาพ

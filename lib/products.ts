@@ -250,3 +250,13 @@ export function relatedProducts(slug: string, n = 3) {
   if (!cur) return [];
   return products.filter((p) => p.category === cur.category && p.slug !== slug).slice(0, n);
 }
+
+// ── ตัวกรองหน้าสินค้ารวม ──
+export type FacetKey = 'category' | 'series' | 'material';
+export type Picked = Record<FacetKey, string[]>;
+export const FACETS: FacetKey[] = ['category', 'series', 'material'];
+
+// ในกลุ่มเดียวกัน = หรือ · ข้ามกลุ่ม = และ · กลุ่มที่ไม่ได้เลือก = ไม่กรอง · สินค้าที่ไม่มีค่าในกลุ่มที่เลือก = ไม่ผ่าน
+export function filterProducts(list: Product[], picked: Picked): Product[] {
+  return list.filter((p) => FACETS.every((k) => picked[k].length === 0 || picked[k].includes(p[k] ?? '')));
+}

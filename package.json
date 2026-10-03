@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "check:overflow": "node scripts/check-overflow.mjs"
+    "check:overflow": "node scripts/check-overflow.mjs",
+    "check:filter": "node --no-warnings --experimental-strip-types scripts/check-filter.mjs"
   },
   "dependencies": {
     "gsap": "^3.12.5",
