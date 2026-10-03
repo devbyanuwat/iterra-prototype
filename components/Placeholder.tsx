@@ -1,10 +1,13 @@
 // ── จุดเปลี่ยนเป็นของจริง #4 ──
-// ทุกตำแหน่งที่เห็น <Placeholder label="..." /> คือจุดที่รอภาพจริง
-// เมื่อได้ภาพแล้ว แทนที่ component นี้ด้วย <Image /> ของ next/image
-// (สัดส่วนภาพถูกล็อกไว้แล้ว: hero 16:9, สินค้า 4:5, บทความ 16:9)
+// ไม่มี src = กล่อง placeholder มีป้ายชื่อ (จุดที่ยังรอภาพจริง)
+// มี src = ภาพจริงในกรอบสัดส่วนเดิม · label ใช้เป็น alt ('' = ภาพประกอบ ข้อความข้าง ๆ บอกครบแล้ว)
+// fit="contain" สำหรับภาพสินค้าตัดพื้นหลัง: วางกลางกรอบ เว้นขอบ 18% บนพื้น warm-100 (dark = ink)
+// (ParallaxImage ขยายภาพ 1.18 เท่าและเลื่อน ±7% ขอบน้อยกว่านี้สินค้าจะชนขอบกรอบ)
 
 type Props = {
-  label: string;
+  label?: string;
+  src?: string;
+  fit?: 'cover' | 'contain';
   ratio?: '16/9' | '4/5' | '1/1' | '3/2' | '21/9' | '3/4';
   fill?: boolean;
   dark?: boolean;
@@ -12,19 +15,44 @@ type Props = {
 };
 
 export default function Placeholder({
-  label,
+  label = '',
+  src,
+  fit = 'cover',
   ratio = '4/5',
   fill = false,
   dark = false,
   className = '',
 }: Props) {
+  const box = fill ? 'absolute inset-0 h-full w-full' : 'relative w-full';
+  const style = fill ? undefined : { aspectRatio: ratio.replace('/', ' / ') };
+
+  if (src) {
+    const contain = fit === 'contain';
+    const surface = dark ? 'bg-ink' : contain ? 'bg-warm-100' : 'bg-warm-200';
+    return (
+      <div className={`${box} overflow-hidden ${surface} ${className}`} style={style}>
+        <img
+          src={src}
+          alt={label}
+          loading="lazy"
+          decoding="async"
+          className={
+            contain
+              ? 'absolute left-[18%] top-[18%] h-[64%] w-[64%] object-contain'
+              : 'absolute inset-0 h-full w-full object-cover'
+          }
+        />
+      </div>
+    );
+  }
+
   const tone = dark
     ? 'from-stone-700 via-stone-800 to-stone-900 text-stone-400'
     : 'from-stone-200 via-stone-300 to-stone-400 text-stone-600';
   return (
     <div
-      className={`${fill ? 'absolute inset-0 h-full w-full' : 'relative w-full'} overflow-hidden bg-gradient-to-br ${tone} ${className}`}
-      style={fill ? undefined : { aspectRatio: ratio.replace('/', ' / ') }}
+      className={`${box} overflow-hidden bg-gradient-to-br ${tone} ${className}`}
+      style={style}
       role="img"
       aria-label={`ภาพประกอบ: ${label}`}
     >

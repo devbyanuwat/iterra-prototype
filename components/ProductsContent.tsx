@@ -25,14 +25,13 @@ export default function ProductsContent() {
 
       <section className="px-6 md:px-[8vw]">
         <Reveal>
-          <Link href={`/products/${lead.slug}/`} className="group relative block">
-            <ParallaxImage label={lead.images[0]} ratio="21/9" speed={-6} dark />
-            {/* scrim เฉพาะเดสก์ท็อป: มือถือข้อความอยู่ใต้ภาพบนพื้น paper */}
-            <div className="absolute inset-0 hidden bg-gradient-to-t from-black/70 via-black/35 to-transparent md:block" aria-hidden />
-            <div className="pt-6 text-ink md:absolute md:inset-x-0 md:bottom-0 md:p-8 md:text-paper lg:p-12">
-              <p className="mb-2 text-[10px] uppercase tracking-widest2 text-warm-500 md:text-paper/70">{t.products.featured}</p>
+          <Link href={`/products/${lead.slug}/`} className="group block">
+            {/* ภาพสินค้าตัดพื้นหลังบนเวทีสีเข้ม ข้อความอยู่ใต้ภาพทุกขนาดจอ จะได้ไม่ทับตัวสินค้า */}
+            <ParallaxImage src={lead.images[0]} fit="contain" ratio="21/9" speed={-6} dark />
+            <div className="pt-6">
+              <p className="mb-2 text-[10px] uppercase tracking-widest2 text-warm-500">{t.products.featured}</p>
               <h2 className="text-2xl font-extralight tracking-wide md:text-4xl">{lead.name[lang]}</h2>
-              <p className="mt-3 max-w-xl text-sm font-light leading-relaxed text-stone-600 md:text-paper/80">{lead.desc[lang]}</p>
+              <p className="mt-3 max-w-xl text-sm font-light leading-relaxed text-stone-600">{lead.desc[lang]}</p>
               <span className="mt-6 inline-block text-[11px] uppercase tracking-widest2 transition-transform duration-500 group-hover:translate-x-1.5">
                 {t.common.readMore} →
               </span>
@@ -45,9 +44,9 @@ export default function ProductsContent() {
         {rest.map((p, i) => (
           <div key={p.slug} className="grid items-center gap-8 md:grid-cols-12 md:gap-0">
             <Reveal className={`md:col-span-7 ${i % 2 ? 'md:order-2 md:col-start-6' : ''}`}>
-              {/* ลิงก์ภาพซ้ำกับ "อ่านต่อ" → ซ่อนจาก tab/screen reader (aria-label ของ Placeholder เป็นไทยตายตัว) */}
+              {/* ลิงก์ภาพซ้ำกับ "อ่านต่อ" → ซ่อนจาก tab/screen reader */}
               <Link href={`/products/${p.slug}/`} className="block" tabIndex={-1} aria-hidden="true">
-                <ParallaxImage label={p.images[0]} ratio="4/5" speed={i % 2 ? 7 : -7} />
+                <ParallaxImage src={p.images[0]} fit="contain" ratio="4/5" speed={i % 2 ? 7 : -7} />
               </Link>
             </Reveal>
             <Reveal delay={0.12} className={`md:col-span-4 ${i % 2 ? 'md:order-1 md:col-start-1' : 'md:col-start-9'}`}>

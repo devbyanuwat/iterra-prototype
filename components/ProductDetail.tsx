@@ -31,9 +31,18 @@ export default function ProductDetail({ slug }: { slug: string }) {
         <div className="grid gap-14 lg:grid-cols-[1.2fr_1fr] lg:gap-[6vw]">
           {/* แกลเลอรี parallax — ภาพคู่–คี่เลื่อนสวนทิศกัน */}
           <div className="space-y-8">
-            {product.images.map((label, i) => (
-              <Reveal key={label} delay={i === 0 ? 0 : 0.1}>
-                <ParallaxImage label={label} ratio={i === 0 ? '4/5' : '3/2'} speed={i % 2 ? 7 : -7} />
+            {[
+              ...product.images.map((src) => ({ src, fit: 'contain' as const })),
+              ...(product.scenes ?? []).map((src) => ({ src, fit: 'cover' as const })),
+            ].map((img, i) => (
+              <Reveal key={img.src} delay={i === 0 ? 0 : 0.1}>
+                <ParallaxImage
+                  label={product.name[lang]}
+                  src={img.src}
+                  fit={img.fit}
+                  ratio={i === 0 ? '4/5' : '3/2'}
+                  speed={i % 2 ? 7 : -7}
+                />
               </Reveal>
             ))}
           </div>

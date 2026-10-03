@@ -84,7 +84,7 @@ function FeaturedProducts() {
                 <Link href={`/products/${p.slug}/`} className="group flex items-center gap-5 py-6">
                   <div className="w-24 shrink-0 overflow-hidden md:w-28">
                     <div className="transition-transform duration-700 ease-out group-hover:scale-105">
-                      <Placeholder label={p.images[0]} ratio="1/1" />
+                      <Placeholder src={p.images[0]} fit="contain" ratio="1/1" />
                     </div>
                   </div>
                   <div className="min-w-0">

@@ -9,7 +9,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Placeholder from './Placeholder';
 
 type Props = {
-  label: string;
+  label?: string;
+  src?: string;
+  fit?: 'cover' | 'contain';
   ratio?: '16/9' | '4/5' | '1/1' | '3/2' | '21/9' | '3/4';
   speed?: number; // yPercent สุทธิ; ค่าลบ = เลื่อนสวนทาง
   dark?: boolean;
@@ -17,7 +19,9 @@ type Props = {
 };
 
 export default function ParallaxImage({
-  label,
+  label = '',
+  src,
+  fit,
   ratio = '3/2',
   speed = -8,
   dark = false,
@@ -51,7 +55,7 @@ export default function ParallaxImage({
   return (
     <div ref={ref} className={`overflow-hidden ${className}`}>
       <div className="scale-[1.18] will-change-transform">
-        <Placeholder label={label} ratio={ratio} dark={dark} />
+        <Placeholder label={label} src={src} fit={fit} ratio={ratio} dark={dark} />
       </div>
     </div>
   );

@@ -16,7 +16,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <Link href={`/products/${product.slug}/`} className="group block bg-paper">
         <div className="overflow-hidden">
           <div className="transition-transform duration-700 ease-out group-hover:scale-[1.04]">
-            <Placeholder label={product.images[0]} ratio="4/5" />
+            <Placeholder src={product.images[0]} fit="contain" ratio="4/5" />
           </div>
         </div>
         <div className="px-1 pb-2 pt-4">

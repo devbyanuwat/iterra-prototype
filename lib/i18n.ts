@@ -23,7 +23,7 @@ export const dict = {
       readMore: 'อ่านต่อ',
       explore: 'ชมคอลเลกชัน',
       scroll: 'เลื่อนเพื่อชม',
-      category: { all: 'ทั้งหมด', kitchen: 'ครัว' } as Record<string, string>,
+      category: { all: 'ทั้งหมด', faucet: 'ก๊อกครัว', sink: 'ซิงก์ล้างจาน' } as Record<string, string>,
     },
     home: {
       heroKicker: 'PREMIUM KITCHEN DEALER',
@@ -61,7 +61,7 @@ export const dict = {
     products: {
       kicker: 'COLLECTION',
       title: 'สินค้าทั้งหมด',
-      sub: 'ชุดครัวและอุปกรณ์ครัวคัดสรร 7 รายการ — ทุกชิ้นสัมผัสจริงได้ที่โชว์รูม',
+      sub: 'ก๊อกและซิงก์ครัวจาก KOHLER ทุกชิ้นสัมผัสจริงได้ที่โชว์รูม',
       featured: 'สินค้าเด่น',
       specs: 'สเปกสินค้า',
       related: 'สินค้าใกล้เคียง',
@@ -112,7 +112,7 @@ export const dict = {
       readMore: 'Read more',
       explore: 'Explore the collection',
       scroll: 'Scroll to explore',
-      category: { all: 'All', kitchen: 'Kitchen' } as Record<string, string>,
+      category: { all: 'All', faucet: 'Kitchen faucet', sink: 'Kitchen sink' } as Record<string, string>,
     },
     home: {
       heroKicker: 'PREMIUM KITCHEN DEALER',
@@ -150,7 +150,7 @@ export const dict = {
     products: {
       kicker: 'COLLECTION',
       title: 'All Products',
-      sub: 'Seven curated kitchen pieces — every one on display at our showroom.',
+      sub: 'KOHLER kitchen faucets and sinks, every one on display at our showroom.',
       featured: 'Featured',
       specs: 'Specifications',
       related: 'Related pieces',
