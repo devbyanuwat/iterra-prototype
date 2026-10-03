@@ -31,6 +31,7 @@ export default function RoomContent() {
   const scene = useRef<RoomHandle>(null);
   const faucet = FAUCET.find((f) => f.id === picks.faucet)!;
   const [focus, setFocus] = useState<Part | null>(null); // หมวดที่กำลังเจาะดูในฉาก
+  const [cardOpen, setCardOpen] = useState(true); // การ์ดเจาะดูกางอยู่ไหม · ผู้ใช้ย่อได้เมื่อการ์ดบังชิ้นส่วน
   const stage = useRef<HTMLDivElement>(null);
   const sink = SINKS.find((s) => s.id === picks.sink)!;
   const faucetShape = FAUCET_SHAPES.find((s) => s.id === picks.faucetShape)!;
@@ -95,6 +96,10 @@ export default function RoomContent() {
                 onChange={(id) => setPicks((p) => ({ ...p, [focus]: id }))}
                 back={t.room.back}
                 onBack={leave}
+                open={cardOpen}
+                collapse={t.room.collapse}
+                expand={t.room.expand}
+                onToggle={() => setCardOpen((o) => !o)}
               />
             )}
           </>

@@ -135,3 +135,14 @@ Requested in chat by anuwat during execution ("ลองปั้นก๊อก
   counter. Under reduced motion everything still jumps.
 - Not done: a cross-fade between materials when a colour changes (the swap is instant), and a transition for the sink
   shape (its countertop cut-out changes with it).
+
+## Addendum 2026-10-04 (2): card layout and collapse
+
+Requested in chat by anuwat ("ออกแบบ layout ใหม่ แล้วก็ button กดเพื่อปิดการ์ดได้ เพราะมันบัง"), plan approved ("ทำได้").
+
+- Header row: part name and current choice on the left, then a minimise button and a close button. Close returns to
+  the full view (it replaces the "Back to full view" text button; that text is now the close button's label).
+- Minimise leaves only the header row; the camera stays in the close view. The same button expands the card again.
+  The state is kept while moving between parts.
+- Below the header: colour dots, shape buttons, description. The card is 264 px wide at `lg` and up, and as wide as its
+  header when minimised.
