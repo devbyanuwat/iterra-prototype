@@ -8,7 +8,8 @@
     "start": "next start",
     "check:overflow": "node scripts/check-overflow.mjs",
     "check:filter": "node --no-warnings --experimental-strip-types scripts/check-filter.mjs",
-    "check:artwork": "node scripts/check-artwork.mjs"
+    "check:artwork": "node scripts/check-artwork.mjs",
+    "check:room": "node --no-warnings --experimental-strip-types scripts/check-room.mjs"
   },
   "dependencies": {
     "gsap": "^3.12.5",

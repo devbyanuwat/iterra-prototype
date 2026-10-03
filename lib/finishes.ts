@@ -14,7 +14,7 @@ export type Finish = {
   demo?: boolean;
 };
 
-const FAUCET: Finish[] = [
+export const FAUCET: Finish[] = [
   {
     id: 'chrome',
     name: { th: 'โครเมียมขัดเงา', en: 'Polished Chrome' },
