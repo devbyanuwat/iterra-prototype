@@ -84,7 +84,7 @@ export const dict = {
     },
     room: {
       title: 'จำลองห้องครัว',
-      help: 'เลือกผังครัว แล้วลองสีและวัสดุกับแสงแต่ละแบบ ลากที่ภาพเพื่อหมุน เลื่อนล้อเมาส์หรือจีบนิ้วเพื่อซูม กดที่ชิ้นส่วนในภาพเพื่อไปยังตัวเลือกของชิ้นนั้น',
+      help: 'เลือกผังครัว แล้วลองสีและวัสดุกับแสงแต่ละแบบ ลากที่ภาพเพื่อหมุน เลื่อนล้อเมาส์หรือจีบนิ้วเพื่อซูม กดที่ชิ้นส่วนในภาพเพื่อดูใกล้ ๆ และเปลี่ยนวัสดุ',
       layout: 'ผังครัว',
       doors: 'หน้าบานตู้',
       top: 'ท็อปเคาน์เตอร์',
@@ -96,9 +96,10 @@ export const dict = {
       zoomIn: 'ซูมเข้า',
       zoomOut: 'ซูมออก',
       reset: 'มุมเริ่มต้น',
+      back: 'กลับมุมกว้าง',
       note: 'ภาพจำลองเพื่อประกอบการตัดสินใจ สีและผิววัสดุจริงอาจต่างจากที่เห็นบนจอ ก๊อกในภาพเป็นทรงตัวอย่าง ไม่ใช่รุ่นที่จำหน่าย',
       noWebgl: 'อุปกรณ์นี้แสดงภาพ 3 มิติไม่ได้ ลองเปิดด้วยเบราว์เซอร์รุ่นใหม่หรืออุปกรณ์เครื่องอื่น',
-      sceneLabel: 'ห้องครัวจำลอง 3 มิติ กดลูกศรซ้ายขวาเพื่อหมุน กดบวกลบเพื่อซูม',
+      sceneLabel: 'ห้องครัวจำลอง 3 มิติ กดลูกศรซ้ายขวาเพื่อหมุน กดบวกลบเพื่อซูม กด Esc เพื่อกลับมุมกว้าง',
     },
     catalog: {
       kicker: 'KOHLER KITCHENS 2026',
@@ -207,7 +208,7 @@ export const dict = {
     },
     room: {
       title: 'Kitchen studio',
-      help: 'Pick a layout, then try colours and materials under each light. Drag the scene to look around, scroll or pinch to zoom. Click a part in the scene to jump to its options.',
+      help: 'Pick a layout, then try colours and materials under each light. Drag the scene to look around, scroll or pinch to zoom. Click a part in the scene to see it up close and change its material.',
       layout: 'Layout',
       doors: 'Cabinet doors',
       top: 'Countertop',
@@ -219,9 +220,10 @@ export const dict = {
       zoomIn: 'Zoom in',
       zoomOut: 'Zoom out',
       reset: 'Reset view',
+      back: 'Back to full view',
       note: 'A simulation to help you decide. Real colours and surfaces can differ from what the screen shows. The faucet shape is a sample, not a model on sale.',
       noWebgl: 'This device cannot show 3D. Try a newer browser or another device.',
-      sceneLabel: '3D kitchen studio. Press the left and right arrow keys to look around, plus and minus to zoom.',
+      sceneLabel: '3D kitchen studio. Press the left and right arrow keys to look around, plus and minus to zoom, Escape to return to the full view.',
     },
     catalog: {
       kicker: 'KOHLER KITCHENS 2026',

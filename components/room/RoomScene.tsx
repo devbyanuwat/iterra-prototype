@@ -9,14 +9,14 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { FAUCET_LOOKS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, type Layout, type LayoutId, type LightId, type Look, type Picks } from '@/lib/room';
+import { FAUCET_LOOKS, FOCUS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, type Layout, type LayoutId, type LightId, type Look, type Part, type Picks } from '@/lib/room';
 import { buildKitchen, ledPositions, makeMaterials } from './kitchen';
 import { applyLook, disposeTextures } from './textures';
 
-export type RoomHandle = { zoom: (step: number) => void; rotate: (step: number) => void; reset: () => void };
-export type Part = keyof Picks;
-type Props = { layout: LayoutId; picks: Picks; light: LightId; label: string; tipText: (part: Part) => string; onPick: (part: Part) => void; onReady: () => void; onError: () => void };
-type Api = { setPicks: (p: Picks) => void; setLight: (l: LightId) => void; goTo: (l: LayoutId, jump?: boolean) => void; orbit: (dAzimuth: number, dZoom: number) => void };
+export type RoomHandle = { zoom: (step: number) => void; rotate: (step: number) => void; reset: () => void; focusScene: () => void };
+// focus = หมวดที่กำลังเจาะดู (null = มุมกว้าง) · onPick = ผู้ใช้กดชิ้นส่วนในฉาก
+type Props = { layout: LayoutId; focus: Part | null; picks: Picks; light: LightId; label: string; tipText: (part: Part) => string; onPick: (part: Part) => void; onReady: () => void; onError: () => void };
+type Api = { setPicks: (p: Picks) => void; setLight: (l: LightId) => void; goTo: (l: LayoutId, part: Part | null, jump?: boolean) => void; orbit: (dAzimuth: number, dZoom: number) => void };
 
 const FLIGHT = 1.2; // วินาทีที่กล้องใช้เลื่อนไปครัวอื่น
 const FADE = 0.6; // วินาทีที่แสงใช้ไล่ไปโทนใหม่
@@ -28,9 +28,10 @@ const lookOf = (part: keyof typeof PARTS, picks: Picks): Look => {
   return look === 'top' ? lookOf('top', picks) : look;
 };
 
-const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, picks, light, label, tipText, onPick, onReady, onError }, ref) {
+const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, focus, picks, light, label, tipText, onPick, onReady, onError }, ref) {
   const host = useRef<HTMLDivElement>(null);
   const tip = useRef<HTMLDivElement>(null);
+  const guide = useRef<SVGSVGElement>(null);
   // ฉากสร้างครั้งเดียว จึงอ่าน callback ล่าสุดผ่าน ref (ข้อความป้ายเปลี่ยนตามภาษาและตัวเลือก)
   const live = useRef({ tipText, onPick });
   live.current = { tipText, onPick };
@@ -40,7 +41,8 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
   useImperativeHandle(ref, () => ({
     zoom: (step) => api.current?.orbit(0, step),
     rotate: (step) => api.current?.orbit(step, 0),
-    reset: () => api.current?.goTo(layout, true),
+    reset: () => api.current?.goTo(layout, null, true),
+    focusScene: () => host.current?.focus({ preventScroll: true }),
   }));
 
   useEffect(() => {
@@ -151,12 +153,33 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       lightsFor = null;
       applyLight();
     };
-    const goTo = (id: LayoutId, jump = false) => {
+    // ขอบเขตหมุนและซูม: มุมกว้างใช้ ORBIT · เจาะดูใช้ FOCUS รอบมุมเจาะของชิ้นนั้น
+    const limit = { azimuthMin: -ORBIT.azimuth, azimuthMax: ORBIT.azimuth, zoomMin: ORBIT.zoomMin, zoomMax: ORBIT.zoomMax };
+    let current: Layout | undefined; // ครัวที่กำลังดู
+    let focused: Part | null = null;
+    const goTo = (id: LayoutId, part: Part | null, jump = false) => {
       const l = layoutOf(id);
-      if (jump || still) moveLights(l);
-      else lightsFor = l;
-      flight.toTarget.set(l.x, l.home.target[0], l.home.target[1]);
-      flight.to.set(l.home.distance, l.home.polar, l.home.azimuth);
+      if (l !== current) {
+        if (jump || still) moveLights(l);
+        else lightsFor = l;
+      }
+      current = l;
+      focused = part;
+      setHover(null);
+      const f = part && l.focus[part];
+      if (f) {
+        flight.toTarget.set(l.x + f.at[0], f.at[1], f.at[2]);
+        flight.to.set(f.distance, f.polar, f.azimuth);
+        Object.assign(limit, { azimuthMin: f.azimuth - FOCUS.azimuth, azimuthMax: f.azimuth + FOCUS.azimuth, zoomMin: FOCUS.zoomMin, zoomMax: FOCUS.zoomMax });
+      } else {
+        flight.toTarget.set(l.x, l.home.target[0], l.home.target[1]);
+        flight.to.set(l.home.distance, l.home.polar, l.home.azimuth);
+        Object.assign(limit, { azimuthMin: -ORBIT.azimuth, azimuthMax: ORBIT.azimuth, zoomMin: ORBIT.zoomMin, zoomMax: ORBIT.zoomMax });
+      }
+      controls.minAzimuthAngle = limit.azimuthMin;
+      controls.maxAzimuthAngle = limit.azimuthMax;
+      controls.minDistance = limit.zoomMin;
+      controls.maxDistance = limit.zoomMax;
       if (jump || still) {
         flight.t = 1;
         controls.enabled = true;
@@ -213,6 +236,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
     const watcher = new ResizeObserver(() => {
       resize();
       renderer.render(scene, camera);
+      drawGuide();
     });
     watcher.observe(el);
     resize();
@@ -237,20 +261,52 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       return (hit && parts.get((hit.object as THREE.Mesh).material as THREE.Material)) ?? null;
     };
     let hover: Part | null = null;
-    const setHover = (part: Part | null, e?: PointerEvent) => {
-      const label = tip.current!;
-      if (part && e) {
-        const box = el.getBoundingClientRect();
-        label.style.transform = `translate(${Math.min(e.clientX - box.left + 14, box.width - label.offsetWidth - 8)}px, ${Math.max(e.clientY - box.top - 34, 8)}px)`;
-      }
+    // ชี้ที่ชิ้นส่วน: วัสดุสว่างขึ้น + ป้ายชื่อ (ตอนเจาะดูอยู่ไม่ขึ้นป้าย เพราะการ์ดบอกชื่อแล้ว)
+    function setHover(part: Part | null) {
       if (part === hover) return;
       if (hover) matOf(hover).emissive.set(0);
       if (part) matOf(part).emissive.set('#2b2620');
       hover = part;
-      label.textContent = part ? live.current.tipText(part) : '';
-      label.style.opacity = part ? '1' : '0';
+      tip.current!.textContent = part && !focused ? live.current.tipText(part) : '';
       el.style.cursor = part ? 'pointer' : '';
       dirty = true;
+    }
+    // เส้นชี้: จุดบนชิ้นส่วน (at ของครัวที่ดูอยู่) ลากหักมุมฉากไปหาป้าย หรือขอบการ์ดตอนเจาะดู · วาดใหม่ทุกครั้งที่ฉากวาด
+    const anchor = new THREE.Vector3();
+    const drawGuide = () => {
+      const svg = guide.current!;
+      const label = tip.current!;
+      const part = focused ?? hover;
+      const f = part && current?.focus[part];
+      if (f) anchor.set(current!.x + f.at[0], f.at[1], f.at[2]).project(camera);
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      const x = ((anchor.x + 1) / 2) * w;
+      const y = ((1 - anchor.y) / 2) * h;
+      const seen = !!f && flight.t === 1 && anchor.z < 1 && x > 0 && x < w && y > 0 && y < h;
+      label.style.opacity = seen && !focused ? '1' : '0';
+      svg.style.opacity = seen ? '1' : '0';
+      if (!seen) return;
+      let points: number[][];
+      const card = focused && el.parentElement!.querySelector('[data-focus-card]')?.getBoundingClientRect();
+      if (card) {
+        const box = el.getBoundingClientRect();
+        const left = card.left - box.left;
+        const top = card.top - box.top;
+        const right = left + card.width;
+        if (x >= left && x <= right) points = y < top ? [[x, y], [x, top]] : [];
+        else points = [[x, y], [x, Math.max(y, top + 24)], [x < left ? left : right, Math.max(y, top + 24)]];
+      } else {
+        // ป้ายอยู่เฉียงขึ้นทางขวาของจุด · ชนขอบขวาให้พลิกไปซ้าย ชนขอบบนให้ลงล่าง
+        const lw = label.offsetWidth;
+        const side = x + 48 + lw > w - 8 ? -1 : 1;
+        const ly = y - 56 < 8 ? y + 56 : y - 56;
+        label.style.transform = `translate(${side === 1 ? x + 48 : x - 48 - lw}px, ${ly - label.offsetHeight / 2}px)`;
+        points = [[x, y], [x, ly], [x + side * 48, ly]];
+      }
+      const path = points.map((p) => p.map(Math.round).join(',')).join(' ');
+      svg.querySelectorAll('polyline').forEach((line) => line.setAttribute('points', path));
+      svg.querySelector('circle')!.setAttribute('transform', `translate(${Math.round(x)} ${Math.round(y)})`);
     };
     let moved: PointerEvent | null = null; // pointermove ล่าสุด · ยิง ray เฟรมละครั้งใน tick
     let down: { x: number; y: number } | null = null;
@@ -261,15 +317,12 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       down = { x: e.clientX, y: e.clientY };
       setHover(null);
     };
-    // ขยับไม่เกิน 5px = กด ไม่ใช่ลากหมุนกล้อง
+    // ขยับไม่เกิน 5px = กด ไม่ใช่ลากหมุนกล้อง · กดชิ้นส่วน = ขอเจาะดูชิ้นนั้น
     const onUp = (e: PointerEvent) => {
       const tap = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5;
       down = null;
       const part = tap && flight.t === 1 ? partAt(e) : null;
-      if (!part) return;
-      setHover(part, e.pointerType === 'mouse' ? e : undefined);
-      if (e.pointerType !== 'mouse') tip.current!.style.opacity = '0'; // จอสัมผัส: ไฮไลต์อย่างเดียว ป้ายจะบังนิ้ว
-      live.current.onPick(part);
+      if (part) live.current.onPick(part);
     };
     const onLeave = () => {
       moved = null;
@@ -310,13 +363,14 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
         if (flight.t === 1) controls.enabled = true;
       } else controls.update();
       if (moved) {
-        setHover(flight.t === 1 ? partAt(moved) : null, moved);
+        setHover(flight.t === 1 ? partAt(moved) : null);
         moved = null;
       }
       if (!dirty) return;
       dirty = false;
       const start = performance.now();
       renderer.render(scene, camera);
+      drawGuide();
       stats.renderMs = performance.now() - start;
       stats.frames++;
     };
@@ -339,14 +393,14 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       orbit: (dAzimuth, dZoom) => {
         if (flight.t < 1) return;
         spherical.setFromVector3(camera.position.clone().sub(controls.target));
-        spherical.theta = THREE.MathUtils.clamp(spherical.theta + dAzimuth, -ORBIT.azimuth, ORBIT.azimuth);
-        spherical.radius = THREE.MathUtils.clamp(spherical.radius * (1 - dZoom), ORBIT.zoomMin, ORBIT.zoomMax);
+        spherical.theta = THREE.MathUtils.clamp(spherical.theta + dAzimuth, limit.azimuthMin, limit.azimuthMax);
+        spherical.radius = THREE.MathUtils.clamp(spherical.radius * (1 - dZoom), limit.zoomMin, limit.zoomMax);
         place(controls.target.clone(), spherical);
         controls.update();
       },
     };
     api.current.setPicks(picks);
-    goTo(layout, true);
+    goTo(layout, focus, true);
     raf = requestAnimationFrame(tick);
     onReady();
 
@@ -378,8 +432,8 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
   useEffect(() => api.current?.setLight(light), [light]);
   useEffect(() => {
     if (first.current) first.current = false;
-    else api.current?.goTo(layout);
-  }, [layout]);
+    else api.current?.goTo(layout, focus);
+  }, [layout, focus]);
 
   const onKey = (e: React.KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return; // ปล่อยคีย์ลัดของเบราว์เซอร์ (ซูมหน้า ย้อนกลับ)
@@ -400,11 +454,13 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       data-lenis-prevent
       className="absolute inset-0 cursor-grab touch-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:cursor-grabbing [&>canvas]:block"
     >
-      <div
-        ref={tip}
-        aria-hidden
-        className="pointer-events-none absolute left-0 top-0 z-10 whitespace-nowrap bg-ink px-2.5 py-1.5 text-xs text-paper opacity-0 transition-opacity motion-reduce:transition-none"
-      />
+      {/* เส้นชี้: เส้น ink บนเส้นรอง paper ให้อ่านออกทั้งบนวัสดุเข้มและอ่อน */}
+      <svg ref={guide} aria-hidden className="pointer-events-none absolute inset-0 z-10 h-full w-full opacity-0" fill="none">
+        <polyline stroke="#faf9f7" strokeWidth="3" strokeLinejoin="round" />
+        <polyline stroke="#1c1917" strokeWidth="1" />
+        <circle r="4" fill="#1c1917" stroke="#faf9f7" strokeWidth="1.5" />
+      </svg>
+      <div ref={tip} aria-hidden className="pointer-events-none absolute left-0 top-0 z-10 whitespace-nowrap bg-ink px-2.5 py-1.5 text-xs text-paper opacity-0" />
     </div>
   );
 });

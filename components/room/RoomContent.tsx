@@ -6,11 +6,12 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRef, useState } from 'react';
+import FocusCard from './FocusCard';
 import { useLang } from '@/components/LangProvider';
 import FinishDots from '@/components/FinishDots';
 import { FAUCET } from '@/lib/finishes';
-import { DEFAULT_PICKS, LAYOUTS, LIGHTS, PARTS, type LayoutId, type LightId, type PartId, type Picks } from '@/lib/room';
-import type { Part, RoomHandle } from './RoomScene';
+import { DEFAULT_PICKS, FAUCET_NOTES, LAYOUTS, LIGHTS, PARTS, type LayoutId, type LightId, type Part, type PartId, type Picks } from '@/lib/room';
+import type { RoomHandle } from './RoomScene';
 
 const Skeleton = () => <div className="absolute inset-0 animate-pulse bg-warm-200 motion-reduce:animate-none" aria-hidden />;
 const RoomScene = dynamic(() => import('./RoomScene'), { ssr: false, loading: Skeleton });
@@ -29,34 +30,27 @@ export default function RoomContent() {
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const scene = useRef<RoomHandle>(null);
   const faucet = FAUCET.find((f) => f.id === picks.faucet)!;
-  const groups = useRef<Partial<Record<Part, HTMLFieldSetElement | null>>>({});
-  const [flash, setFlash] = useState<Part | null>(null);
-  const flashOff = useRef(0);
+  const [focus, setFocus] = useState<Part | null>(null); // หมวดที่กำลังเจาะดูในฉาก
+  const stage = useRef<HTMLDivElement>(null);
   const nameOf = (part: Part) => (part === 'faucet' ? faucet : PARTS[part].find((o) => o.id === picks[part])!).name[lang];
-  // กดชิ้นส่วนในฉาก: เลื่อนแผงไปหมวดนั้น เน้นพื้นหลังชั่วครู่ แล้วย้าย focus ไปตัวเลือกที่เลือกอยู่
-  const jumpTo = (part: Part) => {
-    const group = groups.current[part];
-    if (!group) return;
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const behavior = still ? 'auto' : 'smooth';
-    const panel = group.parentElement!;
-    // lg ขึ้นไปแผงเลื่อนในตัวเอง: เลื่อนเฉพาะแผง (scrollIntoView จะพาทั้งหน้าเลื่อนไปด้วย)
-    if (getComputedStyle(panel).overflowY === 'auto') panel.scrollTo({ top: panel.scrollTop + group.getBoundingClientRect().top - panel.getBoundingClientRect().top - 16, behavior });
-    else group.scrollIntoView({ behavior, block: 'start' });
-    group.querySelector<HTMLElement>('[aria-pressed="true"]')?.focus({ preventScroll: true });
-    setFlash(part);
-    window.clearTimeout(flashOff.current);
-    flashOff.current = window.setTimeout(() => setFlash(null), 1400);
+  const demoName = (f: (typeof FAUCET)[number]) => (f.demo ? `${f.name[lang]} (${t.products.finishDemo})` : f.name[lang]);
+  // ออกจากโหมดเจาะดู · ถ้า focus อยู่ในการ์ด (ซึ่งกำลังจะหายไป) ให้ย้ายกลับไปที่ฉาก
+  const leave = () => {
+    if (stage.current?.querySelector('[data-focus-card]')?.contains(document.activeElement)) scene.current?.focusScene();
+    setFocus(null);
   };
-  // scroll-mt: ต่ำกว่า lg ฉากติดบนจอ (เมนู 5rem + ฉาก 45dvh) หมวดที่เลื่อนมาต้องหยุดใต้ฉาก
-  const group = (part: Part) =>
-    `scroll-mt-[calc(max(45dvh,280px)+7.5rem)] transition-[background-color,box-shadow] duration-500 motion-reduce:transition-none ${flash === part ? 'bg-warm-200 shadow-[0_0_0_8px_theme(colors.warm.200)]' : 'shadow-[0_0_0_8px_transparent]'}`;
 
   return (
     <section className="px-6 pb-16 md:px-[4vw] lg:grid lg:h-[100dvh] lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-[minmax(0,1fr)] lg:gap-10 lg:pb-8 lg:pt-24">
       {/* ต่ำกว่า lg: ฉากติดบนจอ แผงเลื่อนอยู่ข้างใต้ · ตัวห่อพื้นทึบสูงถึงขอบบนจอ บังข้อความที่เลื่อนผ่านใต้เมนู (เมนูโปร่งใส) */}
       <div className="sticky top-0 z-10 mx-[-1.5rem] bg-paper px-6 pt-20 md:mx-[-4vw] md:px-[4vw] lg:static lg:mx-0 lg:min-h-0 lg:p-0">
-      <div className="relative h-[45dvh] min-h-[280px] overflow-hidden bg-warm-200 lg:h-full">
+      <div
+        ref={stage}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape' && focus) leave();
+        }}
+        className="relative h-[45dvh] min-h-[280px] overflow-hidden bg-warm-200 lg:h-full"
+      >
         {state === 'error' ? (
           <p className="absolute inset-0 flex items-center justify-center px-8 text-center text-sm text-stone-600">{t.room.noWebgl}</p>
         ) : (
@@ -64,15 +58,30 @@ export default function RoomContent() {
             <RoomScene
               ref={scene}
               layout={layout}
+              focus={focus}
               picks={picks}
               light={light}
               label={t.room.sceneLabel}
               tipText={(part) => `${t.room[part]} · ${nameOf(part)}`}
-              onPick={jumpTo}
+              onPick={setFocus}
               onReady={() => setState('ready')}
               onError={() => setState('error')}
             />
             {state === 'loading' && <Skeleton />}
+            {focus && state === 'ready' && (
+              <FocusCard
+                part={focus}
+                title={t.room[focus]}
+                name={nameOf(focus)}
+                tag={focus === 'faucet' && faucet.demo ? t.products.finishDemo : undefined}
+                note={(focus === 'faucet' ? FAUCET_NOTES[picks.faucet] : PARTS[focus].find((o) => o.id === picks[focus])!.note)[lang]}
+                choices={focus === 'faucet' ? FAUCET.map((f) => ({ id: f.id, label: demoName(f), swatch: f.swatch })) : PARTS[focus].map((o) => ({ id: o.id, label: o.name[lang], swatch: o.swatch }))}
+                value={picks[focus]}
+                onChange={(id) => setPicks((p) => ({ ...p, [focus]: id }))}
+                back={t.room.back}
+                onBack={leave}
+              />
+            )}
           </>
         )}
       </div>
@@ -88,7 +97,10 @@ export default function RoomContent() {
           <legend className={legend}>{t.room.layout}</legend>
           <div className="flex flex-wrap gap-2">
             {LAYOUTS.map((l) => (
-              <button key={l.id} type="button" aria-pressed={layout === l.id} onClick={() => setLayout(l.id)} className={`${button} ${picked(layout === l.id)}`}>
+              <button key={l.id} type="button" aria-pressed={layout === l.id} onClick={() => {
+                  setFocus(null);
+                  setLayout(l.id);
+                }} className={`${button} ${picked(layout === l.id)}`}>
                 {l.name[lang]}
               </button>
             ))}
@@ -98,7 +110,7 @@ export default function RoomContent() {
         {PART_ORDER.map((part) => {
           const current = PARTS[part].find((o) => o.id === picks[part])!;
           return (
-            <fieldset key={part} ref={(node) => { groups.current[part] = node; }} className={group(part)}>
+            <fieldset key={part}>
               <legend className={`${legend} w-full`}>
                 <span>{t.room[part]}</span>
                 <span className="text-ink">{current.name[lang]}</span>
@@ -126,7 +138,7 @@ export default function RoomContent() {
           );
         })}
 
-        <fieldset ref={(node) => { groups.current.faucet = node; }} className={group('faucet')}>
+        <fieldset>
           <legend className={`${legend} w-full`}>
             <span>{t.room.faucet}</span>
             <span className="text-ink">
@@ -157,7 +169,7 @@ export default function RoomContent() {
             <button type="button" aria-label={t.room.zoomIn} onClick={() => scene.current?.zoom(0.15)} className={`${button} ${picked(false)}`}>
               +
             </button>
-            <button type="button" onClick={() => scene.current?.reset()} className={`${button} ${picked(false)}`}>
+            <button type="button" onClick={() => (focus ? setFocus(null) : scene.current?.reset())} className={`${button} ${picked(false)}`}>
               {t.room.reset}
             </button>
           </div>
