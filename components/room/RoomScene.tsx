@@ -9,7 +9,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { FAUCET_LOOKS, FOCUS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, SHOWROOM, type Layout, type LayoutId, type LightId, type Look, type Part, type Picks } from '@/lib/room';
+import { FAUCET_LOOKS, FOCUS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, SHOWROOM, SINK_COLORS, type Layout, type LayoutId, type LightId, type Look, type Part, type Picks } from '@/lib/room';
 import { buildKitchen, ledPositions, makeMaterials } from './kitchen';
 import { applyLook, disposeTextures } from './textures';
 import { buildHall } from './hall';
@@ -441,6 +441,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
         applyLook(m.splash, lookOf('splash', p));
         applyLook(m.floor, lookOf('floor', p));
         applyLook(m.faucet, FAUCET_LOOKS[p.faucet]);
+        applyLook(m.sink, SINK_COLORS.find((o) => o.id === p.sinkColor)!.look as Look);
         // ทรงก๊อกและซิงก์: ทุกทรงปั้นไว้แล้ว เปิดให้เห็นเฉพาะทรงที่เลือก
         scene.traverse((o) => {
           if (o.userData.sink) o.visible = o.userData.sink === p.sink;

@@ -146,9 +146,36 @@ export const SINKS: Shape[] = [
   { id: 'round', name: { th: 'หลุมกลม', en: 'Round Bowl' }, note: { th: 'อ่างกลมขนาดกะทัดรัด เหลือพื้นที่ท็อปสองข้างมากขึ้น', en: 'A compact round bowl that leaves more countertop on both sides.' } },
 ];
 
-export type Picks = Record<PartId, string> & { faucet: string; faucetShape: string; sink: string };
+// สีอ่างซิงก์ ใช้กับอ่างทุกทรง (ข้อความตัวอย่าง)
+export const SINK_COLORS: Option[] = [
+  {
+    id: 'steel', name: { th: 'สเตนเลส', en: 'Stainless' },
+    note: { th: 'สเตนเลสผิวแปรง ทนร้อน ทนกระแทก เข้ากับครัวได้ทุกแบบ', en: 'Brushed stainless that takes heat and knocks and suits any kitchen.' },
+    swatch: 'linear-gradient(135deg, #e3e4e5, #a9acaf)',
+    look: { color: '#c8cacc', roughness: 0.32, metalness: 1 },
+  },
+  {
+    id: 'black', name: { th: 'ดำด้าน', en: 'Matte Black' },
+    note: { th: 'ดำด้าน กลืนไปกับท็อปสีเข้ม หรือตัดกับท็อปสีอ่อนให้เป็นจุดเด่น', en: 'Matte black that blends into a dark countertop or stands out on a pale one.' },
+    swatch: '#262524',
+    look: { color: '#232221', roughness: 0.62, metalness: 0.15 },
+  },
+  {
+    id: 'white', name: { th: 'ขาวด้าน', en: 'Matte White' },
+    note: { th: 'ขาวด้าน ทำให้มุมล้างดูสะอาดตา เข้าชุดกับหน้าบานสีอ่อน', en: 'Matte white for a clean-looking wash area that matches pale doors.' },
+    swatch: '#ecebe7',
+    look: { color: '#ecebe7', roughness: 0.48 },
+  },
+  {
+    id: 'gunmetal', name: { th: 'เทากันเมทัล', en: 'Gunmetal' },
+    note: { th: 'โลหะสีเทาเข้ม ดูขรึมกว่าสเตนเลส ไม่ค่อยเห็นคราบน้ำ', en: 'Dark grey metal, quieter than stainless, and slow to show water marks.' },
+    swatch: 'linear-gradient(135deg, #8b8e91, #55585b)',
+    look: { color: '#6f7275', roughness: 0.36, metalness: 1 },
+  },
+];
+export type Picks = Record<PartId, string> & { faucet: string; faucetShape: string; sink: string; sinkColor: string };
 export type Part = PartId | 'faucet' | 'sink'; // ชิ้นส่วนที่ชี้และเจาะดูได้ในฉาก
-export const DEFAULT_PICKS: Picks = { doors: 'white', top: 'quartz-grey', splash: 'tile-white', floor: 'oak-light', faucet: 'chrome', faucetShape: 'gooseneck', sink: 'single' };
+export const DEFAULT_PICKS: Picks = { doors: 'white', top: 'quartz-grey', splash: 'tile-white', floor: 'oak-light', faucet: 'chrome', faucetShape: 'gooseneck', sink: 'single', sinkColor: 'steel' };
 
 // ── แสง ──
 // sun = แสงจากหน้าต่าง, hemi = แสงฟ้า, env = แรงของเงาสะท้อน, led = ไฟใต้ตู้แขวน
