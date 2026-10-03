@@ -1,12 +1,15 @@
 // สินค้าจริงจาก kohler.co.th หมวดครัว (อ่านเมื่อ 2026-10-03): ก๊อก 6 รุ่น ซิงก์ 4 รุ่น ครบทุกรุ่นที่เว็บมี
-// ทุกรหัสมีสี/วัสดุเดียว (ก๊อก = โครเมียมขัดเงา) เว็บ Kohler ไม่มีตัวเลือกสี จึงไม่มีตัวสลับสีในหน้าเว็บ
+// ทุกรหัสมีสี/วัสดุเดียว (ก๊อก = โครเมียมขัดเงา) เว็บ Kohler ไม่มีตัวเลือกสี · จุดสีในหน้าเว็บเป็นสีตัวอย่างเพื่อเดโม ดู lib/finishes.ts
 // ภาพ: scripts/build-media.sh products · images = ภาพตัดพื้นหลัง (contain) · scenes = ภาพใช้งานจริง (cover)
 
 export type Category = 'faucet' | 'sink';
+export type Material = 'brass' | 'stainless' | 'castIron';
 
 export type Product = {
   slug: string; // ตรงกับ slug บน kohler.co.th
   category: Category;
+  series: string; // ซีรีส์ของ Kohler (ProductBrandName)
+  material?: Material; // ไม่มี = Kohler ไม่ระบุวัสดุ (Kumin 99480T)
   name: { th: string; en: string };
   desc: { th: string; en: string };
   specs: { label: string; value: string }[];
@@ -24,6 +27,8 @@ export const products: Product[] = [
   {
     slug: 'elate-13963t-c4',
     category: 'faucet',
+    series: 'Elate',
+    material: 'brass',
     name: { th: 'Elate™ ก๊อกผสมอ่างล้างจาน หัวฝักบัวดึงได้', en: 'Elate™ Pull-Out Kitchen Faucet' },
     desc: {
       th: 'ก๊อกผสมทองเหลืองก้านโยกเดี่ยว หัวฝักบัวดึงออกได้ สลับได้ 2 แบบระหว่างสายน้ำนุ่มกับสเปรย์ Sweep® สายถัก ProMotion® ดึงเบาและเงียบ',
@@ -46,6 +51,7 @@ export const products: Product[] = [
   {
     slug: 'kumin-99480t-4',
     category: 'faucet',
+    series: 'Kumin',
     name: { th: 'Kumin™ ก๊อกผสมอ่างล้างจาน', en: 'Kumin™ Single-Control Kitchen Faucet' },
     desc: {
       th: 'ก๊อกผสมก้านโยกเดี่ยว คอหมุนได้ 360 องศา ระยะยื่น 227 มม. วาล์วเซรามิกของ Kohler ทนทานเกินมาตรฐานอุตสาหกรรม 2 เท่า',
@@ -64,6 +70,8 @@ export const products: Product[] = [
   {
     slug: 'elate-15609x-4',
     category: 'faucet',
+    series: 'Elate',
+    material: 'brass',
     name: { th: 'Elate™ ก๊อกผสมอ่างล้างจาน', en: 'Elate™ Single-Control Kitchen Faucet' },
     desc: {
       th: 'ก๊อกผสมทองเหลือง ติดตั้งรูเดียว วาล์วเซรามิกชิ้นเดียวคุมทั้งปริมาณน้ำและอุณหภูมิ ระยะยื่น 210 มม.',
@@ -82,6 +90,8 @@ export const products: Product[] = [
   {
     slug: 'taut-21370t-4cd',
     category: 'faucet',
+    series: 'Taut',
+    material: 'brass',
     name: { th: 'Taut™ ก๊อกเดี่ยวอ่างล้างจาน', en: 'Taut™ Cold-Water Swing-Spout Kitchen Faucet' },
     desc: {
       th: 'ก๊อกน้ำเย็นทองเหลือง คอสวิง ระยะยื่น 178 มม. เซรามิกวาล์วหมุน 1/4 รอบ รับประกันตลอดอายุการใช้งาน',
@@ -102,6 +112,8 @@ export const products: Product[] = [
   {
     slug: 'kumin-30946t-4',
     category: 'faucet',
+    series: 'Kumin',
+    material: 'brass',
     name: { th: 'Kumin™ ก๊อกเดี่ยวอ่างล้างจาน', en: 'Kumin™ Cold-Water Kitchen Faucet' },
     desc: {
       th: 'ก๊อกน้ำเย็นทองเหลืองก้านโยกข้าง คอหมุน 360 องศา ระยะยื่น 192 มม. สายน้ำผสมอากาศ',
@@ -122,6 +134,8 @@ export const products: Product[] = [
   {
     slug: 'taut-21366t-4',
     category: 'faucet',
+    series: 'Taut',
+    material: 'brass',
     name: { th: 'Taut™ ก๊อกผสมอ่างล้างจาน หัวฝักบัวดึงลง', en: 'Taut™ Pull-Down Kitchen Faucet' },
     desc: {
       th: 'ก๊อกผสมทองเหลือง หัวฝักบัวดึงลงปรับได้ 2 แบบ ระยะยื่น 222 มม. เซรามิกวาล์วรับประกันตลอดอายุการใช้งาน',
@@ -142,6 +156,8 @@ export const products: Product[] = [
   {
     slug: 'toccata-3644x-2kd',
     category: 'sink',
+    series: 'Toccata',
+    material: 'stainless',
     name: { th: 'Toccata™ ซิงก์สเตนเลส 1 หลุม', en: 'Toccata™ Single-Bowl Stainless Sink' },
     desc: {
       th: 'ซิงก์สเตนเลสหลุมเดี่ยวขนาด 31 นิ้ว ติดตั้งแบบฝังบนเคาน์เตอร์',
@@ -160,6 +176,8 @@ export const products: Product[] = [
   {
     slug: 'indio-3885x-2sd',
     category: 'sink',
+    series: 'Indio',
+    material: 'castIron',
     name: { th: 'Indio™ ซิงก์เหล็กหล่อ 2 หลุม', en: 'Indio™ Smart Divide Cast-Iron Double Sink' },
     desc: {
       th: 'ซิงก์เหล็กหล่อสีขาว 33 นิ้ว 2 หลุมใหญ่และกลางแบบ Smart Divide พร้อมที่กดสบู่ ติดตั้งได้ทั้งฝังบนและใต้เคาน์เตอร์',
@@ -181,6 +199,8 @@ export const products: Product[] = [
   {
     slug: 'toccata-3645x-2kd',
     category: 'sink',
+    series: 'Toccata',
+    material: 'stainless',
     name: { th: 'Toccata™ ซิงก์สเตนเลส 2 หลุม', en: 'Toccata™ Double-Bowl Stainless Sink' },
     desc: {
       th: 'ซิงก์สเตนเลส 31 นิ้ว 2 หลุมใหญ่และกลาง ติดตั้งแบบฝังบนเคาน์เตอร์',
@@ -200,6 +220,8 @@ export const products: Product[] = [
   {
     slug: 'marcato-3676x-2kd',
     category: 'sink',
+    series: 'Marcato',
+    material: 'stainless',
     name: { th: 'Marcato™ ซิงก์สเตนเลส 1 หลุมครึ่ง', en: 'Marcato™ 1.5-Bowl Stainless Sink' },
     desc: {
       th: 'ซิงก์สเตนเลส 30 นิ้ว หลุมใหญ่คู่หลุมกลาง ติดตั้งแบบฝังบนเคาน์เตอร์',

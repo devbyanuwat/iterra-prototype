@@ -3,6 +3,7 @@
 // มี src = ภาพจริงในกรอบสัดส่วนเดิม · label ใช้เป็น alt ('' = ภาพประกอบ ข้อความข้าง ๆ บอกครบแล้ว)
 // fit="contain" สำหรับภาพสินค้าตัดพื้นหลัง: วางกลางกรอบ เว้นขอบ 18% บนพื้น warm-100 (dark = ink)
 // (ParallaxImage ขยายภาพ 1.18 เท่าและเลื่อน ±7% ขอบน้อยกว่านี้สินค้าจะชนขอบกรอบ)
+// ภาพ contain อ่านค่า --tint จากตัวห่อ (สีตัวอย่างใน lib/finishes.ts) · ไม่กำหนด = ไม่ปรับสี
 
 type Props = {
   label?: string;
@@ -38,7 +39,7 @@ export default function Placeholder({
           decoding="async"
           className={
             contain
-              ? 'absolute left-[18%] top-[18%] h-[64%] w-[64%] object-contain'
+              ? 'absolute left-[18%] top-[18%] h-[64%] w-[64%] object-contain transition-[filter] duration-500 [filter:var(--tint,none)] motion-reduce:transition-none'
               : 'absolute inset-0 h-full w-full object-cover'
           }
         />

@@ -65,6 +65,10 @@ export const dict = {
       featured: 'สินค้าเด่น',
       specs: 'สเปกสินค้า',
       related: 'สินค้าใกล้เคียง',
+      finish: 'สีผิว',
+      finishReal: 'มีจำหน่าย',
+      finishDemo: 'สีตัวอย่าง',
+      finishNote: 'สีตัวอย่างใช้แสดงภาพเท่านั้น KOHLER Thailand จำหน่ายรุ่นนี้เฉพาะโครเมียมขัดเงา',
     },
     catalog: {
       kicker: 'KOHLER KITCHENS 2026',
@@ -154,6 +158,10 @@ export const dict = {
       featured: 'Featured',
       specs: 'Specifications',
       related: 'Related pieces',
+      finish: 'Finish',
+      finishReal: 'Available',
+      finishDemo: 'Sample finish',
+      finishNote: 'Sample finishes are for illustration only. KOHLER Thailand sells this model in Polished Chrome only.',
     },
     catalog: {
       kicker: 'KOHLER KITCHENS 2026',

@@ -3,18 +3,24 @@
 // รายละเอียดสินค้า (template): แกลเลอรีภาพ parallax เลื่อนสวนทิศเล็กน้อย,
 // ข้อมูล sticky ด้านขวา, ตารางสเปก, สินค้าใกล้เคียง, ปุ่มสอบถาม
 
+import { useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import Reveal from './Reveal';
 import ParallaxImage from './ParallaxImage';
 import ProductCard from './ProductCard';
+import FinishDots from './FinishDots';
 import { useLang } from './LangProvider';
 import { getProduct, relatedProducts } from '@/lib/products';
+import { finishesFor } from '@/lib/finishes';
 
 export default function ProductDetail({ slug }: { slug: string }) {
   const { lang, t } = useLang();
+  const [finishId, setFinishId] = useState<string | null>(null);
   const product = getProduct(slug);
   if (!product) return null;
   const related = relatedProducts(slug);
+  const finishes = finishesFor(product);
+  const finish = finishes.find((f) => f.id === finishId) ?? finishes[0];
 
   return (
     <>
@@ -30,7 +36,8 @@ export default function ProductDetail({ slug }: { slug: string }) {
 
         <div className="grid gap-14 lg:grid-cols-[1.2fr_1fr] lg:gap-[6vw]">
           {/* แกลเลอรี parallax — ภาพคู่–คี่เลื่อนสวนทิศกัน */}
-          <div className="space-y-8">
+          {/* --tint ปรับสีเฉพาะภาพตัดพื้นหลัง (contain) ภาพบรรยากาศ (cover) ไม่ถูกปรับ */}
+          <div className="space-y-8" style={{ '--tint': finish.tint || 'none' } as CSSProperties}>
             {[
               ...product.images.map((src) => ({ src, fit: 'contain' as const })),
               ...(product.scenes ?? []).map((src) => ({ src, fit: 'cover' as const })),
@@ -63,6 +70,19 @@ export default function ProductDetail({ slug }: { slug: string }) {
                 {product.desc[lang]}
               </p>
               <p className="mt-6 text-lg font-light">{product.price[lang]}</p>
+
+              {/* สีผิว: เฉพาะรุ่นที่มีให้เลือกมากกว่า 1 สี (ก๊อก) · สีที่ไม่ใช่ของจริงบอกว่าเป็นสีตัวอย่าง */}
+              {finishes.length > 1 && (
+                <div className="mt-8">
+                  <h2 className="text-[11px] font-normal uppercase tracking-widest2 text-warm-500">{t.products.finish}</h2>
+                  <FinishDots finishes={finishes} value={finish.id} onChange={setFinishId} className="mt-2" />
+                  <p aria-live="polite" className="mt-2 text-sm font-light">
+                    {finish.name[lang]}
+                    <span className="ml-2 text-warm-500">{finish.demo ? t.products.finishDemo : t.products.finishReal}</span>
+                  </p>
+                  <p className="mt-2 max-w-md text-[12px] font-normal leading-relaxed text-warm-500">{t.products.finishNote}</p>
+                </div>
+              )}
 
               {/* ตารางสเปก */}
               <h2 className="mb-3 mt-10 text-[11px] uppercase tracking-widest2 text-warm-500">
