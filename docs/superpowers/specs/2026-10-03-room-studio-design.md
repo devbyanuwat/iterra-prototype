@@ -32,7 +32,7 @@ changes, reduced motion respected, a loading skeleton and a no-WebGL message.
 Units are metres. `x` runs along the back wall, `y` is up, `z` comes out of the wall toward the camera. The back wall
 is at `z = 0`.
 
-- One hall, back wall 27 m long, 3.6 m high, floor 5 m deep. Walls are single-sided planes so the camera can sit
+- One hall, back wall 27 m long, 4.6 m high (tall enough that a portrait screen never sees the wall top), floor 5 m deep. Walls are single-sided planes so the camera can sit
   outside the hall and still see in.
 - Three bays along the back wall, centres 9 m apart: I at `x = -9`, L at `x = 0`, U at `x = 9`. No partitions
   between bays; from the side a neighbouring kitchen is visible in the background, as in a real showroom. 9 m keeps a

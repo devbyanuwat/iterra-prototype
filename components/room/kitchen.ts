@@ -83,8 +83,9 @@ function handle(g: THREE.Group, m: Mats, x: number, y: number, z: number, vertic
 }
 
 // ตัวตู้ล่าง + ขาตู้ + พื้นมืดหลังร่องหน้าบาน
-function carcass(g: THREE.Group, m: Mats, x0: number, x1: number, backing = true) {
-  box(g, m.door, x0, x1, KICK, BASE, 0, DEPTH);
+// top = ขอบบนของตัวตู้ (ตู้ซิงก์เตี้ยกว่า เพื่อเว้นที่ให้อ่าง) · depth = ลึกตัวตู้ (ตู้มุมลึกเท่าท็อป ปิดช่องระหว่างมุมกับขา)
+function carcass(g: THREE.Group, m: Mats, x0: number, x1: number, backing = true, top = BASE, depth = DEPTH) {
+  box(g, m.door, x0, x1, KICK, top, 0, depth);
   box(g, m.kick, x0, x1, 0, KICK, 0.02, 0.5);
   if (backing) box(g, m.kick, x0 + 0.01, x1 - 0.01, KICK + 0.01, BASE - 0.01, DEPTH, DEPTH + 0.001);
 }
@@ -121,6 +122,11 @@ function sink(g: THREE.Group, m: Mats, x0: number, x1: number) {
   box(g, m.top, b, x1, BASE, TOP, 0, COUNTER);
   box(g, m.top, a, b, BASE, TOP, 0, z0);
   box(g, m.top, a, b, BASE, TOP, z1, COUNTER);
+  // ตัวตู้ช่วงบน (จากก้นอ่างถึงใต้ท็อป) เป็นกรอบ 4 ด้านรอบอ่าง ไม่ทับตัวอ่าง
+  box(g, m.door, x0, x1, floor, BASE, 0, z0 - 0.01);
+  box(g, m.door, x0, x1, floor, BASE, z1 + 0.01, DEPTH);
+  box(g, m.door, x0, a - 0.01, floor, BASE, z0 - 0.01, z1 + 0.01);
+  box(g, m.door, b + 0.01, x1, floor, BASE, z0 - 0.01, z1 + 0.01);
   box(g, m.steel, a, b, floor, floor + 0.01, z0, z1);
   box(g, m.steel, a - 0.01, a, floor, TOP - 0.005, z0, z1);
   box(g, m.steel, b, b + 0.01, floor, TOP - 0.005, z0, z1);
@@ -153,7 +159,12 @@ function hob(g: THREE.Group, m: Mats, x0: number, x1: number) {
 function ovenFront(g: THREE.Group, m: Mats, x0: number, x1: number, y0: number, y1: number) {
   box(g, m.glass, x0 + 0.01, x1 - 0.01, y0, y1, DEPTH, DEPTH + 0.015, 0.004);
   box(g, m.steel, x0 + 0.01, x1 - 0.01, y1 - 0.09, y1, DEPTH + 0.015, DEPTH + 0.018);
-  mesh(g, new RoundedBoxGeometry(x1 - x0 - 0.14, 0.014, 0.014, 2, 0.006), m.steel, (x0 + x1) / 2, y1 - 0.14, DEPTH + 0.05);
+  // มือจับยาว + ขายึด 2 จุด · ยื่นไม่เกินขอบท็อป (COUNTER)
+  const [bar, half] = [DEPTH + 0.034, (x1 - x0) / 2 - 0.1];
+  mesh(g, new RoundedBoxGeometry(x1 - x0 - 0.14, 0.012, 0.012, 2, 0.005), m.steel, (x0 + x1) / 2, y1 - 0.14, bar);
+  for (const o of [-half, half]) {
+    mesh(g, new THREE.CylinderGeometry(0.004, 0.004, 0.02, 10), m.steel, (x0 + x1) / 2 + o, y1 - 0.14, bar - 0.01).rotation.x = Math.PI / 2;
+  }
 }
 
 // ตู้สูง: บานล่าง เตาอบฝัง บานบน
@@ -188,7 +199,7 @@ function buildModule(g: THREE.Group, m: Mats, mod: Module, x0: number, run: Run,
     tall(g, m, x0, x1, last ? x0 + 0.07 : x1 - 0.07);
     return;
   }
-  carcass(g, m, x0, x1, mod.kind !== 'corner');
+  carcass(g, m, x0, x1, mod.kind !== 'corner', mod.kind === 'sink' ? 0.68 : BASE, mod.kind === 'corner' ? COUNTER : DEPTH);
   if (mod.kind === 'sink') sink(g, m, x0, x1);
   else counter(g, m, x0, x1);
 

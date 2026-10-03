@@ -63,6 +63,7 @@ export const DEFAULT_PICKS: Picks = { doors: 'white', top: 'quartz-grey', splash
 
 // ── แสง ──
 // sun = แสงจากหน้าต่าง, hemi = แสงฟ้า, env = แรงของเงาสะท้อน, led = ไฟใต้ตู้แขวน, ceil = ไฟเพดาน
+// ไฟติดพร้อมกันได้ไม่เกิน 6 ดวง (hemi 1 + led 4 + sun หรือ ceil 1) → โทนที่เปิด ceil ต้องให้ sun เป็น 0 (check:room ตรวจ)
 export type LightId = 'day' | 'warm' | 'cool' | 'night';
 export type LightPreset = {
   id: LightId;
@@ -80,17 +81,17 @@ export type LightPreset = {
 };
 export const LIGHTS: LightPreset[] = [
   { id: 'day', name: { th: 'กลางวัน', en: 'Daylight' }, sun: 3.1, sunColor: '#fff1dc', hemi: 0.38, env: 0.5, led: 0, ledColor: '#ffc98f', ceil: 0, ceilColor: '#ffbf80', bg: '#e9e6e1', exposure: 0.82 },
-  { id: 'warm', name: { th: 'วอร์มไวท์ 3000K', en: 'Warm White 3000K' }, sun: 0.1, sunColor: '#ffd9a8', hemi: 0.1, env: 0.16, led: 6, ledColor: '#ffc98f', ceil: 7.5, ceilColor: '#ffbf80', bg: '#2a2420', exposure: 1 },
-  { id: 'cool', name: { th: 'คูลไวท์ 6000K', en: 'Cool White 6000K' }, sun: 0.1, sunColor: '#dfe9ff', hemi: 0.12, env: 0.2, led: 6, ledColor: '#e4eeff', ceil: 8, ceilColor: '#dfe9ff', bg: '#22262b', exposure: 1 },
-  { id: 'night', name: { th: 'กลางคืน', en: 'Night' }, sun: 0, sunColor: '#ffd9a8', hemi: 0.04, env: 0.06, led: 7, ledColor: '#ffc98f', ceil: 0, ceilColor: '#ffbf80', bg: '#141210', exposure: 1.05 },
+  { id: 'warm', name: { th: 'วอร์มไวท์ 3000K', en: 'Warm White 3000K' }, sun: 0, sunColor: '#ffd9a8', hemi: 0.12, env: 0.18, led: 6, ledColor: '#ffc98f', ceil: 7.5, ceilColor: '#ffbf80', bg: '#2a2420', exposure: 1 },
+  { id: 'cool', name: { th: 'คูลไวท์ 6000K', en: 'Cool White 6000K' }, sun: 0, sunColor: '#dfe9ff', hemi: 0.14, env: 0.22, led: 6, ledColor: '#e4eeff', ceil: 8, ceilColor: '#dfe9ff', bg: '#22262b', exposure: 1 },
+  { id: 'night', name: { th: 'กลางคืน', en: 'Night' }, sun: 0, sunColor: '#ffd9a8', hemi: 0.09, env: 0.14, led: 7, ledColor: '#ffc98f', ceil: 0, ceilColor: '#ffbf80', bg: '#141210', exposure: 1.05 },
 ];
 
 // ── ผังครัว ──
 // ครัว 1 ชุด = หลาย run · run = ตู้เรียงต่อกันเป็นเส้นตรง กว้างรวม = ผลรวม w ของ modules
 // ทุก run ลึก 0.6 ม. · x, z = จุดเริ่มของ run นับจากกลาง bay
 // turn 0  = run หลัง ชิดผนัง หน้าบานหันออก (+z) · modules เรียงจากซ้ายไปขวา
-// turn 1  = ขาซ้าย หน้าบานหันขวา (+x) · modules เรียงจากปลายฝั่งกล้อง เข้าหาผนัง
-// turn -1 = ขาขวา หน้าบานหันซ้าย (-x) · modules เรียงจากผนัง ออกมาฝั่งกล้อง
+// turn 1  = ขาซ้าย หน้าบานหันขวา (+x) · modules เรียงจากปลายฝั่งกล้อง เข้าหาผนัง · ตัวตู้กินพื้นที่ x ถึง x + 0.6
+// turn -1 = ขาขวา หน้าบานหันซ้าย (-x) · modules เรียงจากผนัง ออกมาฝั่งกล้อง · ตัวตู้กินพื้นที่ x - 0.6 ถึง x
 // back: true = มีตู้แขวน ผนังกันเปื้อน ฮูด (เฉพาะ run หลัง) · ขามีแค่ตู้ล่างกับท็อป
 export type Module =
   | { kind: 'door'; w: number; doors: 1 | 2 }
@@ -113,7 +114,7 @@ export type Layout = {
 };
 
 export const BAY_PITCH = 9; // ระยะห่างกลาง bay ถึงกลาง bay
-export const HALL = { width: 27, depth: 5, height: 3.6 };
+export const HALL = { width: 27, depth: 5, height: 4.6 }; // สูงเผื่อจอแนวตั้งที่มุมกล้องกว้าง ไม่ให้เห็นขอบบนผนัง
 // ขอบเขตกล้อง: หมุนซ้ายขวาข้างละ azimuth (รวม 180 องศา) · polar วัดจากแนวดิ่ง · zoom เป็นเมตร
 export const ORBIT = { azimuth: Math.PI / 2, polarMin: 0.95, polarMax: 1.52, zoomMin: 2.8, zoomMax: 7 };
 

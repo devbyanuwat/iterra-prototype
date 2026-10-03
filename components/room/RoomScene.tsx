@@ -9,7 +9,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { FAUCET_LOOKS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, type LayoutId, type LightId, type Look, type Picks } from '@/lib/room';
+import { FAUCET_LOOKS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, type Layout, type LayoutId, type LightId, type Look, type Picks } from '@/lib/room';
 import { buildKitchen, ledPositions, makeMaterials } from './kitchen';
 import { applyLook, disposeTextures } from './textures';
 
@@ -30,6 +30,7 @@ const lookOf = (part: keyof typeof PARTS, picks: Picks): Look => {
 const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, picks, light, label, onReady, onError }, ref) {
   const host = useRef<HTMLDivElement>(null);
   const api = useRef<Api | null>(null);
+  const first = useRef(true);
 
   useImperativeHandle(ref, () => ({
     zoom: (step) => api.current?.orbit(0, step),
@@ -86,7 +87,8 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
     }
     LAYOUTS.forEach((l) => scene.add(buildKitchen(l, m)));
 
-    // ── ไฟ: แดดดวงเดียวคลุมทั้งห้อง · ไฟใต้ตู้ 4 ดวง + ไฟเพดาน 1 ดวง ย้ายตามครัวที่กำลังดู (รวมไม่เกิน 6 ดวง) ──
+    // ── ไฟ: แดดดวงเดียวคลุมทั้งห้อง · ไฟใต้ตู้ 4 ดวง + ไฟเพดาน 1 ดวง ย้ายตามครัวที่กำลังดู ──
+    // ติดพร้อมกันไม่เกิน 6 ดวง: hemi + ไฟใต้ตู้ 4 + แดดหรือไฟเพดานอย่างใดอย่างหนึ่ง (lib/room.ts กำหนด, check:room ตรวจ)
     const small = window.innerWidth < 768;
     const sun = new THREE.DirectionalLight();
     sun.position.set(10.5, 11.5, 10.7); // แดดเฉียงจากหน้าขวา · อยู่ไกลพอให้เงาคลุมทั้งห้อง
@@ -136,15 +138,22 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
     // ── กล้องเลื่อนไปครัวอื่น ──
     const flight = { t: 1, fromTarget: new THREE.Vector3(), toTarget: new THREE.Vector3(), from: new THREE.Spherical(), to: new THREE.Spherical() };
     let ledOn = 4; // จำนวนไฟใต้ตู้ที่ใช้กับครัวปัจจุบัน
-    const goTo = (id: LayoutId, jump = false) => {
-      const l = layoutOf(id);
+    // ย้ายไฟใต้ตู้และไฟเพดานไปครัวที่จะดู · ตอนกล้องเลื่อน ย้ายที่ครึ่งทาง ครัวเดิมจึงไม่มืดทันทีที่กด
+    let lightsFor: Layout | null = null;
+    const moveLights = (l: Layout) => {
       const xs = ledPositions(l);
       ledOn = xs.length;
       leds.forEach((spot, i) => {
         spot.position.x = spot.target.position.x = xs[i] ?? l.x;
       });
       ceil.position.x = l.x;
+      lightsFor = null;
       applyLight();
+    };
+    const goTo = (id: LayoutId, jump = false) => {
+      const l = layoutOf(id);
+      if (jump || still) moveLights(l);
+      else lightsFor = l;
       flight.toTarget.set(l.x, l.home.target[0], l.home.target[1]);
       flight.to.set(l.home.distance, l.home.polar, l.home.azimuth);
       if (jump || still) {
@@ -233,6 +242,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
           THREE.MathUtils.lerp(flight.from.theta, flight.to.theta, k),
         );
         place(target, spherical);
+        if (lightsFor && flight.t >= 0.5) moveLights(lightsFor);
         if (flight.t === 1) controls.enabled = true;
       } else controls.update();
       if (!dirty) return;
@@ -279,18 +289,23 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       scene.traverse((o) => (o as THREE.Mesh).geometry?.dispose());
       Object.values(m).forEach((mat) => mat.dispose());
       disposeTextures();
+      sun.dispose();
+      ceil.dispose();
+      leds.forEach((spot) => spot.dispose());
       scene.environment?.dispose();
       pmrem.dispose();
       renderer.dispose();
+      renderer.forceContextLoss();
       renderer.domElement.remove();
+      delete (window as unknown as { __room?: unknown }).__room;
       api.current = null;
+      first.current = true; // dev StrictMode mount ซ้ำ: ให้ effect ของ layout ข้ามรอบแรกอีกครั้ง
     };
     // สร้างฉากครั้งเดียว · layout, picks, light เปลี่ยนผ่าน effect ด้านล่าง
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // effect ทั้งสามทำงานตอน mount ด้วย แต่ค่าเท่ากับที่ฉากเพิ่งตั้ง จึงไม่มีผล (goTo ไปที่เดิม = กล้องอยู่ที่เดิม)
-  const first = useRef(true);
+  // effect ของ picks กับ light ทำงานตอน mount ด้วย แต่ค่าเท่ากับที่ฉากเพิ่งตั้ง จึงไม่มีผล · ของ layout ข้ามรอบแรก (first)
   useEffect(() => api.current?.setPicks(picks), [picks]);
   useEffect(() => api.current?.setLight(light), [light]);
   useEffect(() => {
@@ -314,7 +329,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       aria-label={label}
       onKeyDown={onKey}
       data-lenis-prevent
-      className="absolute inset-0 cursor-grab touch-none focus-visible:outline focus-visible:outline-1 focus-visible:outline-ink active:cursor-grabbing [&>canvas]:block"
+      className="absolute inset-0 cursor-grab touch-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink active:cursor-grabbing [&>canvas]:block"
     />
   );
 });

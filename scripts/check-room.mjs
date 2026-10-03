@@ -26,6 +26,11 @@ assert.ok(FAUCET_LOOKS[DEFAULT_PICKS.faucet], 'ค่าเริ่มต้น
 unique('LIGHTS', LIGHTS.map((l) => l.id));
 assert.deepEqual(LIGHTS.map((l) => l.id), ['day', 'warm', 'cool', 'night']);
 LIGHTS.forEach((l) => named(`light.${l.id}`, l.name));
+// ไฟติดพร้อมกันไม่เกิน 6 ดวง: hemi 1 + ไฟใต้ตู้ 4 + (แดด หรือ ไฟเพดาน) 1
+for (const l of LIGHTS) {
+  const on = [l.sun, l.hemi, l.ceil].filter((v) => v > 0).length + (l.led > 0 ? 4 : 0);
+  assert.ok(on <= 6, `light.${l.id}: ไฟติดพร้อมกัน ${on} ดวง เกิน 6`);
+}
 
 // ── ผังครัว ──
 const EXPECTED = { i: [3.6], l: [3.0, 2.4], u: [3.2, 2.2, 2.2] }; // ความยาว run ตาม spec

@@ -31,9 +31,10 @@ export default function RoomContent() {
   const faucet = FAUCET.find((f) => f.id === picks.faucet)!;
 
   return (
-    <section className="px-6 pb-16 pt-24 md:px-[4vw] lg:grid lg:h-[100dvh] lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-[minmax(0,1fr)] lg:gap-10 lg:pb-8">
-      {/* ต่ำกว่า lg: ฉากติดบนจอ แผงเลื่อนอยู่ข้างใต้ */}
-      <div className="sticky top-20 z-10 h-[45dvh] min-h-[280px] overflow-hidden bg-warm-200 lg:relative lg:top-0 lg:h-auto">
+    <section className="px-6 pb-16 md:px-[4vw] lg:grid lg:h-[100dvh] lg:grid-cols-[minmax(0,1fr)_320px] lg:grid-rows-[minmax(0,1fr)] lg:gap-10 lg:pb-8 lg:pt-24">
+      {/* ต่ำกว่า lg: ฉากติดบนจอ แผงเลื่อนอยู่ข้างใต้ · ตัวห่อพื้นทึบสูงถึงขอบบนจอ บังข้อความที่เลื่อนผ่านใต้เมนู (เมนูโปร่งใส) */}
+      <div className="sticky top-0 z-10 mx-[-1.5rem] bg-paper px-6 pt-20 md:mx-[-4vw] md:px-[4vw] lg:static lg:mx-0 lg:min-h-0 lg:p-0">
+      <div className="relative h-[45dvh] min-h-[280px] overflow-hidden bg-warm-200 lg:h-full">
         {state === 'error' ? (
           <p className="absolute inset-0 flex items-center justify-center px-8 text-center text-sm text-stone-600">{t.room.noWebgl}</p>
         ) : (
@@ -51,8 +52,9 @@ export default function RoomContent() {
           </>
         )}
       </div>
+      </div>
 
-      <div className="flex flex-col gap-7 pt-8 lg:min-h-0 lg:overflow-y-auto lg:pr-1 lg:pt-1" data-lenis-prevent>
+      <div className="flex flex-col gap-7 pt-8 lg:-ml-2 lg:min-h-0 lg:overflow-y-auto lg:pl-2 lg:pr-1 lg:pt-1" data-lenis-prevent>
         <div>
           <h1 className="text-3xl font-extralight leading-snug tracking-wide md:text-4xl">{t.room.title}</h1>
           <p className="mt-3 text-sm font-light leading-relaxed text-stone-600">{t.room.help}</p>
