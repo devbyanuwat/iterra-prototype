@@ -92,7 +92,7 @@ LAYOUTS.forEach((layout, index) => {
   assert.ok(h.polar >= ORBIT.polarMin && h.polar <= ORBIT.polarMax, `${at}: home.polar เกินขอบเขต`);
   assert.ok(h.distance >= ORBIT.zoomMin && h.distance <= ORBIT.zoomMax, `${at}: home.distance เกินขอบเขต`);
 
-  // มุมเจาะดูชิ้นส่วน: ครบ 5 หมวด อยู่ในขอบเขตกล้อง และจุดชี้อยู่ในครัวของตัวเอง
+  // มุมเจาะดูชิ้นส่วน: ครบ 6 หมวด อยู่ในขอบเขตกล้อง และจุดชี้อยู่ในครัวของตัวเอง
   assert.deepEqual(Object.keys(layout.focus).sort(), ['doors', 'faucet', 'floor', 'sink', 'splash', 'top'], `${at}: focus ต้องมีครบทุกหมวด`);
   const reach = Math.max(Math.abs(back.x), Math.abs(backEnd));
   for (const [part, f] of Object.entries(layout.focus)) {

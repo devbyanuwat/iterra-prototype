@@ -160,6 +160,12 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     const limit = { azimuthMin: -ORBIT.azimuth, azimuthMax: ORBIT.azimuth, zoomMin: ORBIT.zoomMin, zoomMax: ORBIT.zoomMax };
     let current: Layout | undefined; // ครัวที่กำลังดู
     let focused: Part | null = null;
+    // กล้องกำลังบินไปครัวอื่นหรือเข้าเจาะดู (ไม่นับการขยับสั้น ๆ จากปุ่ม): ช่วงนี้ปิดการชี้ การกด และเส้นชี้
+    const flying = () => flight.t < 1 && flight.time !== NUDGE;
+    // เริ่มลากระหว่างที่กล้องยังขยับจากปุ่ม: หยุดการขยับนั้น ให้มือผู้ใช้คุมต่อ
+    controls.addEventListener('start', () => {
+      if (flight.t < 1 && flight.time === NUDGE) flight.t = 1;
+    });
     const goTo = (id: LayoutId, part: Part | null, jump = false) => {
       const l = layoutOf(id);
       // เปลี่ยนครัว หรือมีการย้ายไฟค้างอยู่จากการเลื่อนที่ถูกตัดจบ: ย้ายไฟทันทีถ้ากล้องกระโดด ไม่งั้นย้ายที่ครึ่งทาง
@@ -243,6 +249,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     // วาดทันทีหลังเปลี่ยนขนาด: setSize ล้าง canvas ถ้ารอเฟรมถัดไปจะเห็นจอดำวูบตอนลากขอบหน้าต่าง
     const watcher = new ResizeObserver(() => {
       resize();
+      fitCard();
       renderer.render(scene, camera);
       drawGuide();
     });
@@ -255,7 +262,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
     const onRestore = () => { dirty = true; };
     renderer.domElement.addEventListener('webglcontextrestored', onRestore);
 
-    // ── ชี้และกดที่ชิ้นส่วน: วัสดุที่เปลี่ยนได้ 5 ตัวคือ 5 หมวดในแผง ──
+    // ── ชี้และกดที่ชิ้นส่วน: วัสดุที่เปลี่ยนได้ 6 ตัวคือ 6 หมวดในแผง ──
     // ไฮไลต์ทำที่วัสดุ จึงสว่างทุกชิ้นที่ใช้วัสดุนั้นทั้ง 3 ครัว (ตัวเลือกก็ใช้ร่วมกันทั้งห้องเหมือนกัน)
     const parts = new Map<THREE.Material, Part>([[m.door, 'doors'], [m.top, 'top'], [m.splash, 'splash'], [m.floor, 'floor'], [m.faucet, 'faucet'], [m.sink, 'sink']]);
     const matOf = (part: Part) => [...parts].find(([, p]) => p === part)![0] as THREE.MeshStandardMaterial;
@@ -304,7 +311,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       const h = el.clientHeight;
       const x = ((anchor.x + 1) / 2) * w;
       const y = ((1 - anchor.y) / 2) * h;
-      const seen = !!f && flight.t === 1 && anchor.z < 1 && x > 0 && x < w && y > 0 && y < h;
+      const seen = !!f && !flying() && anchor.z < 1 && x > 0 && x < w && y > 0 && y < h;
       label.style.opacity = seen && !focused ? '1' : '0';
       svg.style.opacity = seen ? '1' : '0';
       if (!seen) return;
@@ -343,7 +350,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       if (e.button !== 0) return;
       const tap = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5;
       down = null;
-      const part = tap && flight.t === 1 ? partAt(e) : null;
+      const part = tap && !flying() ? partAt(e) : null;
       if (part) live.current.onPick(part);
     };
     const onLeave = () => {
@@ -374,7 +381,8 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
       }
       if (flight.t < 1) {
         flight.t = Math.min(1, flight.t + dt / flight.time);
-        const k = ease(flight.t);
+        // ปุ่มหมุน/ซูมออกตัวทันทีแล้วค่อยผ่อน กดรัวหรือกดค้างจึงไม่หน่วง · การบินไกลใช้ ease เข้าออก
+        const k = flight.time === NUDGE ? 1 - (1 - flight.t) ** 3 : ease(flight.t);
         target.lerpVectors(flight.fromTarget, flight.toTarget, k);
         spherical.set(
           THREE.MathUtils.lerp(flight.from.radius, flight.to.radius, k),
@@ -392,7 +400,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
         dirty = true;
       }
       if (moved) {
-        setHover(flight.t === 1 ? partAt(moved) : null);
+        setHover(flying() ? null : partAt(moved));
         moved = null;
       }
       if (!dirty) return;
@@ -442,6 +450,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
         spherical.copy(nudging ? flight.to : here);
         spherical.theta = THREE.MathUtils.clamp(spherical.theta + dAzimuth, limit.azimuthMin, limit.azimuthMax);
         spherical.radius = THREE.MathUtils.clamp(spherical.radius * (1 - dZoom), limit.zoomMin, limit.zoomMax);
+        if (spherical.theta === here.theta && spherical.radius === here.radius) return; // ชนขอบแล้ว ไม่มีอะไรให้ขยับ
         if (still) {
           place(controls.target.clone(), spherical);
           controls.update();
@@ -453,7 +462,6 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
         flight.to.copy(spherical);
         flight.t = 0;
         flight.time = NUDGE;
-        controls.enabled = false;
       },
     };
     api.current.setPicks(picks);

@@ -125,6 +125,7 @@ Requested in chat by anuwat during execution ("ลองปั้นก๊อก
 - **Shapes.** `FAUCET_SHAPES` (gooseneck, square, spring) and `SINKS` (single, double, round) in `lib/room.ts`, names and
   notes in Thai and English, MOCK. `Picks` gains `faucetShape` and `sink`. All shapes are built once in `kitchen.ts`
   and `RoomScene` shows the chosen one. They are sample forms, not models on sale; the page note says so.
+- Wherever the text above says "five parts" read six: the sink is the sixth.
 - **Sink is now a focusable part** (this replaces "sink" in the list of fixed parts and in Out of scope). Its card has
   shape buttons and no colour dots. The faucet card has both colour dots and shape buttons. The side panel has two new
   groups, "Faucet shape" and "Sink".

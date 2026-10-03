@@ -129,11 +129,11 @@ function variant(g: THREE.Group, key: 'sink' | 'faucet', id: string) {
 // อ่างสี่เหลี่ยมฝังใต้ท็อป: ก้น + ผนัง 4 ด้าน + สะดืออ่าง
 function bowl(g: THREE.Group, m: Mats, a: number, b: number, z0: number, z1: number, floor: number) {
   box(g, m.sink, a, b, floor, floor + 0.01, z0, z1);
-  box(g, m.sink, a - 0.01, a, floor, TOP - 0.005, z0, z1);
-  box(g, m.sink, b, b + 0.01, floor, TOP - 0.005, z0, z1);
-  box(g, m.sink, a, b, floor, TOP - 0.005, z0 - 0.01, z0);
+  box(g, m.sink, a - 0.01, a, floor, BASE, z0, z1);
+  box(g, m.sink, b, b + 0.01, floor, BASE, z0, z1);
+  box(g, m.sink, a, b, floor, BASE, z0 - 0.01, z0);
   box(g, m.sink, a, b, floor, TOP - 0.005, z1, z1 + 0.01);
-  mesh(g, new THREE.CylinderGeometry(0.03, 0.03, 0.004, 24), m.kick, (a + b) / 2, floor + 0.012, (z0 + z1) / 2, false);
+  mesh(g, new THREE.CylinderGeometry(0.03, 0.03, 0.004, 24), m.kick, (a + b) / 2, floor + 0.012, (z0 + z1) / 2, false).userData.part = 'sink';
 }
 
 // ซิงก์ 3 ทรง: single = หลุมเดียว, double = สองหลุม, round = หลุมกลม · แต่ละทรงมีท็อปที่เจาะช่องของตัวเอง
@@ -162,7 +162,7 @@ function sink(g: THREE.Group, m: Mats, x0: number, x1: number) {
   cutTop(double, cx - 0.35, cx + 0.35);
   bowl(double, m, cx - 0.35, cx - 0.02, z0, z1, floor);
   bowl(double, m, cx + 0.02, cx + 0.35, z0, z1, floor + 0.04); // หลุมขวาตื้นกว่า ไว้ล้างผัก
-  box(double, m.sink, cx - 0.01, cx + 0.01, floor, TOP - 0.005, z0, z1); // สันกลางระหว่างสองหลุม
+  box(double, m.sink, cx - 0.01, cx + 0.01, floor, BASE, z0, z1); // สันกลางระหว่างสองหลุม
 
   // หลุมกลม: ท็อปเป็นแผ่นเจาะรูกลม (ExtrudeGeometry) · อ่างเป็นทรงหมุน ไล่จุดจากขอบบนลงก้น ผิวจึงหันเข้าด้านใน
   const round = variant(g, 'sink', 'round');
@@ -171,9 +171,9 @@ function sink(g: THREE.Group, m: Mats, x0: number, x1: number) {
   slab.holes.push(new THREE.Path().absarc(cx, cz, r, 0, Math.PI * 2, true));
   const top = mesh(round, new THREE.ExtrudeGeometry(slab, { depth: TOP - BASE, bevelEnabled: false, curveSegments: 40 }), m.top, 0, TOP, 0);
   top.rotation.x = Math.PI / 2; // แผ่นวาดในระนาบ x-y แล้วพลิกลงนอน: y ของแผ่น = z ของตู้ หนาลงไปถึง BASE
-  const profile = [[r + 0.01, TOP - 0.005], [r, TOP - 0.005], [r, floor + 0.03], [r - 0.03, floor], [0.001, floor]].map(([x, y]) => new THREE.Vector2(x, y));
+  const profile = [[r + 0.01, BASE], [r, BASE], [r, floor + 0.04], [r - 0.03, floor + 0.01], [0.001, floor + 0.01]].map(([x, y]) => new THREE.Vector2(x, y));
   mesh(round, new THREE.LatheGeometry(profile, 48), m.sink, cx, 0, cz);
-  mesh(round, new THREE.CylinderGeometry(0.03, 0.03, 0.004, 24), m.kick, cx, floor + 0.004, cz, false);
+  mesh(round, new THREE.CylinderGeometry(0.03, 0.03, 0.004, 24), m.kick, cx, floor + 0.012, cz, false).userData.part = 'sink';
 }
 
 // ก๊อก 3 ทรง ฐานอยู่จุดเดียวกัน (หลังอ่าง) ปลายน้ำออกเหนือกลางอ่าง
