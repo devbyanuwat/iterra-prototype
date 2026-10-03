@@ -42,10 +42,12 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
     const el = host.current!;
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // เช็ก WebGL เองก่อน: ถ้าปล่อยให้ three.js ลองแล้วพลาด มันจะ console.error ซึ่งทำให้ด่าน check:overflow ตก
-    if (!document.createElement('canvas').getContext('webgl2')) {
+    const probe = document.createElement('canvas').getContext('webgl2');
+    if (!probe) {
       onError();
       return;
     }
+    probe.getExtension('WEBGL_lose_context')?.loseContext();
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -202,6 +204,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
     const resize = () => {
       const { clientWidth: w, clientHeight: h } = el;
       if (!w || !h) return;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(w, h);
       camera.aspect = w / h;
       // จอแนวตั้ง: ขยายมุมกล้องแนวตั้งให้ความกว้างที่เห็นเท่าเดิม ครัวจะไม่ตกขอบ
@@ -209,13 +212,19 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       camera.updateProjectionMatrix();
       dirty = true;
     };
-    const watcher = new ResizeObserver(resize);
+    // วาดทันทีหลังเปลี่ยนขนาด: setSize ล้าง canvas ถ้ารอเฟรมถัดไปจะเห็นจอดำวูบตอนลากขอบหน้าต่าง
+    const watcher = new ResizeObserver(() => {
+      resize();
+      renderer.render(scene, camera);
+    });
     watcher.observe(el);
     resize();
 
     // ตัวเลขไว้วัดผล (ดูใน console: window.__room)
     const stats = { renderMs: 0, frames: 0 };
     (window as unknown as { __room?: unknown }).__room = { stats, info: renderer.info };
+    const onRestore = () => { dirty = true; };
+    renderer.domElement.addEventListener('webglcontextrestored', onRestore);
 
     const target = new THREE.Vector3();
     const spherical = new THREE.Spherical();
@@ -294,6 +303,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       leds.forEach((spot) => spot.dispose());
       scene.environment?.dispose();
       pmrem.dispose();
+      renderer.domElement.removeEventListener('webglcontextrestored', onRestore);
       renderer.dispose();
       renderer.forceContextLoss();
       renderer.domElement.remove();
@@ -314,6 +324,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
   }, [layout]);
 
   const onKey = (e: React.KeyboardEvent) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return; // ปล่อยคีย์ลัดของเบราว์เซอร์ (ซูมหน้า ย้อนกลับ)
     const steps: Record<string, [number, number]> = { ArrowLeft: [-0.15, 0], ArrowRight: [0.15, 0], '+': [0, 0.12], '=': [0, 0.12], '-': [0, -0.12] };
     const step = steps[e.key];
     if (!step) return;

@@ -115,8 +115,8 @@ export type Layout = {
 
 export const BAY_PITCH = 9; // ระยะห่างกลาง bay ถึงกลาง bay
 export const HALL = { width: 27, depth: 5, height: 4.6 }; // สูงเผื่อจอแนวตั้งที่มุมกล้องกว้าง ไม่ให้เห็นขอบบนผนัง
-// ขอบเขตกล้อง: หมุนซ้ายขวาข้างละ azimuth (รวม 180 องศา) · polar วัดจากแนวดิ่ง · zoom เป็นเมตร
-export const ORBIT = { azimuth: Math.PI / 2, polarMin: 0.95, polarMax: 1.52, zoomMin: 2.8, zoomMax: 7 };
+// ขอบเขตกล้อง: หมุนซ้ายขวาข้างละ azimuth (รวม 180 องศา) · polar วัดจากแนวดิ่ง · zoom เป็นเมตร · polarMin 1.05 = กล้องซูมออกสุดยังอยู่ต่ำกว่าขอบบนผนัง
+export const ORBIT = { azimuth: Math.PI / 2, polarMin: 1.05, polarMax: 1.52, zoomMin: 2.8, zoomMax: 7 };
 
 const door = (w: number, doors: 1 | 2 = 1): Module => ({ kind: 'door', w, doors });
 
