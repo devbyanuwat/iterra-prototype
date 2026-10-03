@@ -1,4 +1,4 @@
-// แต่งโถงให้เป็นโชว์รูมแบบแกลเลอรี: บัวพื้น ฝ้า รางไฟ เสาอิงผนัง ป้ายชื่อผัง หน้าต่างพร้อมวิว
+// แต่งโถงให้เป็นโชว์รูมแบบแกลเลอรี: บัวพื้น ฝ้า รางไฟ เสาอิงผนัง ป้ายชื่อผัง หน้าต่างพร้อมวิว เฟอร์นิเจอร์
 // ตำแหน่งทั้งหมดมาจาก SHOWROOM ใน lib/room.ts · ทุกชิ้นเป็นของประกอบฉาก ชี้และกดไม่ได้ (userData.inert)
 // ชิ้นนิ่งรวมเป็น mesh เดียวต่อวัสดุ (mergeGeometries) ทั้งโถงจึงใช้ draw call ราววัสดุละ 1 ครั้ง
 // รางไฟเป็นของประกอบฉาก ไม่มีไฟจริง (งบไฟ 6 ดวงเต็มแล้ว)
@@ -59,7 +59,7 @@ export function buildHall(m: Mats, lang: Lang): Hall {
   const solid: Bag = new Map();
   const flat: Bag = new Map();
   const half = HALL.width / 2;
-  const { skirting, pilasters, windows, rails, sign } = SHOWROOM;
+  const { skirting, pilasters, windows, rails, sign, bench, plant, table } = SHOWROOM;
 
   // บัวพื้น: ผนังหลังและผนังปลายห้องทั้งสองด้าน
   slab(solid, m.kick, -half, half, 0, skirting, 0, 0.015);
@@ -100,6 +100,34 @@ export function buildHall(m: Mats, lang: Lang): Hall {
     slab(solid, m.kick, a - 0.04, b + 0.04, y0 - bar, y0, 0, 0.1); // ธรณีหน้าต่างยื่นออกมาเล็กน้อย
     slab(solid, m.kick, x - 0.015, x + 0.015, y0, y1, 0, 0.04);
     slab(solid, m.kick, a, b, y0 + (y1 - y0) * 0.72, y0 + (y1 - y0) * 0.72 + 0.03, 0, 0.04);
+  }
+
+  // ── เฟอร์นิเจอร์โชว์รูม: วางในช่องว่างระหว่างครัว หน้าหน้าต่าง ──
+  // ม้านั่งไม้: แผ่นนั่งบนขาแผ่น 2 ข้าง
+  {
+    const [a, b, z0, z1] = [bench.x - bench.w / 2, bench.x + bench.w / 2, bench.z - bench.d / 2, bench.z + bench.d / 2];
+    slab(solid, m.wood, a, b, 0.4, 0.46, z0, z1);
+    for (const x of [a + 0.08, b - 0.13]) slab(solid, m.wood, x, x + 0.05, 0, 0.4, z0 + 0.02, z1 - 0.02);
+  }
+  // ต้นไม้กระถาง: กระถางเซรามิก ลำต้น และพุ่มใบเป็นก้อนเหลี่ยมหยาบ
+  {
+    const { x, z } = plant;
+    put(solid, m.ceramic, new THREE.CylinderGeometry(0.21, 0.16, 0.42, 24), x, 0.21, z);
+    put(solid, m.kick, new THREE.CylinderGeometry(0.19, 0.19, 0.01, 24), x, 0.4, z);
+    put(solid, m.wood, new THREE.CylinderGeometry(0.016, 0.026, 0.95, 8), x, 0.87, z);
+    for (const [dx, y, dz, r] of [[0, 1.5, 0, plant.r], [0.2, 1.34, 0.05, 0.2], [-0.17, 1.36, -0.06, 0.22], [0.04, 1.72, 0.08, 0.18], [-0.05, 1.22, 0.14, 0.16]]) {
+      put(solid, m.leaf, new THREE.IcosahedronGeometry(r, 1), x + dx, y, z + dz);
+    }
+  }
+  // โต๊ะตัวอย่างวัสดุ: แผ่นตัวอย่าง 4 แผ่นใช้วัสดุชุดเดียวกับครัว เปลี่ยนสีในแผงแล้วแผ่นเปลี่ยนตาม
+  {
+    const [a, b, z0, z1] = [table.x - table.w / 2, table.x + table.w / 2, table.z - table.d / 2, table.z + table.d / 2];
+    slab(solid, m.wood, a, b, 0.72, 0.76, z0, z1);
+    for (const x of [a + 0.06, b - 0.1]) for (const z of [z0 + 0.06, z1 - 0.1]) slab(solid, m.kick, x, x + 0.04, 0, 0.72, z, z + 0.04);
+    [m.door, m.top, m.splash, m.floor].forEach((mat, i) => {
+      const x = table.x + (i - 1.5) * 0.36;
+      slab(solid, mat, x - 0.13, x + 0.13, 0.76, 0.778, table.z - 0.17, table.z + 0.17);
+    });
   }
 
   for (const [bag, shadow] of [[solid, true], [flat, false]] as const) {
