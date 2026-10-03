@@ -89,8 +89,8 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
     }
     LAYOUTS.forEach((l) => scene.add(buildKitchen(l, m)));
 
-    // ── ไฟ: แดดดวงเดียวคลุมทั้งห้อง · ไฟใต้ตู้ 4 ดวง + ไฟเพดาน 1 ดวง ย้ายตามครัวที่กำลังดู ──
-    // ติดพร้อมกันไม่เกิน 6 ดวง: hemi + ไฟใต้ตู้ 4 + แดดหรือไฟเพดานอย่างใดอย่างหนึ่ง (lib/room.ts กำหนด, check:room ตรวจ)
+    // ── ไฟ: แสงหลักดวงเดียวคลุมทั้งห้อง · ไฟใต้ตู้ 4 ดวง ย้ายตามครัวที่กำลังดู ──
+    // ติดพร้อมกันไม่เกิน 6 ดวง: hemi + ไฟใต้ตู้ 4 + แสงหลัก (lib/room.ts กำหนด, check:room ตรวจ)
     const small = window.innerWidth < 768;
     const sun = new THREE.DirectionalLight();
     sun.position.set(10.5, 11.5, 10.7); // แดดเฉียงจากหน้าขวา · อยู่ไกลพอให้เงาคลุมทั้งห้อง
@@ -108,12 +108,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       scene.add(spot, spot.target);
       return spot;
     });
-    const ceil = new THREE.PointLight('#ffffff', 0, 9, 2);
-    ceil.position.set(0, 2.55, 1.7);
-    ceil.castShadow = true;
-    ceil.shadow.mapSize.set(1024, 1024);
-    ceil.shadow.bias = -0.002;
-    scene.add(sun, sun.target, hemi, ceil);
+    scene.add(sun, sun.target, hemi);
 
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 60);
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -140,7 +135,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
     // ── กล้องเลื่อนไปครัวอื่น ──
     const flight = { t: 1, fromTarget: new THREE.Vector3(), toTarget: new THREE.Vector3(), from: new THREE.Spherical(), to: new THREE.Spherical() };
     let ledOn = 4; // จำนวนไฟใต้ตู้ที่ใช้กับครัวปัจจุบัน
-    // ย้ายไฟใต้ตู้และไฟเพดานไปครัวที่จะดู · ตอนกล้องเลื่อน ย้ายที่ครึ่งทาง ครัวเดิมจึงไม่มืดทันทีที่กด
+    // ย้ายไฟใต้ตู้ไปครัวที่จะดู · ตอนกล้องเลื่อน ย้ายที่ครึ่งทาง ครัวเดิมจึงไม่มืดทันทีที่กด
     let lightsFor: Layout | null = null;
     const moveLights = (l: Layout) => {
       const xs = ledPositions(l);
@@ -148,7 +143,6 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       leds.forEach((spot, i) => {
         spot.position.x = spot.target.position.x = xs[i] ?? l.x;
       });
-      ceil.position.x = l.x;
       lightsFor = null;
       applyLight();
     };
@@ -172,14 +166,14 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
     };
 
     // ── แสง: ไล่จากค่าตอนกดไปค่าเป้าหมาย ──
-    type Mix = { sun: number; hemi: number; env: number; led: number; ceil: number; exposure: number; sunColor: THREE.Color; ledColor: THREE.Color; ceilColor: THREE.Color; bg: THREE.Color };
-    const NUMBERS = ['sun', 'hemi', 'env', 'led', 'ceil', 'exposure'] as const;
-    const COLORS = ['sunColor', 'ledColor', 'ceilColor', 'bg'] as const;
+    type Mix = { sun: number; hemi: number; env: number; led: number; exposure: number; sunColor: THREE.Color; ledColor: THREE.Color; bg: THREE.Color };
+    const NUMBERS = ['sun', 'hemi', 'env', 'led', 'exposure'] as const;
+    const COLORS = ['sunColor', 'ledColor', 'bg'] as const;
     const mix = (id: LightId): Mix => {
       const p = presetOf(id);
-      return { ...p, sunColor: new THREE.Color(p.sunColor), ledColor: new THREE.Color(p.ledColor), ceilColor: new THREE.Color(p.ceilColor), bg: new THREE.Color(p.bg) };
+      return { ...p, sunColor: new THREE.Color(p.sunColor), ledColor: new THREE.Color(p.ledColor), bg: new THREE.Color(p.bg) };
     };
-    const copy = (a: Mix): Mix => ({ ...a, sunColor: a.sunColor.clone(), ledColor: a.ledColor.clone(), ceilColor: a.ceilColor.clone(), bg: a.bg.clone() });
+    const copy = (a: Mix): Mix => ({ ...a, sunColor: a.sunColor.clone(), ledColor: a.ledColor.clone(), bg: a.bg.clone() });
     const now = mix(light);
     let from = copy(now);
     let goal = copy(now);
@@ -193,8 +187,6 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
         spot.intensity = i < ledOn ? now.led : 0;
         spot.color.copy(now.ledColor);
       });
-      ceil.intensity = now.ceil;
-      ceil.color.copy(now.ceilColor);
       m.led.color.copy(now.ledColor).multiplyScalar(Math.min(1, now.led / 6));
       background.copy(now.bg);
       renderer.toneMappingExposure = now.exposure;
@@ -299,7 +291,6 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, pic
       Object.values(m).forEach((mat) => mat.dispose());
       disposeTextures();
       sun.dispose();
-      ceil.dispose();
       leds.forEach((spot) => spot.dispose());
       scene.environment?.dispose();
       pmrem.dispose();

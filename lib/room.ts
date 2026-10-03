@@ -62,8 +62,9 @@ export type Picks = Record<PartId, string> & { faucet: string };
 export const DEFAULT_PICKS: Picks = { doors: 'white', top: 'quartz-grey', splash: 'tile-white', floor: 'oak-light', faucet: 'chrome' };
 
 // ── แสง ──
-// sun = แสงจากหน้าต่าง, hemi = แสงฟ้า, env = แรงของเงาสะท้อน, led = ไฟใต้ตู้แขวน, ceil = ไฟเพดาน
-// ไฟติดพร้อมกันได้ไม่เกิน 6 ดวง (hemi 1 + led 4 + sun หรือ ceil 1) → โทนที่เปิด ceil ต้องให้ sun เป็น 0 (check:room ตรวจ)
+// sun = แสงจากหน้าต่าง, hemi = แสงฟ้า, env = แรงของเงาสะท้อน, led = ไฟใต้ตู้แขวน
+// ไฟติดพร้อมกันได้ไม่เกิน 6 ดวง (hemi 1 + led 4 + sun 1) · check:room ตรวจ
+// วอร์มไวท์กับคูลไวท์ใช้ sun เป็นแสงหลักย้อมสีตามโทน ห้องจึงมีเงาและไม่แบน
 export type LightId = 'day' | 'warm' | 'cool' | 'night';
 export type LightPreset = {
   id: LightId;
@@ -74,16 +75,14 @@ export type LightPreset = {
   env: number;
   led: number;
   ledColor: string;
-  ceil: number;
-  ceilColor: string;
   bg: string;
   exposure: number;
 };
 export const LIGHTS: LightPreset[] = [
-  { id: 'day', name: { th: 'กลางวัน', en: 'Daylight' }, sun: 3.1, sunColor: '#fff1dc', hemi: 0.38, env: 0.5, led: 0, ledColor: '#ffc98f', ceil: 0, ceilColor: '#ffbf80', bg: '#e9e6e1', exposure: 0.82 },
-  { id: 'warm', name: { th: 'วอร์มไวท์ 3000K', en: 'Warm White 3000K' }, sun: 0, sunColor: '#ffd9a8', hemi: 0.12, env: 0.18, led: 6, ledColor: '#ffc98f', ceil: 7.5, ceilColor: '#ffbf80', bg: '#2a2420', exposure: 1 },
-  { id: 'cool', name: { th: 'คูลไวท์ 6000K', en: 'Cool White 6000K' }, sun: 0, sunColor: '#dfe9ff', hemi: 0.14, env: 0.22, led: 6, ledColor: '#e4eeff', ceil: 8, ceilColor: '#dfe9ff', bg: '#22262b', exposure: 1 },
-  { id: 'night', name: { th: 'กลางคืน', en: 'Night' }, sun: 0, sunColor: '#ffd9a8', hemi: 0.09, env: 0.14, led: 7, ledColor: '#ffc98f', ceil: 0, ceilColor: '#ffbf80', bg: '#141210', exposure: 1.05 },
+  { id: 'day', name: { th: 'กลางวัน', en: 'Daylight' }, sun: 3.1, sunColor: '#fff1dc', hemi: 0.38, env: 0.5, led: 0, ledColor: '#ffc98f', bg: '#e9e6e1', exposure: 0.82 },
+  { id: 'warm', name: { th: 'วอร์มไวท์ 3000K', en: 'Warm White 3000K' }, sun: 1.7, sunColor: '#ffd2a0', hemi: 0.22, env: 0.3, led: 6, ledColor: '#ffc98f', bg: '#2a2420', exposure: 1 },
+  { id: 'cool', name: { th: 'คูลไวท์ 6000K', en: 'Cool White 6000K' }, sun: 1.9, sunColor: '#e6eeff', hemi: 0.26, env: 0.34, led: 6, ledColor: '#e4eeff', bg: '#22262b', exposure: 1 },
+  { id: 'night', name: { th: 'กลางคืน', en: 'Night' }, sun: 0, sunColor: '#ffd9a8', hemi: 0.09, env: 0.14, led: 7, ledColor: '#ffc98f', bg: '#141210', exposure: 1.05 },
 ];
 
 // ── ผังครัว ──

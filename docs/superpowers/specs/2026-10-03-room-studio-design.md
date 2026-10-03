@@ -86,12 +86,12 @@ images from the supplier replace them later (out of scope).
 
 ## Light
 
-Each preset sets sun, sky, environment reflection, under-cabinet lights, ceiling light, background colour and
+Each preset sets the key light (the sun, tinted to the preset in warm and cool white), sky, environment reflection, under-cabinet lights, background colour and
 exposure. A preset change fades over 0.6 s (instant under reduced motion). A material change swaps at once.
 
 Cost rule: the sun covers the whole hall with one shadow map (4096 × 4096, 2048 × 2048 below 768 px; the sun is
 diagonal, so the map has to be wide on both axes). Under-cabinet
-and ceiling lights exist only for the active bay; they move with the camera flight. No more than 6 lights are on at
+lights exist only for the active bay; they move with the camera flight. No more than 6 lights are on at
 any time.
 
 ## Page
