@@ -3,7 +3,7 @@
 // การ์ดบนฉากตอนเจาะดูชิ้นส่วน (จอ lg ขึ้นไป · จอแคบใช้แผงใต้ฉากแทน): แถวหัว (ชื่อหมวด ตัวเลือกที่เลือกอยู่ ปุ่มย่อ ปุ่มปิด) จุดสี ปุ่มทรง คำอธิบาย
 // ไม่มี three.js ในไฟล์นี้ · data-focus-card ให้ RoomScene หาเจอเพื่อลากเส้นชี้มาที่ขอบการ์ด
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 export type Choice = { id: string; label: string; swatch: string };
 // ทรง (ก๊อก ซิงก์) เลือกด้วยปุ่มข้อความ ไม่ใช่จุดสี
@@ -14,9 +14,11 @@ type Props = {
   name: string;
   tag?: string;
   note: string;
-  choices: Choice[];
-  value: string;
-  onChange: (id: string) => void;
+  // ก๊อกและซิงก์: จุดสี (choices) กับปุ่มทรง (shapes) · พื้นผิว: ส่งตัวเลือกวัสดุและสีมาเป็น children
+  choices?: Choice[];
+  value?: string;
+  onChange?: (id: string) => void;
+  children?: ReactNode;
   shapes?: ShapeChoice[];
   shape?: string;
   onShape?: (id: string) => void;
@@ -29,7 +31,7 @@ type Props = {
   onToggle: () => void;
 };
 
-export default function FocusCard({ part, title, name, tag, note, choices, value, onChange, shapes, shape, onShape, back, onBack, open, collapse, expand, onToggle }: Props) {
+export default function FocusCard({ part, title, name, tag, note, choices = [], value, onChange, children, shapes, shape, onShape, back, onBack, open, collapse, expand, onToggle }: Props) {
   const root = useRef<HTMLDivElement>(null);
   // เข้าโหมดเจาะดู หรือย้ายไปชิ้นอื่น: ย้าย focus มาที่ตัวเลือกที่เลือกอยู่
   useEffect(() => {
@@ -74,7 +76,7 @@ export default function FocusCard({ part, title, name, tag, note, choices, value
                   aria-pressed={c.id === value}
                   aria-label={c.label}
                   title={c.label}
-                  onClick={() => onChange(c.id)}
+                  onClick={() => onChange?.(c.id)}
                   className="flex h-11 w-11 items-center justify-center transition-transform focus-visible:outline focus-visible:outline-1 focus-visible:outline-ink active:scale-[0.92] motion-reduce:transition-none"
                 >
                   <span
@@ -86,6 +88,7 @@ export default function FocusCard({ part, title, name, tag, note, choices, value
               ))}
             </div>
           )}
+          {children}
           {shapes && (
             <div className="flex flex-wrap gap-1.5 py-1">
               {shapes.map((s) => (

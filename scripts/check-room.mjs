@@ -1,7 +1,7 @@
 // เช็กข้อมูลห้องจำลอง (lib/room.ts): npm run check:room
 // ผังครัววาดจากตัวเลขล้วน ๆ ตัวเลขผิดนิดเดียวตู้จะซ้อนกันหรือลอยจากผนัง ด่านนี้จับก่อนเปิดเบราว์เซอร์
 import assert from 'node:assert/strict';
-import { PARTS, FAUCET_LOOKS, FAUCET_NOTES, FAUCET_SHAPES, SINKS, SINK_COLORS, DEFAULT_PICKS, LIGHTS, LAYOUTS, BAY_PITCH, HALL, ORBIT, FOCUS, SHOWROOM, runLength } from '../lib/room.ts';
+import { SURFACES, HEX, FAUCET_LOOKS, FAUCET_NOTES, FAUCET_SHAPES, SINKS, SINK_COLORS, DEFAULT_PICKS, LIGHTS, LAYOUTS, BAY_PITCH, HALL, ORBIT, FOCUS, SHOWROOM, runLength } from '../lib/room.ts';
 import { FAUCET } from '../lib/finishes.ts';
 
 const named = (what, name) => assert.ok(name?.th?.trim() && name?.en?.trim(), `${what}: ต้องมีชื่อ th และ en`);
@@ -13,16 +13,24 @@ const noted = (what, note) => {
 const unique = (what, ids) => assert.equal(new Set(ids).size, ids.length, `${what}: id ซ้ำ`);
 const near = (a, b) => Math.abs(a - b) < 1e-6;
 
-// ── ตัวเลือกวัสดุ ──
-for (const [part, options] of Object.entries(PARTS)) {
-  unique(part, options.map((o) => o.id));
-  for (const o of options) {
+// ── พื้นผิว: วัสดุกับสีแยกกัน ──
+assert.deepEqual(Object.keys(SURFACES), ['upper', 'lower', 'top', 'splash', 'floor']);
+for (const [part, { materials, colours }] of Object.entries(SURFACES)) {
+  unique(`${part}.materials`, materials.map((o) => o.id));
+  unique(`${part}.colours`, colours.map((c) => c.hex));
+  for (const o of materials) {
     named(`${part}.${o.id}`, o.name);
     noted(`${part}.${o.id}.note`, o.note);
-    assert.ok(o.swatch, `${part}.${o.id}: ไม่มี swatch`);
     if (o.look === 'top') assert.equal(part, 'splash', `${part}.${o.id}: look 'top' ใช้ได้เฉพาะผนังกันเปื้อน`);
+    else assert.ok(o.look.roughness >= 0 && o.look.roughness <= 1 && !('color' in o.look), `${part}.${o.id}: look ต้องมี roughness และไม่มี color`);
   }
-  assert.ok(options.some((o) => o.id === DEFAULT_PICKS[part]), `${part}: ค่าเริ่มต้น ${DEFAULT_PICKS[part]} ไม่อยู่ในตัวเลือก`);
+  for (const c of colours) {
+    named(`${part} ${c.hex}`, c.name);
+    assert.match(c.hex, HEX, `${part}: รหัสสี ${c.hex} ต้องเป็น #rrggbb ตัวเล็ก`);
+  }
+  const pick = DEFAULT_PICKS[part];
+  assert.ok(materials.some((o) => o.id === pick.material), `${part}: วัสดุเริ่มต้น ${pick.material} ไม่อยู่ในตัวเลือก`);
+  assert.match(pick.color, HEX, `${part}: สีเริ่มต้นต้องเป็น #rrggbb`);
 }
 // สีก๊อกต้องตรงกับ lib/finishes.ts ทุกตัว ไม่ขาดไม่เกิน
 // สีซิงก์: ชื่อ คำอธิบาย สีจุด และ look ครบ · ค่าเริ่มต้นอยู่ในตัวเลือก
@@ -122,8 +130,8 @@ LAYOUTS.forEach((layout, index) => {
     for (const q of layout.props) if (p !== q) assert.ok(Math.hypot(p.x - q.x, p.z - q.z) >= r + REACH[q.kind], `${at} props.${p.kind} ทับ ${q.kind}`);
   }
 
-  // มุมเจาะดูชิ้นส่วน: ครบ 6 หมวด อยู่ในขอบเขตกล้อง และจุดชี้อยู่ในครัวของตัวเอง
-  assert.deepEqual(Object.keys(layout.focus).sort(), ['doors', 'faucet', 'floor', 'sink', 'splash', 'top'], `${at}: focus ต้องมีครบทุกหมวด`);
+  // มุมเจาะดูชิ้นส่วน: ครบ 7 หมวด อยู่ในขอบเขตกล้อง และจุดชี้อยู่ในครัวของตัวเอง
+  assert.deepEqual(Object.keys(layout.focus).sort(), ['faucet', 'floor', 'lower', 'sink', 'splash', 'top', 'upper'], `${at}: focus ต้องมีครบทุกหมวด`);
   const reach = Math.max(Math.abs(back.x), Math.abs(backEnd));
   for (const [part, f] of Object.entries(layout.focus)) {
     const where = `${at} focus.${part}`;

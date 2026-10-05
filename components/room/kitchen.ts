@@ -11,12 +11,13 @@ import type { Layout, Module, Run } from '@/lib/room';
 
 export type Mats = ReturnType<typeof makeMaterials>;
 
-// วัสดุชุดเดียวใช้ร่วมกันทั้ง 3 ครัว · door, top, splash, floor, faucet เปลี่ยนตามที่ผู้ใช้เลือก (applyLook)
+// วัสดุชุดเดียวใช้ร่วมกันทั้ง 3 ครัว · upper, lower, top, splash, floor, faucet เปลี่ยนตามที่ผู้ใช้เลือก (applyLook)
 // sink แยกจาก steel เพื่อให้ชี้และไฮไลต์ซิงก์ได้โดยมือจับไม่สว่างตาม
 export function makeMaterials() {
   const standard = (color: string, roughness: number, metalness = 0) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
   return {
-    door: standard('#eeece8', 0.62),
+    upper: standard('#eeece8', 0.62), // ตู้แขวน
+    lower: standard('#eeece8', 0.62), // ตู้ล่างและตู้สูง
     top: standard('#8d8983', 0.3),
     splash: standard('#efede8', 0.18),
     floor: standard('#b7a085', 0.62),
@@ -84,8 +85,8 @@ function box(group: THREE.Group, mat: THREE.Material, x0: number, x1: number, y0
   return mesh(group, geo, mat, (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
 }
 
-const front = (g: THREE.Group, m: Mats, x0: number, x1: number, y0: number, y1: number, z: number) =>
-  box(g, m.door, x0 + GAP, x1 - GAP, y0 + GAP, y1 - GAP, z, z + 0.018, 0.004);
+const front = (g: THREE.Group, m: Mats, x0: number, x1: number, y0: number, y1: number, z: number, mat = m.lower) =>
+  box(g, mat, x0 + GAP, x1 - GAP, y0 + GAP, y1 - GAP, z, z + 0.018, 0.004);
 
 function handle(g: THREE.Group, m: Mats, x: number, y: number, z: number, vertical = false) {
   const bar = mesh(g, new RoundedBoxGeometry(0.16, 0.012, 0.012, 2, 0.005), m.steel, x, y, z + 0.034);
@@ -98,7 +99,7 @@ function handle(g: THREE.Group, m: Mats, x: number, y: number, z: number, vertic
 // ตัวตู้ล่าง + ขาตู้ + พื้นมืดหลังร่องหน้าบาน
 // top = ขอบบนของตัวตู้ (ตู้ซิงก์เตี้ยกว่า เพื่อเว้นที่ให้อ่าง) · depth = ลึกตัวตู้ (ตู้มุมลึกเท่าท็อป ปิดช่องระหว่างมุมกับขา)
 function carcass(g: THREE.Group, m: Mats, x0: number, x1: number, backing = true, top = BASE, depth = DEPTH) {
-  box(g, m.door, x0, x1, KICK, top, 0, depth);
+  box(g, m.lower, x0, x1, KICK, top, 0, depth);
   box(g, m.kick, x0, x1, 0, KICK, 0.02, 0.5);
   if (backing) box(g, m.kick, x0 + 0.01, x1 - 0.01, KICK + 0.01, BASE - 0.01, DEPTH, DEPTH + 0.001);
 }
@@ -151,10 +152,10 @@ function sink(g: THREE.Group, m: Mats, x0: number, x1: number) {
   const [z0, z1, floor] = [0.12, 0.52, 0.68];
   // ตัวตู้ช่วงบน (จากก้นอ่างถึงใต้ท็อป) เป็นกรอบ 4 ด้าน กว้างพอสำหรับอ่างทุกทรง
   const [fa, fb] = [cx - 0.36, cx + 0.36];
-  box(g, m.door, x0, x1, floor, BASE, 0, z0 - 0.01);
-  box(g, m.door, x0, x1, floor, BASE, z1 + 0.01, DEPTH);
-  box(g, m.door, x0, fa, floor, BASE, z0 - 0.01, z1 + 0.01);
-  box(g, m.door, fb, x1, floor, BASE, z0 - 0.01, z1 + 0.01);
+  box(g, m.lower, x0, x1, floor, BASE, 0, z0 - 0.01);
+  box(g, m.lower, x0, x1, floor, BASE, z1 + 0.01, DEPTH);
+  box(g, m.lower, x0, fa, floor, BASE, z0 - 0.01, z1 + 0.01);
+  box(g, m.lower, fb, x1, floor, BASE, z0 - 0.01, z1 + 0.01);
   // ท็อปรอบช่องสี่เหลี่ยม a ถึง b
   const cutTop = (v: THREE.Group, a: number, b: number) => {
     box(v, m.top, x0, a, BASE, TOP, 0, COUNTER);
@@ -241,7 +242,7 @@ function ovenFront(g: THREE.Group, m: Mats, x0: number, x1: number, y0: number, 
 
 // ตู้สูง: บานล่าง เตาอบฝัง บานบน
 function tall(g: THREE.Group, m: Mats, x0: number, x1: number, handleX: number) {
-  box(g, m.door, x0, x1, KICK, WALL_Y1, 0, DEPTH);
+  box(g, m.lower, x0, x1, KICK, WALL_Y1, 0, DEPTH);
   box(g, m.kick, x0, x1, 0, KICK, 0.02, 0.5);
   box(g, m.kick, x0 + 0.01, x1 - 0.01, KICK + 0.01, WALL_Y1 - 0.01, DEPTH, DEPTH + 0.001);
   front(g, m, x0, x1, KICK, 0.72, DEPTH);
@@ -253,13 +254,13 @@ function tall(g: THREE.Group, m: Mats, x0: number, x1: number, handleX: number) 
 
 // ตู้แขวน: หน้าบานยื่นลงใต้ตู้ 2 ซม. ใช้เป็นที่จับ · เหนือเตา = ฮูดฝัง · ที่อื่น = เส้นไฟใต้ตู้
 function wallCabinet(g: THREE.Group, m: Mats, x0: number, x1: number, overHob: boolean) {
-  box(g, m.door, x0, x1, WALL_Y0, WALL_Y1, 0, WALL_DEPTH);
+  box(g, m.upper, x0, x1, WALL_Y0, WALL_Y1, 0, WALL_DEPTH);
   box(g, m.kick, x0 + 0.01, x1 - 0.01, WALL_Y0 + 0.01, WALL_Y1 - 0.01, WALL_DEPTH, WALL_DEPTH + 0.001);
   const mid = (x0 + x1) / 2;
   if (x1 - x0 >= 0.8) {
-    front(g, m, x0, mid, WALL_Y0 - 0.02, WALL_Y1, WALL_DEPTH);
-    front(g, m, mid, x1, WALL_Y0 - 0.02, WALL_Y1, WALL_DEPTH);
-  } else front(g, m, x0, x1, WALL_Y0 - 0.02, WALL_Y1, WALL_DEPTH);
+    front(g, m, x0, mid, WALL_Y0 - 0.02, WALL_Y1, WALL_DEPTH, m.upper);
+    front(g, m, mid, x1, WALL_Y0 - 0.02, WALL_Y1, WALL_DEPTH, m.upper);
+  } else front(g, m, x0, x1, WALL_Y0 - 0.02, WALL_Y1, WALL_DEPTH, m.upper);
   if (overHob) box(g, m.steel, mid - 0.27, mid + 0.27, WALL_Y0 - 0.015, WALL_Y0, 0.03, 0.3);
   else box(g, m.led, x0 + 0.02, x1 - 0.02, WALL_Y0 - 0.006, WALL_Y0, 0.24, 0.26).castShadow = false;
 }
