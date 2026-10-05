@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import type { Look, Pattern } from '@/lib/room';
 
 const PX = 512;
+const KEEP = 24; // สีกำหนดเองสร้างลายใหม่ทุกสี เก็บไว้แค่ชุดที่ใช้ล่าสุด
 const cache = new Map<string, THREE.CanvasTexture>();
 
 // สุ่มแบบกำหนด seed ให้ลายออกมาเหมือนเดิมทุกครั้ง
@@ -63,7 +64,8 @@ function textureFor(look: Look) {
   const size = look.size ?? 1;
   const key = `${look.pattern}|${look.color}|${size}`;
   let texture = cache.get(key);
-  if (!texture) {
+  if (texture) cache.delete(key); // ใส่กลับท้ายแถว = เพิ่งใช้ล่าสุด
+  else {
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = PX;
     const g = canvas.getContext('2d')!;
@@ -75,7 +77,13 @@ function textureFor(look: Look) {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.setScalar(1 / size);
     texture.anisotropy = 8;
-    cache.set(key, texture);
+  }
+  cache.set(key, texture);
+  // setPicks ใส่ look ครบทุกพื้นผิวทุกครั้ง ลายที่ใช้อยู่จึงอยู่ท้ายแถวเสมอ ตัวที่หลุดคือตัวที่ไม่มีใครใช้แล้ว
+  for (const [old, stale] of cache) {
+    if (cache.size <= KEEP) break;
+    stale.dispose();
+    cache.delete(old);
   }
   return texture;
 }

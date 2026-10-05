@@ -10,112 +10,120 @@ export type Name = { th: string; en: string };
 // size = ลาย 1 ชุดกินกี่เมตร (ไม่ใส่ = 1) · ของจริงควรเปลี่ยนเป็นไฟล์ลายจากผู้ผลิต
 export type Pattern = 'wood' | 'planks' | 'tile' | 'speckle';
 export type Look = { color: string; roughness: number; metalness?: number; pattern?: Pattern; size?: number };
-// look: 'top' = ใช้วัสดุเดียวกับท็อป (มีเฉพาะผนังกันเปื้อน)
-// note = คำอธิบายสั้น ๆ ของตัวเลือก ขึ้นในการ์ดตอนเจาะดูชิ้นส่วน (ข้อความตัวอย่าง รอเจ้าของร้านแก้)
-export type Option = { id: string; name: Name; note: Name; swatch: string; look: Look | 'top' };
-export type PartId = 'doors' | 'top' | 'splash' | 'floor';
+// Option = ตัวเลือกสำเร็จที่ผูกสีกับผิวไว้ด้วยกัน (ใช้กับสีซิงก์) · note ขึ้นในการ์ดตอนเจาะดูชิ้นส่วน (ข้อความตัวอย่าง รอเจ้าของร้านแก้)
+export type Option = { id: string; name: Name; note: Name; swatch: string; look: Look };
 
-export const PARTS: Record<PartId, Option[]> = {
-  doors: [
+// พื้นผิว 5 ชิ้น เลือกวัสดุ (ผิวและลาย) กับสีแยกกัน · สีเป็นรหัส #rrggbb จะกดจากชุดสำเร็จหรือกำหนดเองก็ได้
+// look: 'top' = ใช้วัสดุและสีเดียวกับท็อป (มีเฉพาะผนังกันเปื้อน)
+export type SurfaceId = 'upper' | 'lower' | 'top' | 'splash' | 'floor';
+export type Material = { id: string; name: Name; note: Name; look: Omit<Look, 'color'> | 'top' };
+export type Colour = { hex: string; name: Name };
+export type Surface = { material: string; color: string };
+export const HEX = /^#[0-9a-f]{6}$/;
+
+// ตู้บนกับตู้ล่างใช้รายการเดียวกัน แต่เลือกแยกกัน · ตู้สูงนับเป็นตู้ล่าง
+const CABINET: { materials: Material[]; colours: Colour[] } = {
+  materials: [
     {
-      id: 'white', name: { th: 'ขาวด้าน', en: 'Matte White' },
-      note: { th: 'ผิวด้านไม่สะท้อนแสง ทำให้ครัวดูสว่างและกว้างขึ้น ไม่ค่อยเห็นรอยนิ้วมือ', en: 'A matte surface that keeps the kitchen bright and open. Fingerprints barely show.' },
-      swatch: '#eeece8',
-      look: { color: '#eeece8', roughness: 0.62 },
+      id: 'matte', name: { th: 'ผิวด้าน', en: 'Matte' },
+      note: { th: 'ผิวด้านไม่สะท้อนแสง ไม่ค่อยเห็นรอยนิ้วมือ เหมาะกับครัวที่ใช้งานทุกวัน', en: 'A matte surface with no glare. Fingerprints barely show, which suits a kitchen in daily use.' },
+      look: { roughness: 0.62 },
     },
     {
-      id: 'graphite', name: { th: 'เทาเข้ม', en: 'Graphite' },
-      note: { th: 'เทาเข้ม ตัดกับท็อปสีอ่อนได้ชัด เหมาะกับคนที่อยากได้ครัวโทนเข้ม', en: 'A dark grey that sets off a pale countertop. For a kitchen in a deeper tone.' },
-      swatch: '#45464a',
-      look: { color: '#45464a', roughness: 0.58 },
+      id: 'gloss', name: { th: 'ผิวเงา', en: 'Gloss' },
+      note: { th: 'ผิวเงาสะท้อนแสง ทำให้ครัวดูสว่างและกว้างขึ้น เช็ดคราบออกง่าย', en: 'A gloss surface that reflects light and makes the kitchen feel brighter and wider. It wipes clean easily.' },
+      look: { roughness: 0.2 },
     },
     {
-      id: 'oak',
-      name: { th: 'ลายไม้โอ๊ค', en: 'Oak' },
-      note: { th: 'ลายไม้โอ๊คสีน้ำผึ้ง ให้ความรู้สึกอบอุ่น เข้ากับท็อปหินได้ทุกสี', en: 'Honey oak grain that warms the room and sits well with any stone countertop.' },
-      swatch: 'linear-gradient(90deg, #b89468, #a47f52 40%, #c2a078 70%, #b08a5e)',
-      look: { color: '#b89468', roughness: 0.55, pattern: 'wood' },
-    },
-    {
-      id: 'sage', name: { th: 'เขียวหม่น', en: 'Sage' },
-      note: { th: 'เขียวอมเทาสีสบายตา ดูสดกว่าสีขาวแต่ไม่ฉูดฉาด', en: 'A soft grey green. Fresher than white without being loud.' },
-      swatch: '#8f9c88',
-      look: { color: '#8f9c88', roughness: 0.6 },
-    },
-  ],
-  top: [
-    {
-      id: 'quartz-white', name: { th: 'ควอตซ์ขาว', en: 'White Quartz' },
-      note: { th: 'ควอตซ์สีขาวมีเกล็ดละเอียด คราบไม่ค่อยฝัง เช็ดออกง่าย', en: 'White quartz with a fine fleck. Spills sit on the surface and wipe clean.' },
-      swatch: '#e6e3dd',
-      look: { color: '#e6e3dd', roughness: 0.3, pattern: 'speckle' },
-    },
-    {
-      id: 'quartz-grey', name: { th: 'ควอตซ์เทา', en: 'Grey Quartz' },
-      note: { th: 'ควอตซ์สีเทากลาง ไม่ค่อยเห็นคราบและรอยใช้งาน เหมาะกับครัวที่ทำอาหารทุกวัน', en: 'Mid grey quartz that hides marks from daily cooking.' },
-      swatch: '#8d8983',
-      look: { color: '#8d8983', roughness: 0.3, pattern: 'speckle' },
-    },
-    {
-      id: 'stone-black', name: { th: 'หินดำ', en: 'Black Stone' },
-      note: { th: 'หินสีดำผิวเงา ให้ครัวดูหรูและนิ่ง ควรเช็ดให้แห้งหลังใช้เพื่อไม่ให้เห็นคราบน้ำ', en: 'Polished black stone for a calm, formal kitchen. Wipe it dry after use so water marks do not show.' },
-      swatch: '#26262a',
-      look: { color: '#26262a', roughness: 0.22, pattern: 'speckle' },
-    },
-    {
-      id: 'wood',
-      name: { th: 'ไม้จริง', en: 'Solid Wood' },
-      note: { th: 'ท็อปไม้จริง สัมผัสอุ่นมือ ต้องทาน้ำมันรักษาเนื้อไม้เป็นระยะ', en: 'A solid wood top that feels warm to the touch. It needs oiling from time to time.' },
-      swatch: 'linear-gradient(90deg, #a97c50, #8f6740 45%, #b58a5c)',
-      look: { color: '#a97c50', roughness: 0.5, pattern: 'wood' },
+      id: 'wood', name: { th: 'ลายไม้', en: 'Wood Grain' },
+      note: { th: 'ลายไม้ให้ความรู้สึกอบอุ่น เข้ากับท็อปหินได้ทุกสี', en: 'Wood grain that warms the room and sits well with any stone countertop.' },
+      look: { roughness: 0.55, pattern: 'wood' },
     },
   ],
-  splash: [
-    {
-      id: 'tile-white', name: { th: 'กระเบื้องขาวเงา', en: 'Gloss White Tile' },
-      note: { th: 'กระเบื้องขาวผิวเงา สะท้อนแสงใต้ตู้ให้เคาน์เตอร์สว่าง เช็ดคราบน้ำมันออกง่าย', en: 'Gloss white tile that bounces the under-cabinet light onto the counter and wipes clean of grease.' },
-      swatch: '#efede8',
-      look: { color: '#efede8', roughness: 0.18, pattern: 'tile', size: 0.5 },
-    },
-    {
-      id: 'tile-grey', name: { th: 'กระเบื้องเทา', en: 'Grey Tile' },
-      note: { th: 'กระเบื้องสีเทาผิวกึ่งด้าน ไม่ค่อยเห็นคราบกระเด็น ดูเรียบร้อยอยู่เสมอ', en: 'Satin grey tile that hides splashes and always looks tidy.' },
-      swatch: '#a7a6a2',
-      look: { color: '#a7a6a2', roughness: 0.3, pattern: 'tile', size: 0.5 },
-    },
-    {
-      id: 'match', name: { th: 'วัสดุเดียวกับท็อป', en: 'Same as Countertop' },
-      note: { th: 'ใช้วัสดุเดียวกับท็อปขึ้นผนังต่อเนื่อง ดูต่อเนื่องเป็นชิ้นเดียวกัน', en: 'The countertop material carried up the wall, so counter and wall read as one piece.' },
-      swatch: 'linear-gradient(135deg, #e6e3dd 50%, #8d8983 50%)',
-      look: 'top',
-    },
+  colours: [
+    { hex: '#eeece8', name: { th: 'ขาว', en: 'White' } },
+    { hex: '#45464a', name: { th: 'เทาเข้ม', en: 'Graphite' } },
+    { hex: '#b89468', name: { th: 'น้ำตาลโอ๊ค', en: 'Oak Brown' } },
+    { hex: '#8f9c88', name: { th: 'เขียวหม่น', en: 'Sage' } },
   ],
-  floor: [
-    {
-      id: 'oak-light', name: { th: 'ไม้โอ๊คอ่อน', en: 'Light Oak' },
-      note: { th: 'พื้นลายไม้โอ๊คสีอ่อน ทำให้ห้องดูสว่างและเดินสบายเท้า', en: 'Light oak boards that brighten the room and feel easy underfoot.' },
-      swatch: '#b7a085',
-      look: { color: '#b7a085', roughness: 0.62, pattern: 'planks' },
-    },
-    {
-      id: 'walnut', name: { th: 'ไม้วอลนัต', en: 'Walnut' },
-      note: { th: 'พื้นลายไม้วอลนัตสีเข้ม ให้ห้องดูอบอุ่น ตัดกับตู้สีอ่อนได้ดี', en: 'Dark walnut boards that warm the room and contrast with pale cabinets.' },
-      swatch: '#6f5340',
-      look: { color: '#6f5340', roughness: 0.58, pattern: 'planks' },
-    },
-    {
-      id: 'concrete', name: { th: 'ปูนขัดมัน', en: 'Polished Concrete' },
-      note: { th: 'พื้นปูนขัดมันสีเทาเรียบ ไม่มีร่องยาแนว ทำความสะอาดง่าย', en: 'Smooth grey polished concrete with no grout lines to clean.' },
-      swatch: '#a3a09b',
-      look: { color: '#a3a09b', roughness: 0.45, pattern: 'speckle', size: 2 },
-    },
-    {
-      id: 'tile-grey', name: { th: 'กระเบื้องเทา', en: 'Grey Tile' },
-      note: { th: 'กระเบื้องแผ่นใหญ่สีเทาอ่อน เหมาะกับครัวที่ใช้งานหนัก', en: 'Large pale grey tiles for a busy kitchen.' },
-      swatch: '#b4b2ad',
-      look: { color: '#b4b2ad', roughness: 0.4, pattern: 'tile', size: 3 },
-    },
-  ],
+};
+
+export const SURFACES: Record<SurfaceId, { materials: Material[]; colours: Colour[] }> = {
+  upper: CABINET,
+  lower: CABINET,
+  top: {
+    materials: [
+      {
+        id: 'quartz', name: { th: 'ควอตซ์', en: 'Quartz' },
+        note: { th: 'ควอตซ์มีเกล็ดละเอียด คราบไม่ค่อยฝัง เช็ดออกง่าย', en: 'Quartz with a fine fleck. Spills sit on the surface and wipe clean.' },
+        look: { roughness: 0.3, pattern: 'speckle' },
+      },
+      {
+        id: 'stone', name: { th: 'หินขัดเงา', en: 'Polished Stone' },
+        note: { th: 'หินผิวเงา ให้ครัวดูหรูและนิ่ง ควรเช็ดให้แห้งหลังใช้เพื่อไม่ให้เห็นคราบน้ำ', en: 'Polished stone for a calm, formal kitchen. Wipe it dry after use so water marks do not show.' },
+        look: { roughness: 0.22, pattern: 'speckle' },
+      },
+      {
+        id: 'wood', name: { th: 'ไม้จริง', en: 'Solid Wood' },
+        note: { th: 'ท็อปไม้จริง สัมผัสอุ่นมือ ต้องทาน้ำมันรักษาเนื้อไม้เป็นระยะ', en: 'A solid wood top that feels warm to the touch. It needs oiling from time to time.' },
+        look: { roughness: 0.5, pattern: 'wood' },
+      },
+    ],
+    colours: [
+      { hex: '#e6e3dd', name: { th: 'ขาว', en: 'White' } },
+      { hex: '#8d8983', name: { th: 'เทา', en: 'Grey' } },
+      { hex: '#26262a', name: { th: 'ดำ', en: 'Black' } },
+      { hex: '#a97c50', name: { th: 'น้ำตาลไม้', en: 'Wood Brown' } },
+    ],
+  },
+  splash: {
+    materials: [
+      {
+        id: 'tile-gloss', name: { th: 'กระเบื้องเงา', en: 'Gloss Tile' },
+        note: { th: 'กระเบื้องผิวเงา สะท้อนแสงใต้ตู้ให้เคาน์เตอร์สว่าง เช็ดคราบน้ำมันออกง่าย', en: 'Gloss tile that bounces the under-cabinet light onto the counter and wipes clean of grease.' },
+        look: { roughness: 0.18, pattern: 'tile', size: 0.5 },
+      },
+      {
+        id: 'tile-satin', name: { th: 'กระเบื้องกึ่งด้าน', en: 'Satin Tile' },
+        note: { th: 'กระเบื้องผิวกึ่งด้าน ไม่ค่อยเห็นคราบกระเด็น ดูเรียบร้อยอยู่เสมอ', en: 'Satin tile that hides splashes and always looks tidy.' },
+        look: { roughness: 0.3, pattern: 'tile', size: 0.5 },
+      },
+      {
+        id: 'match', name: { th: 'วัสดุเดียวกับท็อป', en: 'Same as Countertop' },
+        note: { th: 'ใช้วัสดุและสีเดียวกับท็อปขึ้นผนัง ดูต่อเนื่องเป็นชิ้นเดียวกัน', en: 'The countertop material and colour carried up the wall, so counter and wall read as one piece.' },
+        look: 'top',
+      },
+    ],
+    colours: [
+      { hex: '#efede8', name: { th: 'ขาว', en: 'White' } },
+      { hex: '#a7a6a2', name: { th: 'เทา', en: 'Grey' } },
+    ],
+  },
+  floor: {
+    materials: [
+      {
+        id: 'planks', name: { th: 'ไม้แผ่น', en: 'Wood Planks' },
+        note: { th: 'พื้นลายไม้แผ่นยาว ให้ห้องดูอบอุ่นและเดินสบายเท้า', en: 'Long wood boards that warm the room and feel easy underfoot.' },
+        look: { roughness: 0.62, pattern: 'planks' },
+      },
+      {
+        id: 'concrete', name: { th: 'ปูนขัดมัน', en: 'Polished Concrete' },
+        note: { th: 'พื้นปูนขัดมันเรียบ ไม่มีร่องยาแนว ทำความสะอาดง่าย', en: 'Smooth polished concrete with no grout lines to clean.' },
+        look: { roughness: 0.45, pattern: 'speckle', size: 2 },
+      },
+      {
+        id: 'tile', name: { th: 'กระเบื้อง', en: 'Tile' },
+        note: { th: 'กระเบื้องแผ่นใหญ่ เหมาะกับครัวที่ใช้งานหนัก', en: 'Large tiles for a busy kitchen.' },
+        look: { roughness: 0.4, pattern: 'tile', size: 3 },
+      },
+    ],
+    colours: [
+      { hex: '#b7a085', name: { th: 'โอ๊คอ่อน', en: 'Light Oak' } },
+      { hex: '#6f5340', name: { th: 'วอลนัต', en: 'Walnut' } },
+      { hex: '#a3a09b', name: { th: 'เทา', en: 'Grey' } },
+      { hex: '#b4b2ad', name: { th: 'เทาอ่อน', en: 'Pale Grey' } },
+    ],
+  },
 };
 
 // สีก๊อก: ชื่อและจุดสีมาจาก lib/finishes.ts (FAUCET) · ที่นี่เก็บแค่ค่าวัสดุ 3D ต่อ id
@@ -173,9 +181,16 @@ export const SINK_COLORS: Option[] = [
     look: { color: '#6f7275', roughness: 0.36, metalness: 1 },
   },
 ];
-export type Picks = Record<PartId, string> & { faucet: string; faucetShape: string; sink: string; sinkColor: string };
-export type Part = PartId | 'faucet' | 'sink'; // ชิ้นส่วนที่ชี้และเจาะดูได้ในฉาก
-export const DEFAULT_PICKS: Picks = { doors: 'white', top: 'quartz-grey', splash: 'tile-white', floor: 'oak-light', faucet: 'chrome', faucetShape: 'gooseneck', sink: 'single', sinkColor: 'steel' };
+export type Picks = Record<SurfaceId, Surface> & { faucet: string; faucetShape: string; sink: string; sinkColor: string };
+export type Part = SurfaceId | 'faucet' | 'sink'; // ชิ้นส่วนที่ชี้และเจาะดูได้ในฉาก
+export const DEFAULT_PICKS: Picks = {
+  upper: { material: 'matte', color: '#eeece8' },
+  lower: { material: 'matte', color: '#eeece8' },
+  top: { material: 'quartz', color: '#8d8983' },
+  splash: { material: 'tile-gloss', color: '#efede8' },
+  floor: { material: 'planks', color: '#b7a085' },
+  faucet: 'chrome', faucetShape: 'gooseneck', sink: 'single', sinkColor: 'steel',
+};
 
 // ── แสง ──
 // sun = แสงจากหน้าต่าง, hemi = แสงฟ้า, env = แรงของเงาสะท้อน, led = ไฟใต้ตู้แขวน
@@ -271,7 +286,8 @@ export const LAYOUTS: Layout[] = [
     ],
     home: { azimuth: 0.42, polar: 1.36, distance: 5.2, target: [1.08, 0.3] },
     focus: {
-      doors: { at: [1.5, 0.48, 0.58], azimuth: 0.35, polar: 1.3, distance: 2.7 },
+      upper: { at: [1.5, 1.8, 0.34], azimuth: 0.35, polar: 1.45, distance: 2.4 },
+      lower: { at: [1.5, 0.48, 0.58], azimuth: 0.35, polar: 1.3, distance: 2.7 },
       top: { at: [0.4, 0.9, 0.3], azimuth: 0.3, polar: 1.1, distance: 1.8 },
       splash: { at: [0.4, 1.17, 0.01], azimuth: 0.25, polar: 1.4, distance: 2 },
       floor: { at: [0, 0, 1.6], azimuth: 0.3, polar: 1.05, distance: 3 },
@@ -296,7 +312,8 @@ export const LAYOUTS: Layout[] = [
     ],
     home: { azimuth: 0.55, polar: 1.25, distance: 6.2, target: [1, 1.1] },
     focus: {
-      doors: { at: [0.6, 0.48, 0.58], azimuth: 0.35, polar: 1.3, distance: 2.7 },
+      upper: { at: [0.6, 1.8, 0.34], azimuth: 0.35, polar: 1.45, distance: 2.4 },
+      lower: { at: [0.6, 0.48, 0.58], azimuth: 0.35, polar: 1.3, distance: 2.7 },
       top: { at: [-0.6, 0.9, 0.3], azimuth: 0.45, polar: 1.1, distance: 1.8 },
       splash: { at: [-0.6, 1.17, 0.01], azimuth: 0.4, polar: 1.4, distance: 2 },
       floor: { at: [0.4, 0, 1.8], azimuth: 0.3, polar: 1.05, distance: 3 },
@@ -325,7 +342,8 @@ export const LAYOUTS: Layout[] = [
     ],
     home: { azimuth: 0, polar: 1.18, distance: 6.6, target: [1, 1.2] },
     focus: {
-      doors: { at: [-0.7, 0.48, 0.58], azimuth: 0.45, polar: 1.25, distance: 2.7 }, // มุมเอียงขวา: หมุนสุดทางซ้ายแล้วขาซ้ายยังไม่บังบาน
+      upper: { at: [-0.7, 1.8, 0.34], azimuth: 0.45, polar: 1.45, distance: 2.4 },
+      lower: { at: [-0.7, 0.48, 0.58], azimuth: 0.45, polar: 1.25, distance: 2.7 }, // มุมเอียงขวา: หมุนสุดทางซ้ายแล้วขาซ้ายยังไม่บังบาน
       top: { at: [0.7, 0.9, 0.3], azimuth: -0.2, polar: 1.1, distance: 1.8 },
       splash: { at: [0.7, 1.17, 0.01], azimuth: -0.15, polar: 1.4, distance: 2 },
       floor: { at: [0, 0, 2], azimuth: 0, polar: 1.05, distance: 3 },

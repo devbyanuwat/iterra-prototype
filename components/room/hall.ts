@@ -125,7 +125,7 @@ export function buildHall(m: Mats, lang: Lang): Hall {
     const [a, b, z0, z1] = [table.x - table.w / 2, table.x + table.w / 2, table.z - table.d / 2, table.z + table.d / 2];
     slab(solid, m.wood, a, b, 0.72, 0.76, z0, z1);
     for (const x of [a + 0.06, b - 0.1]) for (const z of [z0 + 0.06, z1 - 0.1]) slab(solid, m.kick, x, x + 0.04, 0, 0.72, z, z + 0.04);
-    [m.door, m.top, m.splash, m.floor].forEach((mat, i) => {
+    [m.lower, m.top, m.splash, m.floor].forEach((mat, i) => {
       const x = table.x + (i - 1.5) * 0.36;
       slab(solid, mat, x - 0.13, x + 0.13, 0.76, 0.778, table.z - 0.17, table.z + 0.17);
     });

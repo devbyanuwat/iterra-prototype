@@ -9,7 +9,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { FAUCET_LOOKS, FOCUS, HALL, LAYOUTS, LIGHTS, ORBIT, PARTS, SHOWROOM, SINK_COLORS, type Layout, type LayoutId, type LightId, type Look, type Part, type Picks } from '@/lib/room';
+import { FAUCET_LOOKS, FOCUS, HALL, LAYOUTS, LIGHTS, ORBIT, SHOWROOM, SINK_COLORS, SURFACES, type Layout, type LayoutId, type LightId, type Look, type Part, type Picks, type SurfaceId } from '@/lib/room';
 import { buildKitchen, ledPositions, makeMaterials } from './kitchen';
 import { applyLook, disposeTextures } from './textures';
 import { buildHall } from './hall';
@@ -27,10 +27,10 @@ const TRACK = 22; // ความแรงของไฟรางตอนเ�
 const FADE = 0.6; // วินาทีที่แสงใช้ไล่ไปโทนใหม่
 const layoutOf = (id: LayoutId) => LAYOUTS.find((l) => l.id === id)!;
 const presetOf = (id: LightId) => LIGHTS.find((l) => l.id === id)!;
-// look ของตัวเลือกที่เลือกอยู่ · 'top' (ผนังกันเปื้อนแบบวัสดุเดียวกับท็อป) = ใช้ look ของท็อปที่เลือก
-const lookOf = (part: keyof typeof PARTS, picks: Picks): Look => {
-  const look = PARTS[part].find((o) => o.id === picks[part])!.look;
-  return look === 'top' ? lookOf('top', picks) : look;
+// look ของพื้นผิว = ผิวและลายของวัสดุที่เลือก + สีที่เลือก · 'top' (ผนังกันเปื้อนแบบวัสดุเดียวกับท็อป) = ใช้ look ของท็อป
+const lookOf = (part: SurfaceId, picks: Picks): Look => {
+  const look = SURFACES[part].materials.find((o) => o.id === picks[part].material)!.look;
+  return look === 'top' ? lookOf('top', picks) : { ...look, color: picks[part].color };
 };
 
 const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, focus, picks, light, lang, label, tipText, onPick, onReady, onError }, ref) {
@@ -275,7 +275,7 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
 
     // ── ชี้และกดที่ชิ้นส่วน: วัสดุที่เปลี่ยนได้ 6 ตัวคือ 6 หมวดในแผง ──
     // ไฮไลต์ทำที่วัสดุ จึงสว่างทุกชิ้นที่ใช้วัสดุนั้นทั้ง 3 ครัว (ตัวเลือกก็ใช้ร่วมกันทั้งห้องเหมือนกัน)
-    const parts = new Map<THREE.Material, Part>([[m.door, 'doors'], [m.top, 'top'], [m.splash, 'splash'], [m.floor, 'floor'], [m.faucet, 'faucet'], [m.sink, 'sink']]);
+    const parts = new Map<THREE.Material, Part>([[m.upper, 'upper'], [m.lower, 'lower'], [m.top, 'top'], [m.splash, 'splash'], [m.floor, 'floor'], [m.faucet, 'faucet'], [m.sink, 'sink']]);
     const matOf = (part: Part) => [...parts].find(([, p]) => p === part)![0] as THREE.MeshStandardMaterial;
     const ray = new THREE.Raycaster();
     const ndc = new THREE.Vector2();
@@ -430,12 +430,13 @@ const RoomScene = forwardRef<RoomHandle, Props>(function RoomScene({ layout, foc
         dirty = true;
       },
       setPicks: (p) => {
-        applyLook(m.door, lookOf('doors', p));
+        applyLook(m.upper, lookOf('upper', p));
+        applyLook(m.lower, lookOf('lower', p));
         applyLook(m.top, lookOf('top', p));
         applyLook(m.splash, lookOf('splash', p));
         applyLook(m.floor, lookOf('floor', p));
         applyLook(m.faucet, FAUCET_LOOKS[p.faucet]);
-        applyLook(m.sink, SINK_COLORS.find((o) => o.id === p.sinkColor)!.look as Look);
+        applyLook(m.sink, SINK_COLORS.find((o) => o.id === p.sinkColor)!.look);
         // ทรงก๊อกและซิงก์: ทุกทรงปั้นไว้แล้ว เปิดให้เห็นเฉพาะทรงที่เลือก
         scene.traverse((o) => {
           if (o.userData.sink) o.visible = o.userData.sink === p.sink;

@@ -7,19 +7,21 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRef, useState } from 'react';
 import FocusCard from './FocusCard';
+import SurfacePicker from './SurfacePicker';
 import { useLang } from '@/components/LangProvider';
 import FinishDots from '@/components/FinishDots';
 import { FAUCET } from '@/lib/finishes';
-import { DEFAULT_PICKS, FAUCET_NOTES, FAUCET_SHAPES, LAYOUTS, LIGHTS, PARTS, SINKS, SINK_COLORS, type LayoutId, type LightId, type Part, type PartId, type Picks } from '@/lib/room';
+import { DEFAULT_PICKS, FAUCET_NOTES, FAUCET_SHAPES, LAYOUTS, LIGHTS, SINKS, SINK_COLORS, SURFACES, type LayoutId, type LightId, type Part, type Picks, type SurfaceId } from '@/lib/room';
 import type { RoomHandle } from './RoomScene';
 
 const Skeleton = () => <div className="absolute inset-0 animate-pulse bg-warm-200 motion-reduce:animate-none" aria-hidden />;
 const RoomScene = dynamic(() => import('./RoomScene'), { ssr: false, loading: Skeleton });
 
-const PART_ORDER: PartId[] = ['doors', 'top', 'splash', 'floor'];
+const PART_ORDER: SurfaceId[] = ['upper', 'lower', 'top', 'splash', 'floor'];
+const isSurface = (part: Part): part is SurfaceId => part in SURFACES;
 // หมวดของแผงตัวเลือก · จอแคบกว่า lg โชว์ทีละหมวด เลือกด้วยแถวปุ่มหมวดใต้ฉาก · จอกว้างโชว์ทุกหมวด
 type Tab = 'layout' | Part | 'light';
-const TABS: Tab[] = ['layout', 'doors', 'top', 'splash', 'floor', 'faucet', 'sink', 'light'];
+const TABS: Tab[] = ['layout', 'upper', 'lower', 'top', 'splash', 'floor', 'faucet', 'sink', 'light'];
 const isPart = (tab: Tab): tab is Part => tab !== 'layout' && tab !== 'light';
 const legend = 'mb-2 flex items-baseline justify-between gap-3 text-xs font-normal text-warm-500';
 const button =
@@ -42,11 +44,32 @@ export default function RoomContent() {
   const sink = SINKS.find((s) => s.id === picks.sink)!;
   const sinkColor = SINK_COLORS.find((o) => o.id === picks.sinkColor)!;
   const faucetShape = FAUCET_SHAPES.find((s) => s.id === picks.faucetShape)!;
-  const nameOf = (part: Part) => (part === 'faucet' ? faucet : part === 'sink' ? sinkColor : PARTS[part].find((o) => o.id === picks[part])!).name[lang];
+  // พื้นผิว: วัสดุที่เลือก · ชื่อที่โชว์ = วัสดุ + ชื่อสีสำเร็จ หรือรหัสสีถ้ากำหนดเอง · วัสดุเดียวกับท็อปไม่มีสีของตัวเอง
+  const surfaceOf = (part: SurfaceId) => {
+    const { materials, colours } = SURFACES[part];
+    const material = materials.find((o) => o.id === picks[part].material)!;
+    const own = material.look !== 'top';
+    const colour = colours.find((c) => c.hex === picks[part].color)?.name[lang] ?? picks[part].color.toUpperCase();
+    return { material, colours: own ? colours : [], name: own ? `${material.name[lang]} · ${colour}` : material.name[lang] };
+  };
+  const picker = (part: SurfaceId, compact = false) => (
+    <SurfacePicker
+      key={part}
+      compact={compact}
+      materials={SURFACES[part].materials.map((o) => ({ id: o.id, label: o.name[lang] }))}
+      material={picks[part].material}
+      onMaterial={(material) => setPicks((p) => ({ ...p, [part]: { ...p[part], material } }))}
+      colours={surfaceOf(part).colours.map((c) => ({ hex: c.hex, label: c.name[lang] }))}
+      color={picks[part].color}
+      onColor={(color) => setPicks((p) => ({ ...p, [part]: { ...p[part], color } }))}
+      text={t.room}
+    />
+  );
+  const nameOf = (part: Part) => (isSurface(part) ? surfaceOf(part).name : (part === 'faucet' ? faucet : sinkColor).name[lang]);
   const shapeButtons = (list: typeof SINKS) => list.map((s) => ({ id: s.id, label: s.name[lang] }));
-  // สิ่งที่การ์ดเจาะดูแสดงต่อหมวด: ก๊อกและซิงก์ = สี + ทรง · หมวดอื่น = สี/วัสดุ
+  // สิ่งที่การ์ดเจาะดูแสดงต่อหมวด: ก๊อกและซิงก์ = สี + ทรง · พื้นผิว = วัสดุ + สี
   const cardOf = (part: Part) => {
-    const set = (key: keyof Picks) => (id: string) => setPicks((p) => ({ ...p, [key]: id }));
+    const set = (key: 'faucet' | 'faucetShape' | 'sink' | 'sinkColor') => (id: string) => setPicks((p) => ({ ...p, [key]: id }));
     if (part === 'sink')
       return {
         note: `${sink.note[lang]} ${sinkColor.note[lang]}`,
@@ -67,7 +90,7 @@ export default function RoomContent() {
         shape: picks.faucetShape,
         onShape: set('faucetShape'),
       };
-    return { note: PARTS[part].find((o) => o.id === picks[part])!.note[lang], choices: PARTS[part].map((o) => ({ id: o.id, label: o.name[lang], swatch: o.swatch })), value: picks[part], onChange: set(part) };
+    return { note: surfaceOf(part).material.note[lang], children: picker(part, true) };
   };
   const demoName = (f: (typeof FAUCET)[number]) => (f.demo ? `${f.name[lang]} (${t.products.finishDemo})` : f.name[lang]);
   // ออกจากโหมดเจาะดู · ถ้า focus อยู่ในการ์ด (ซึ่งกำลังจะหายไป) ให้ย้ายกลับไปที่ฉาก
@@ -172,36 +195,15 @@ export default function RoomContent() {
           </div>
         </fieldset>
 
-        {PART_ORDER.map((part) => {
-          const current = PARTS[part].find((o) => o.id === picks[part])!;
-          return (
-            <fieldset key={part} className={only(part)}>
-              <legend className={`${legend} w-full`}>
-                <span>{t.room[part]}</span>
-                <span className="text-ink">{current.name[lang]}</span>
-              </legend>
-              <div className="-ml-2 flex">
-                {PARTS[part].map((o) => (
-                  <button
-                    key={o.id}
-                    type="button"
-                    aria-pressed={o.id === current.id}
-                    aria-label={o.name[lang]}
-                    title={o.name[lang]}
-                    onClick={() => setPicks((p) => ({ ...p, [part]: o.id }))}
-                    className="flex h-11 w-11 items-center justify-center transition-transform focus-visible:outline focus-visible:outline-1 focus-visible:outline-ink active:scale-[0.92] motion-reduce:transition-none"
-                  >
-                    <span
-                      aria-hidden
-                      className={`block h-7 w-7 rounded-full border border-warm-300 ${o.id === current.id ? 'ring-1 ring-ink ring-offset-2 ring-offset-paper' : ''}`}
-                      style={{ background: o.swatch }}
-                    />
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-          );
-        })}
+        {PART_ORDER.map((part) => (
+          <fieldset key={part} className={only(part)}>
+            <legend className={`${legend} w-full`}>
+              <span>{t.room[part]}</span>
+              <span className="text-ink">{surfaceOf(part).name}</span>
+            </legend>
+            {picker(part)}
+          </fieldset>
+        ))}
 
         <fieldset className={only('faucet')}>
           <legend className={`${legend} w-full`}>
