@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { LangProvider } from '@/components/LangProvider';
 import SmoothScroll from '@/components/SmoothScroll';
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
         </LangProvider>
         <JsonLd data={organizationJsonLd} />
+        <Analytics />
       </body>
     </html>
   );
