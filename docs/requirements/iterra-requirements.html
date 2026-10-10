@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สรุป Requirement เว็บไซต์ ITERRA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+Thai:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* สีและตัวอักษรตาม design.md ที่ root ของ repo */
+  :root {
+    --paper: #faf9f7;
+    --ink: #1c1917;
+    --warm-100: #f5f4f1;
+    --warm-300: #d6d3cc;
+    --warm-500: #78716c;
+    --stone-600: #57534e;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Inter, 'Noto Sans Thai', system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+  main { max-width: 1040px; margin: 0 auto; padding: 96px 24px 112px; }
+  .label {
+    margin: 0 0 16px;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--warm-500);
+  }
+  h1 { margin: 0; font-size: 44px; font-weight: 200; letter-spacing: 0.025em; line-height: 1.2; }
+  h2 { margin: 0 0 8px; font-size: 30px; font-weight: 200; letter-spacing: 0.025em; line-height: 1.3; }
+  .intro { max-width: 34rem; margin: 16px 0 0; font-size: 14px; color: var(--warm-500); }
+  .note { margin: 8px 0 0; font-size: 12px; font-weight: 400; color: var(--stone-600); }
+  section { margin-top: 88px; }
+  .sub { margin: 0 0 28px; max-width: 34rem; font-size: 14px; color: var(--warm-500); }
+
+  .counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 56px; border-top: 1px solid var(--warm-300); border-bottom: 1px solid var(--warm-300); }
+  .counts div { padding: 24px 0; }
+  .counts div + div { padding-left: 24px; border-left: 1px solid var(--warm-300); }
+  .counts b { display: block; font-size: 40px; font-weight: 200; line-height: 1.1; }
+  .counts span { font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--warm-500); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    padding: 0 16px 12px 0;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--warm-500);
+    border-bottom: 1px solid var(--ink);
+  }
+  td { padding: 16px 16px 16px 0; vertical-align: top; border-bottom: 1px solid var(--warm-300); }
+  td:first-child { width: 26%; font-weight: 400; }
+  td:last-child, th:last-child { width: 132px; padding-right: 0; }
+  .tag { display: inline-block; padding: 4px 10px; border: 1px solid var(--warm-300); font-size: 11px; font-weight: 400; white-space: nowrap; }
+  .tag.done { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+  .tag.sample { border-color: var(--ink); }
+  .tag.todo { color: var(--stone-600); border-style: dashed; border-color: var(--warm-500); }
+
+  ul { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--ink); }
+  li { padding: 14px 0; font-size: 14px; border-bottom: 1px solid var(--warm-300); }
+  li b { font-weight: 400; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  footer { margin-top: 96px; padding-top: 24px; border-top: 1px solid var(--warm-300); font-size: 12px; font-weight: 400; color: var(--stone-600); }
+
+  @media (max-width: 720px) {
+    main { padding: 64px 24px 80px; }
+    h1 { font-size: 34px; }
+    h2 { font-size: 26px; }
+    section { margin-top: 64px; }
+    .counts b { font-size: 30px; }
+    .counts div + div { padding-left: 14px; }
+    .counts span { letter-spacing: 0.12em; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    thead { display: none; }
+    tr { padding: 16px 0; border-bottom: 1px solid var(--warm-300); }
+    td, td:first-child, td:last-child { width: 100%; padding: 0 0 6px; border: 0; }
+    tbody tr:first-child { border-top: 1px solid var(--ink); }
+  }
+  @media print {
+    main { max-width: none; padding: 0; }
+    section { margin-top: 40px; }
+    tr, li { break-inside: avoid; }
+    h2 { break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="label">Requirement Summary</p>
+  <h1>สรุป Requirement<br>เว็บไซต์ ITERRA</h1>
+  <p class="intro">เว็บไซต์โชว์รูมสินค้าครัว ก๊อกและซิงก์ สองภาษา ไทยและอังกฤษ เอกสารนี้สรุปว่าเว็บต้องทำอะไรได้บ้าง และแต่ละข้ออยู่ในสถานะใด</p>
+  <p class="note">ข้อมูล ณ วันที่ 10 ตุลาคม 2569 ตรวจจากเว็บรุ่นต้นแบบ iterra-prototype.vercel.app</p>
+
+  <div class="counts" aria-label="จำนวนข้อตามสถานะ">
+    <div><b data-count="done">0</b><span>ทำแล้ว</span></div>
+    <div><b data-count="sample">0</b><span>รอเนื้อหาจริง</span></div>
+    <div><b data-count="todo">0</b><span>ยังไม่ทำ</span></div>
+  </div>
+  <p class="note"><span class="tag done">ทำแล้ว</span> ใช้งานได้ในเว็บต้นแบบ &nbsp; <span class="tag sample">รอเนื้อหาจริง</span> ระบบทำแล้ว แต่ข้อความหรือรูปยังเป็นตัวอย่าง &nbsp; <span class="tag todo">ยังไม่ทำ</span> ยังไม่ได้พัฒนา</p>
+
+  <section>
+    <p class="label">01 ภาพรวม</p>
+    <h2>เว็บนี้คืออะไร</h2>
+    <p class="sub">ข้อกำหนดพื้นฐานที่ใช้กับทุกหน้า</p>
+    <ul>
+      <li><b>จุดประสงค์</b> แสดงสินค้าและบรรยากาศโชว์รูม ชวนผู้เข้าชมนัดชมโชว์รูมหรือติดต่อผ่าน LINE</li>
+      <li><b>ภาษา</b> ไทยและอังกฤษทุกหน้า สลับได้ทันทีโดยไม่เปลี่ยนหน้า</li>
+      <li><b>อุปกรณ์</b> ใช้ได้ทั้งมือถือ แท็บเล็ต และคอมพิวเตอร์</li>
+      <li><b>ระบบ</b> เป็นเว็บแบบไฟล์สำเร็จรูป ไม่มีระบบหลังบ้านและไม่มีฐานข้อมูล แก้เนื้อหาโดยทีมพัฒนา</li>
+      <li><b>รูปแบบ</b> เรียบ หรู พื้นสว่าง ตัวอักษรบาง ตามเอกสาร <code>design.md</code></li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="label">02 หน้าเว็บ</p>
+    <h2>หน้าที่ต้องมี</h2>
+    <p class="sub">หน้าทั้งหมดที่ผู้เข้าชมเปิดได้จากเมนูหรือลิงก์ในเว็บ</p>
+    <table>
+      <thead><tr><th>หน้า</th><th>ต้องมีอะไร</th><th>สถานะ</th></tr></thead>
+      <tbody>
+        <tr><td>หน้าแรก</td><td>ภาพเปิด ผนังภาพครัว เรื่องราวแบรนด์ สินค้าแนะนำ ตัวเลขสรุป ตัวอย่างแคตตาล็อก บทความล่าสุด และส่วนชวนติดต่อ</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>เกี่ยวกับเรา</td><td>ที่มาและแนวคิดของแบรนด์ พร้อมภาพประกอบ</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>สินค้า</td><td>รายการสินค้า 10 รายการ จาก 6 ซีรีส์ กรองตามประเภท ซีรีส์ และวัสดุ เรียงลำดับได้</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>หน้าสินค้ารายตัว</td><td>ภาพสินค้า เลือกดูสีผิว ตารางสเปก และสินค้าที่เกี่ยวข้อง</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>แคตตาล็อก</td><td>ดูแคตตาล็อกทีละหน้าแบบเต็มจอ เลื่อนหน้าด้วยปุ่ม แป้นพิมพ์ หรือปัดบนมือถือ และดาวน์โหลดไฟล์ PDF</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>บทความ</td><td>รายการบทความและหน้าอ่านบทความ ตอนนี้มี 5 บทความ</td><td><span class="tag sample">รอเนื้อหาจริง</span></td></tr>
+        <tr><td>ผลงานอ้างอิง</td><td>การ์ดโครงการ แสดงภาพ ชื่อ ที่ตั้ง ประเภท ปี และสินค้าที่ใช้ ตอนนี้มี 6 โครงการ</td><td><span class="tag sample">รอเนื้อหาจริง</span></td></tr>
+        <tr><td>ติดต่อเรา: ข้อมูล</td><td>ที่อยู่ โทรศัพท์ อีเมล LINE และเวลาทำการ</td><td><span class="tag sample">รอเนื้อหาจริง</span></td></tr>
+        <tr><td>ติดต่อเรา: แบบฟอร์ม</td><td>กรอกแบบฟอร์มแล้วข้อความต้องส่งถึงอีเมลของร้าน ตอนนี้มีหน้าฟอร์มแล้ว แต่ยังไม่ได้เชื่อมการส่งจริง</td><td><span class="tag todo">ยังไม่ทำ</span></td></tr>
+        <tr><td>นโยบายความเป็นส่วนตัว</td><td>อธิบายข้อมูลที่เก็บ คุกกี้ และสิทธิ์ของผู้เข้าชม มีปุ่มเปลี่ยนการตั้งค่าคุกกี้</td><td><span class="tag sample">รอเนื้อหาจริง</span></td></tr>
+        <tr><td>ไม่พบหน้า (404)</td><td>หน้าแจ้งเมื่อเปิดลิงก์ผิด พร้อมทางไปหน้าแรก สินค้า และการค้นหา</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <p class="label">03 ฟังก์ชันร่วม</p>
+    <h2>สิ่งที่มีในทุกหน้า</h2>
+    <p class="sub">ส่วนที่ติดอยู่กับเว็บทั้งเว็บ ไม่ขึ้นกับหน้าใดหน้าหนึ่ง</p>
+    <table>
+      <thead><tr><th>ฟังก์ชัน</th><th>ต้องทำอะไรได้</th><th>สถานะ</th></tr></thead>
+      <tbody>
+        <tr><td>เมนูนำทาง</td><td>เมนู 7 รายการด้านบน บนจอเล็กเปลี่ยนเป็นเมนูเต็มจอ</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>ค้นหา</td><td>ปุ่มแว่นขยายในเมนู ค้นได้ทั้งสินค้า บทความ ผลงาน และหน้าเว็บ พิมพ์ไทยหรืออังกฤษก็ได้ แสดงผลทันทีขณะพิมพ์</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>สลับภาษา</td><td>ปุ่ม TH / EN ในเมนู เปลี่ยนข้อความทั้งหน้าทันที เปิดเว็บใหม่จะเริ่มที่ภาษาไทย</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>ปุ่มขึ้นบนสุด</td><td>ปุ่มมุมขวาล่าง แสดงเมื่อเลื่อนลงมา 300 พิกเซล กดแล้วเลื่อนกลับขึ้นบนสุด</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>ปุ่ม LINE</td><td>ปุ่มไอคอนแชตสีเขียวมุมขวาล่าง ใต้ปุ่มขึ้นบนสุด กดแล้วเปิดแชต LINE ของร้าน ตอนนี้ใช้ LINE ID ตัวอย่าง</td><td><span class="tag sample">รอเนื้อหาจริง</span></td></tr>
+        <tr><td>ประกาศตอนเข้าเว็บ</td><td>หน้าต่างประกาศแสดง 1 ครั้งต่อการเข้าชม มีภาพ ข้อความ และปุ่มไปหน้าที่กำหนด เปิดปิดการใช้งานได้ ตอนนี้เป็นข้อความชวนนัดชมโชว์รูม</td><td><span class="tag sample">รอเนื้อหาจริง</span></td></tr>
+        <tr><td>การยอมรับคุกกี้</td><td>แถบแจ้งเมื่อเข้าเว็บครั้งแรก เลือกได้ 3 ทาง ยอมรับทั้งหมด ปฏิเสธ หรือตั้งค่าเอง ระบบสถิติจะทำงานต่อเมื่อผู้เข้าชมยินยอม เปลี่ยนใจได้จากลิงก์ท้ายหน้า</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>ส่วนท้ายหน้า</td><td>ลิงก์ไปทุกหน้า ข้อมูลติดต่อ นโยบายความเป็นส่วนตัว และปุ่มตั้งค่าคุกกี้</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <p class="label">04 หน้าผลงาน</p>
+    <h2>การ์ดโครงการ</h2>
+    <p class="sub">พฤติกรรมเมื่อผู้เข้าชมวางเมาส์บนการ์ด ใช้กับคอมพิวเตอร์เท่านั้น บนมือถือการ์ดอยู่นิ่ง</p>
+    <table>
+      <thead><tr><th>ข้อ</th><th>ต้องทำอะไรได้</th><th>สถานะ</th></tr></thead>
+      <tbody>
+        <tr><td>รูปเลื่อนสุ่ม</td><td>วางเมาส์บนการ์ด รูปของโครงการนั้นเปลี่ยนเป็นรูปอื่นแบบสุ่มทุก 2 วินาที รูปเก่าเลื่อนออก รูปใหม่เลื่อนเข้า อยู่ในกรอบของการ์ดเอง</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>การ์ดขยาย</td><td>การ์ดที่ชี้อยู่ขยายขึ้นเล็กน้อยและลอยเหนือการ์ดข้างเคียง รายละเอียดใต้รูปอ่านได้ตลอด พื้นที่รอบข้างไม่มืดลง</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>ลิงก์สินค้าที่ใช้</td><td>แต่ละโครงการลิงก์ไปหน้าสินค้าที่ใช้ในโครงการนั้น</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>หน้ารายละเอียดโครงการ</td><td>หน้าแยกของแต่ละโครงการ พร้อมคำอธิบายและภาพเพิ่มเติม</td><td><span class="tag todo">ยังไม่ทำ</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <p class="label">05 ห้องจำลอง</p>
+    <h2>ห้องครัวสามมิติ</h2>
+    <p class="sub">เครื่องมือให้ผู้เข้าชมลองจัดครัว ยังไม่เปิดให้คนทั่วไปเห็น</p>
+    <table>
+      <thead><tr><th>ข้อ</th><th>ต้องทำอะไรได้</th><th>สถานะ</th></tr></thead>
+      <tbody>
+        <tr><td>ลองเลือกในห้อง</td><td>หมุนดูห้องครัวสามมิติ เลือกวัสดุและสีของพื้นผิว เลือกแบบและสีของก๊อกและซิงก์ เจาะดูทีละชิ้น</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>การเข้าถึง</td><td>ซ่อนไว้ที่ <code>/lab/room/</code> ไม่มีในเมนู ไม่มีในผลค้นหา และไม่ให้เครื่องมือค้นหาเก็บข้อมูล เข้าได้เฉพาะผู้ที่รู้ที่อยู่</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>เปิดให้คนทั่วไปใช้</td><td>ย้ายเข้าเมนูหลักเมื่อพร้อม</td><td><span class="tag todo">ยังไม่ทำ</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <p class="label">06 คุณภาพ</p>
+    <h2>ข้อกำหนดด้านคุณภาพ</h2>
+    <p class="sub">สิ่งที่ผู้เข้าชมไม่ได้เห็นเป็นปุ่ม แต่กระทบการใช้งานทุกหน้า</p>
+    <table>
+      <thead><tr><th>ข้อ</th><th>เกณฑ์</th><th>สถานะ</th></tr></thead>
+      <tbody>
+        <tr><td>ขนาดจอ</td><td>ไม่มีหน้าใดล้นจอทางแนวนอน ตรวจอัตโนมัติทุกหน้าที่ 4 ความกว้าง</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>ปุ่มบนจอสัมผัส</td><td>ปุ่มและลิงก์ทุกตัวมีพื้นที่กดไม่น้อยกว่า 44 พิกเซล</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>แป้นพิมพ์</td><td>ใช้งานด้วยแป้นพิมพ์ได้ เห็นกรอบชัดเจนว่ากำลังอยู่ที่ปุ่มใด</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>ลดการเคลื่อนไหว</td><td>ผู้ที่ตั้งค่าเครื่องให้ลดการเคลื่อนไหว จะไม่เห็นภาพเลื่อนหรือขยาย</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>เครื่องมือค้นหา</td><td>มีแผนผังเว็บ ชื่อและคำอธิบายของแต่ละหน้า ภาพตัวอย่างเมื่อแชร์ลิงก์ และข้อมูลองค์กรแบบมีโครงสร้าง</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>ความเป็นส่วนตัว</td><td>ไม่เก็บสถิติการเข้าชมก่อนได้รับความยินยอม</td><td><span class="tag done">ทำแล้ว</span></td></tr>
+        <tr><td>ชื่อเว็บจริง</td><td>ย้ายจากที่อยู่ต้นแบบไปใช้โดเมนของร้าน พร้อมอีเมลของร้าน</td><td><span class="tag todo">ยังไม่ทำ</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <p class="label">07 รอจากลูกค้า</p>
+    <h2>สิ่งที่ต้องได้จากลูกค้า</h2>
+    <p class="sub">ข้อที่มีสถานะ รอเนื้อหาจริง จะปิดได้เมื่อได้รับข้อมูลเหล่านี้</p>
+    <ul>
+      <li><b>ข้อมูลติดต่อ</b> ที่อยู่โชว์รูม เบอร์โทรศัพท์ อีเมล เวลาทำการ และ LINE ID ของร้าน</li>
+      <li><b>ผลงานอ้างอิง</b> ชื่อโครงการ ที่ตั้ง ประเภท ปี รูปโครงการละหลายรูป และสินค้าที่ใช้</li>
+      <li><b>บทความ</b> เนื้อหาและรูปของบทความจริง หรือยืนยันให้ใช้บทความตัวอย่างต่อ</li>
+      <li><b>ประกาศ</b> ข้อความ รูป และหน้าปลายทางของประกาศตอนเข้าเว็บ หรือแจ้งปิดการใช้งาน</li>
+      <li><b>นโยบายความเป็นส่วนตัว</b> ฉบับที่ผ่านการตรวจทางกฎหมาย</li>
+      <li><b>ตรวจข้อความ</b> อ่านทวนข้อความทุกหน้า รวมถึงตัวเลขสรุปในหน้าแรก ทั้งภาษาไทยและอังกฤษ</li>
+      <li><b>ปลายทางแบบฟอร์ม</b> อีเมลที่ต้องการให้ข้อความจากหน้าติดต่อส่งไปถึง</li>
+      <li><b>โดเมน</b> ชื่อโดเมนที่จะใช้ และผู้ดูแลการตั้งค่า</li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="label">08 นอกขอบเขต</p>
+    <h2>สิ่งที่ยังไม่อยู่ในงานนี้</h2>
+    <p class="sub">เพิ่มได้ภายหลังเป็นงานแยก</p>
+    <ul>
+      <li>ระบบหลังบ้านให้ร้านแก้สินค้า บทความ ผลงาน หรือประกาศเอง</li>
+      <li>ตะกร้าสินค้า การสั่งซื้อ และการชำระเงิน</li>
+      <li>หน้าต่างแชต LINE ที่ฝังอยู่ในเว็บ (ตอนนี้เป็นปุ่มเปิดแอป LINE)</li>
+      <li>ระบบสมาชิกและการเข้าสู่ระบบ</li>
+    </ul>
+  </section>
+
+  <footer>ITERRA Requirement Summary · จัดทำจากเว็บต้นแบบและข้อกำหนดที่ตกลงกันถึงวันที่ 10 ตุลาคม 2569 · ค่าบริการโฮสต์และอีเมลอยู่ในเอกสารประมาณการแยก</footer>
+</main>
+<script>
+  // นับจำนวนข้อตามสถานะจากตารางในหน้านี้ ไม่พิมพ์ตัวเลขค้างไว้
+  for (const el of document.querySelectorAll('[data-count]'))
+    el.textContent = document.querySelectorAll('td .tag.' + el.dataset.count).length;
+</script>
+</body>
+</html>
