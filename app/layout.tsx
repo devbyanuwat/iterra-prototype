@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { LangProvider } from '@/components/LangProvider';
 import SmoothScroll from '@/components/SmoothScroll';
@@ -7,6 +6,7 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import FloatingActions from '@/components/FloatingActions';
 import Announcement from '@/components/Announcement';
+import CookieConsent from '@/components/CookieConsent';
 import JsonLd from '@/components/JsonLd';
 import { CONTACT, SITE_NAME, SITE_TAGLINE_EN, SITE_TAGLINE_TH, SITE_URL } from '@/lib/site';
 
@@ -64,9 +64,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <FloatingActions />
           <Announcement />
+          <CookieConsent />
         </LangProvider>
         <JsonLd data={organizationJsonLd} />
-        <Analytics />
       </body>
     </html>
   );

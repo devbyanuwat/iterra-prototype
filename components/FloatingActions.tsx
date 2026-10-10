@@ -1,6 +1,6 @@
 'use client';
 
-// ปุ่มลอยมุมขวาล่าง: กลับขึ้นด้านบน (โผล่เมื่อเลื่อนเกิน 1 จอ) อยู่บน · LINE อยู่ล่าง เห็นตลอด
+// ปุ่มลอยมุมขวาล่าง: กลับขึ้นด้านบน (โผล่เมื่อเลื่อนเกิน 300px) อยู่บน · LINE อยู่ล่าง เห็นตลอด
 // z-40: อยู่เหนือเนื้อหา ใต้แถบเมนู (z-50) และเมนูมือถือ (z-60) · แผงค้นหากับประกาศเป็น <dialog> อยู่ชั้นบนสุดเอง
 
 import { useEffect, useState } from 'react';
@@ -15,7 +15,7 @@ export default function FloatingActions() {
   const [far, setFar] = useState(false);
 
   useEffect(() => {
-    const check = () => setFar(window.scrollY > window.innerHeight);
+    const check = () => setFar(window.scrollY > 300);
     check();
     window.addEventListener('scroll', check, { passive: true });
     return () => window.removeEventListener('scroll', check);
