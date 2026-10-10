@@ -16,6 +16,7 @@ export const dict = {
       contact: 'ติดต่อเรา',
       showroom: 'นัดชมโชว์รูม',
     },
+    float: { top: 'กลับขึ้นด้านบน', line: 'แชตกับเราทาง LINE' },
     common: {
       inquire: 'สอบถามสินค้านี้',
       priceOnRequest: 'สอบถามราคา',
@@ -152,6 +153,7 @@ export const dict = {
       contact: 'Contact',
       showroom: 'Book a Visit',
     },
+    float: { top: 'Back to top', line: 'Chat with us on LINE' },
     common: {
       inquire: 'Inquire about this piece',
       priceOnRequest: 'Price on request',
