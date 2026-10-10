@@ -57,6 +57,46 @@ html:has(dialog[open]) {
   }
 }
 
+/* การ์ดผลงาน: ชี้รูป (.spot) แล้วรูปขยาย ส่วนอื่นของหน้ามืดลงด้วยเงาสี ink ที่แผ่เต็มจอ
+   .spot-lift = ตัวห่อการ์ด ยกขึ้นเหนือการ์ดอื่นระหว่างชี้ และค้างไว้จนม่านจางหมด */
+.spot {
+  position: relative;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: 0 0 0 200vmax theme('colors.ink');
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+
+.spot-lift {
+  position: relative;
+  z-index: 0;
+  transition: z-index 0s 0.5s;
+}
+
+@media (hover: hover) {
+  .spot:hover::before {
+    opacity: 0.6;
+  }
+
+  .spot-lift:has(.spot:hover) {
+    z-index: 20;
+    transition-delay: 0s;
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .spot:hover {
+    transform: scale(1.08);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

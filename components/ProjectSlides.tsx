@@ -1,6 +1,7 @@
 'use client';
 
 // รูปของการ์ดผลงาน: วางเมาส์แล้วสุ่มรูปถัดไปกับทิศเลื่อน รูปเก่าเลื่อนออก รูปใหม่เลื่อนเข้าในกรอบเดิม ทุก 2 วินาที
+// ตอนชี้ รูปขยายและส่วนอื่นของหน้ามืดลง (.spot ใน globals.css)
 // เอาเมาส์ออก = หยุดที่รูปปัจจุบัน · จอสัมผัสและ reduced motion ไม่เลื่อน · รูปถัดไปโหลดตอนจะใช้
 
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
@@ -53,9 +54,11 @@ export default function ProjectSlides({ images, alt }: { images: string[]; alt: 
   const vars = { '--dx': `${dx}%`, '--dy': `${dy}%` } as CSSProperties;
 
   return (
-    <div onPointerEnter={start} onPointerLeave={stop} className="relative w-full overflow-hidden bg-warm-200" style={{ aspectRatio: '3 / 2' }}>
-      {s.prev >= 0 && <img key={`out${s.n}`} src={images[s.prev]} alt="" aria-hidden className={`${img} animate-[slide-out_0.7s_cubic-bezier(0.16,1,0.3,1)_forwards]`} style={vars} />}
-      <img key={`in${s.n}`} src={images[s.cur]} alt={alt} loading="lazy" decoding="async" className={`${img} ${s.prev >= 0 ? 'animate-[slide-in_0.7s_cubic-bezier(0.16,1,0.3,1)]' : ''}`} style={vars} />
+    <div onPointerEnter={start} onPointerLeave={stop} className="spot">
+      <div className="relative w-full overflow-hidden bg-warm-200" style={{ aspectRatio: '3 / 2' }}>
+        {s.prev >= 0 && <img key={`out${s.n}`} src={images[s.prev]} alt="" aria-hidden className={`${img} animate-[slide-out_0.7s_cubic-bezier(0.16,1,0.3,1)_forwards]`} style={vars} />}
+        <img key={`in${s.n}`} src={images[s.cur]} alt={alt} loading="lazy" decoding="async" className={`${img} ${s.prev >= 0 ? 'animate-[slide-in_0.7s_cubic-bezier(0.16,1,0.3,1)]' : ''}`} style={vars} />
+      </div>
     </div>
   );
 }
