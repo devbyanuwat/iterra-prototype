@@ -8,8 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* แก้ข้อความได้ตรง ๆ ในไฟล์นี้ · ช่องที่มีพื้นเหลืองคือข้อมูลที่ยังรอยืนยัน ลบ class="fill" เมื่อใส่ค่าจริงแล้ว */
-  :root { --ink: #1c1b1a; --soft: #5c5853; --line: #d9d5cf; --wash: #f5f3ef; --mark: #fff3bf; }
+  :root { --ink: #1c1b1a; --soft: #5c5853; --line: #d9d5cf; --wash: #f5f3ef; }
   * { box-sizing: border-box; }
   html { background: #e9e6e1; }
   body { margin: 0; font-family: 'Sarabun', 'Noto Sans Thai', 'Thonburi', sans-serif; font-size: 11pt; line-height: 1.65; color: var(--ink); }
@@ -31,7 +30,6 @@
   .box { margin: 2mm 0 3mm; padding: 3.5mm 4.5mm; background: var(--wash); border-left: 2pt solid var(--ink); }
   .box p:last-child, .box ul:last-child { margin-bottom: 0; }
   .note { font-size: 9.5pt; color: var(--soft); }
-  .fill { background: var(--mark); padding: 0 1.2mm; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 8mm; }
   footer { margin-top: 8mm; padding-top: 3mm; border-top: 0.5pt solid var(--line); font-size: 9pt; color: var(--soft); }
   h2, table, .box { break-inside: avoid; }
@@ -54,8 +52,6 @@
       <p>การประเมินทรัพยากร จำนวนผู้ใช้งานพร้อมกัน และจำนวนรูปภาพที่รองรับ</p>
     </div>
     <div class="meta">
-      ใบเสนอราคาเลขที่ <span class="fill">รอระบุ</span><br>
-      เสนอต่อ <span class="fill">รอระบุชื่อลูกค้า</span><br>
       จัดทำเมื่อ 10 ตุลาคม 2569
     </div>
   </header>
@@ -68,13 +64,8 @@
     <tr><th style="width:34%">รายการ</th><th>ที่เสนอ</th></tr>
     <tr class="pick"><td>แพ็กเกจเซิร์ฟเวอร์</td><td>P1: CPU 2 Core, RAM 4 GB</td></tr>
     <tr><td>ระบบปฏิบัติการ</td><td>Ubuntu 24</td></tr>
-    <tr><td>แผงควบคุม</td><td>1Panel (ไม่มีค่าใช้จ่ายเพิ่ม)</td></tr>
+    <tr><td>แผงควบคุม</td><td>1Panel</td></tr>
     <tr><td>ด้านหน้าเซิร์ฟเวอร์</td><td>Cloudflare ทำหน้าที่ DNS, HTTPS และ CDN</td></tr>
-    <tr><td>ผู้ให้บริการ</td><td><span class="fill">รอระบุ</span></td></tr>
-    <tr><td>ราคาเริ่มต้น</td><td>7,200 บาท <span class="fill">รอยืนยันว่าเป็นราคาต่อปี และรวมภาษีหรือไม่</span></td></tr>
-    <tr><td>พื้นที่ดิสก์</td><td><span class="fill">รอยืนยัน</span></td></tr>
-    <tr><td>ความเร็วอินเทอร์เน็ตของเซิร์ฟเวอร์</td><td><span class="fill">รอยืนยัน</span></td></tr>
-    <tr><td>ปริมาณรับส่งข้อมูลต่อเดือน</td><td><span class="fill">รอยืนยัน</span></td></tr>
   </table>
 
   <h2><span>2</span>ทรัพยากรที่เว็บไซต์ใช้</h2>
@@ -140,15 +131,7 @@
     <tr><td>รูปต้นฉบับจากกล้อง ไม่ย่อ</td><td class="n">ประมาณ 4 MB</td><td class="n">250 รูป</td><td class="n">2,500 รูป</td><td class="n">12,500 รูป</td></tr>
   </table>
   <p class="note">จำนวนรูปเป็นค่าประมาณ ปัดเศษแล้ว และนับเฉพาะพื้นที่ที่เหลือหลังติดตั้งระบบ ขนาดรูปจากกล้อง 4 MB เป็นค่าทั่วไป ไม่ได้วัดจากไฟล์ของลูกค้า</p>
-  <p class="note">ปัจจุบันการย่อและแปลงรูปทำในขั้นตอนจัดเตรียมเว็บโดยผู้พัฒนา หากต้องการให้ลูกค้าอัปโหลดรูปเองผ่านระบบหลังบ้าน ต้องพัฒนาเพิ่มและเสนอราคาแยก</p>
-
-  <h2><span>6</span>รายการที่รอยืนยันก่อนสรุปราคา</h2>
-  <ul>
-    <li>พื้นที่ดิสก์ ความเร็วอินเทอร์เน็ต และปริมาณรับส่งข้อมูลต่อเดือนของแพ็กเกจ P1</li>
-    <li>ราคา 7,200 บาท เป็นราคาต่อปีหรือไม่ และรวมภาษีมูลค่าเพิ่มแล้วหรือยัง</li>
-    <li>แผนของ Cloudflare ที่จะใช้ และผู้รับผิดชอบค่าใช้จ่าย (ถ้ามี)</li>
-    <li>ผู้ดูแลเซิร์ฟเวอร์หลังส่งมอบ: การอัปเดตระบบ การสำรองข้อมูล และการเฝ้าระวัง</li>
-  </ul>
+  <p class="note">ปัจจุบันการย่อและแปลงรูปทำในขั้นตอนจัดเตรียมเว็บโดยผู้พัฒนา หากต้องการให้ลูกค้าอัปโหลดรูปเองผ่านระบบหลังบ้าน ต้องพัฒนาเพิ่ม</p>
 
   <footer>เอกสารนี้เป็นการประเมินเพื่อประกอบการตัดสินใจ ตัวเลขวัดและคำนวณ ณ วันที่จัดทำ และอาจเปลี่ยนเมื่อเนื้อหาเว็บไซต์เพิ่มขึ้น</footer>
 </section>
