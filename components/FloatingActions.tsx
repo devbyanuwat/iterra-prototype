@@ -30,16 +30,18 @@ export default function FloatingActions() {
           </svg>
         </button>
       )}
-      {/* ตัวอักษรสีเข้มบนเขียว LINE: ขาวบน #06C755 ได้ contrast ราว 2.3:1 ไม่ผ่าน */}
+      {/* ไอคอนสีเข้มบนเขียว LINE: ขาวบน #06C755 ได้ contrast ราว 2.3:1 ไม่ผ่าน */}
       <a
         href={`https://line.me/R/ti/p/${encodeURIComponent(CONTACT.line)}`}
         target="_blank"
         rel="noopener"
         aria-label={t.float.line}
         title={t.float.line}
-        className={`${round} bg-[#06C755] text-[11px] font-medium tracking-wide text-ink`}
+        className={`${round} bg-[#06C755] text-ink`}
       >
-        LINE
+        <svg aria-hidden viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
+          <path d="M12 4c-4.7 0-8.5 3.1-8.5 7 0 2.2 1.2 4.1 3.1 5.4L6 20l3.7-1.8c.7.1 1.5.2 2.3.2 4.7 0 8.5-3.1 8.5-7S16.7 4 12 4z" />
+        </svg>
       </a>
     </div>
   );
