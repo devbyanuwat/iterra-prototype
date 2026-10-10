@@ -3,61 +3,74 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>เอกสารประกอบใบเสนอราคา: Private Cloud สำหรับเว็บไซต์ ITERRA</title>
+<title>เอกสารประกอบใบเสนอราคา: Private Cloud สำหรับเว็บไซต์</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ภาพรวมหน้าเดียว A4 · แก้ตัวเลขและข้อความได้ตรง ๆ ในไฟล์นี้
+     ป้ายสี = ข้อมูลชุดเดียวกันที่ปรากฏหลายจุด: class="cloud" พื้นที่ของ Private Cloud · class="mail" พื้นที่ของอีเมล
      แท่งเทียบจำนวนรูป: ความกว้างตั้งที่ style="--w: …%" ของแต่ละแท่ง (สัดส่วนจากจำนวนรูปที่เก็บได้) */
-  :root { --ink: #1c1b1a; --soft: #5c5853; --line: #d9d5cf; --wash: #f5f3ef; --tone: #4f6b5a; }
+  :root { --ink: #1c1b1a; --soft: #5c5853; --line: #d9d5cf; --wash: #f5f3ef; --tone: #4f6b5a; --cloud: #d5e3d9; --mail: #f0dfc8; }
   * { box-sizing: border-box; }
   html { background: #e9e6e1; }
-  body { margin: 0; font-family: 'Sarabun', 'Noto Sans Thai', 'Thonburi', sans-serif; font-size: 11pt; line-height: 1.6; color: var(--ink); }
-  .page { width: 210mm; min-height: 297mm; margin: 10mm auto; padding: 14mm 18mm; background: #fff; display: flex; flex-direction: column; }
-  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 10mm; padding-bottom: 5mm; border-bottom: 1.5pt solid var(--ink); }
-  h1 { margin: 0; font-size: 17pt; font-weight: 600; line-height: 1.3; }
+  body { margin: 0; font-family: 'Sarabun', 'Noto Sans Thai', 'Thonburi', sans-serif; font-size: 10.5pt; line-height: 1.55; color: var(--ink); }
+  .page { width: 210mm; min-height: 297mm; margin: 10mm auto; padding: 12mm 18mm; background: #fff; display: flex; flex-direction: column; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 10mm; padding-bottom: 4mm; border-bottom: 1.5pt solid var(--ink); }
+  h1 { margin: 0; font-size: 16pt; font-weight: 600; line-height: 1.3; }
   header p { margin: 1mm 0 0; color: var(--soft); }
   .date { font-size: 9.5pt; color: var(--soft); white-space: nowrap; }
 
-  .spec { display: grid; grid-template-columns: auto auto auto auto 1fr; margin: 6mm 0 0; background: var(--wash); }
-  .spec div { padding: 3mm 3.5mm; border-left: 0.5pt solid var(--line); }
+  .cloud, .mail { padding: 0 1.4mm; border-radius: 0.6mm; white-space: nowrap; }
+  .cloud { background: var(--cloud); }
+  .mail { background: var(--mail); }
+
+  .spec { display: grid; grid-template-columns: auto auto auto auto 1fr; margin: 5mm 0 0; background: var(--wash); }
+  .spec div { padding: 2.5mm 3.5mm; border-left: 0.5pt solid var(--line); }
   .spec div:first-child { border-left: 0; }
   .spec small { display: block; white-space: nowrap; font-size: 9pt; color: var(--soft); }
   .spec b { font-weight: 500; font-size: 11pt; white-space: nowrap; }
+  .key { margin: 2mm 0 0; font-size: 9pt; color: var(--soft); }
+  .key span { color: var(--ink); }
 
-  section { margin-top: 8mm; }
-  h2 { margin: 0 0 1mm; font-size: 10.5pt; font-weight: 500; color: var(--soft); }
-  .big { margin: 0; display: flex; align-items: baseline; gap: 3mm; line-height: 1; }
-  .big strong { font-size: 46pt; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-  .big span { font-size: 15pt; }
-  .big em { font-style: normal; font-size: 11pt; color: var(--soft); }
-  .lead { margin: 3mm 0 0; max-width: 150mm; }
-  .note { margin: 1.5mm 0 0; font-size: 9.5pt; color: var(--soft); }
+  section { margin-top: 6mm; }
+  h2 { margin: 0 0 0.5mm; font-size: 10.5pt; font-weight: 500; color: var(--soft); }
+  .big { margin: 0; display: flex; align-items: baseline; gap: 3mm; line-height: 1.05; }
+  .big strong { font-size: 36pt; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .big span { font-size: 14pt; }
+  .big em { font-style: normal; font-size: 10.5pt; color: var(--soft); }
+  .lead { margin: 2mm 0 0; }
+  .note { margin: 1mm 0 0; font-size: 9pt; color: var(--soft); }
 
   /* แถวคน 90 คน = 3 แถว แถวละ 30 · วาดด้วยภาพพื้นหลังซ้ำ */
-  .people { width: 174mm; height: 25.5mm; margin-top: 4mm; background-size: 5.8mm 8.5mm;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 58 100'%3E%3Ccircle cx='29' cy='24' r='13' fill='%234f6b5a'/%3E%3Cpath d='M9 88c0-22 8-38 20-38s20 16 20 38z' fill='%234f6b5a'/%3E%3C/svg%3E"); }
+  .people { width: 174mm; height: 21mm; margin-top: 3mm; background-size: 5.8mm 7mm;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 58 70'%3E%3Ccircle cx='29' cy='17' r='10' fill='%234f6b5a'/%3E%3Cpath d='M12 64c0-17 7-29 17-29s17 12 17 29z' fill='%234f6b5a'/%3E%3C/svg%3E"); }
 
-  .bars { margin: 4mm 0 0; display: grid; grid-template-columns: 62mm 1fr; gap: 2.5mm 5mm; align-items: center; }
+  .bars { margin: 3mm 0 0; display: grid; grid-template-columns: 72mm 1fr; gap: 1.5mm 5mm; align-items: center; }
   .bars dt { font-size: 10.5pt; }
   .bars dt small { display: block; font-size: 9pt; font-weight: 400; color: var(--soft); }
   .bars dd { margin: 0; display: flex; align-items: center; gap: 3mm; }
-  .bars i { display: block; height: 8mm; width: var(--w); min-width: 1mm; background: var(--line); }
+  .bars i { display: block; height: 6.5mm; width: var(--w); min-width: 1mm; background: var(--line); }
   .bars .pick i { background: var(--tone); }
   .bars dd b { font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .bars .pick { font-weight: 500; }
 
-  footer { margin-top: auto; padding-top: 4mm; border-top: 0.5pt solid var(--line); font-size: 9pt; color: var(--soft); }
+  .boxes { margin: 3mm 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(5, 1fr) auto; gap: 3mm; align-items: stretch; }
+  .boxes li { display: flex; align-items: center; justify-content: space-between; gap: 2mm; padding: 2.5mm 3mm; border: 0.75pt solid var(--line); }
+  .boxes svg { width: 7mm; height: 5mm; flex: none; }
+  .boxes .sum { border: 0; padding-left: 2mm; font-weight: 500; white-space: nowrap; }
+
+  footer { margin-top: auto; padding-top: 3mm; border-top: 0.5pt solid var(--line); font-size: 9pt; color: var(--soft); }
   @page { size: A4; margin: 0; }
   @media print { html { background: #fff; } .page { margin: 0; } * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
   @media screen and (max-width: 220mm) {
     .page { width: auto; min-height: 0; margin: 0; padding: 8mm 6mm; }
     header { display: block; } .date { margin-top: 2mm; }
     .spec { grid-template-columns: 1fr 1fr; } .spec div:nth-child(odd) { border-left: 0; }
-    .big { flex-wrap: wrap; } .big strong { font-size: 40pt; }
-    .people { width: 100%; height: auto; aspect-ratio: 174 / 25.5; background-size: calc(100% / 30) calc(100% / 3); }
+    .big { flex-wrap: wrap; } .big strong { font-size: 34pt; }
+    .people { width: 100%; height: auto; aspect-ratio: 174 / 21; background-size: calc(100% / 30) calc(100% / 3); }
     .bars { grid-template-columns: 1fr; gap: 1mm; } .bars dd { margin-bottom: 3mm; }
+    .boxes { grid-template-columns: repeat(3, 1fr); }
     footer { margin-top: 10mm; }
   }
 </style>
@@ -66,31 +79,32 @@
 <main class="page">
   <header>
     <div>
-      <h1>เอกสารประกอบใบเสนอราคา<br>Private Cloud สำหรับเว็บไซต์ ITERRA</h1>
-      <p>ภาพรวม: รองรับผู้ใช้ได้กี่คน และเก็บรูปได้กี่รูป</p>
+      <h1>เอกสารประกอบใบเสนอราคา<br>Private Cloud สำหรับเว็บไซต์</h1>
+      <p>ภาพรวม: รองรับผู้ใช้ได้กี่คน เก็บรูปได้กี่รูป และอีเมลองค์กร</p>
     </div>
     <div class="date">จัดทำเมื่อ 10 ตุลาคม 2569</div>
   </header>
 
   <div class="spec">
-    <div><small>Private Cloud</small><b>CPU 2 Core, RAM 4 GB</b></div>
-    <div><small>พื้นที่</small><b>50 GB</b></div>
+    <div><small>Private Cloud</small><b>CPU 4 Core, RAM 8 GB</b></div>
+    <div><small>พื้นที่</small><b><span class="cloud">50 GB</span></b></div>
     <div><small>ระบบปฏิบัติการ</small><b>Ubuntu 24</b></div>
     <div><small>แผงควบคุม</small><b>1Panel</b></div>
     <div><small>DNS</small><b>จัดการด้วย Cloudflare</b></div>
   </div>
+  <p class="key">ป้ายสีเดียวกันคือข้อมูลชุดเดียวกัน: <span class="cloud">พื้นที่ของ Private Cloud</span> และ <span class="mail">พื้นที่ของอีเมล</span> ซึ่งแยกจากกัน</p>
 
   <section>
     <h2>ผู้ใช้งานพร้อมกัน</h2>
     <p class="big"><em>ประมาณ</em><strong>90</strong><span>คน ในเวลาเดียวกัน</span></p>
     <div class="people" role="img" aria-label="ภาพคน 90 คน"></div>
-    <p class="lead">เว็บไซต์เป็นไฟล์สำเร็จรูป ระบบทำหน้าที่ส่งไฟล์อย่างเดียว จึงรองรับผู้เข้าชมได้มากด้วยแพ็กเกจขนาดเล็ก</p>
+    <p class="lead">เว็บไซต์เป็นไฟล์สำเร็จรูป ระบบส่งไฟล์อย่างเดียว และมีกำลังเหลือสำหรับระบบที่จะเพิ่มในอนาคต เช่น ระบบหลังบ้าน</p>
     <p class="note">นับจากผู้ใช้ 1 คนเปิดหน้าใหม่ทุก 30 วินาที หน้าละ 4 MB ซึ่งเป็นขนาดของหน้าแรกที่มีวิดีโอ บนความเร็วมาตรฐาน 100 Mbps</p>
   </section>
 
   <section>
     <h2>พื้นที่เก็บรูปภาพ</h2>
-    <p class="big"><em>ประมาณ</em><strong>800,000</strong><span>รูป บนพื้นที่ 50 GB</span></p>
+    <p class="big"><em>ประมาณ</em><strong>800,000</strong><span>รูป บนพื้นที่ <span class="cloud">50 GB</span></span></p>
     <dl class="bars">
       <dt class="pick">ผ่านระบบของเว็บไซต์<small>ย่อไม่เกิน 1,600 พิกเซล แปลงเป็น WebP · 51 KB ต่อรูป</small></dt>
       <dd class="pick"><i style="--w: 100%"></i><b>800,000 รูป</b></dd>
@@ -99,8 +113,23 @@
       <dt>รูปต้นฉบับจากกล้อง ไม่ย่อ<small>ประมาณ 4 MB ต่อรูป</small></dt>
       <dd><i style="--w: 1.25%"></i><b>10,000 รูป</b></dd>
     </dl>
-    <p class="lead">ระบบย่อและแปลงรูปทุกรูปก่อนขึ้นเว็บ รูปจึงคมชัดบนทุกหน้าจอ และเก็บได้มากกว่าการใช้ไฟล์ตามที่ได้รับประมาณ 3.5 เท่า</p>
-    <p class="note">คิดจากพื้นที่ 50 GB หักส่วนของระบบประมาณ 10 GB เหลือใช้เก็บรูป 40 GB ขนาด 51 KB และ 180 KB วัดจากไฟล์จริงของเว็บไซต์และไฟล์ตัวอย่าง 15 รูป ขนาดรูปจากกล้อง 4 MB เป็นค่าทั่วไป</p>
+    <p class="lead">ระบบย่อและแปลงรูปทุกรูปก่อนขึ้นเว็บ รูปจึงคมชัดบนทุกหน้าจอ และเก็บได้มากกว่าไฟล์ตามที่ได้รับประมาณ 3.5 เท่า</p>
+    <p class="note">คิดจากพื้นที่ <span class="cloud">50 GB</span> หักส่วนของระบบประมาณ 10 GB เหลือใช้เก็บรูป 40 GB ขนาด 51 KB และ 180 KB วัดจากไฟล์จริงของเว็บไซต์และไฟล์ตัวอย่าง 15 รูป ขนาดรูปจากกล้อง 4 MB เป็นค่าทั่วไป</p>
+  </section>
+
+  <section>
+    <h2>อีเมลองค์กร</h2>
+    <p class="big"><strong>5</strong><span>บัญชี ภายใต้โดเมน .co.th ของลูกค้า</span></p>
+    <ul class="boxes" aria-label="กล่องอีเมล 5 บัญชี บัญชีละ 5 GB">
+      <li><svg viewBox="0 0 28 20" aria-hidden="true"><rect x="1" y="1" width="26" height="18" fill="none" stroke="#1c1b1a" stroke-width="1.6"/><path d="M1 2l13 10L27 2" fill="none" stroke="#1c1b1a" stroke-width="1.6"/></svg><span class="mail">5 GB</span></li>
+      <li><svg viewBox="0 0 28 20" aria-hidden="true"><rect x="1" y="1" width="26" height="18" fill="none" stroke="#1c1b1a" stroke-width="1.6"/><path d="M1 2l13 10L27 2" fill="none" stroke="#1c1b1a" stroke-width="1.6"/></svg><span class="mail">5 GB</span></li>
+      <li><svg viewBox="0 0 28 20" aria-hidden="true"><rect x="1" y="1" width="26" height="18" fill="none" stroke="#1c1b1a" stroke-width="1.6"/><path d="M1 2l13 10L27 2" fill="none" stroke="#1c1b1a" stroke-width="1.6"/></svg><span class="mail">5 GB</span></li>
+      <li><svg viewBox="0 0 28 20" aria-hidden="true"><rect x="1" y="1" width="26" height="18" fill="none" stroke="#1c1b1a" stroke-width="1.6"/><path d="M1 2l13 10L27 2" fill="none" stroke="#1c1b1a" stroke-width="1.6"/></svg><span class="mail">5 GB</span></li>
+      <li><svg viewBox="0 0 28 20" aria-hidden="true"><rect x="1" y="1" width="26" height="18" fill="none" stroke="#1c1b1a" stroke-width="1.6"/><path d="M1 2l13 10L27 2" fill="none" stroke="#1c1b1a" stroke-width="1.6"/></svg><span class="mail">5 GB</span></li>
+      <li class="sum">รวม <span class="mail">25 GB</span></li>
+    </ul>
+    <p class="lead">แต่ละบัญชีมีพื้นที่ <span class="mail">5 GB</span> แนบไฟล์ได้ถึง 30 MB ใช้งานผ่านเว็บ แอปมือถือ และโปรแกรมอีเมล เช่น Outlook</p>
+    <p class="note">อีเมลเป็นบริการแยกจากเว็บไซต์ พื้นที่อีเมล <span class="mail">25 GB</span> ไม่นับรวมในพื้นที่ <span class="cloud">50 GB</span> ของ Private Cloud</p>
   </section>
 
   <footer>ตัวเลขเป็นค่าประมาณจากการวัดและคำนวณ ณ วันที่จัดทำ ยังไม่ได้ทดสอบบนระบบจริง และอาจเปลี่ยนเมื่อเนื้อหาเว็บไซต์เพิ่มขึ้น</footer>
