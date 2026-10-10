@@ -57,7 +57,7 @@ html:has(dialog[open]) {
   }
 }
 
-/* การ์ดผลงาน: ชี้รูป (.spot) แล้วรูปขยาย ส่วนอื่นของหน้ามืดลงด้วยเงาสี ink ที่แผ่เต็มจอ
+/* การ์ดผลงาน: ชี้การ์ด (.spot) แล้วการ์ดขยาย ส่วนอื่นของหน้ามืดลงด้วยเงาสี ink ที่แผ่เต็มจอ
    .spot-lift = ตัวห่อการ์ด ยกขึ้นเหนือการ์ดอื่นระหว่างชี้ และค้างไว้จนม่านจางหมด */
 .spot {
   position: relative;
@@ -93,7 +93,7 @@ html:has(dialog[open]) {
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .spot:hover {
-    transform: scale(1.08);
+    transform: scale(1.04);
   }
 }
 
