@@ -93,7 +93,7 @@ for (let i = 0; i < pages.length; i++) {
   }
 }
 if (pages.length < 2) { console.error(`ไล่ลิงก์จาก ${BASE}/ ได้แค่ ${pages.length} หน้า: dev server เปิดอยู่ที่ ${BASE} หรือเปล่า`); quit(2); }
-if (!pages.includes('/room/')) pages.push('/room/'); // หน้าห้องจำลองไม่มีลิงก์เข้า (ตั้งใจ) จึงต้องใส่เอง
+if (!pages.includes('/lab/room/')) pages.push('/lab/room/'); // หน้าห้องจำลองไม่มีลิงก์เข้า (ตั้งใจ) จึงต้องใส่เอง
 
 // เช็กตัวเองข้อสอง: ภาพที่ไม่มีไฟล์ต้องโดนจับ
 await evaluate(`document.body.insertAdjacentHTML('beforeend', '<img src="/__overflow-self-test__.webp">')`);

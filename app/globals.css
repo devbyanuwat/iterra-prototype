@@ -31,6 +31,11 @@ html.lenis body {
   overflow: hidden;
 }
 
+/* แผงค้นหาหรือประกาศเปิดอยู่: หน้าข้างหลังไม่เลื่อนตาม (data-lenis-prevent กัน Lenis ได้ แต่ไม่กันการเลื่อนของเบราว์เซอร์เอง) */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
 /* การ์ดเจาะดูของห้องจำลอง: ค่อย ๆ ลอยขึ้นมา */
 @keyframes card-in {
   from {

@@ -13,8 +13,25 @@ export const dict = {
       products: 'สินค้า',
       catalog: 'แคตตาล็อก',
       articles: 'บทความ',
+      projects: 'ผลงาน',
       contact: 'ติดต่อเรา',
       showroom: 'นัดชมโชว์รูม',
+    },
+    float: { top: 'กลับขึ้นด้านบน', line: 'แชตกับเราทาง LINE' },
+    search: {
+      open: 'ค้นหา',
+      close: 'ปิดการค้นหา',
+      placeholder: 'ค้นหาสินค้า บทความ ผลงาน',
+      hint: 'พิมพ์ชื่อสินค้า รุ่น หรือหัวข้อที่สนใจ',
+      none: 'ไม่พบผลลัพธ์ ลองคำอื่น',
+      groups: { products: 'สินค้า', articles: 'บทความ', projects: 'ผลงาน', pages: 'หน้าเว็บ' },
+    },
+    announce: { close: 'ปิดประกาศ' },
+    projects: {
+      title: 'ผลงานอ้างอิง',
+      sub: 'โครงการที่เลือกใช้ก๊อกและซิงก์จาก ITERRA',
+      sample: 'ข้อมูลในหน้านี้เป็นตัวอย่างสำหรับเดโม',
+      used: 'สินค้าที่ใช้',
     },
     common: {
       inquire: 'สอบถามสินค้านี้',
@@ -149,8 +166,25 @@ export const dict = {
       products: 'Products',
       catalog: 'Catalog',
       articles: 'Journal',
+      projects: 'Project Reference',
       contact: 'Contact',
       showroom: 'Book a Visit',
+    },
+    float: { top: 'Back to top', line: 'Chat with us on LINE' },
+    search: {
+      open: 'Search',
+      close: 'Close search',
+      placeholder: 'Search products, journal, projects',
+      hint: 'Type a product name, a model or a topic',
+      none: 'No results. Try another word.',
+      groups: { products: 'Products', articles: 'Journal', projects: 'Projects', pages: 'Pages' },
+    },
+    announce: { close: 'Close announcement' },
+    projects: {
+      title: 'Project Reference',
+      sub: 'Projects fitted with faucets and sinks from ITERRA',
+      sample: 'The entries on this page are samples for the demo.',
+      used: 'Products used',
     },
     common: {
       inquire: 'Inquire about this piece',
@@ -281,3 +315,17 @@ export const dict = {
 };
 
 export type Dict = (typeof dict)['th'];
+
+// เมนูหลัก: ใช้ทั้ง Nav และดัชนีค้นหา
+export const NAV_LINKS = [
+  { href: '/', key: 'home' },
+  { href: '/about/', key: 'about' },
+  { href: '/products/', key: 'products' },
+  { href: '/catalog/', key: 'catalog' },
+  { href: '/articles/', key: 'articles' },
+  { href: '/projects/', key: 'projects' },
+  { href: '/contact/', key: 'contact' },
+] as const;
+
+// หน้าเว็บที่ค้นหาได้: เมนูหลัก · หน้าจำลองห้องครัว (/lab/room/) ซ่อนไว้ ไม่อยู่ในนี้
+export const PAGES = NAV_LINKS.map((l) => ({ href: l.href as string, title: { th: dict.th.nav[l.key], en: dict.en.nav[l.key] } }));
