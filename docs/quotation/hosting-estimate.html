@@ -8,133 +8,101 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --ink: #1c1b1a; --soft: #5c5853; --line: #d9d5cf; --wash: #f5f3ef; }
+  /* ภาพรวมหน้าเดียว A4 · แก้ตัวเลขและข้อความได้ตรง ๆ ในไฟล์นี้
+     แท่งเทียบจำนวนรูป: ความกว้างตั้งที่ style="--w: …%" ของแต่ละแท่ง (สัดส่วนจากจำนวนรูปต่อ 1 GB) */
+  :root { --ink: #1c1b1a; --soft: #5c5853; --line: #d9d5cf; --wash: #f5f3ef; --tone: #4f6b5a; }
   * { box-sizing: border-box; }
   html { background: #e9e6e1; }
-  body { margin: 0; font-family: 'Sarabun', 'Noto Sans Thai', 'Thonburi', sans-serif; font-size: 11pt; line-height: 1.65; color: var(--ink); }
-  .page { width: 210mm; min-height: 297mm; margin: 10mm auto; padding: 18mm 18mm 16mm; background: #fff; }
-  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 12mm; padding-bottom: 5mm; border-bottom: 1.5pt solid var(--ink); }
-  header h1 { margin: 0; font-size: 17pt; font-weight: 600; line-height: 1.3; }
+  body { margin: 0; font-family: 'Sarabun', 'Noto Sans Thai', 'Thonburi', sans-serif; font-size: 11pt; line-height: 1.6; color: var(--ink); }
+  .page { width: 210mm; min-height: 297mm; margin: 10mm auto; padding: 14mm 18mm; background: #fff; display: flex; flex-direction: column; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 10mm; padding-bottom: 5mm; border-bottom: 1.5pt solid var(--ink); }
+  h1 { margin: 0; font-size: 17pt; font-weight: 600; line-height: 1.3; }
   header p { margin: 1mm 0 0; color: var(--soft); }
-  .meta { text-align: right; font-size: 9.5pt; color: var(--soft); white-space: nowrap; }
-  h2 { margin: 8mm 0 2mm; font-size: 12.5pt; font-weight: 600; }
-  h2 span { display: inline-block; min-width: 7mm; color: var(--soft); font-weight: 400; }
-  p { margin: 0 0 2.5mm; }
-  ul { margin: 0 0 2.5mm; padding-left: 5.5mm; }
-  li { margin-bottom: 0.8mm; }
-  table { width: 100%; border-collapse: collapse; margin: 1mm 0 3mm; font-size: 10.5pt; }
-  th, td { padding: 1.8mm 2.5mm; border-bottom: 0.5pt solid var(--line); text-align: left; vertical-align: top; }
-  th { font-weight: 500; color: var(--soft); border-bottom: 0.75pt solid var(--ink); }
-  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  tr.pick td { background: var(--wash); font-weight: 500; }
-  .box { margin: 2mm 0 3mm; padding: 3.5mm 4.5mm; background: var(--wash); border-left: 2pt solid var(--ink); }
-  .box p:last-child, .box ul:last-child { margin-bottom: 0; }
-  .note { font-size: 9.5pt; color: var(--soft); }
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 8mm; }
-  footer { margin-top: 8mm; padding-top: 3mm; border-top: 0.5pt solid var(--line); font-size: 9pt; color: var(--soft); }
-  h2, table, .box { break-inside: avoid; }
-  h2 { break-after: avoid; }
-  @page { size: A4; margin: 16mm 18mm; }
-  @media print {
-    html { background: #fff; }
-    .page { width: auto; margin: 0; padding: 0; min-height: 0; }
-    .page + .page h2:first-child { margin-top: 8mm !important; }
+  .date { font-size: 9.5pt; color: var(--soft); white-space: nowrap; }
+
+  .spec { display: grid; grid-template-columns: 1.5fr 1fr 0.8fr 1.4fr; margin: 6mm 0 0; background: var(--wash); }
+  .spec div { padding: 3mm 4.5mm; border-left: 0.5pt solid var(--line); }
+  .spec div:first-child { border-left: 0; }
+  .spec small { display: block; font-size: 9pt; color: var(--soft); }
+  .spec b { font-weight: 500; font-size: 11.5pt; }
+
+  section { margin-top: 8mm; }
+  h2 { margin: 0 0 1mm; font-size: 10.5pt; font-weight: 500; color: var(--soft); }
+  .big { margin: 0; display: flex; align-items: baseline; gap: 3mm; line-height: 1; }
+  .big strong { font-size: 46pt; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .big span { font-size: 15pt; }
+  .big em { font-style: normal; font-size: 11pt; color: var(--soft); }
+  .lead { margin: 3mm 0 0; max-width: 150mm; }
+  .note { margin: 1.5mm 0 0; font-size: 9.5pt; color: var(--soft); }
+
+  /* แถวคน 90 คน = 3 แถว แถวละ 30 · วาดด้วยภาพพื้นหลังซ้ำ */
+  .people { width: 174mm; height: 25.5mm; margin-top: 4mm; background-size: 5.8mm 8.5mm;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 58 100'%3E%3Ccircle cx='29' cy='24' r='13' fill='%234f6b5a'/%3E%3Cpath d='M9 88c0-22 8-38 20-38s20 16 20 38z' fill='%234f6b5a'/%3E%3C/svg%3E"); }
+
+  .bars { margin: 4mm 0 0; display: grid; grid-template-columns: 62mm 1fr; gap: 2.5mm 5mm; align-items: center; }
+  .bars dt { font-size: 10.5pt; }
+  .bars dt small { display: block; font-size: 9pt; font-weight: 400; color: var(--soft); }
+  .bars dd { margin: 0; display: flex; align-items: center; gap: 3mm; }
+  .bars i { display: block; height: 8mm; width: var(--w); min-width: 1mm; background: var(--line); }
+  .bars .pick i { background: var(--tone); }
+  .bars dd b { font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .bars .pick { font-weight: 500; }
+
+  footer { margin-top: auto; padding-top: 4mm; border-top: 0.5pt solid var(--line); font-size: 9pt; color: var(--soft); }
+  @page { size: A4; margin: 0; }
+  @media print { html { background: #fff; } .page { margin: 0; } * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  @media screen and (max-width: 220mm) {
+    .page { width: auto; min-height: 0; margin: 0; padding: 8mm 6mm; }
+    header { display: block; } .date { margin-top: 2mm; }
+    .spec { grid-template-columns: 1fr 1fr; } .spec div:nth-child(3) { border-left: 0; }
+    .big { flex-wrap: wrap; } .big strong { font-size: 40pt; }
+    .people { width: 100%; height: auto; aspect-ratio: 174 / 25.5; background-size: calc(100% / 30) calc(100% / 3); }
+    .bars { grid-template-columns: 1fr; gap: 1mm; } .bars dd { margin-bottom: 3mm; }
+    footer { margin-top: 10mm; }
   }
-  @media screen and (max-width: 220mm) { .page { width: auto; margin: 0; padding: 8mm 6mm; } .two { grid-template-columns: 1fr; } header { display: block; } .meta { text-align: left; margin-top: 3mm; } table { display: block; overflow-x: auto; } }
 </style>
 </head>
 <body>
-
-<section class="page">
+<main class="page">
   <header>
     <div>
       <h1>เอกสารประกอบใบเสนอราคา<br>เซิร์ฟเวอร์สำหรับเว็บไซต์ ITERRA</h1>
-      <p>การประเมินทรัพยากร จำนวนผู้ใช้งานพร้อมกัน และจำนวนรูปภาพที่รองรับ</p>
+      <p>ภาพรวม: รองรับผู้ใช้ได้กี่คน และเก็บรูปได้กี่รูป</p>
     </div>
-    <div class="meta">
-      จัดทำเมื่อ 10 ตุลาคม 2569
-    </div>
+    <div class="date">จัดทำเมื่อ 10 ตุลาคม 2569</div>
   </header>
 
-  <h2><span>1</span>สรุปข้อเสนอ</h2>
-  <div class="box">
-    <p>เว็บไซต์ ITERRA เป็นเว็บแบบไฟล์สำเร็จรูป (static) เซิร์ฟเวอร์ทำหน้าที่ส่งไฟล์อย่างเดียว ไม่มีฐานข้อมูลและไม่มีโปรแกรมประมวลผลฝั่งเซิร์ฟเวอร์ แพ็กเกจเล็กที่สุดจึงเพียงพอ และมีกำลังเหลือสำหรับการขยายในอนาคต</p>
+  <div class="spec">
+    <div><small>แพ็กเกจเซิร์ฟเวอร์</small><b>CPU 2 Core, RAM 4 GB</b></div>
+    <div><small>ระบบปฏิบัติการ</small><b>Ubuntu 24</b></div>
+    <div><small>แผงควบคุม</small><b>1Panel</b></div>
+    <div><small>DNS</small><b>จัดการด้วย Cloudflare</b></div>
   </div>
-  <table>
-    <tr><th style="width:34%">รายการ</th><th>ที่เสนอ</th></tr>
-    <tr class="pick"><td>แพ็กเกจเซิร์ฟเวอร์</td><td>P1: CPU 2 Core, RAM 4 GB</td></tr>
-    <tr><td>ระบบปฏิบัติการ</td><td>Ubuntu 24</td></tr>
-    <tr><td>แผงควบคุม</td><td>1Panel</td></tr>
-    <tr><td>ด้านหน้าเซิร์ฟเวอร์</td><td>Cloudflare ทำหน้าที่ DNS, HTTPS และ CDN</td></tr>
-  </table>
 
-  <h2><span>2</span>ทรัพยากรที่เว็บไซต์ใช้</h2>
-  <p>วัดจากไฟล์เว็บไซต์ชุดล่าสุด ณ วันที่จัดทำเอกสาร</p>
-  <table>
-    <tr><th>ประเภทไฟล์</th><th class="n">จำนวน</th><th class="n">ขนาดรวม</th><th>หมายเหตุ</th></tr>
-    <tr><td>รูปภาพ (WebP)</td><td class="n">140 ไฟล์</td><td class="n">7.2 MB</td><td>ขนาดกลาง 44 KB ต่อรูป ใหญ่สุด 212 KB</td></tr>
-    <tr><td>แคตตาล็อก (PDF)</td><td class="n">1 ไฟล์</td><td class="n">17.6 MB</td><td>ไฟล์ใหญ่ที่สุดของเว็บ</td></tr>
-    <tr><td>วิดีโอหน้าแรก</td><td class="n">1 ไฟล์</td><td class="n">2.7 MB</td><td></td></tr>
-    <tr><td>หน้าเว็บและโปรแกรม (HTML, JS, CSS)</td><td class="n">47 ไฟล์</td><td class="n">2.4 MB</td><td>25 หน้า</td></tr>
-    <tr class="pick"><td>รวมทั้งเว็บไซต์</td><td class="n"></td><td class="n">32 MB</td><td></td></tr>
-  </table>
-  <div class="two">
-    <div>
-      <p><strong>หน่วยความจำ (RAM)</strong><br>ระบบปฏิบัติการ โปรแกรมส่งไฟล์ และแผงควบคุม ใช้รวมกันประมาณ 1 ถึง 1.5 GB จาก 4 GB</p>
-    </div>
-    <div>
-      <p><strong>หน่วยประมวลผล (CPU)</strong><br>การส่งไฟล์สำเร็จรูปใช้ CPU น้อยมาก 2 Core รองรับได้โดยไม่ต้องขยาย</p>
-    </div>
-  </div>
-  <p class="note">ตัวเลข RAM และ CPU เป็นค่าประมาณจากลักษณะของเว็บ ยังไม่ได้วัดบนเซิร์ฟเวอร์จริง</p>
-</section>
+  <section>
+    <h2>ผู้ใช้งานพร้อมกัน</h2>
+    <p class="big"><em>ประมาณ</em><strong>90</strong><span>คน ในเวลาเดียวกัน</span></p>
+    <div class="people" role="img" aria-label="ภาพคน 90 คน"></div>
+    <p class="lead">เว็บไซต์เป็นไฟล์สำเร็จรูป เซิร์ฟเวอร์ทำหน้าที่ส่งไฟล์อย่างเดียว จึงรองรับผู้เข้าชมได้มากด้วยแพ็กเกจขนาดเล็ก</p>
+    <p class="note">นับจากผู้ใช้ 1 คนเปิดหน้าใหม่ทุก 30 วินาที หน้าละ 4 MB ซึ่งเป็นขนาดของหน้าแรกที่มีวิดีโอ บนความเร็วมาตรฐานของเซิร์ฟเวอร์ 100 Mbps</p>
+  </section>
 
-<section class="page">
-  <h2 style="margin-top:0"><span>3</span>จำนวนผู้ใช้งานพร้อมกัน</h2>
-  <p>ข้อจำกัดของเว็บประเภทนี้คือความเร็วอินเทอร์เน็ตของเซิร์ฟเวอร์ ไม่ใช่ CPU หรือ RAM ตารางด้านล่างคำนวณจากสมมติฐานดังนี้</p>
-  <ul>
-    <li>ผู้ใช้ 1 คนเปิดหน้าใหม่ทุก 30 วินาที</li>
-    <li>การเปิด 1 หน้าใช้ข้อมูล 4 MB ซึ่งเป็นค่าของหน้าแรกที่มีวิดีโอ หน้าอื่นเบากว่านี้</li>
-  </ul>
-  <table>
-    <tr><th>ความเร็วของเซิร์ฟเวอร์</th><th class="n">เซิร์ฟเวอร์ส่งไฟล์เองทั้งหมด</th><th class="n">ผ่าน Cloudflare CDN</th></tr>
-    <tr><td>100 Mbps</td><td class="n">ประมาณ 90 คน</td><td class="n" rowspan="2" style="vertical-align:middle">หลายพันคน</td></tr>
-    <tr><td>1 Gbps</td><td class="n">ประมาณ 900 คน</td></tr>
-  </table>
-  <p>เมื่อใช้ Cloudflare ไฟล์รูป วิดีโอ และโปรแกรมจะถูกเก็บสำเนาไว้ที่เครือข่ายของ Cloudflare ผู้เข้าชมส่วนใหญ่จึงรับไฟล์จาก Cloudflare โดยตรง เซิร์ฟเวอร์ส่งเฉพาะตัวหน้าเว็บ ซึ่งมีขนาดเฉลี่ยราว 36 KB ต่อหน้า</p>
-  <p class="note">ตัวเลขในตารางเป็นการคำนวณ ยังไม่ได้ทดสอบด้วยการจำลองผู้ใช้จริง กรณีผ่าน Cloudflare ขึ้นกับการตั้งค่าการเก็บสำเนาและเงื่อนไขของแผนที่ใช้</p>
+  <section>
+    <h2>พื้นที่เก็บรูปภาพ</h2>
+    <p class="big"><em>ประมาณ</em><strong>20,000</strong><span>รูป ต่อพื้นที่ 1 GB</span></p>
+    <dl class="bars">
+      <dt class="pick">ผ่านระบบของเว็บไซต์<small>ย่อไม่เกิน 1,600 พิกเซล แปลงเป็น WebP · 51 KB ต่อรูป</small></dt>
+      <dd class="pick"><i style="--w: 100%"></i><b>20,000 รูป</b></dd>
+      <dt>ตามไฟล์ตัวอย่างที่ได้รับ<small>PNG 375 × 281 พิกเซล · 180 KB ต่อรูป</small></dt>
+      <dd><i style="--w: 29%"></i><b>5,800 รูป</b></dd>
+      <dt>รูปต้นฉบับจากกล้อง ไม่ย่อ<small>ประมาณ 4 MB ต่อรูป</small></dt>
+      <dd><i style="--w: 1.25%"></i><b>250 รูป</b></dd>
+    </dl>
+    <p class="lead">ระบบย่อและแปลงรูปทุกรูปก่อนขึ้นเว็บ รูปจึงคมชัดบนทุกหน้าจอ และเก็บได้มากกว่าการใช้ไฟล์ตามที่ได้รับประมาณ 3.5 เท่า</p>
+    <p class="note">ขนาด 51 KB และ 180 KB วัดจากไฟล์จริงของเว็บไซต์และไฟล์ตัวอย่าง 15 รูป ขนาดรูปจากกล้อง 4 MB เป็นค่าทั่วไป</p>
+  </section>
 
-  <h2><span>4</span>ปริมาณรับส่งข้อมูลต่อเดือน</h2>
-  <p>สมมติว่าการเข้าชม 1 ครั้งเปิดเฉลี่ย 3 หน้า ใช้ข้อมูลประมาณ 6 MB</p>
-  <table>
-    <tr><th>จำนวนการเข้าชมต่อเดือน</th><th class="n">ข้อมูลที่ใช้ (ไม่ผ่าน CDN)</th></tr>
-    <tr><td>1,000 ครั้ง</td><td class="n">ประมาณ 6 GB</td></tr>
-    <tr><td>10,000 ครั้ง</td><td class="n">ประมาณ 60 GB</td></tr>
-    <tr><td>50,000 ครั้ง</td><td class="n">ประมาณ 300 GB</td></tr>
-  </table>
-  <p class="note">การดาวน์โหลดแคตตาล็อก PDF ใช้เพิ่มครั้งละ 17.6 MB เมื่อผ่าน Cloudflare ปริมาณที่เซิร์ฟเวอร์ต้องส่งเองจะต่ำกว่าตารางนี้</p>
-
-  <h2><span>5</span>รูปภาพ: คุณภาพและจำนวนที่รองรับ</h2>
-  <div class="box">
-    <p><strong>ข้อเสนอ: ให้ระบบกำหนดคุณภาพรูปทุกรูปก่อนขึ้นเว็บ</strong> แทนการเก็บไฟล์ตามที่ได้รับมา</p>
-    <ul>
-      <li>ย่อด้านกว้างไม่เกิน 1,600 พิกเซล</li>
-      <li>แปลงเป็นไฟล์ WebP คุณภาพระดับ 78</li>
-      <li>ผลที่ได้: รูปคมชัดบนจอคอมพิวเตอร์และมือถือ ขนาดเฉลี่ยราว 51 KB ต่อรูป</li>
-    </ul>
-  </div>
-  <p>เหตุผล: รูปตัวอย่างที่ได้รับ 15 รูป เป็นไฟล์ PNG ขนาด 375 × 281 พิกเซล เฉลี่ย 180 KB ต่อรูป ความละเอียดต่ำแต่ไฟล์ใหญ่ ขณะที่รูปที่ผ่านระบบแล้วละเอียดกว่าและเล็กกว่าประมาณ 3.5 เท่า เมื่อระบบเป็นผู้กำหนดคุณภาพ จำนวนรูปที่รองรับจะคาดการณ์ได้แน่นอน ไม่ขึ้นกับไฟล์ต้นทาง</p>
-  <table>
-    <tr><th>รูปแบบการเก็บ</th><th class="n">ขนาดต่อรูป</th><th class="n">ต่อดิสก์ 1 GB</th><th class="n">ต่อดิสก์ 10 GB</th><th class="n">ต่อดิสก์ 50 GB</th></tr>
-    <tr class="pick"><td>ผ่านระบบ (WebP ไม่เกิน 1,600 พิกเซล)</td><td class="n">51 KB</td><td class="n">20,000 รูป</td><td class="n">200,000 รูป</td><td class="n">1,000,000 รูป</td></tr>
-    <tr><td>ตามไฟล์ตัวอย่างที่ได้รับ (PNG)</td><td class="n">180 KB</td><td class="n">5,800 รูป</td><td class="n">58,000 รูป</td><td class="n">290,000 รูป</td></tr>
-    <tr><td>รูปต้นฉบับจากกล้อง ไม่ย่อ</td><td class="n">ประมาณ 4 MB</td><td class="n">250 รูป</td><td class="n">2,500 รูป</td><td class="n">12,500 รูป</td></tr>
-  </table>
-  <p class="note">จำนวนรูปเป็นค่าประมาณ ปัดเศษแล้ว และนับเฉพาะพื้นที่ที่เหลือหลังติดตั้งระบบ ขนาดรูปจากกล้อง 4 MB เป็นค่าทั่วไป ไม่ได้วัดจากไฟล์ของลูกค้า</p>
-  <p class="note">ปัจจุบันการย่อและแปลงรูปทำในขั้นตอนจัดเตรียมเว็บโดยผู้พัฒนา หากต้องการให้ลูกค้าอัปโหลดรูปเองผ่านระบบหลังบ้าน ต้องพัฒนาเพิ่ม</p>
-
-  <footer>เอกสารนี้เป็นการประเมินเพื่อประกอบการตัดสินใจ ตัวเลขวัดและคำนวณ ณ วันที่จัดทำ และอาจเปลี่ยนเมื่อเนื้อหาเว็บไซต์เพิ่มขึ้น</footer>
-</section>
-
+  <footer>ตัวเลขเป็นค่าประมาณจากการวัดและคำนวณ ณ วันที่จัดทำ ยังไม่ได้ทดสอบบนเซิร์ฟเวอร์จริง และอาจเปลี่ยนเมื่อเนื้อหาเว็บไซต์เพิ่มขึ้น</footer>
+</main>
 </body>
 </html>
