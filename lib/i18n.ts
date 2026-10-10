@@ -25,6 +25,7 @@ export const dict = {
       none: 'ไม่พบผลลัพธ์ ลองคำอื่น',
       groups: { products: 'สินค้า', articles: 'บทความ', projects: 'ผลงาน', pages: 'หน้าเว็บ' },
     },
+    announce: { close: 'ปิดประกาศ' },
     common: {
       inquire: 'สอบถามสินค้านี้',
       priceOnRequest: 'สอบถามราคา',
@@ -170,6 +171,7 @@ export const dict = {
       none: 'No results. Try another word.',
       groups: { products: 'Products', articles: 'Journal', projects: 'Projects', pages: 'Pages' },
     },
+    announce: { close: 'Close announcement' },
     common: {
       inquire: 'Inquire about this piece',
       priceOnRequest: 'Price on request',

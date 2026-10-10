@@ -6,6 +6,7 @@ import SmoothScroll from '@/components/SmoothScroll';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import FloatingActions from '@/components/FloatingActions';
+import Announcement from '@/components/Announcement';
 import JsonLd from '@/components/JsonLd';
 import { CONTACT, SITE_NAME, SITE_TAGLINE_EN, SITE_TAGLINE_TH, SITE_URL } from '@/lib/site';
 
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main>{children}</main>
           <Footer />
           <FloatingActions />
+          <Announcement />
         </LangProvider>
         <JsonLd data={organizationJsonLd} />
         <Analytics />

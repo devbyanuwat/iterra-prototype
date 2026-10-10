@@ -4,6 +4,7 @@ import { buildIndex, search, GROUPS } from '../lib/search.ts';
 import { products } from '../lib/products.ts';
 import { posts } from '../lib/posts.ts';
 import { PAGES } from '../lib/i18n.ts';
+import { ANNOUNCEMENT, shouldShow, markSeen } from '../lib/announcement.ts';
 
 const projects = [];
 const index = buildIndex({ products, posts, projects, pages: PAGES });
@@ -37,4 +38,20 @@ assert.doesNotThrow(() => search(index, '( + [ \\ *'));
 assert.ok(hrefs('studio').includes('/room/'));
 assert.ok(hrefs('ติดต่อ').includes('/contact/'));
 
-console.log('ผ่าน: การค้นหา');
+// ── ประกาศตอนเข้าเว็บ (อยู่ในด่านเดียวกัน: ตรรกะสั้น ไม่คุ้มแยกสคริปต์) ──
+const mem = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => void m.set(k, v) }; };
+const broken = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); } };
+const on = { enabled: true, id: 'a1' };
+const s = mem();
+assert.equal(shouldShow(on, s), true);
+markSeen('a1', s);
+assert.equal(shouldShow(on, s), false);
+assert.equal(shouldShow({ enabled: true, id: 'a2' }, s), true); // id ใหม่ = แสดงอีกครั้ง
+assert.equal(shouldShow({ enabled: false, id: 'a3' }, s), false);
+assert.equal(shouldShow(on, null), true); // ไม่มี storage: แสดงทุกครั้งที่โหลดหน้า
+assert.equal(shouldShow(on, broken), true);
+assert.doesNotThrow(() => markSeen('a1', broken));
+assert.ok(ANNOUNCEMENT.id && ANNOUNCEMENT.image.startsWith('/media/'));
+for (const n of [ANNOUNCEMENT.title, ANNOUNCEMENT.body, ANNOUNCEMENT.cta.label]) assert.ok(n.th.trim() && n.en.trim() && !/[\u0E4E\u2013\u2014]/.test(n.th + n.en));
+
+console.log('ผ่าน: การค้นหา และประกาศ');
