@@ -14,7 +14,7 @@ const hrefs = (q) => search(index, q).map((e) => e.href);
 assert.equal(index.length, products.length + posts.length + projects.length + PAGES.length);
 for (const p of products) assert.ok(index.some((e) => e.href === `/products/${p.slug}/`), `ไม่มีสินค้า ${p.slug}`);
 for (const p of posts) assert.ok(index.some((e) => e.href === `/articles/${p.slug}/`), `ไม่มีบทความ ${p.slug}`);
-assert.ok(PAGES.some((p) => p.href === '/room/'), 'หน้าเว็บต้องมี /room/');
+assert.ok(!index.some((e) => e.href.endsWith('/room/')), 'หน้าจำลองห้องครัวซ่อนไว้ ต้องไม่อยู่ในผลค้นหา');
 assert.ok(index.every((e) => GROUPS.includes(e.group) && e.title.th && e.title.en));
 
 // ไทย และอังกฤษ (ไม่สนตัวพิมพ์)
@@ -35,7 +35,7 @@ assert.deepEqual(hrefs('   '), []);
 assert.deepEqual(hrefs(''), []);
 assert.doesNotThrow(() => search(index, '( + [ \\ *'));
 // หน้าเว็บ
-assert.ok(hrefs('studio').includes('/room/'));
+assert.deepEqual(hrefs('studio'), []);
 assert.ok(hrefs('ติดต่อ').includes('/contact/'));
 
 // ── ผลงาน ──

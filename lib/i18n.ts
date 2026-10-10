@@ -327,8 +327,5 @@ export const NAV_LINKS = [
   { href: '/contact/', key: 'contact' },
 ] as const;
 
-// หน้าเว็บที่ค้นหาได้: เมนูหลัก + หน้าจำลองห้องครัว (ไม่อยู่ในเมนู)
-export const PAGES = [
-  ...NAV_LINKS.map((l) => ({ href: l.href as string, title: { th: dict.th.nav[l.key], en: dict.en.nav[l.key] } })),
-  { href: '/room/', title: { th: dict.th.room.title, en: dict.en.room.title } },
-];
+// หน้าเว็บที่ค้นหาได้: เมนูหลัก · หน้าจำลองห้องครัว (/lab/room/) ซ่อนไว้ ไม่อยู่ในนี้
+export const PAGES = NAV_LINKS.map((l) => ({ href: l.href as string, title: { th: dict.th.nav[l.key], en: dict.en.nav[l.key] } }));

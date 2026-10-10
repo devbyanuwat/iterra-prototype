@@ -5,7 +5,7 @@ import RoomContent from '@/components/room/RoomContent';
 export const metadata: Metadata = {
   title: 'จำลองห้องครัว 3 มิติ',
   description: 'ลองสีหน้าบาน ท็อป พื้น และโทนแสงกับครัวผัง I, L และ U ในห้องจำลอง หมุนและซูมดูได้ 180 องศา',
-  alternates: { canonical: '/room/' },
+  alternates: { canonical: '/lab/room/' },
   robots: { index: false, follow: false },
 };
 
