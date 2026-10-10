@@ -13,6 +13,7 @@ export const dict = {
       products: 'สินค้า',
       catalog: 'แคตตาล็อก',
       articles: 'บทความ',
+      projects: 'ผลงาน',
       contact: 'ติดต่อเรา',
       showroom: 'นัดชมโชว์รูม',
     },
@@ -26,6 +27,12 @@ export const dict = {
       groups: { products: 'สินค้า', articles: 'บทความ', projects: 'ผลงาน', pages: 'หน้าเว็บ' },
     },
     announce: { close: 'ปิดประกาศ' },
+    projects: {
+      title: 'ผลงานอ้างอิง',
+      sub: 'โครงการที่เลือกใช้ก๊อกและซิงก์จาก ITERRA',
+      sample: 'ข้อมูลในหน้านี้เป็นตัวอย่างสำหรับเดโม',
+      used: 'สินค้าที่ใช้',
+    },
     common: {
       inquire: 'สอบถามสินค้านี้',
       priceOnRequest: 'สอบถามราคา',
@@ -159,6 +166,7 @@ export const dict = {
       products: 'Products',
       catalog: 'Catalog',
       articles: 'Journal',
+      projects: 'Project Reference',
       contact: 'Contact',
       showroom: 'Book a Visit',
     },
@@ -172,6 +180,12 @@ export const dict = {
       groups: { products: 'Products', articles: 'Journal', projects: 'Projects', pages: 'Pages' },
     },
     announce: { close: 'Close announcement' },
+    projects: {
+      title: 'Project Reference',
+      sub: 'Projects fitted with faucets and sinks from ITERRA',
+      sample: 'The entries on this page are samples for the demo.',
+      used: 'Products used',
+    },
     common: {
       inquire: 'Inquire about this piece',
       priceOnRequest: 'Price on request',
@@ -309,6 +323,7 @@ export const NAV_LINKS = [
   { href: '/products/', key: 'products' },
   { href: '/catalog/', key: 'catalog' },
   { href: '/articles/', key: 'articles' },
+  { href: '/projects/', key: 'projects' },
   { href: '/contact/', key: 'contact' },
 ] as const;
 

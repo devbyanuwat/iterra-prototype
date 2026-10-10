@@ -4,9 +4,9 @@ import { buildIndex, search, GROUPS } from '../lib/search.ts';
 import { products } from '../lib/products.ts';
 import { posts } from '../lib/posts.ts';
 import { PAGES } from '../lib/i18n.ts';
+import { projects } from '../lib/projects.ts';
 import { ANNOUNCEMENT, shouldShow, markSeen } from '../lib/announcement.ts';
 
-const projects = [];
 const index = buildIndex({ products, posts, projects, pages: PAGES });
 const hrefs = (q) => search(index, q).map((e) => e.href);
 
@@ -37,6 +37,20 @@ assert.doesNotThrow(() => search(index, '( + [ \\ *'));
 // หน้าเว็บ
 assert.ok(hrefs('studio').includes('/room/'));
 assert.ok(hrefs('ติดต่อ').includes('/contact/'));
+
+// ── ผลงาน ──
+assert.equal(projects.length, 6);
+assert.equal(new Set(projects.map((p) => p.slug)).size, projects.length);
+for (const p of projects) {
+  assert.ok(index.some((e) => e.href === `/projects/#${p.slug}`), `ไม่มีผลงาน ${p.slug}`);
+  for (const n of [p.name, p.location, p.type]) assert.ok(n.th.trim() && n.en.trim() && !/[\u0E4E\u2013\u2014]/.test(n.th + n.en));
+  assert.ok(p.image.startsWith('/media/') && p.year > 2000);
+  assert.ok(p.products.length > 0);
+  for (const slug of p.products) assert.ok(products.some((x) => x.slug === slug), `${p.slug}: ไม่มีสินค้า ${slug}`);
+}
+assert.ok(hrefs('เขาใหญ่').includes('/projects/#khao-yai-villa'));
+assert.ok(hrefs('penthouse').includes('/projects/#sukhumvit-penthouse'));
+assert.ok(PAGES.some((p) => p.href === '/projects/'), 'เมนูต้องมี /projects/');
 
 // ── ประกาศตอนเข้าเว็บ (อยู่ในด่านเดียวกัน: ตรรกะสั้น ไม่คุ้มแยกสคริปต์) ──
 const mem = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => void m.set(k, v) }; };

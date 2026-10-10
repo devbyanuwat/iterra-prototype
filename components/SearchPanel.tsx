@@ -10,8 +10,9 @@ import { buildIndex, search, GROUPS } from '@/lib/search';
 import { PAGES } from '@/lib/i18n';
 import { products } from '@/lib/products';
 import { posts } from '@/lib/posts';
+import { projects } from '@/lib/projects';
 
-const index = buildIndex({ products, posts, projects: [], pages: PAGES });
+const index = buildIndex({ products, posts, projects, pages: PAGES });
 
 export default function SearchPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { lang, t } = useLang();

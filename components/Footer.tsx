@@ -22,6 +22,7 @@ export default function Footer() {
             <li><Link href="/products/" className="text-paper/75 hover:text-paper">{t.nav.products}</Link></li>
             <li><Link href="/catalog/" className="text-paper/75 hover:text-paper">{t.nav.catalog}</Link></li>
             <li><Link href="/articles/" className="text-paper/75 hover:text-paper">{t.nav.articles}</Link></li>
+            <li><Link href="/projects/" className="text-paper/75 hover:text-paper">{t.nav.projects}</Link></li>
             <li><Link href="/contact/" className="text-paper/75 hover:text-paper">{t.nav.contact}</Link></li>
           </ul>
         </nav>

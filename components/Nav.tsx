@@ -57,7 +57,7 @@ export default function Nav() {
           <Link href="/" className="pointer-events-auto text-lg font-light tracking-widest2">
             ITERRA
           </Link>
-          <nav aria-label="เมนูหลัก" className="pointer-events-auto hidden items-center gap-6 md:flex lg:gap-8">
+          <nav aria-label="เมนูหลัก" className="pointer-events-auto hidden items-center gap-5 lg:flex xl:gap-8">
             {LINKS.map((l) => (
               <Link
                 key={l.href}
@@ -72,7 +72,7 @@ export default function Nav() {
             <SearchButton label={t.search.open} onClick={() => setSearching(true)} />
             <LangSwitch />
           </nav>
-          <div className="pointer-events-auto flex items-center gap-2 md:hidden">
+          <div className="pointer-events-auto flex items-center gap-2 lg:hidden">
             <LangSwitch />
             <SearchButton label={t.search.open} onClick={() => setSearching(true)} />
             <button
@@ -90,7 +90,7 @@ export default function Nav() {
 
       {/* เมนูมือถือแบบเต็มจอ */}
       <div
-        className={`fixed inset-0 z-[60] flex flex-col bg-ink text-paper transition-transform duration-500 md:hidden ${
+        className={`fixed inset-0 z-[60] flex flex-col bg-ink text-paper transition-transform duration-500 lg:hidden ${
           open ? 'translate-y-0' : '-translate-y-full'
         }`}
         aria-hidden={!open}
