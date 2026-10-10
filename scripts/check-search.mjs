@@ -6,6 +6,7 @@ import { posts } from '../lib/posts.ts';
 import { PAGES } from '../lib/i18n.ts';
 import { projects } from '../lib/projects.ts';
 import { ANNOUNCEMENT, shouldShow, markSeen } from '../lib/announcement.ts';
+import { CONSENT_KEY, ALL, NONE, parseConsent, readConsent, writeConsent } from '../lib/consent.ts';
 
 const index = buildIndex({ products, posts, projects, pages: PAGES });
 const hrefs = (q) => search(index, q).map((e) => e.href);
@@ -68,4 +69,20 @@ assert.doesNotThrow(() => markSeen('a1', broken));
 assert.ok(ANNOUNCEMENT.id && ANNOUNCEMENT.image.startsWith('/media/'));
 for (const n of [ANNOUNCEMENT.title, ANNOUNCEMENT.body, ANNOUNCEMENT.cta.label]) assert.ok(n.th.trim() && n.en.trim() && !/[\u0E4E\u2013\u2014]/.test(n.th + n.en));
 
-console.log('ผ่าน: การค้นหา และประกาศ');
+// ── ตัวเลือกคุกกี้ ──
+assert.equal(parseConsent(null), null); // ยังไม่เคยเลือก = ต้องถาม
+for (const bad of ['', 'x', '{}', '[]', 'null', '{"analytics":"yes","marketing":true}', '{"analytics":true}']) assert.equal(parseConsent(bad), null, `ค่าเสีย ${bad} ต้องถามใหม่`);
+assert.deepEqual(parseConsent('{"analytics":true,"marketing":false,"extra":1}'), { analytics: true, marketing: false });
+assert.deepEqual(NONE, { analytics: false, marketing: false });
+assert.deepEqual(ALL, { analytics: true, marketing: true });
+const cs = mem();
+assert.equal(readConsent(cs), null);
+writeConsent(NONE, cs);
+assert.deepEqual(readConsent(cs), NONE); // ปฏิเสธแล้วจำไว้ ไม่ถามซ้ำ และสถิติปิด
+writeConsent({ analytics: true, marketing: false }, cs);
+assert.deepEqual(JSON.parse(cs.getItem(CONSENT_KEY)), { analytics: true, marketing: false });
+assert.equal(readConsent(null), null);
+assert.equal(readConsent(broken), null);
+assert.doesNotThrow(() => writeConsent(ALL, broken));
+
+console.log('ผ่าน: การค้นหา ประกาศ และคุกกี้');
