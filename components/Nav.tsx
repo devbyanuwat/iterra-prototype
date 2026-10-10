@@ -3,12 +3,15 @@
 // เมนูหลัก + ปุ่มสลับภาษา TH/EN (ทำงานจริงผ่าน LangProvider)
 // ใช้ mix-blend-difference ให้ตัวหนังสืออ่านออกบนทุกพื้นหลัง (ลุคโชว์รูม)
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLang } from './LangProvider';
 import SearchPanel from './SearchPanel';
 import { NAV_LINKS as LINKS, type Lang } from '@/lib/i18n';
+
+// เปิดแผงค้นหาจากที่อื่น (หน้า 404): window.dispatchEvent(new Event(OPEN_SEARCH))
+export const OPEN_SEARCH = 'open-search';
 
 function LangSwitch({ className = '' }: { className?: string }) {
   const { lang, setLang } = useLang();
@@ -49,6 +52,12 @@ export default function Nav() {
   const { t } = useLang();
   const [open, setOpen] = useState(false);
   const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const open = () => setSearching(true);
+    window.addEventListener(OPEN_SEARCH, open);
+    return () => window.removeEventListener(OPEN_SEARCH, open);
+  }, []);
 
   return (
     <>

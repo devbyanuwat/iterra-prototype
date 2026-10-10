@@ -27,6 +27,13 @@ export const dict = {
       groups: { products: 'สินค้า', articles: 'บทความ', projects: 'ผลงาน', pages: 'หน้าเว็บ' },
     },
     announce: { close: 'ปิดประกาศ' },
+    notFound: {
+      title: 'ไม่พบหน้าที่คุณต้องการ',
+      body: 'หน้านี้อาจถูกย้าย เปลี่ยนชื่อ หรือไม่มีอยู่แล้ว ลองเริ่มจากทางด้านล่าง',
+      home: 'กลับหน้าแรก',
+      products: 'ดูสินค้า',
+      search: 'ค้นหาในเว็บ',
+    },
     cookie: {
       title: 'เว็บไซต์นี้ใช้คุกกี้',
       body: 'เราใช้คุกกี้ที่จำเป็นเพื่อให้เว็บไซต์ทำงาน และขออนุญาตใช้คุกกี้เพื่อเก็บสถิติการเข้าชม คุณเลือกได้ว่าจะอนุญาตหรือไม่',
@@ -197,6 +204,13 @@ export const dict = {
       groups: { products: 'Products', articles: 'Journal', projects: 'Projects', pages: 'Pages' },
     },
     announce: { close: 'Close announcement' },
+    notFound: {
+      title: 'Page not found',
+      body: 'This page may have been moved or renamed, or it no longer exists. Try one of the links below.',
+      home: 'Back to home',
+      products: 'View products',
+      search: 'Search the site',
+    },
     cookie: {
       title: 'This site uses cookies',
       body: 'We use necessary cookies to make the site work, and ask your permission to use cookies for visit statistics. The choice is yours.',
