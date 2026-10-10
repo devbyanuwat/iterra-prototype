@@ -5,7 +5,7 @@
 
 import Link from 'next/link';
 import Reveal from './Reveal';
-import Placeholder from './Placeholder';
+import ProjectSlides from './ProjectSlides';
 import { useLang } from './LangProvider';
 import { projects } from '@/lib/projects';
 import { getProduct } from '@/lib/products';
@@ -25,9 +25,9 @@ export default function ProjectsContent() {
       <section className="px-6 pb-28 md:px-[8vw]">
         <div className="grid gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((p, i) => (
-            <Reveal key={p.slug} delay={(i % 3) * 0.12} y={30}>
-              <article id={p.slug} className="scroll-mt-28">
-                <Placeholder src={p.image} label={p.name[lang]} ratio="3/2" />
+            <Reveal key={p.slug} delay={(i % 3) * 0.12} y={30} className="spot-lift">
+              <article id={p.slug} className="spot -m-4 scroll-mt-28 bg-paper p-4">
+                <ProjectSlides images={p.images} alt={p.name[lang]} />
                 <p className="mt-5 text-[10px] uppercase tracking-widest2 text-warm-500">
                   {p.type[lang]} · {p.location[lang]} · {p.year}
                 </p>

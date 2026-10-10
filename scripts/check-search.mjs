@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 // เช็กการค้นหาในเว็บ (lib/search.ts) กับข้อมูลจริง: npm run check:search
 import assert from 'node:assert/strict';
 import { buildIndex, search, GROUPS } from '../lib/search.ts';
@@ -45,7 +46,8 @@ assert.equal(new Set(projects.map((p) => p.slug)).size, projects.length);
 for (const p of projects) {
   assert.ok(index.some((e) => e.href === `/projects/#${p.slug}`), `ไม่มีผลงาน ${p.slug}`);
   for (const n of [p.name, p.location, p.type]) assert.ok(n.th.trim() && n.en.trim() && !/[\u0E4E\u2013\u2014]/.test(n.th + n.en));
-  assert.ok(p.image.startsWith('/media/') && p.year > 2000);
+  assert.ok(p.images.length > 1 && p.year > 2000);
+  for (const src of p.images) assert.ok(existsSync(`public${src}`), src);
   assert.ok(p.products.length > 0);
   for (const slug of p.products) assert.ok(products.some((x) => x.slug === slug), `${p.slug}: ไม่มีสินค้า ${slug}`);
 }

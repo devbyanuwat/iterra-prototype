@@ -44,6 +44,45 @@ html:has(dialog[open]) {
   }
 }
 
+/* รูปการ์ดผลงาน: --dx --dy = ทิศที่รูปใหม่เข้ามา (components/ProjectSlides.tsx) */
+@keyframes slide-in {
+  from {
+    transform: translate(var(--dx), var(--dy));
+  }
+}
+
+@keyframes slide-out {
+  to {
+    transform: translate(calc(var(--dx) * -1), calc(var(--dy) * -1));
+  }
+}
+
+/* การ์ดผลงาน: ชี้การ์ด (.spot) แล้วการ์ดขยาย
+   .spot-lift = ตัวห่อการ์ด ยกขึ้นเหนือการ์ดอื่นระหว่างชี้ และค้างไว้จนการ์ดหดกลับ */
+.spot {
+  position: relative;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spot-lift {
+  position: relative;
+  z-index: 0;
+  transition: z-index 0s 0.5s;
+}
+
+@media (hover: hover) {
+  .spot-lift:has(.spot:hover) {
+    z-index: 20;
+    transition-delay: 0s;
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .spot:hover {
+    transform: scale(1.04);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
