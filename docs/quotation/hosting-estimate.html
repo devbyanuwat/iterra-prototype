@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>เอกสารประกอบใบเสนอราคา: เซิร์ฟเวอร์สำหรับเว็บไซต์ ITERRA</title>
+<title>เอกสารประกอบใบเสนอราคา: Private Cloud สำหรับเว็บไซต์ ITERRA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ภาพรวมหน้าเดียว A4 · แก้ตัวเลขและข้อความได้ตรง ๆ ในไฟล์นี้
-     แท่งเทียบจำนวนรูป: ความกว้างตั้งที่ style="--w: …%" ของแต่ละแท่ง (สัดส่วนจากจำนวนรูปต่อ 1 GB) */
+     แท่งเทียบจำนวนรูป: ความกว้างตั้งที่ style="--w: …%" ของแต่ละแท่ง (สัดส่วนจากจำนวนรูปที่เก็บได้) */
   :root { --ink: #1c1b1a; --soft: #5c5853; --line: #d9d5cf; --wash: #f5f3ef; --tone: #4f6b5a; }
   * { box-sizing: border-box; }
   html { background: #e9e6e1; }
@@ -20,11 +20,11 @@
   header p { margin: 1mm 0 0; color: var(--soft); }
   .date { font-size: 9.5pt; color: var(--soft); white-space: nowrap; }
 
-  .spec { display: grid; grid-template-columns: 1.5fr 1fr 0.8fr 1.4fr; margin: 6mm 0 0; background: var(--wash); }
-  .spec div { padding: 3mm 4.5mm; border-left: 0.5pt solid var(--line); }
+  .spec { display: grid; grid-template-columns: auto auto auto auto 1fr; margin: 6mm 0 0; background: var(--wash); }
+  .spec div { padding: 3mm 3.5mm; border-left: 0.5pt solid var(--line); }
   .spec div:first-child { border-left: 0; }
-  .spec small { display: block; font-size: 9pt; color: var(--soft); }
-  .spec b { font-weight: 500; font-size: 11.5pt; }
+  .spec small { display: block; white-space: nowrap; font-size: 9pt; color: var(--soft); }
+  .spec b { font-weight: 500; font-size: 11pt; white-space: nowrap; }
 
   section { margin-top: 8mm; }
   h2 { margin: 0 0 1mm; font-size: 10.5pt; font-weight: 500; color: var(--soft); }
@@ -54,7 +54,7 @@
   @media screen and (max-width: 220mm) {
     .page { width: auto; min-height: 0; margin: 0; padding: 8mm 6mm; }
     header { display: block; } .date { margin-top: 2mm; }
-    .spec { grid-template-columns: 1fr 1fr; } .spec div:nth-child(3) { border-left: 0; }
+    .spec { grid-template-columns: 1fr 1fr; } .spec div:nth-child(odd) { border-left: 0; }
     .big { flex-wrap: wrap; } .big strong { font-size: 40pt; }
     .people { width: 100%; height: auto; aspect-ratio: 174 / 25.5; background-size: calc(100% / 30) calc(100% / 3); }
     .bars { grid-template-columns: 1fr; gap: 1mm; } .bars dd { margin-bottom: 3mm; }
@@ -66,14 +66,15 @@
 <main class="page">
   <header>
     <div>
-      <h1>เอกสารประกอบใบเสนอราคา<br>เซิร์ฟเวอร์สำหรับเว็บไซต์ ITERRA</h1>
+      <h1>เอกสารประกอบใบเสนอราคา<br>Private Cloud สำหรับเว็บไซต์ ITERRA</h1>
       <p>ภาพรวม: รองรับผู้ใช้ได้กี่คน และเก็บรูปได้กี่รูป</p>
     </div>
     <div class="date">จัดทำเมื่อ 10 ตุลาคม 2569</div>
   </header>
 
   <div class="spec">
-    <div><small>แพ็กเกจเซิร์ฟเวอร์</small><b>CPU 2 Core, RAM 4 GB</b></div>
+    <div><small>Private Cloud</small><b>CPU 2 Core, RAM 4 GB</b></div>
+    <div><small>พื้นที่</small><b>50 GB</b></div>
     <div><small>ระบบปฏิบัติการ</small><b>Ubuntu 24</b></div>
     <div><small>แผงควบคุม</small><b>1Panel</b></div>
     <div><small>DNS</small><b>จัดการด้วย Cloudflare</b></div>
@@ -83,26 +84,26 @@
     <h2>ผู้ใช้งานพร้อมกัน</h2>
     <p class="big"><em>ประมาณ</em><strong>90</strong><span>คน ในเวลาเดียวกัน</span></p>
     <div class="people" role="img" aria-label="ภาพคน 90 คน"></div>
-    <p class="lead">เว็บไซต์เป็นไฟล์สำเร็จรูป เซิร์ฟเวอร์ทำหน้าที่ส่งไฟล์อย่างเดียว จึงรองรับผู้เข้าชมได้มากด้วยแพ็กเกจขนาดเล็ก</p>
-    <p class="note">นับจากผู้ใช้ 1 คนเปิดหน้าใหม่ทุก 30 วินาที หน้าละ 4 MB ซึ่งเป็นขนาดของหน้าแรกที่มีวิดีโอ บนความเร็วมาตรฐานของเซิร์ฟเวอร์ 100 Mbps</p>
+    <p class="lead">เว็บไซต์เป็นไฟล์สำเร็จรูป ระบบทำหน้าที่ส่งไฟล์อย่างเดียว จึงรองรับผู้เข้าชมได้มากด้วยแพ็กเกจขนาดเล็ก</p>
+    <p class="note">นับจากผู้ใช้ 1 คนเปิดหน้าใหม่ทุก 30 วินาที หน้าละ 4 MB ซึ่งเป็นขนาดของหน้าแรกที่มีวิดีโอ บนความเร็วมาตรฐาน 100 Mbps</p>
   </section>
 
   <section>
     <h2>พื้นที่เก็บรูปภาพ</h2>
-    <p class="big"><em>ประมาณ</em><strong>20,000</strong><span>รูป ต่อพื้นที่ 1 GB</span></p>
+    <p class="big"><em>ประมาณ</em><strong>800,000</strong><span>รูป บนพื้นที่ 50 GB</span></p>
     <dl class="bars">
       <dt class="pick">ผ่านระบบของเว็บไซต์<small>ย่อไม่เกิน 1,600 พิกเซล แปลงเป็น WebP · 51 KB ต่อรูป</small></dt>
-      <dd class="pick"><i style="--w: 100%"></i><b>20,000 รูป</b></dd>
+      <dd class="pick"><i style="--w: 100%"></i><b>800,000 รูป</b></dd>
       <dt>ตามไฟล์ตัวอย่างที่ได้รับ<small>PNG 375 × 281 พิกเซล · 180 KB ต่อรูป</small></dt>
-      <dd><i style="--w: 29%"></i><b>5,800 รูป</b></dd>
+      <dd><i style="--w: 29%"></i><b>230,000 รูป</b></dd>
       <dt>รูปต้นฉบับจากกล้อง ไม่ย่อ<small>ประมาณ 4 MB ต่อรูป</small></dt>
-      <dd><i style="--w: 1.25%"></i><b>250 รูป</b></dd>
+      <dd><i style="--w: 1.25%"></i><b>10,000 รูป</b></dd>
     </dl>
     <p class="lead">ระบบย่อและแปลงรูปทุกรูปก่อนขึ้นเว็บ รูปจึงคมชัดบนทุกหน้าจอ และเก็บได้มากกว่าการใช้ไฟล์ตามที่ได้รับประมาณ 3.5 เท่า</p>
-    <p class="note">ขนาด 51 KB และ 180 KB วัดจากไฟล์จริงของเว็บไซต์และไฟล์ตัวอย่าง 15 รูป ขนาดรูปจากกล้อง 4 MB เป็นค่าทั่วไป</p>
+    <p class="note">คิดจากพื้นที่ 50 GB หักส่วนของระบบประมาณ 10 GB เหลือใช้เก็บรูป 40 GB ขนาด 51 KB และ 180 KB วัดจากไฟล์จริงของเว็บไซต์และไฟล์ตัวอย่าง 15 รูป ขนาดรูปจากกล้อง 4 MB เป็นค่าทั่วไป</p>
   </section>
 
-  <footer>ตัวเลขเป็นค่าประมาณจากการวัดและคำนวณ ณ วันที่จัดทำ ยังไม่ได้ทดสอบบนเซิร์ฟเวอร์จริง และอาจเปลี่ยนเมื่อเนื้อหาเว็บไซต์เพิ่มขึ้น</footer>
+  <footer>ตัวเลขเป็นค่าประมาณจากการวัดและคำนวณ ณ วันที่จัดทำ ยังไม่ได้ทดสอบบนระบบจริง และอาจเปลี่ยนเมื่อเนื้อหาเว็บไซต์เพิ่มขึ้น</footer>
 </main>
 </body>
 </html>
