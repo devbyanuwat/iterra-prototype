@@ -15,7 +15,7 @@
   * { box-sizing: border-box; }
   html { background: #e9e6e1; }
   body { margin: 0; font-family: 'Sarabun', 'Noto Sans Thai', 'Thonburi', sans-serif; font-size: 10.5pt; line-height: 1.55; color: var(--ink); }
-  .page { width: 210mm; min-height: 297mm; margin: 10mm auto; padding: 12mm 18mm; background: #fff; display: flex; flex-direction: column; }
+  .page { width: 210mm; min-height: 297mm; margin: 10mm auto; padding: 10mm 18mm; background: #fff; display: flex; flex-direction: column; }
   header { display: flex; justify-content: space-between; align-items: flex-end; gap: 10mm; padding-bottom: 4mm; border-bottom: 1.5pt solid var(--ink); }
   h1 { margin: 0; font-size: 16pt; font-weight: 600; line-height: 1.3; }
   header p { margin: 1mm 0 0; color: var(--soft); }
@@ -43,7 +43,7 @@
   .note { margin: 1mm 0 0; font-size: 9pt; color: var(--soft); }
 
   /* แถวคน 90 คน = 3 แถว แถวละ 30 · วาดด้วยภาพพื้นหลังซ้ำ */
-  .people { width: 174mm; height: 21mm; margin-top: 3mm; background-size: 5.8mm 7mm;
+  .people { width: 174mm; height: 18mm; margin-top: 2.5mm; background-size: 5.8mm 6mm;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 58 70'%3E%3Ccircle cx='29' cy='17' r='10' fill='%234f6b5a'/%3E%3Cpath d='M12 64c0-17 7-29 17-29s17 12 17 29z' fill='%234f6b5a'/%3E%3C/svg%3E"); }
 
   .bars { margin: 3mm 0 0; display: grid; grid-template-columns: 72mm 1fr; gap: 1.5mm 5mm; align-items: center; }
@@ -55,10 +55,18 @@
   .bars dd b { font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .bars .pick { font-weight: 500; }
 
-  .boxes { margin: 3mm 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(5, 1fr) auto; gap: 3mm; align-items: stretch; }
-  .boxes li { display: flex; align-items: center; justify-content: space-between; gap: 2mm; padding: 2.5mm 3mm; border: 0.75pt solid var(--line); }
-  .boxes svg { width: 7mm; height: 5mm; flex: none; }
-  .boxes .sum { border: 0; padding-left: 2mm; font-weight: 500; white-space: nowrap; }
+  .opts { margin: 2mm 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .opts > div { padding: 2.5mm 4mm 3mm; border: 0.75pt solid var(--line); }
+  .opts > .pick { border: 1.25pt solid var(--tone); }
+  .opts p { margin: 0; }
+  .opts small { font-size: 9pt; font-weight: 400; color: var(--soft); }
+  .opts .name { font-weight: 600; }
+  .opts .name small { margin-left: 1.5mm; }
+  .opts .pick .name small { color: var(--tone); font-weight: 500; }
+  .opts .price strong { font-size: 20pt; font-weight: 600; line-height: 1.25; font-variant-numeric: tabular-nums; }
+  .opts dl { margin: 1mm 0 0; display: grid; grid-template-columns: 22mm 1fr; gap: 0.4mm 2mm; font-size: 9.5pt; }
+  .opts dt { color: var(--soft); }
+  .opts dd { margin: 0; }
 
   footer { margin-top: auto; padding-top: 3mm; border-top: 0.5pt solid var(--line); font-size: 9pt; color: var(--soft); }
   @page { size: A4; margin: 0; }
@@ -68,9 +76,9 @@
     header { display: block; } .date { margin-top: 2mm; }
     .spec { grid-template-columns: 1fr 1fr; } .spec div:nth-child(odd) { border-left: 0; }
     .big { flex-wrap: wrap; } .big strong { font-size: 34pt; }
-    .people { width: 100%; height: auto; aspect-ratio: 174 / 21; background-size: calc(100% / 30) calc(100% / 3); }
+    .people { width: 100%; height: auto; aspect-ratio: 174 / 18; background-size: calc(100% / 30) calc(100% / 3); }
     .bars { grid-template-columns: 1fr; gap: 1mm; } .bars dd { margin-bottom: 3mm; }
-    .boxes { grid-template-columns: repeat(3, 1fr); }
+    .opts { grid-template-columns: 1fr; }
     footer { margin-top: 10mm; }
   }
 </style>
@@ -80,7 +88,7 @@
   <header>
     <div>
       <h1>เอกสารประกอบใบเสนอราคา<br>Private Cloud สำหรับเว็บไซต์</h1>
-      <p>ภาพรวม: รองรับผู้ใช้ได้กี่คน เก็บรูปได้กี่รูป และอีเมลองค์กร</p>
+      <p>ภาพรวม: รองรับผู้ใช้ได้กี่คน เก็บรูปได้กี่รูป และตัวเลือกบริการอีเมล</p>
     </div>
     <div class="date">จัดทำเมื่อ 10 ตุลาคม 2569</div>
   </header>
@@ -118,18 +126,30 @@
   </section>
 
   <section>
-    <h2>อีเมลองค์กร</h2>
-    <p class="big"><strong>5</strong><span>บัญชี ภายใต้โดเมน .co.th ของลูกค้า</span></p>
-    <ul class="boxes" aria-label="กล่องอีเมล 5 บัญชี บัญชีละ 5 GB">
-      <li><svg viewBox="0 0 28 20" aria-hidden="true"><rect x="1" y="1" width="26" height="18" fill="none" stroke="#1c1b1a" stroke-width="1.6"/><path d="M1 2l13 10L27 2" fill="none" stroke="#1c1b1a" stroke-width="1.6"/></svg><span class="mail">5 GB</span></li>
-      <li><svg viewBox="0 0 28 20" aria-hidden="true"><rect x="1" y="1" width="26" height="18" fill="none" stroke="#1c1b1a" stroke-width="1.6"/><path d="M1 2l13 10L27 2" fill="none" stroke="#1c1b1a" stroke-width="1.6"/></svg><span class="mail">5 GB</span></li>
-      <li><svg viewBox="0 0 28 20" aria-hidden="true"><rect x="1" y="1" width="26" height="18" fill="none" stroke="#1c1b1a" stroke-width="1.6"/><path d="M1 2l13 10L27 2" fill="none" stroke="#1c1b1a" stroke-width="1.6"/></svg><span class="mail">5 GB</span></li>
-      <li><svg viewBox="0 0 28 20" aria-hidden="true"><rect x="1" y="1" width="26" height="18" fill="none" stroke="#1c1b1a" stroke-width="1.6"/><path d="M1 2l13 10L27 2" fill="none" stroke="#1c1b1a" stroke-width="1.6"/></svg><span class="mail">5 GB</span></li>
-      <li><svg viewBox="0 0 28 20" aria-hidden="true"><rect x="1" y="1" width="26" height="18" fill="none" stroke="#1c1b1a" stroke-width="1.6"/><path d="M1 2l13 10L27 2" fill="none" stroke="#1c1b1a" stroke-width="1.6"/></svg><span class="mail">5 GB</span></li>
-      <li class="sum">รวม <span class="mail">25 GB</span></li>
-    </ul>
-    <p class="lead">แต่ละบัญชีมีพื้นที่ <span class="mail">5 GB</span> แนบไฟล์ได้ถึง 30 MB ใช้งานผ่านเว็บ แอปมือถือ และโปรแกรมอีเมล เช่น Outlook</p>
-    <p class="note">อีเมลเป็นบริการแยกจากเว็บไซต์ พื้นที่อีเมล <span class="mail">25 GB</span> ไม่นับรวมในพื้นที่ <span class="cloud">50 GB</span> ของ Private Cloud</p>
+    <h2>ข้อมูลประกอบ: ตัวเลือกบริการอีเมลสำหรับ 5 บัญชี ภายใต้โดเมน .co.th ของลูกค้า</h2>
+    <div class="opts">
+      <div class="pick">
+        <p class="name">Zoho Mail Lite <small>คุ้มกว่าสำหรับ 5 บัญชี</small></p>
+        <p class="price"><strong>1,800</strong> บาทต่อปี <small>30 บาทต่อคนต่อเดือน</small></p>
+        <dl>
+          <dt>พื้นที่</dt><dd>คนละ <span class="mail">5 GB</span> รวม <span class="mail">25 GB</span></dd>
+          <dt>ไฟล์แนบ</dt><dd>30 MB</dd>
+          <dt>จำนวนบัญชี</dt><dd>5 บัญชี เพิ่มได้ คิดราคาต่อคน</dd>
+          <dt>เหมาะกับ</dt><dd>คนน้อย ต้องการพื้นที่ต่อคนมาก</dd>
+        </dl>
+      </div>
+      <div>
+        <p class="name">Z.com Email Hosting <small>ผู้ให้บริการในไทย</small></p>
+        <p class="price"><strong>3,500</strong> บาทต่อปี <small>แพ็กเกจ Standard 5 GB</small></p>
+        <dl>
+          <dt>พื้นที่</dt><dd><span class="mail">5 GB</span> ใช้ร่วมกันทุกบัญชี</dd>
+          <dt>ไฟล์แนบ</dt><dd>20 MB</dd>
+          <dt>จำนวนบัญชี</dt><dd>ไม่จำกัด</dd>
+          <dt>เหมาะกับ</dt><dd>บัญชีจำนวนมาก กล่องเล็ก</dd>
+        </dl>
+      </div>
+    </div>
+    <p class="note">ราคาจากหน้าเว็บของผู้ให้บริการ ณ วันที่ 10 ตุลาคม 2569 ยังไม่ได้ยืนยันว่ารวมภาษีมูลค่าเพิ่ม ลูกค้าสมัครและชำระกับผู้ให้บริการโดยตรง ไม่รวมในใบเสนอราคานี้ พื้นที่อีเมลไม่นับรวมในพื้นที่ <span class="cloud">50 GB</span> ของ Private Cloud</p>
   </section>
 
   <footer>ตัวเลขเป็นค่าประมาณจากการวัดและคำนวณ ณ วันที่จัดทำ ยังไม่ได้ทดสอบบนระบบจริง และอาจเปลี่ยนเมื่อเนื้อหาเว็บไซต์เพิ่มขึ้น</footer>
