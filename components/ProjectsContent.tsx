@@ -5,7 +5,7 @@
 
 import Link from 'next/link';
 import Reveal from './Reveal';
-import Placeholder from './Placeholder';
+import ProjectSlides from './ProjectSlides';
 import { useLang } from './LangProvider';
 import { projects } from '@/lib/projects';
 import { getProduct } from '@/lib/products';
@@ -27,7 +27,7 @@ export default function ProjectsContent() {
           {projects.map((p, i) => (
             <Reveal key={p.slug} delay={(i % 3) * 0.12} y={30}>
               <article id={p.slug} className="scroll-mt-28">
-                <Placeholder src={p.image} label={p.name[lang]} ratio="3/2" />
+                <ProjectSlides images={p.images} alt={p.name[lang]} />
                 <p className="mt-5 text-[10px] uppercase tracking-widest2 text-warm-500">
                   {p.type[lang]} · {p.location[lang]} · {p.year}
                 </p>
