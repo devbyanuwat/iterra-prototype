@@ -7,16 +7,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLang } from './LangProvider';
-import type { Lang } from '@/lib/i18n';
-
-const LINKS = [
-  { href: '/', key: 'home' },
-  { href: '/about/', key: 'about' },
-  { href: '/products/', key: 'products' },
-  { href: '/catalog/', key: 'catalog' },
-  { href: '/articles/', key: 'articles' },
-  { href: '/contact/', key: 'contact' },
-] as const;
+import SearchPanel from './SearchPanel';
+import { NAV_LINKS as LINKS, type Lang } from '@/lib/i18n';
 
 function LangSwitch({ className = '' }: { className?: string }) {
   const { lang, setLang } = useLang();
@@ -41,10 +33,22 @@ function LangSwitch({ className = '' }: { className?: string }) {
   );
 }
 
+function SearchButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} aria-label={label} title={label} className="flex h-11 w-11 items-center justify-center opacity-85 transition-opacity hover:opacity-100">
+      <svg aria-hidden viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="11" cy="11" r="6.5" />
+        <path d="M16 16l4.5 4.5" />
+      </svg>
+    </button>
+  );
+}
+
 export default function Nav() {
   const pathname = usePathname();
   const { t } = useLang();
   const [open, setOpen] = useState(false);
+  const [searching, setSearching] = useState(false);
 
   return (
     <>
@@ -65,10 +69,12 @@ export default function Nav() {
                 {t.nav[l.key]}
               </Link>
             ))}
+            <SearchButton label={t.search.open} onClick={() => setSearching(true)} />
             <LangSwitch />
           </nav>
-          <div className="pointer-events-auto flex items-center gap-4 md:hidden">
+          <div className="pointer-events-auto flex items-center gap-2 md:hidden">
             <LangSwitch />
+            <SearchButton label={t.search.open} onClick={() => setSearching(true)} />
             <button
               type="button"
               onClick={() => setOpen(true)}
@@ -112,6 +118,7 @@ export default function Nav() {
           <LangSwitch />
         </div>
       </div>
+      <SearchPanel open={searching} onClose={() => setSearching(false)} />
     </>
   );
 }

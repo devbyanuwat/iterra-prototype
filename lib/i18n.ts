@@ -17,6 +17,14 @@ export const dict = {
       showroom: 'นัดชมโชว์รูม',
     },
     float: { top: 'กลับขึ้นด้านบน', line: 'แชตกับเราทาง LINE' },
+    search: {
+      open: 'ค้นหา',
+      close: 'ปิดการค้นหา',
+      placeholder: 'ค้นหาสินค้า บทความ ผลงาน',
+      hint: 'พิมพ์ชื่อสินค้า รุ่น หรือหัวข้อที่สนใจ',
+      none: 'ไม่พบผลลัพธ์ ลองคำอื่น',
+      groups: { products: 'สินค้า', articles: 'บทความ', projects: 'ผลงาน', pages: 'หน้าเว็บ' },
+    },
     common: {
       inquire: 'สอบถามสินค้านี้',
       priceOnRequest: 'สอบถามราคา',
@@ -154,6 +162,14 @@ export const dict = {
       showroom: 'Book a Visit',
     },
     float: { top: 'Back to top', line: 'Chat with us on LINE' },
+    search: {
+      open: 'Search',
+      close: 'Close search',
+      placeholder: 'Search products, journal, projects',
+      hint: 'Type a product name, a model or a topic',
+      none: 'No results. Try another word.',
+      groups: { products: 'Products', articles: 'Journal', projects: 'Projects', pages: 'Pages' },
+    },
     common: {
       inquire: 'Inquire about this piece',
       priceOnRequest: 'Price on request',
@@ -283,3 +299,19 @@ export const dict = {
 };
 
 export type Dict = (typeof dict)['th'];
+
+// เมนูหลัก: ใช้ทั้ง Nav และดัชนีค้นหา
+export const NAV_LINKS = [
+  { href: '/', key: 'home' },
+  { href: '/about/', key: 'about' },
+  { href: '/products/', key: 'products' },
+  { href: '/catalog/', key: 'catalog' },
+  { href: '/articles/', key: 'articles' },
+  { href: '/contact/', key: 'contact' },
+] as const;
+
+// หน้าเว็บที่ค้นหาได้: เมนูหลัก + หน้าจำลองห้องครัว (ไม่อยู่ในเมนู)
+export const PAGES = [
+  ...NAV_LINKS.map((l) => ({ href: l.href as string, title: { th: dict.th.nav[l.key], en: dict.en.nav[l.key] } })),
+  { href: '/room/', title: { th: dict.th.room.title, en: dict.en.room.title } },
+];
