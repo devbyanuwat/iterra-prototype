@@ -42,8 +42,8 @@
   .lead { margin: 2mm 0 0; }
   .note { margin: 1mm 0 0; font-size: 9pt; color: var(--soft); }
 
-  /* แถวคน 90 คน = 3 แถว แถวละ 30 · วาดด้วยภาพพื้นหลังซ้ำ */
-  .people { width: 174mm; height: 18mm; margin-top: 2.5mm; background-size: 5.8mm 6mm;
+  /* แถวคน 300 คน = 5 แถว แถวละ 60 · วาดด้วยภาพพื้นหลังซ้ำ */
+  .people { width: 174mm; height: 17.5mm; margin-top: 2.5mm; background-size: 2.9mm 3.5mm;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 58 70'%3E%3Ccircle cx='29' cy='17' r='10' fill='%234f6b5a'/%3E%3Cpath d='M12 64c0-17 7-29 17-29s17 12 17 29z' fill='%234f6b5a'/%3E%3C/svg%3E"); }
 
   .bars { margin: 3mm 0 0; display: grid; grid-template-columns: 72mm 1fr; gap: 1.5mm 5mm; align-items: center; }
@@ -76,7 +76,7 @@
     header { display: block; } .date { margin-top: 2mm; }
     .spec { grid-template-columns: 1fr 1fr; } .spec div:nth-child(odd) { border-left: 0; }
     .big { flex-wrap: wrap; } .big strong { font-size: 34pt; }
-    .people { width: 100%; height: auto; aspect-ratio: 174 / 18; background-size: calc(100% / 30) calc(100% / 3); }
+    .people { width: 100%; height: auto; aspect-ratio: 174 / 17.5; background-size: calc(100% / 60) calc(100% / 5); }
     .bars { grid-template-columns: 1fr; gap: 1mm; } .bars dd { margin-bottom: 3mm; }
     .opts { grid-template-columns: 1fr; }
     footer { margin-top: 10mm; }
@@ -104,10 +104,10 @@
 
   <section>
     <h2>ผู้ใช้งานพร้อมกัน</h2>
-    <p class="big"><em>ประมาณ</em><strong>90</strong><span>คน ในเวลาเดียวกัน</span></p>
-    <div class="people" role="img" aria-label="ภาพคน 90 คน"></div>
-    <p class="lead">เว็บไซต์เป็นไฟล์สำเร็จรูป ระบบส่งไฟล์อย่างเดียว และมีกำลังเหลือสำหรับระบบที่จะเพิ่มในอนาคต เช่น ระบบหลังบ้าน</p>
-    <p class="note">นับจากผู้ใช้ 1 คนเปิดหน้าใหม่ทุก 30 วินาที หน้าละ 4 MB ซึ่งเป็นขนาดของหน้าแรกที่มีวิดีโอ บนความเร็วมาตรฐาน 100 Mbps</p>
+    <p class="big"><em>ประมาณ</em><strong>300</strong><span>คน ในเวลาเดียวกัน</span></p>
+    <div class="people" role="img" aria-label="ภาพคน 300 คน"></div>
+    <p class="lead">เทียบเท่าผู้เข้าชมราว 9,000 คนต่อชั่วโมง เมื่อแต่ละคนอยู่ในเว็บเฉลี่ย 2 นาที</p>
+    <p class="note">นับจากผู้ใช้ 1 คนเปิดหน้าใหม่ทุก 30 วินาที เฉลี่ยหน้าละ 1.2 MB วัดจากเว็บไซต์จริง บนความเร็วมาตรฐาน 100 Mbps</p>
   </section>
 
   <section>
