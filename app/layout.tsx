@@ -11,6 +11,7 @@ import JsonLd from '@/components/JsonLd';
 import { CatalogProvider } from '@/components/CatalogProvider';
 import { db } from '@/lib/db';
 import { listPublished } from '@/lib/server/products';
+import { getAnnouncement } from '@/lib/server/announcement';
 import { listCategories, listMaterials } from '@/lib/server/taxonomy';
 import { CONTACT, SITE_NAME, SITE_TAGLINE_EN, SITE_TAGLINE_TH, SITE_URL } from '@/lib/site';
 
@@ -54,7 +55,12 @@ const organizationJsonLd = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [products, categories, materials] = await Promise.all([listPublished(db), listCategories(db), listMaterials(db)]);
+  const [products, categories, materials, announcement] = await Promise.all([
+    listPublished(db),
+    listCategories(db),
+    listMaterials(db),
+    getAnnouncement(db),
+  ]);
   return (
     <html lang="th">
       <head>
@@ -73,7 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <main>{children}</main>
           <Footer />
           <FloatingActions />
-          <Announcement />
+          <Announcement data={announcement} />
           <CookieConsent />
         </CatalogProvider>
         </LangProvider>

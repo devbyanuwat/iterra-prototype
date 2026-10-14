@@ -10,6 +10,7 @@ import { projects } from '../lib/projects.ts';
 import { ANNOUNCEMENT } from '../lib/announcement.ts';
 import * as tax from '../lib/server/taxonomy.ts';
 import * as prod from '../lib/server/products.ts';
+import { getAnnouncement, saveAnnouncement } from '../lib/server/announcement.ts';
 import { imageExt, newName, resolveInside } from '../lib/server/uploads.ts';
 import { login, logout, sessionUser, sha256, upsertAdmin, verifyPassword } from '../lib/server/auth.ts';
 
@@ -211,6 +212,28 @@ try {
   await c.query("update products set published = true where slug = 'elate-13963t-c4'");
   assert.equal((await prod.getPublished(c, 'elate-13963t-c4')).name.en, products.find((p) => p.slug === 'elate-13963t-c4').name.en);
   assert.equal(await prod.getPublished(c, 'no-such-product'), null);
+  // ── ประกาศ (Task 9) ──
+  const a0 = await getAnnouncement(c);
+  assert.equal(a0.id, ANNOUNCEMENT.id);
+  assert.deepEqual(a0.cta, { label: ANNOUNCEMENT.cta.label, href: ANNOUNCEMENT.cta.href });
+  const input = {
+    enabled: true, titleTh: 'ลดราคา', titleEn: '', bodyTh: 'รายละเอียด', bodyEn: '', image: '',
+    ctaTh: '', ctaEn: '', href: '', resetSeen: false,
+  };
+  await saveAnnouncement(c, input);
+  const a1 = await getAnnouncement(c);
+  assert.equal(a1.id, ANNOUNCEMENT.id, 'ไม่ติ๊กแสดงอีกครั้ง = คนที่ปิดไปแล้วไม่เห็นซ้ำ');
+  assert.deepEqual(a1.title, { th: 'ลดราคา', en: 'ลดราคา' }, 'ไม่กรอกอังกฤษ = ใช้ไทย');
+  assert.equal(a1.cta, null);
+  assert.equal(a1.image, null);
+  await saveAnnouncement(c, { ...input, resetSeen: true });
+  assert.notEqual((await getAnnouncement(c)).id, ANNOUNCEMENT.id, 'ติ๊กแสดงอีกครั้ง = seen_key ใหม่');
+  await assert.rejects(saveAnnouncement(c, { ...input, titleTh: ' ' }), { name: 'InputError' });
+  await assert.rejects(saveAnnouncement(c, { ...input, href: 'javascript:alert(1)', ctaTh: 'กด' }), { name: 'InputError' });
+  await assert.rejects(saveAnnouncement(c, { ...input, href: '/contact/' }), /ข้อความปุ่ม/);
+  await assert.rejects(saveAnnouncement(c, { ...input, image: 'https://evil.example/x.png' }), { name: 'InputError' });
+  await saveAnnouncement(c, { ...input, href: 'https://line.me/ti/p/x', ctaTh: 'แชต', image: '/uploads/2026/10/a.webp' });
+  assert.deepEqual((await getAnnouncement(c)).cta, { label: { th: 'แชต', en: 'แชต' }, href: 'https://line.me/ti/p/x' });
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {
   c.release();
