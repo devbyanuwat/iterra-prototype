@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แผนทีม ระบบหลังบ้าน ITERRA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+Thai:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* สีและตัวอักษรตาม design.md ที่ root ของ repo */
+  :root {
+    --paper: #faf9f7;
+    --ink: #1c1917;
+    --warm-100: #f5f4f1;
+    --warm-300: #d6d3cc;
+    --warm-500: #78716c;
+    --stone-600: #57534e;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Inter, 'Noto Sans Thai', system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+  main { max-width: 1040px; margin: 0 auto; padding: 96px 24px 112px; }
+  .label {
+    margin: 0 0 16px;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--warm-500);
+  }
+  h1 { margin: 0; font-size: 44px; font-weight: 200; letter-spacing: 0.025em; line-height: 1.2; }
+  h2 { margin: 0 0 8px; font-size: 30px; font-weight: 200; letter-spacing: 0.025em; line-height: 1.3; }
+  .intro { max-width: 34rem; margin: 16px 0 0; font-size: 14px; color: var(--warm-500); }
+  .note { margin: 8px 0 0; font-size: 12px; font-weight: 400; color: var(--stone-600); }
+  section { margin-top: 88px; }
+  .sub { margin: 0 0 28px; max-width: 34rem; font-size: 14px; color: var(--warm-500); }
+
+  .counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 56px; border-top: 1px solid var(--warm-300); border-bottom: 1px solid var(--warm-300); }
+  .counts div { padding: 24px 0; }
+  .counts div + div { padding-left: 24px; border-left: 1px solid var(--warm-300); }
+  .counts b { display: block; font-size: 40px; font-weight: 200; line-height: 1.1; }
+  .counts span { font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--warm-500); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    padding: 0 16px 12px 0;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--warm-500);
+    border-bottom: 1px solid var(--ink);
+  }
+  td { padding: 16px 16px 16px 0; vertical-align: top; border-bottom: 1px solid var(--warm-300); }
+  td:first-child { width: 24%; font-weight: 400; }
+  td:last-child, th:last-child { width: 132px; padding-right: 0; }
+  .tag { display: inline-block; padding: 4px 10px; border: 1px solid var(--warm-300); font-size: 11px; font-weight: 400; white-space: nowrap; }
+  .tag.done { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+  .tag.sample { border-color: var(--ink); }
+  .tag.todo { color: var(--stone-600); border-style: dashed; border-color: var(--warm-500); }
+
+  ul { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--ink); }
+  li { padding: 14px 0; font-size: 14px; border-bottom: 1px solid var(--warm-300); }
+  li b { font-weight: 400; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  footer { margin-top: 96px; padding-top: 24px; border-top: 1px solid var(--warm-300); font-size: 12px; font-weight: 400; color: var(--stone-600); }
+
+  @media (max-width: 720px) {
+    main { padding: 64px 24px 80px; }
+    h1 { font-size: 34px; }
+    h2 { font-size: 26px; }
+    section { margin-top: 64px; }
+    .counts b { font-size: 30px; }
+    .counts div + div { padding-left: 14px; }
+    .counts span { letter-spacing: 0.12em; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    thead { display: none; }
+    tr { padding: 16px 0; border-bottom: 1px solid var(--warm-300); }
+    td, td:first-child, td:last-child { width: 100%; padding: 0 0 6px; border: 0; }
+    tbody tr:first-child { border-top: 1px solid var(--ink); }
+  }
+  @media print {
+    main { max-width: none; padding: 0; }
+    section { margin-top: 40px; }
+    tr, li { break-inside: avoid; }
+    h2 { break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="label">Team Plan · Draft</p>
+  <h1>แผนทีม<br>ระบบหลังบ้าน ITERRA</h1>
+  <p class="intro">งาน 2 สัปดาห์รวมทดสอบและ deploy แล้วเว้น 1 สัปดาห์เป็นกันชน ระบบหลังบ้านให้พนักงานร้านจัดการบทความ ผลงานอ้างอิง และแคตตาล็อกเอง บน server ของร้านที่มี 1Panel</p>
+  <p class="note">ร่างวันที่ 12 ตุลาคม 2569 · ยังไม่ได้ล็อกเทคโนโลยี จำนวนคน และสเปกเครื่อง</p>
+
+  <div class="counts">
+    <div><b>2</b><span>สัปดาห์ทำงาน</span></div>
+    <div><b>23 ต.ค.</b><span>ขึ้น server จริง</span></div>
+    <div><b>30 ต.ค.</b><span>เส้นตายสุดท้าย</span></div>
+  </div>
+
+  <section>
+    <p class="label">01 วันสำคัญ</p>
+    <h2>วัน deploy</h2>
+    <p class="sub">deploy ขึ้นเครื่องทดสอบ 3 รอบ แล้วขึ้น server จริง 1 ครั้ง</p>
+    <table>
+<thead><tr><th>วัน</th><th>เหตุการณ์</th><th>ที่ไหน</th></tr></thead>
+<tbody>
+<tr><td>จันทร์ 12 ต.ค.</td><td>เริ่มงาน ล็อก spec โครงสร้างข้อมูล และรูปแบบ API ให้จบภายใน 13 ต.ค.</td><td>ทีม</td></tr>
+<tr><td>พุธ 14 ต.ค.</td><td>เครื่องทดสอบพร้อม: 1Panel, PostgreSQL, SSL, ขั้นตอน deploy จาก GitHub</td><td>เครื่องทดสอบ</td></tr>
+<tr><td>พฤหัส 15 ต.ค.</td><td>deploy รอบ 1: login และบทความ</td><td>เครื่องทดสอบ</td></tr>
+<tr><td>จันทร์ 19 ต.ค.</td><td>deploy รอบ 2: ผลงานอ้างอิง</td><td>เครื่องทดสอบ</td></tr>
+<tr><td>พุธ 21 ต.ค.</td><td>deploy รอบ 3: แคตตาล็อก แล้วหยุดเพิ่มฟีเจอร์</td><td>เครื่องทดสอบ</td></tr>
+<tr><td>21 ถึง 22 ต.ค.</td><td>ทดสอบเต็มชุดและแก้ข้อบกพร่อง</td><td>เครื่องทดสอบ</td></tr>
+<tr><td>ศุกร์ 23 ต.ค. เช้า</td><td>deploy ขึ้น server จริง ย้ายเนื้อหา ชี้โดเมน เฝ้าดูทั้งวัน</td><td><span class="tag done">server จริง</span></td></tr>
+<tr><td>26 ถึง 30 ต.ค.</td><td>สัปดาห์กันชน: แก้สิ่งที่หลุด พนักงานร้านทดลองใช้ ทดสอบกู้ข้อมูลสำรอง</td><td>server จริง</td></tr>
+<tr><td>ศุกร์ 30 ต.ค.</td><td>เส้นตายสุดท้าย ตรวจรับ</td><td>ลูกค้า</td></tr>
+</tbody>
+</table>
+  </section>
+
+  <section>
+    <p class="label">02 บทบาท</p>
+    <h2>ใครทำอะไรใน 2 สัปดาห์</h2>
+    <p class="sub">1 คนควบหลายบทบาทได้ Backend กับ Frontend ทำพร้อมกันได้เมื่อรูปแบบ API ล็อกแล้ว</p>
+    <table>
+<thead><tr><th>บทบาท</th><th>สัปดาห์ 1 · 12 ถึง 16 ต.ค.</th><th>สัปดาห์ 2 · 19 ถึง 23 ต.ค.</th></tr></thead>
+<tbody>
+<tr><td>Lead / PM</td><td>ล็อก spec และรูปแบบ API ใน 2 วันแรก แจกงาน นัดลูกค้ารับเนื้อหา</td><td>รีวิวโค้ดรายรอบ ตัดสินว่าข้อบกพร่องใดต้องแก้ก่อนขึ้นจริง อนุมัติ deploy 23 ต.ค.</td></tr>
+<tr><td>Backend</td><td>ตารางฐานข้อมูล 3 ส่วน, login, API บทความ, API ผลงาน</td><td>API แคตตาล็อก, อัปโหลดรูปและ PDF, ภาพย่อจาก PDF, สคริปต์ย้ายเนื้อหาตัวอย่าง</td></tr>
+<tr><td>Frontend หลังบ้าน</td><td>โครงหน้า admin, หน้า login, ฟอร์มบทความ, ฟอร์มผลงาน (หลายรูป เลือกสินค้า)</td><td>ฟอร์มแคตตาล็อก, ข้อความแจ้งข้อผิดพลาด, คู่มือใช้งานสั้นสำหรับพนักงาน</td></tr>
+<tr><td>Frontend หน้าเว็บ</td><td>เลิก static export, หน้าบทความและผลงานอ่านจากฐานข้อมูล</td><td>หน้าแคตตาล็อกและการค้นหาใช้ข้อมูลใหม่, เปลี่ยนตัวนับสถิติ, เชื่อมแบบฟอร์มติดต่อ, ตรวจ SEO และ sitemap</td></tr>
+<tr><td>DevOps</td><td>ตั้งเครื่องทดสอบให้พร้อมภายใน 14 ต.ค., ขั้นตอน deploy, สำรองข้อมูลอัตโนมัติ</td><td>ตั้ง server จริง, Umami, Uptime Kuma, deploy 23 ต.ค., ชี้โดเมนและอีเมล</td></tr>
+<tr><td>QA</td><td>เขียนรายการทดสอบจาก spec ทดสอบรอบ 1 ทันทีที่ขึ้นเครื่องทดสอบ</td><td>ทดสอบรอบ 2 และ 3, ทดสอบเต็มชุด 21 ถึง 22 ต.ค.: หลังบ้าน 3 ส่วน มือถือ สองภาษา สิทธิ์เข้าหน้า admin</td></tr>
+</tbody>
+</table>
+  </section>
+
+  <section>
+    <p class="label">03 กันชน</p>
+    <h2>สัปดาห์ที่ 3</h2>
+    <p class="sub">เว้นไว้รับสิ่งที่ผิดแผน ถ้าไม่มีอะไรหลุด ใช้เวลานี้กับการทดลองใช้ของลูกค้า</p>
+    <table>
+<thead><tr><th>บทบาท</th><th>งานในสัปดาห์กันชน · 26 ถึง 30 ต.ค.</th></tr></thead>
+<tbody>
+<tr><td>ทุกบทบาท</td><td>แก้ข้อบกพร่องที่พบหลังขึ้นจริง ไม่เพิ่มฟีเจอร์ใหม่</td></tr>
+<tr><td>DevOps</td><td>ทดสอบกู้ข้อมูลจากชุดสำรอง 1 ครั้ง ตรวจการแจ้งเตือนเมื่อเว็บล่ม</td></tr>
+<tr><td>QA</td><td>ทดสอบซ้ำหลังแก้ ตรวจบน server จริงทุกหน้า</td></tr>
+<tr><td>ลูกค้า</td><td>พนักงานร้านทดลองเพิ่มบทความ ผลงาน และแคตตาล็อกเอง แจ้งแก้ไขภายใน 28 ต.ค.</td></tr>
+<tr><td>Lead / PM</td><td>ตรวจรับกับลูกค้า 30 ต.ค.</td></tr>
+</tbody>
+</table>
+  </section>
+
+  <section>
+    <p class="label">04 ความเสี่ยง</p>
+    <h2>จุดที่ต้องระวัง</h2>
+    <ul>
+      <li><b>แคตตาล็อก</b> การสร้างภาพย่อจาก PDF เสี่ยงล้นมากสุด ถ้าไม่ทัน 21 ต.ค. รอบแรกทำแค่อัปโหลด PDF ให้ดาวน์โหลด ตัวดูทีละหน้าย้ายไปสัปดาห์กันชน</li>
+      <li><b>เครื่องทดสอบ</b> ต้องพร้อม 14 ต.ค. ทุกบทบาทอื่นรออยู่</li>
+      <li><b>รูปแบบ API</b> ต้องล็อกภายใน 13 ต.ค. ไม่เช่นนั้น Backend กับ Frontend ทำพร้อมกันไม่ได้</li>
+      <li><b>การทดสอบ</b> ทดสอบทุกรอบทันทีที่ขึ้นเครื่องทดสอบ ไม่รอถึง 21 ต.ค.</li>
+      <li><b>เนื้อหาจากลูกค้า</b> ถ้าได้ช้ากว่า 16 ต.ค. เว็บจะขึ้นจริงด้วยเนื้อหาตัวอย่าง แล้วพนักงานใส่เองผ่านหลังบ้าน</li>
+      <li><b>deploy วันศุกร์</b> ทำช่วงเช้าเพื่อเฝ้าดูได้ทั้งวัน และมีสัปดาห์กันชนรองรับ</li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="label">05 ยังไม่ได้ตัดสิน</p>
+    <h2>ต้องตอบก่อนเขียน spec</h2>
+    <ul>
+      <li><b>ทีม</b> จำนวนคนและความถนัด เพื่อจับคู่คนกับบทบาท</li>
+      <li><b>เครื่อง</b> สเปก RAM CPU ดิสก์ และเป็นเครื่องเฉพาะของ ITERRA หรือใช้ร่วม</li>
+      <li><b>เทคโนโลยี</b> รวมหลังบ้านใน Next.js ตัวเดิม หรือแยก backend เป็นบริการต่างหาก</li>
+      <li><b>ที่เก็บไฟล์</b> เก็บรูปและ PDF บนดิสก์ของเครื่อง หรือที่เก็บภายนอก</li>
+      <li><b>แผนลูกค้า</b> เอกสารแผน 4 สัปดาห์และงวดจ่ายเดิมไม่ตรงกับร่างนี้ ต้องแก้เมื่อร่างนิ่ง</li>
+    </ul>
+  </section>
+
+  <footer>ITERRA Team Plan · ร่างสำหรับทีมพัฒนา · อ้างอิงเอกสารสรุป requirement และแผนงานลูกค้าในโฟลเดอร์ docs</footer>
+</main>
+</body>
+</html>

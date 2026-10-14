@@ -8,6 +8,5 @@ out/
 next-env.d.ts
 .DS_Store
 
-# Next 16 สร้าง 2 ไฟล์นี้ให้อัตโนมัติทุกครั้งที่รัน dev
-AGENTS.md
-CLAUDE.md
+# การตั้งค่า Claude Code ส่วนตัวของแต่ละเครื่อง (launch.json เก็บเข้า repo)
+.claude/settings.local.json
