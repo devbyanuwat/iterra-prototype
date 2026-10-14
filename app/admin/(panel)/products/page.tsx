@@ -1,14 +1,19 @@
 import type { Metadata } from 'next';
 import ProductsAdmin from '@/components/admin/ProductsAdmin';
+import { db } from '@/lib/db';
 import { requireAdmin } from '@/lib/admin';
+import { listAdmin } from '@/lib/server/products';
+import { listBrands, listCategories, listMaterials } from '@/lib/server/taxonomy';
 
-// mockup หลังบ้าน: ไม่มี API ไม่มีล็อกอิน ห้ามให้ Google เก็บ และไม่อยู่ใน sitemap
-export const metadata: Metadata = {
-  title: 'จัดการสินค้า (ตัวอย่าง)',
-  robots: { index: false, follow: false },
-};
+export const metadata: Metadata = { title: 'จัดการสินค้า' };
 
 export default async function AdminProductsPage() {
   await requireAdmin();
-  return <ProductsAdmin />;
+  const [products, categories, brands, materials] = await Promise.all([
+    listAdmin(db),
+    listCategories(db),
+    listBrands(db),
+    listMaterials(db),
+  ]);
+  return <ProductsAdmin products={products} categories={categories} brands={brands} materials={materials} />;
 }

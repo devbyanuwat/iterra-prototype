@@ -5,6 +5,7 @@
 
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useLang } from './LangProvider';
 import { ANNOUNCEMENT as A, markSeen, shouldShow } from '@/lib/announcement';
 
@@ -20,9 +21,11 @@ const store = () => {
 export default function Announcement() {
   const { lang, t } = useLang();
   const ref = useRef<HTMLDialogElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (!shouldShow(A, store())) return;
+    // หลังบ้านไม่เด้งประกาศ
+    if (pathname.startsWith('/admin') || !shouldShow(A, store())) return;
     const timer = setTimeout(() => {
       // มี dialog อื่นเปิดอยู่ (กำลังค้นหา): ไม่เด้งทับ รอบนี้ข้ามไป
       if (document.querySelector('dialog[open]')) return;

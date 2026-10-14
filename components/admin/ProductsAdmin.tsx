@@ -1,393 +1,247 @@
 'use client';
 
-// mockup หลังบ้าน: จัดการสินค้า 7 หมวด ธีมกระจกแบบ iOS 26 ตามที่ผู้ดูแลเลือก (2026-10-14)
-// ข้อมูลเริ่มจาก lib/products.ts แล้วแก้ในหน่วยความจำ รีเฟรชแล้วหาย · ไม่มี API ไม่มีล็อกอิน
-// ทับโครงเว็บด้วย fixed overlay แทนการแยก layout · ponytail: แยกเป็น route group (site)/(admin) ตอนทำหลังบ้านจริง
-// ข้อความเป็นภาษาไทยอย่างเดียวตาม design.md ส่วน Back office จึงยังไม่ย้ายเข้า lib/i18n.ts
+// หลังบ้าน: จัดการสินค้า · ข้อมูลมาจาก DB ทาง props · แก้ผ่าน Server Functions แล้ว router.refresh() ดึงรายการใหม่
+// ข้อความเป็นภาษาไทยอย่างเดียวตาม design.md ส่วน Back office · โครงและพื้นหลังอยู่ใน AdminShell
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import type { Result } from '@/lib/admin';
+import type { AdminProduct, ProductInput } from '@/lib/server/products';
+import type { BrandRow, CategoryRow, MaterialRow } from '@/lib/server/taxonomy';
+import { deleteProductAction, saveProductAction, setPublishedAction } from '@/app/admin/(panel)/products/actions';
+import ImageField from './ImageField';
+import { danger, dangerBorder, dangerSolid, ghost, input, label, pill, solid } from './ui';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
-import { CATEGORIES, products as SEED, type Category, type Material } from '@/lib/products';
-import { ANNOUNCEMENT, markSeen } from '@/lib/announcement';
+type Draft = Omit<ProductInput, 'brandId'> & { id: number | null; brandId: string };
+type Props = { products: AdminProduct[]; categories: CategoryRow[]; brands: BrandRow[]; materials: MaterialRow[] };
 
-type Status = 'live' | 'hidden';
-type Row = {
-  slug: string;
-  category: Category;
-  brand: string;
-  series: string;
-  material: Material | '';
-  th: string;
-  en: string;
-  specs: string;
-  image: string;
-  status: Status;
-  edited: string;
-};
-
-const CAT: Record<Category, string> = {
-  kitchen: 'ชุดครัว',
-  wardrobe: 'ตู้เสื้อผ้า',
-  accessory: 'อุปกรณ์เสริม',
-  faucet: 'ก๊อกล้างจาน',
-  sink: 'อ่างล้างจาน',
-  appliance: 'เครื่องใช้ไฟฟ้า',
-  countertop: 'ท็อปหิน',
-};
-const MAT: Record<Material, string> = { brass: 'ทองเหลือง', stainless: 'สเตนเลสสตีล', castIron: 'เหล็กหล่อ' };
-const GLASS_KEY = 'admin:glass';
-// ต่ำสุด 0.7 คิดจากกรณีแย่สุด: พื้นหลังดำสนิท (ภาพ 70% ทับ warm-200) แล้วกระจกขาว 0.7 ทับ ได้พื้นราว rgb(200,199,198)
-// stone-600 บนพื้นนี้ = 4.5:1 พอดี จึงอ่านผ่านทุกภาพพื้นหลัง · ต่ำกว่านี้ต้องวัดจาก pixel ของภาพจริง
-const GLASS_MIN = 0.7;
-const GLASS_MAX = 0.95;
-
-const today = () => new Date().toISOString().slice(0, 10);
-const seed = (): Row[] =>
-  SEED.map((p) => ({
-    slug: p.slug,
-    category: p.category,
-    brand: p.brand,
-    series: p.series,
-    material: p.material ?? '',
-    th: p.name.th,
-    en: p.name.en,
-    specs: p.specs.map((s) => `${s.label}: ${s.value}`).join('\n'),
-    image: p.images[0],
-    status: 'live',
-    edited: '2026-10-03',
-  }));
-const blank = (category: Category): Row => ({
-  slug: '',
-  category,
-  brand: '',
-  series: '',
-  material: '',
-  th: '',
-  en: '',
-  specs: '',
-  image: '',
-  status: 'live',
-  edited: today(),
+const blank = (category: string): Draft => ({
+  id: null, slug: '', category, brandId: '', material: '', series: '', th: '', en: '', descTh: '', descEn: '',
+  specs: '', images: [], published: true, featured: false,
 });
+const toDraft = ({ brand: _b, updated: _u, ...p }: AdminProduct): Draft => ({ ...p, brandId: String(p.brandId) });
 
-const input =
-  'h-11 w-full rounded-xl border border-white/70 bg-white/70 px-3 text-base font-normal text-ink outline-none transition focus:border-ink focus:bg-white';
-const label = 'mb-2 block text-sm font-normal text-ink';
-const pill = (on: boolean) =>
-  `inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-normal transition active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink ${
-    on ? 'bg-ink text-paper' : 'glass text-ink hover:bg-white'
-  }`;
-const solid =
-  'inline-flex min-h-11 items-center rounded-full bg-ink px-6 text-sm font-normal text-paper transition hover:bg-stone-700 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
-const ghost =
-  'inline-flex min-h-11 items-center rounded-full px-4 text-sm font-normal text-ink transition hover:bg-white/70 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink';
-
-function readGlass() {
-  try {
-    const v = Number(localStorage.getItem(GLASS_KEY));
-    return v >= GLASS_MIN && v <= GLASS_MAX ? v : 0.8;
-  } catch {
-    return 0.8;
-  }
-}
-
-export default function ProductsAdmin() {
-  const [rows, setRows] = useState<Row[]>(seed);
-  const [cat, setCat] = useState<Category | 'all'>('all');
+export default function ProductsAdmin({ products, categories, brands, materials }: Props) {
+  const router = useRouter();
+  const [cat, setCat] = useState('all');
   const [brand, setBrand] = useState('');
   const [q, setQ] = useState('');
-  const [glass, setGlass] = useState(0.8);
-  const [form, setForm] = useState<{ row: Row; index: number } | null>(null);
+  const [form, setForm] = useState<Draft | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [del, setDel] = useState<number | null>(null);
-  const [saved, setSaved] = useState('');
+  const [formError, setFormError] = useState('');
+  const [del, setDel] = useState<AdminProduct | null>(null);
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
   const formRef = useRef<HTMLDialogElement>(null);
   const delRef = useRef<HTMLDialogElement>(null);
 
-  useEffect(() => {
-    setGlass(readGlass());
-    // ประกาศตอนเข้าเว็บไม่ควรเด้งทับหลังบ้าน · effect นี้รันก่อนของ Announcement เพราะ main อยู่ก่อนใน layout
-    try {
-      markSeen(ANNOUNCEMENT.id, window.sessionStorage);
-    } catch {}
-  }, []);
-  useEffect(() => {
-    try {
-      localStorage.setItem(GLASS_KEY, String(glass));
-    } catch {}
-  }, [glass]);
   useEffect(() => {
     if (form) formRef.current?.showModal();
     else formRef.current?.close();
   }, [form]);
   useEffect(() => {
-    if (del !== null) delRef.current?.showModal();
+    if (del) delRef.current?.showModal();
     else delRef.current?.close();
   }, [del]);
 
-  const brands = useMemo(() => [...new Set(rows.map((r) => r.brand))].sort(), [rows]);
-  const shown = rows
-    .map((r, i) => ({ r, i }))
-    .filter(({ r }) => (cat === 'all' || r.category === cat) && (!brand || r.brand === brand))
-    .filter(({ r }) => !q || `${r.th} ${r.en} ${r.series} ${r.brand}`.toLowerCase().includes(q.toLowerCase()))
-    .sort((a, b) => b.r.edited.localeCompare(a.r.edited));
+  const catName = (k: string) => categories.find((c) => c.key === k)?.name.th ?? k;
+  const firstCat = categories[0]?.key ?? '';
+  const shown = products
+    .filter((p) => (cat === 'all' || p.category === cat) && (!brand || String(p.brandId) === brand))
+    .filter((p) => !q || `${p.th} ${p.en} ${p.series} ${p.brand}`.toLowerCase().includes(q.toLowerCase()));
+  const set = (patch: Partial<Draft>) => form && setForm({ ...form, ...patch });
+  const multiBrand = form && categories.find((c) => c.key === form.category)?.multiBrand;
+  const open = (d: Draft) => {
+    setErrors({});
+    setFormError('');
+    setForm(d);
+  };
 
-  const set = (patch: Partial<Row>) => form && setForm({ ...form, row: { ...form.row, ...patch } });
-  const multiBrand = form && CATEGORIES.find((c) => c.key === form.row.category)?.multiBrand;
+  // คืนข้อความผิด หรือ null ถ้าสำเร็จ
+  async function run(fn: () => Promise<Result>, done: string): Promise<string | null> {
+    setBusy(true);
+    const r = await fn();
+    setBusy(false);
+    if (!r.ok) return r.error;
+    setMsg(done);
+    router.refresh();
+    return null;
+  }
 
-  function save(e: React.FormEvent) {
+  async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!form) return;
-    const r = form.row;
     const err: Record<string, string> = {};
     // เรียงตามลำดับช่องในฟอร์ม focus จะได้ไปช่องแรกที่ผิด
-    if (!r.brand.trim()) err.brand = 'กรุณากรอกแบรนด์';
-    if (!r.th.trim()) err.th = 'กรุณากรอกชื่อสินค้าภาษาไทย';
+    if (!form.brandId) err.brandId = 'กรุณาเลือกแบรนด์';
+    if (!form.th.trim()) err.th = 'กรุณากรอกชื่อสินค้าภาษาไทย';
     setErrors(err);
     if (Object.keys(err).length) {
       formRef.current?.querySelector<HTMLElement>(`[name="${Object.keys(err)[0]}"]`)?.focus();
       return;
     }
-    const row = { ...r, slug: r.slug || `new-${Date.now()}`, edited: today() };
-    setRows((all) => (form.index < 0 ? [row, ...all] : all.map((x, i) => (i === form.index ? row : x))));
-    setSaved(`บันทึก ${row.th} แล้ว (ในหน้านี้เท่านั้น)`);
-    setForm(null);
+    const { id, ...rest } = form;
+    const error = await run(() => saveProductAction(id, { ...rest, brandId: Number(rest.brandId) }), `บันทึก ${form.th} แล้ว`);
+    if (error) setFormError(error);
+    else setForm(null);
   }
 
   return (
-    <div
-      data-lenis-prevent
-      className="fixed inset-0 z-[70] overflow-y-auto bg-warm-200 font-normal text-ink"
-      style={{ '--glass': glass } as React.CSSProperties}
-    >
-      {/* พื้นหลังให้กระจกมีอะไรให้เบลอ: ภาพครัวจางกับแสงอุ่น 2 ดวง */}
-      <div aria-hidden className="pointer-events-none fixed inset-0">
-        <img src="/media/scenes/about-hero.webp" alt="" className="h-full w-full object-cover opacity-70" />
-        <div className="absolute -left-24 top-1/4 h-96 w-96 rounded-full bg-amber-200/60 blur-3xl" />
-        <div className="absolute -right-24 bottom-0 h-[28rem] w-[28rem] rounded-full bg-stone-300/70 blur-3xl" />
+    <>
+      <header className="glass flex flex-wrap items-end justify-between gap-4 rounded-[28px] p-5 md:p-6">
+        <div>
+          <h1 className="text-2xl font-extralight tracking-wide md:text-3xl">สินค้า</h1>
+          <p className="mt-1 text-sm text-stone-600">{products.length} รายการ</p>
+        </div>
+        <button type="button" className={solid} onClick={() => open(blank(cat === 'all' ? firstCat : cat))}>
+          เพิ่มสินค้า
+        </button>
+      </header>
+
+      <div role="status" className="min-h-6 px-2 text-sm text-ink">
+        {msg}
       </div>
 
-      <div className="relative mx-auto grid min-h-full max-w-7xl gap-4 p-4 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-6 lg:p-6">
-        <aside className="glass flex flex-col gap-6 rounded-[28px] p-5 lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)]">
-          <div>
-            <p className="text-lg font-light tracking-[0.3em]">ITERRA</p>
-            <p className="mt-1 text-xs text-stone-600">หลังบ้าน (ตัวอย่าง)</p>
-          </div>
-          <nav aria-label="เมนูหลังบ้าน">
-            <ul className="flex gap-1 overflow-x-auto lg:flex-col">
-              {['บทความ', 'ผลงาน', 'แคตตาล็อก'].map((x) => (
-                <li key={x}>
-                  <span className="flex min-h-11 items-center whitespace-nowrap rounded-full px-4 text-sm text-stone-600">
-                    {x}
-                  </span>
-                </li>
-              ))}
-              <li>
-                <span aria-current="page" className="flex min-h-11 items-center rounded-full bg-ink px-4 text-sm text-paper">
-                  สินค้า
-                </span>
-              </li>
-            </ul>
-          </nav>
-          <div className="mt-auto space-y-4">
-            <label className="block text-sm">
-              ความทึบของกระจก <span className="text-stone-600">{Math.round(glass * 100)}%</span>
-              <input
-                type="range"
-                min={GLASS_MIN}
-                max={GLASS_MAX}
-                step={0.05}
-                value={glass}
-                onChange={(e) => setGlass(Number(e.target.value))}
-                className="mt-2 block w-full accent-ink"
-              />
-            </label>
-            <Link href="/" target="_blank" className={ghost}>
-              เปิดหน้าเว็บ
-            </Link>
-          </div>
-        </aside>
+      <ul className="flex flex-wrap gap-2" aria-label="หมวดสินค้า">
+        {['all', ...categories.map((c) => c.key)].map((c) => (
+          <li key={c}>
+            <button type="button" aria-pressed={cat === c} className={pill(cat === c)} onClick={() => setCat(c)}>
+              {c === 'all' ? 'ทั้งหมด' : catName(c)}
+              <span className={cat === c ? 'text-warm-300' : 'text-stone-600'}>
+                {c === 'all' ? products.length : products.filter((p) => p.category === c).length}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
 
-        <div className="space-y-4 lg:space-y-6">
-          <header className="glass flex flex-wrap items-end justify-between gap-4 rounded-[28px] p-5 md:p-6">
-            <div>
-              <h1 className="text-2xl font-extralight tracking-wide md:text-3xl">สินค้า</h1>
-              <p className="mt-1 text-sm text-stone-600">
-                {rows.length} รายการ · ข้อมูลตัวอย่าง แก้แล้วไม่บันทึกจริง
-              </p>
-            </div>
-            <button type="button" className={solid} onClick={() => setForm({ row: blank(cat === 'all' ? 'kitchen' : cat), index: -1 })}>
+      <section className="glass rounded-[28px] p-3 md:p-4">
+        <div className="flex flex-wrap gap-3 p-2">
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="ค้นหาชื่อ ซีรีส์ หรือแบรนด์"
+            aria-label="ค้นหาสินค้า"
+            className={`${input} max-w-xs flex-1`}
+          />
+          <select value={brand} onChange={(e) => setBrand(e.target.value)} aria-label="กรองตามแบรนด์" className={`${input.replace('w-full ', '')} w-48`}>
+            <option value="">ทุกแบรนด์</option>
+            {brands.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {shown.length === 0 ? (
+          <div className="m-2 rounded-2xl border border-dashed border-warm-500 px-6 py-14 text-center">
+            <p className="text-sm">ยังไม่มีสินค้าในหมวดนี้</p>
+            <button type="button" className={`${solid} mt-5`} onClick={() => open(blank(cat === 'all' ? firstCat : cat))}>
               เพิ่มสินค้า
             </button>
-          </header>
-
-          <div role="status" className="min-h-6 px-2 text-sm text-ink">
-            {saved}
           </div>
-
-          <ul className="flex flex-wrap gap-2" aria-label="หมวดสินค้า">
-            {(['all', ...CATEGORIES.map((c) => c.key)] as const).map((c) => (
-              <li key={c}>
-                <button type="button" aria-pressed={cat === c} className={pill(cat === c)} onClick={() => setCat(c)}>
-                  {c === 'all' ? 'ทั้งหมด' : CAT[c]}
-                  <span className={cat === c ? 'text-warm-300' : 'text-stone-600'}>
-                    {c === 'all' ? rows.length : rows.filter((r) => r.category === c).length}
-                  </span>
-                </button>
+        ) : (
+          <ul className="divide-y divide-white/70">
+            {shown.map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center gap-4 rounded-2xl p-2 transition hover:bg-white/50 md:flex-nowrap">
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white">
+                  {p.images[0] && <img src={p.images[0]} alt="" className="h-full w-full object-contain" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <button type="button" onClick={() => open(toDraft(p))} className="block max-w-full truncate text-left text-sm hover:underline">
+                    {p.th}
+                  </button>
+                  <p className="truncate text-xs text-stone-600">
+                    {catName(p.category)} · {p.brand} {p.series}
+                  </p>
+                </div>
+                <span className={`rounded-full px-3 py-1 text-xs ${p.published ? 'bg-ink text-paper' : 'border border-ink text-ink'}`}>
+                  {p.published ? 'เผยแพร่' : 'ซ่อน'}
+                </span>
+                <span className="hidden w-24 text-xs text-stone-600 md:block">{p.updated}</span>
+                <div className="flex">
+                  <button type="button" className={ghost} onClick={() => open(toDraft(p))}>
+                    แก้ไข
+                  </button>
+                  <button
+                    type="button"
+                    className={ghost}
+                    disabled={busy}
+                    onClick={async () => {
+                      const error = await run(
+                        () => setPublishedAction(p.id, !p.published),
+                        `${p.published ? 'ซ่อน' : 'แสดง'} ${p.th} แล้ว`,
+                      );
+                      if (error) setMsg(error);
+                    }}
+                  >
+                    {p.published ? 'ซ่อน' : 'แสดง'}
+                  </button>
+                  <button type="button" className={`${ghost} ${danger}`} onClick={() => setDel(p)}>
+                    ลบ
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
-
-          <section className="glass rounded-[28px] p-3 md:p-4">
-            <div className="flex flex-wrap gap-3 p-2">
-              <input
-                type="search"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="ค้นหาชื่อ ซีรีส์ หรือแบรนด์"
-                aria-label="ค้นหาสินค้า"
-                className={`${input} max-w-xs flex-1`}
-              />
-              <select value={brand} onChange={(e) => setBrand(e.target.value)} aria-label="กรองตามแบรนด์" className={`${input.replace('w-full ', '')} w-48`}>
-                <option value="">ทุกแบรนด์</option>
-                {brands.map((b) => (
-                  <option key={b}>{b}</option>
-                ))}
-              </select>
-            </div>
-
-            {shown.length === 0 ? (
-              <div className="m-2 rounded-2xl border border-dashed border-warm-500 px-6 py-14 text-center">
-                <p className="text-sm">ยังไม่มีสินค้าในหมวดนี้</p>
-                <button type="button" className={`${solid} mt-5`} onClick={() => setForm({ row: blank(cat === 'all' ? 'kitchen' : cat), index: -1 })}>
-                  เพิ่มสินค้า
-                </button>
-              </div>
-            ) : (
-              <ul className="divide-y divide-white/70">
-                {shown.map(({ r, i }) => (
-                  <li key={r.slug} className="flex flex-wrap items-center gap-4 rounded-2xl p-2 transition hover:bg-white/50 md:flex-nowrap">
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white">
-                      {r.image && <img src={r.image} alt="" className="h-full w-full object-contain" />}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setErrors({});
-                          setForm({ row: r, index: i });
-                        }}
-                        className="block max-w-full truncate text-left text-sm hover:underline"
-                      >
-                        {r.th}
-                      </button>
-                      <p className="truncate text-xs text-stone-600">
-                        {CAT[r.category]} · {r.brand} {r.series}
-                      </p>
-                    </div>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs ${
-                        r.status === 'live' ? 'bg-ink text-paper' : 'border border-ink text-ink'
-                      }`}
-                    >
-                      {r.status === 'live' ? 'เผยแพร่' : 'ซ่อน'}
-                    </span>
-                    <span className="hidden w-24 text-xs text-stone-600 md:block">{r.edited}</span>
-                    <div className="flex">
-                      <button
-                        type="button"
-                        className={ghost}
-                        onClick={() => {
-                          setErrors({});
-                          setForm({ row: r, index: i });
-                        }}
-                      >
-                        แก้ไข
-                      </button>
-                      <button
-                        type="button"
-                        className={ghost}
-                        onClick={() =>
-                          setRows((all) =>
-                            all.map((x, j) => (j === i ? { ...x, status: x.status === 'live' ? 'hidden' : 'live', edited: today() } : x)),
-                          )
-                        }
-                      >
-                        {r.status === 'live' ? 'ซ่อน' : 'แสดง'}
-                      </button>
-                      <button type="button" className={`${ghost} text-[#9f2d20]`} onClick={() => setDel(i)}>
-                        ลบ
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        </div>
-      </div>
+        )}
+      </section>
 
       <dialog
         ref={formRef}
         onClose={() => setForm(null)}
         aria-labelledby="form-title"
-        className="glass w-[min(94vw,640px)] rounded-[28px] p-0 text-ink backdrop:bg-ink/30 backdrop:backdrop-blur-sm"
+        className="glass w-[min(94vw,680px)] rounded-[28px] p-0 text-ink backdrop:bg-ink/30 backdrop:backdrop-blur-sm"
       >
         {form && (
           <form onSubmit={save} noValidate className="space-y-6 p-6">
             <h2 id="form-title" className="text-xl font-light">
-              {form.index < 0 ? 'เพิ่มสินค้า' : `แก้ไข ${form.row.th}`}
+              {form.id === null ? 'เพิ่มสินค้า' : `แก้ไข ${form.th}`}
             </h2>
             <div className="grid gap-4 md:grid-cols-2">
               <label className={label}>
                 หมวด (จำเป็น)
-                <select
-                  value={form.row.category}
-                  onChange={(e) => set({ category: e.target.value as Category })}
-                  className={`${input} mt-2`}
-                >
-                  {CATEGORIES.map((c) => (
+                <select value={form.category} onChange={(e) => set({ category: e.target.value })} className={`${input} mt-2`}>
+                  {categories.map((c) => (
                     <option key={c.key} value={c.key}>
-                      {CAT[c.key]}
+                      {c.name.th}
                     </option>
                   ))}
                 </select>
               </label>
               <label className={label}>
                 แบรนด์ (จำเป็น)
-                <input
-                  name="brand"
-                  list="brands"
-                  value={form.row.brand}
-                  onChange={(e) => set({ brand: e.target.value })}
-                  aria-invalid={!!errors.brand}
+                <select
+                  name="brandId"
+                  value={form.brandId}
+                  onChange={(e) => set({ brandId: e.target.value })}
+                  aria-invalid={!!errors.brandId}
                   aria-describedby="brand-hint"
-                  className={`${input} mt-2 ${errors.brand ? 'border-[#9f2d20]' : ''}`}
-                />
-                <datalist id="brands">
+                  className={`${input} mt-2 ${errors.brandId ? dangerBorder : ''}`}
+                >
+                  <option value="">เลือกแบรนด์</option>
                   {brands.map((b) => (
-                    <option key={b} value={b} />
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
                   ))}
-                </datalist>
-                <span id="brand-hint" className={`mt-1.5 block text-xs ${errors.brand ? 'text-[#9f2d20]' : 'text-stone-600'}`}>
-                  {errors.brand || (multiBrand ? 'หมวดนี้ต้องมีอย่างน้อย 3 แบรนด์บนหน้าเว็บ' : 'พิมพ์ใหม่หรือเลือกจากที่มี')}
+                </select>
+                <span id="brand-hint" className={`mt-1.5 block text-xs ${errors.brandId ? danger : 'text-stone-600'}`}>
+                  {errors.brandId || (multiBrand ? 'หมวดนี้ต้องมีอย่างน้อย 3 แบรนด์บนหน้าเว็บ' : 'เพิ่มแบรนด์ใหม่ได้ที่เมนู หมวด แบรนด์ วัสดุ')}
                 </span>
               </label>
               <label className={label}>
                 ซีรีส์
-                <input value={form.row.series} onChange={(e) => set({ series: e.target.value })} className={`${input} mt-2`} />
+                <input value={form.series} onChange={(e) => set({ series: e.target.value })} className={`${input} mt-2`} />
               </label>
               <label className={label}>
                 วัสดุ
-                <select
-                  value={form.row.material}
-                  onChange={(e) => set({ material: e.target.value as Material | '' })}
-                  className={`${input} mt-2`}
-                >
+                <select value={form.material} onChange={(e) => set({ material: e.target.value })} className={`${input} mt-2`}>
                   <option value="">ไม่ระบุ</option>
-                  {(Object.keys(MAT) as Material[]).map((m) => (
-                    <option key={m} value={m}>
-                      {MAT[m]}
+                  {materials.map((m) => (
+                    <option key={m.key} value={m.key}>
+                      {m.name.th}
                     </option>
                   ))}
                 </select>
@@ -396,54 +250,64 @@ export default function ProductsAdmin() {
                 ไทย: ชื่อสินค้า (จำเป็น)
                 <input
                   name="th"
-                  value={form.row.th}
+                  value={form.th}
                   onChange={(e) => set({ th: e.target.value })}
                   aria-invalid={!!errors.th}
                   aria-describedby="th-error"
-                  className={`${input} mt-2 ${errors.th ? 'border-[#9f2d20]' : ''}`}
+                  className={`${input} mt-2 ${errors.th ? dangerBorder : ''}`}
                 />
                 {errors.th && (
-                  <span id="th-error" className="mt-1.5 block text-sm text-[#9f2d20]">
+                  <span id="th-error" className={`mt-1.5 block text-sm ${danger}`}>
                     {errors.th}
                   </span>
                 )}
               </label>
               <label className={label}>
                 English: ชื่อสินค้า
-                <input value={form.row.en} onChange={(e) => set({ en: e.target.value })} className={`${input} mt-2`} />
+                <input value={form.en} onChange={(e) => set({ en: e.target.value })} className={`${input} mt-2`} />
+              </label>
+              <label className={`${label} md:col-span-2`}>
+                slug (ส่วนท้ายลิงก์)
+                <input value={form.slug} onChange={(e) => set({ slug: e.target.value })} className={`${input} mt-2`} />
+                <span className="mt-1.5 block text-xs text-stone-600">เว้นว่างได้ ระบบสร้างจากชื่อภาษาอังกฤษ · ใช้ a-z ตัวเลข และ -</span>
+              </label>
+              <label className={label}>
+                ไทย: รายละเอียด
+                <textarea value={form.descTh} onChange={(e) => set({ descTh: e.target.value })} className={`${input} mt-2 min-h-24 py-2.5`} />
+              </label>
+              <label className={label}>
+                English: รายละเอียด
+                <textarea value={form.descEn} onChange={(e) => set({ descEn: e.target.value })} className={`${input} mt-2 min-h-24 py-2.5`} />
               </label>
             </div>
             <label className={label}>
               สเปก
               <span className="mt-1 block text-xs text-stone-600">บรรทัดละ 1 ข้อ เช่น วัสดุ: ทองเหลือง</span>
-              <textarea
-                value={form.row.specs}
-                onChange={(e) => set({ specs: e.target.value })}
-                className={`${input} mt-2 min-h-32 py-2.5`}
-              />
+              <textarea value={form.specs} onChange={(e) => set({ specs: e.target.value })} className={`${input} mt-2 min-h-32 py-2.5`} />
             </label>
-            <label className="block cursor-pointer rounded-2xl border border-dashed border-warm-500 bg-white/40 px-6 py-8 text-center text-sm transition hover:border-ink focus-within:border-ink">
-              {form.row.image ? (
-                <img src={form.row.image} alt="" className="mx-auto mb-3 h-24 w-24 rounded-xl bg-white object-contain" />
-              ) : null}
-              กดเพื่อเลือกรูปสินค้า
-              <span className="mt-1 block text-xs text-stone-600">JPG, PNG หรือ WebP ไม่เกิน 5 MB · ตัวอย่างนี้ไม่อัปโหลดจริง</span>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="sr-only"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) set({ image: URL.createObjectURL(f) });
-                }}
-              />
-            </label>
+            <div>
+              <p className={label}>รูปสินค้า (รูปแรกคือรูปหลัก)</p>
+              <ImageField value={form.images} onChange={(images) => set({ images })} />
+            </div>
+            <div className="flex flex-wrap gap-6">
+              <label className="flex min-h-11 items-center gap-3 text-sm">
+                <input type="checkbox" checked={form.published} onChange={(e) => set({ published: e.target.checked })} className="h-4 w-4 accent-ink" />
+                แสดงบนหน้าเว็บ
+              </label>
+              <label className="flex min-h-11 items-center gap-3 text-sm">
+                <input type="checkbox" checked={form.featured} onChange={(e) => set({ featured: e.target.checked })} className="h-4 w-4 accent-ink" />
+                สินค้าเด่นหน้าแรก
+              </label>
+            </div>
+            <p role="alert" className={`min-h-5 text-sm ${danger}`}>
+              {formError}
+            </p>
             <div className="flex flex-wrap items-center justify-end gap-2">
               <button type="button" className={ghost} onClick={() => setForm(null)}>
                 ยกเลิก
               </button>
-              <button type="submit" className={solid}>
-                บันทึก
+              <button type="submit" className={solid} disabled={busy}>
+                {busy ? 'กำลังบันทึก' : 'บันทึก'}
               </button>
             </div>
           </form>
@@ -456,22 +320,23 @@ export default function ProductsAdmin() {
         aria-labelledby="del-title"
         className="glass w-[min(92vw,440px)] rounded-[28px] p-6 text-ink backdrop:bg-ink/30"
       >
-        {del !== null && rows[del] && (
+        {del && (
           <>
             <h2 id="del-title" className="text-lg font-light">
-              ลบ {rows[del].th}
+              ลบ {del.th}
             </h2>
-            <p className="mt-3 text-sm text-stone-600">สินค้านี้จะหายจากหน้าเว็บ และกู้คืนไม่ได้</p>
+            <p className="mt-3 text-sm text-stone-600">สินค้านี้จะหายจากหน้าเว็บ และกู้คืนไม่ได้ ถ้าแค่ไม่อยากให้เห็น ใช้ปุ่มซ่อนแทน</p>
             <div className="mt-6 flex justify-end gap-2">
               <button type="button" autoFocus className={ghost} onClick={() => setDel(null)}>
                 ยกเลิก
               </button>
               <button
                 type="button"
-                className="inline-flex min-h-11 items-center rounded-full bg-[#9f2d20] px-6 text-sm text-paper active:scale-[0.98]"
-                onClick={() => {
-                  setSaved(`ลบ ${rows[del].th} แล้ว (ในหน้านี้เท่านั้น)`);
-                  setRows((all) => all.filter((_, j) => j !== del));
+                className={dangerSolid}
+                disabled={busy}
+                onClick={async () => {
+                  const error = await run(() => deleteProductAction(del.id), `ลบ ${del.th} แล้ว`);
+                  if (error) setMsg(error);
                   setDel(null);
                 }}
               >
@@ -481,6 +346,6 @@ export default function ProductsAdmin() {
           </>
         )}
       </dialog>
-    </div>
+    </>
   );
 }

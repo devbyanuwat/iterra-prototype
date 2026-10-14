@@ -9,6 +9,7 @@ import { posts } from '../lib/posts.ts';
 import { projects } from '../lib/projects.ts';
 import { ANNOUNCEMENT } from '../lib/announcement.ts';
 import * as tax from '../lib/server/taxonomy.ts';
+import * as prod from '../lib/server/products.ts';
 import { imageExt, newName, resolveInside } from '../lib/server/uploads.ts';
 import { login, logout, sessionUser, sha256, upsertAdmin, verifyPassword } from '../lib/server/auth.ts';
 
@@ -142,6 +143,52 @@ try {
   assert.equal(resolveInside('/srv/up', ['2026', '..', '..', 'x']), null);
   assert.equal(resolveInside('/srv/up', ['..', 'up-evil', 'x']), null);
   assert.equal(resolveInside('/srv/up', []), null);
+
+  // ── สินค้าหลังบ้าน (Task 6) ──
+  assert.deepEqual(prod.parseSpecs('สี: โครเมียม (Chrome)\n\n  ขนาด : 20 x 30 ซม. '), [
+    { label: 'สี', value: 'โครเมียม (Chrome)' },
+    { label: 'ขนาด', value: '20 x 30 ซม.' },
+  ]);
+  assert.throws(() => prod.parseSpecs('ไม่มีโคลอน'), { name: 'InputError' });
+  assert.equal(prod.slugFrom('  Elate Touchless Pull-down!  '), 'elate-touchless-pull-down');
+  assert.equal(prod.slugFrom('ก๊อกน้ำ'), '');
+
+  const all = await prod.listAdmin(c);
+  assert.equal(all.length, products.length);
+  const elate = all.find((p) => p.slug === 'elate-13963t-c4');
+  assert.equal(elate.brand, 'KOHLER');
+  assert.ok(elate.specs.includes(': '), 'สเปกแปลงเป็นข้อความบรรทัดละข้อ');
+
+  const draft = {
+    slug: '', category: 'sink', brandId: elate.brandId, material: 'stainless', series: 'Test',
+    th: 'ซิงก์ทดสอบ', en: 'Test Sink 90', descTh: '', descEn: '', specs: 'ขนาด: 90 ซม.',
+    images: ['/uploads/2026/10/a.webp'], published: false, featured: false,
+  };
+  const id = await prod.saveProduct(c, null, draft);
+  let row = (await prod.listAdmin(c)).find((p) => p.id === id);
+  assert.equal(row.slug, 'test-sink-90', 'slug ว่าง = สร้างจากชื่ออังกฤษ');
+  assert.equal(row.published, false);
+  // แก้แล้ว scenes และราคาเดิมต้องไม่หาย
+  await c.query("update products set scenes = '{/media/scenes/x.webp}', price_th = 'ทดสอบ' where id = $1", [id]);
+  await prod.saveProduct(c, id, { ...draft, slug: 'test-sink-90', th: 'ซิงก์ทดสอบ 2' });
+  const raw = (await c.query('select name_th, scenes, price_th from products where id = $1', [id])).rows[0];
+  assert.deepEqual(raw, { name_th: 'ซิงก์ทดสอบ 2', scenes: ['/media/scenes/x.webp'], price_th: 'ทดสอบ' });
+  await prod.setPublished(c, id, true);
+  assert.equal((await prod.listAdmin(c)).find((p) => p.id === id).published, true);
+  // ข้อมูลผิด
+  await assert.rejects(prod.saveProduct(c, null, { ...draft, th: ' ' }), { name: 'InputError' });
+  await assert.rejects(prod.saveProduct(c, null, { ...draft, category: 'nope' }), /ไม่พบหมวด/);
+  await assert.rejects(prod.saveProduct(c, null, { ...draft, brandId: 999999 }), /ไม่พบแบรนด์/);
+  await assert.rejects(prod.saveProduct(c, null, { ...draft, material: 'gold' }), /ไม่พบวัสดุ/);
+  await assert.rejects(prod.saveProduct(c, null, { ...draft, slug: 'Bad Slug' }), { name: 'InputError' });
+  await assert.rejects(prod.saveProduct(c, null, { ...draft, images: ['javascript:alert(1)'] }), { name: 'InputError' });
+  await assert.rejects(prod.saveProduct(c, null, { ...draft, images: ['/uploads/../../etc/passwd'] }), { name: 'InputError' });
+  await assert.rejects(prod.saveProduct(c, null, { ...draft, slug: 'test-sink-90' }), (e) => e.code === '23505');
+  // แท็บอื่นลบไปแล้ว: แก้ไม่ได้ และไม่สร้างใหม่
+  await prod.deleteProduct(c, id);
+  await assert.rejects(prod.saveProduct(c, id, draft), /ไม่พบสินค้านี้/);
+  await assert.rejects(prod.setPublished(c, id, true), /ไม่พบสินค้านี้/);
+  assert.equal((await prod.listAdmin(c)).length, products.length);
 
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {
