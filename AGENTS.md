@@ -65,3 +65,5 @@ through the lead.
 - One branch per task, cut from `origin/main` with `--no-track`.
 - Conventional Commits: `feat:`, `fix:`, `docs:`, `chore:`.
 - Hooks live in `.githooks/` and `npm install` turns them on. They block commits on `main`, secrets, the banned characters and protected files, and they block pushes to `main`.
+- Approval in chat does not get a protected file past the hook. A plan must name each task that changes a protected file, and that task ends with the files staged: the lead commits them with the override. An agent never sets the override.
+- Join commit and push with `&&`, never `;`. Never push after a commit failed.

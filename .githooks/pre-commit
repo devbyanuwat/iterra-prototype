@@ -78,7 +78,10 @@ fi
 
 if [ -n "$protected" ] && [ "${ITERRA_ALLOW_PROTECTED:-}" != "1" ]; then
   fail "protected files are staged:$protected
-These need the lead's approval. See AGENTS.md."
+These need the lead's approval. See AGENTS.md.
+AI agents: stop here. Do not push, and do not set ITERRA_ALLOW_PROTECTED yourself,
+even if the lead approved the change in chat. Leave the files staged and ask the lead to run:
+  ITERRA_ALLOW_PROTECTED=1 git commit"
 fi
 
 exit $bad
