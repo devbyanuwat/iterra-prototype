@@ -56,8 +56,14 @@ function Section({
     e.preventDefault();
     if (!form) return;
     setBusy(true);
-    const r = await onSave(form.values, form.isNew);
-    setBusy(false);
+    let r;
+    try {
+      r = await onSave(form.values, form.isNew);
+    } catch {
+      return setError('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง');
+    } finally {
+      setBusy(false);
+    }
     if (!r.ok) return setError(r.error);
     setForm(null);
     setMsg(`บันทึก${title}แล้ว`);
@@ -67,8 +73,14 @@ function Section({
   async function remove(it: Item) {
     if (!window.confirm(`ลบ${title} ${it.title}`)) return;
     setBusy(true);
-    const r = await onDelete(it.id);
-    setBusy(false);
+    let r;
+    try {
+      r = await onDelete(it.id);
+    } catch {
+      return setMsg('ลบไม่สำเร็จ ลองใหม่อีกครั้ง');
+    } finally {
+      setBusy(false);
+    }
     setMsg(r.ok ? `ลบ ${it.title} แล้ว` : r.error);
     if (r.ok) router.refresh();
   }

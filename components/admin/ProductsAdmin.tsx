@@ -59,8 +59,14 @@ export default function ProductsAdmin({ products, categories, brands, materials 
   // คืนข้อความผิด หรือ null ถ้าสำเร็จ
   async function run(fn: () => Promise<Result>, done: string): Promise<string | null> {
     setBusy(true);
-    const r = await fn();
-    setBusy(false);
+    let r: Result;
+    try {
+      r = await fn();
+    } catch {
+      return 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง';
+    } finally {
+      setBusy(false);
+    }
     if (!r.ok) return r.error;
     setMsg(done);
     router.refresh();

@@ -34,8 +34,16 @@ export default function AnnouncementAdmin({ data }: { data: AnnouncementData | n
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const r = await saveAnnouncementAction(v);
-    setBusy(false);
+    let r;
+    try {
+      r = await saveAnnouncementAction(v);
+    } catch {
+      setError('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง');
+      setMsg('');
+      return;
+    } finally {
+      setBusy(false);
+    }
     if (!r.ok) {
       setError(r.error);
       setMsg('');
