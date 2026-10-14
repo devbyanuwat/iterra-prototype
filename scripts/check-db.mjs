@@ -8,6 +8,7 @@ import { products } from '../lib/products.ts';
 import { posts } from '../lib/posts.ts';
 import { projects } from '../lib/projects.ts';
 import { ANNOUNCEMENT } from '../lib/announcement.ts';
+import * as tax from '../lib/server/taxonomy.ts';
 import { login, logout, sessionUser, sha256, upsertAdmin, verifyPassword } from '../lib/server/auth.ts';
 
 const url = process.env.TEST_DATABASE_URL ?? 'postgres://localhost:5433/iterra_test';
@@ -85,6 +86,44 @@ try {
   const s3 = await login(c, 'admin@example.test', pw, 'ip-f', 14);
   await upsertAdmin(c, 'admin@example.test', 'ผู้ทดสอบ', 'another long password');
   assert.equal(await sessionUser(c, s3.token), null);
+
+  // ── หมวด แบรนด์ วัสดุ (Task 4) ──
+  const cats = await tax.listCategories(c);
+  assert.equal(cats.length, 7);
+  assert.ok(cats.find((x) => x.key === 'faucet').count > 0);
+  assert.equal(cats.find((x) => x.key === 'wardrobe').count, 0);
+  assert.equal(cats[0].key, 'kitchen', 'เรียงตาม sort ของ seed');
+  // ลบหมวดที่มีสินค้าไม่ได้ · หมวดว่างลบได้
+  await assert.rejects(tax.deleteCategory(c, 'faucet'), (e) => e.code === '23503');
+  await tax.deleteCategory(c, 'wardrobe');
+  assert.equal((await tax.listCategories(c)).length, 6);
+  // เพิ่มใหม่ไปอยู่ท้าย · รหัสซ้ำ · รหัสผิดรูป · ชื่อว่าง
+  await tax.saveCategory(c, { key: 'wardrobe', th: 'ตู้เสื้อผ้า', en: 'Wardrobes', multiBrand: false }, true);
+  assert.equal((await tax.listCategories(c)).at(-1).key, 'wardrobe');
+  await assert.rejects(tax.saveCategory(c, { key: 'wardrobe', th: 'x', en: 'x', multiBrand: false }, true), (e) => e.code === '23505');
+  await assert.rejects(tax.saveCategory(c, { key: 'Bad Key', th: 'x', en: 'x', multiBrand: false }, true), { name: 'InputError' });
+  await assert.rejects(tax.saveCategory(c, { key: 'tiles', th: '  ', en: 'Tiles', multiBrand: false }, true), { name: 'InputError' });
+  // แก้ชื่อและ multiBrand · แก้รายการที่ไม่มีอยู่
+  await tax.saveCategory(c, { key: 'wardrobe', th: 'ตู้', en: 'Closets', multiBrand: true }, false);
+  assert.deepEqual((await tax.listCategories(c)).find((x) => x.key === 'wardrobe').name, { th: 'ตู้', en: 'Closets' });
+  await assert.rejects(tax.saveCategory(c, { key: 'ghost', th: 'x', en: 'x', multiBrand: false }, false), { name: 'InputError' });
+
+  const brandRows = await tax.listBrands(c);
+  const kohler = brandRows.find((b) => b.name === 'KOHLER');
+  assert.equal(kohler.count, products.length);
+  await assert.rejects(tax.deleteBrand(c, kohler.id), (e) => e.code === '23503');
+  await tax.saveBrand(c, null, 'Franke');
+  await assert.rejects(tax.saveBrand(c, null, 'Franke'), (e) => e.code === '23505');
+  const franke = (await tax.listBrands(c)).find((b) => b.name === 'Franke');
+  await tax.saveBrand(c, franke.id, 'FRANKE');
+  await tax.deleteBrand(c, franke.id);
+  assert.equal((await tax.listBrands(c)).length, brandRows.length);
+
+  const mats = await tax.listMaterials(c);
+  assert.deepEqual(mats.map((m) => m.key), ['brass', 'stainless', 'castIron']);
+  await tax.saveMaterial(c, { key: 'quartz', th: 'ควอตซ์', en: 'Quartz' }, true);
+  await tax.deleteMaterial(c, 'quartz');
+  await assert.rejects(tax.deleteMaterial(c, 'stainless'), (e) => e.code === '23503');
 
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {
