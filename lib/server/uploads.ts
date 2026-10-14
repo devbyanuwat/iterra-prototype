@@ -1,6 +1,7 @@
-// ตรวจไฟล์อัปโหลดและหา path ปลอดภัย · import แค่ node: เพื่อให้ scripts/check-db.mjs รันได้ตรง ๆ
+// ตรวจไฟล์อัปโหลด แปลงเป็น WebP และหา path ปลอดภัย · import แค่ node: กับ sharp (แพ็กเกจ npm ล้วน) เพื่อให้ scripts/check-db.mjs รันได้ตรง ๆ
 import { randomBytes } from 'node:crypto';
 import path from 'node:path';
+import sharp from 'sharp';
 
 export const MAX_IMAGE = 5 * 1024 * 1024;
 export type UploadResult = { ok: true; url: string } | { ok: false; error: string };
@@ -27,4 +28,26 @@ export function resolveInside(root: string, parts: string[]): string | null {
   const base = path.resolve(root);
   const full = path.resolve(base, ...parts);
   return full.startsWith(base + path.sep) ? full : null;
+}
+
+// เพดานพิกเซลกันไฟล์เล็กที่ขยายแล้วกินแรม (decompression bomb): 50 ล้านพิกเซล ราว 8660 x 5770
+export const MAX_PIXELS = 50_000_000;
+export const MAX_EDGE = 2560;
+
+class InputError extends Error {
+  name = 'InputError';
+}
+
+// แปลงทุกรูปเป็น WebP: หมุนตาม EXIF ย่อด้านยาวไม่เกิน MAX_EDGE (ไม่ขยาย) ตัด metadata ทั้งหมดรวมพิกัด GPS
+export async function toWebp(bytes: Uint8Array): Promise<Uint8Array> {
+  try {
+    const out = await sharp(bytes, { limitInputPixels: MAX_PIXELS, failOn: 'error' })
+      .rotate()
+      .resize({ width: MAX_EDGE, height: MAX_EDGE, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+    return new Uint8Array(out);
+  } catch {
+    throw new InputError('อ่านรูปนี้ไม่ได้ หรือรูปใหญ่เกินไป');
+  }
 }

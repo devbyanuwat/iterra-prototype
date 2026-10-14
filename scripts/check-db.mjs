@@ -2,6 +2,7 @@
 // ล้าง schema public ทุกครั้งที่รัน จึงยอมรันเฉพาะ DB ที่ชื่อลงท้าย _test
 import assert from 'node:assert/strict';
 import pg from 'pg';
+import sharp from 'sharp';
 import { migrate } from './db-migrate.mjs';
 import { seed } from '../db/seed.mjs';
 import { products } from '../lib/products.ts';
@@ -11,7 +12,7 @@ import { ANNOUNCEMENT } from '../lib/announcement.ts';
 import * as tax from '../lib/server/taxonomy.ts';
 import * as prod from '../lib/server/products.ts';
 import { getAnnouncement, saveAnnouncement } from '../lib/server/announcement.ts';
-import { imageExt, newName, resolveInside } from '../lib/server/uploads.ts';
+import { imageExt, newName, resolveInside, toWebp, MAX_EDGE } from '../lib/server/uploads.ts';
 import { login, logout, sessionUser, sha256, upsertAdmin, verifyPassword } from '../lib/server/auth.ts';
 
 const url = process.env.TEST_DATABASE_URL ?? 'postgres://localhost:5433/iterra_test';
@@ -234,6 +235,29 @@ try {
   await assert.rejects(saveAnnouncement(c, { ...input, image: 'https://evil.example/x.png' }), { name: 'InputError' });
   await saveAnnouncement(c, { ...input, href: 'https://line.me/ti/p/x', ctaTh: 'แชต', image: '/uploads/2026/10/a.webp' });
   assert.deepEqual((await getAnnouncement(c)).cta, { label: { th: 'แชต', en: 'แชต' }, href: 'https://line.me/ti/p/x' });
+  // ── แปลงรูปเป็น WebP (Task 10) ──
+  {
+    // PNG กว้างเกินเพดาน: ได้ WebP ด้านยาวเท่า MAX_EDGE ไม่ขยายรูปเล็ก
+    const big = await sharp({ create: { width: 3000, height: 1000, channels: 3, background: '#c8b49a' } }).png().toBuffer();
+    const out = await toWebp(new Uint8Array(big));
+    assert.equal(imageExt(out), 'webp');
+    const m = await sharp(out).metadata();
+    assert.equal(m.width, MAX_EDGE);
+    assert.equal(m.height, Math.round((1000 * MAX_EDGE) / 3000));
+    const small = await sharp({ create: { width: 40, height: 30, channels: 3, background: '#000' } }).jpeg().toBuffer();
+    assert.equal((await sharp(await toWebp(new Uint8Array(small))).metadata()).width, 40);
+    // JPEG orientation 6 (หมุน 90°) พร้อม EXIF: หมุนให้ตรงแล้วตัด metadata ทิ้ง
+    const turned = await sharp({ create: { width: 60, height: 20, channels: 3, background: '#fff' } })
+      .jpeg()
+      .withMetadata({ orientation: 6, exif: { IFD0: { Copyright: 'test' } } })
+      .toBuffer();
+    const fixed = await sharp(await toWebp(new Uint8Array(turned))).metadata();
+    assert.deepEqual([fixed.width, fixed.height], [20, 60]);
+    assert.equal(fixed.exif, undefined);
+    assert.equal(fixed.orientation, undefined);
+    // ไฟล์เสียหรือไม่ใช่รูป: InputError ข้อความไทย
+    await assert.rejects(toWebp(new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3])), (e) => e.name === 'InputError');
+  }
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {
   c.release();

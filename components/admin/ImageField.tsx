@@ -26,10 +26,15 @@ export default function ImageField({
     setError('');
     const fd = new FormData();
     fd.append('file', file);
-    const r = await uploadImageAction(fd);
-    setBusy(false);
-    if (r.ok) onChange(multiple ? [...value, r.url] : [r.url]);
-    else setError(r.error);
+    try {
+      const r = await uploadImageAction(fd);
+      if (r.ok) onChange(multiple ? [...value, r.url] : [r.url]);
+      else setError(r.error);
+    } catch {
+      setError('อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง');
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
