@@ -16,11 +16,12 @@
 - Next.js ตัวเดียวทำทั้งหน้าเว็บและหลังบ้าน รันด้วย `next start` บน Node
 - เลิก `output: 'export'` ใน `next.config.mjs` (ไฟล์ protected ต้องได้อนุมัติ)
 - ต่อ DB ด้วย dependency ใหม่ 1 ตัว: `pg` (ต้องได้อนุมัติ) เขียน SQL ล้วน ไม่ใช้ ORM
-- การแก้ข้อมูลจากหลังบ้านใช้ Server Functions แล้วเรียก `revalidatePath` ให้หน้าเว็บอัปเดต (ดู `node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md`)
+- การแก้ข้อมูลจากหลังบ้านใช้ Server Functions (ดู `node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md`)
+- root layout ตั้ง `dynamic = 'force-dynamic'`: ทุกหน้าอ่าน DB ตอน request จึงเห็นข้อมูลใหม่ทันทีโดยไม่ต้องเรียก `revalidatePath` และ `next build` ไม่ต้องต่อ DB (lead อนุมัติ 2026-10-15) ถ้าคนเข้าเยอะจน DB ช้า ค่อยใส่ cache พร้อม revalidate ตอนบันทึก
 - Route Handler ใช้เฉพาะ 2 จุด: ส่งไฟล์ที่อัปโหลด (`/uploads/...`) และ endpoint ที่ต้องรับ multipart ถ้า Server Function รับไม่ไหว
 - `proxy.ts` (ชื่อใหม่ของ middleware ใน Next 16) ใช้แค่ redirect คนที่ไม่มี cookie ออกจาก `/admin/` การตรวจสิทธิ์จริงทำซ้ำทุก Server Function และทุกหน้า admin ตามที่เอกสาร Next บอกว่า proxy ไม่ใช่ที่สำหรับ authorization
 - ที่ตั้ง DB (สมมติฐาน ยังไม่ยืนยัน): ตอนพัฒนาใช้ PostgreSQL 16 ในเครื่อง ตอนใช้งานจริงลง Node กับ PostgreSQL บน VPS ของทีมเครื่องเดียวกัน
-- ค่าตั้ง: `DATABASE_URL`, `UPLOAD_DIR`, `SESSION_DAYS`, `SMTP_URL`, `INQUIRY_TO` อยู่ใน `.env` ห้าม commit
+- ค่าตั้ง: `DATABASE_URL`, `UPLOAD_DIR`, `SESSION_DAYS`, `IP_SALT`, `SMTP_URL`, `INQUIRY_TO` อยู่ใน `.env` ห้าม commit
 
 ### โครงไฟล์
 
@@ -192,7 +193,7 @@ create index on inquiries (ip_hash, created_at);
 | ประกาศ แคตตาล็อก | ตารางแถวเดียว | เปิดใช้ทีละอัน ถ้าต้องตั้งเวลาหลายประกาศค่อยเปลี่ยน |
 | ราคา | ข้อความ null = สอบถามราคา | ห้ามใส่ราคาเอง รอข้อมูลจากลูกค้า |
 | ฟอร์มติดต่อ | 3 ช่องตามฟอร์มเดิม (`components/ContactContent.tsx`) | เก็บลง DB ก่อนส่งอีเมล ถ้า SMTP ยังไม่พร้อม ข้อความไม่หาย |
-| IP | เก็บ sha256 ของ IP | พอสำหรับนับจำนวนครั้ง ไม่เก็บข้อมูลส่วนบุคคลเกินจำเป็น |
+| IP | เก็บ sha256 ของ `IP_SALT` ต่อด้วย IP | พอสำหรับนับจำนวนครั้ง ไม่เก็บข้อมูลส่วนบุคคลเกินจำเป็น · ผสม salt เพราะ IPv4 มีน้อยพอจะไล่ย้อนกลับได้ (lead อนุมัติ 2026-10-15) |
 | สถิติ | ไม่มีตาราง | ใช้ Umami |
 
 ## 4. Seed
