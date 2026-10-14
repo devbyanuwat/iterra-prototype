@@ -1,6 +1,7 @@
 // เช็กตรรกะตัวกรองหน้าสินค้ารวมกับข้อมูลสินค้าจริง: npm run check:filter
 import assert from 'node:assert/strict';
-import { products, filterProducts, facetOptions, SUB_FACETS, CATEGORIES } from '../lib/products.ts';
+import { products, CATEGORIES } from '../lib/products.ts';
+import { filterProducts, facetOptions, SUB_FACETS } from '../lib/product-filters.ts';
 
 const none = { category: [], series: [], material: [], brand: [] };
 const slugs = (picked) => filterProducts(products, { ...none, ...picked }).map((p) => p.slug);

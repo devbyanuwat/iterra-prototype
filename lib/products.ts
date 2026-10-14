@@ -2,6 +2,10 @@
 // ทุกรหัสมีสี/วัสดุเดียว (ก๊อก = โครเมียมขัดเงา) เว็บ Kohler ไม่มีตัวเลือกสี · จุดสีในหน้าเว็บเป็นสีตัวอย่างเพื่อเดโม ดู lib/finishes.ts
 // ภาพ: scripts/build-media.sh products · images = ภาพตัดพื้นหลัง (contain) · scenes = ภาพใช้งานจริง (cover)
 
+import type { Product } from './product-filters.ts';
+// ส่งต่อ type ให้ไฟล์ที่ import จากไฟล์นี้อยู่เดิม · ฟังก์ชันกรองอยู่ที่ lib/product-filters.ts
+export type { Category, Product, FacetKey, Picked } from './product-filters.ts';
+
 // 7 หมวดตามโจทย์ลูกค้า (Notes 2026-10-08) · multiBrand = หมวดที่ต้องมีสินค้าจากผู้ผลิตอื่นอย่างน้อย 3 แบรนด์
 // ── ตั้งแต่ 2026-10-15 หน้าเว็บอ่านสินค้าจาก DB (lib/server/products.ts) · CATEGORIES กับ products ในไฟล์นี้เหลือเป็นข้อมูลตั้งต้นของ db/seed.mjs และ check:* ──
 export const CATEGORIES = [
@@ -13,24 +17,6 @@ export const CATEGORIES = [
   { key: 'appliance', multiBrand: true },
   { key: 'countertop', multiBrand: true },
 ] as const;
-// หมวดและวัสดุผู้ดูแลระบบเพิ่มเองได้ในหลังบ้าน จึงเป็น string ไม่ใช่ชุดค่าตายตัว
-export type Category = string;
-
-export type Product = {
-  slug: string; // ตรงกับ slug บน kohler.co.th
-  category: Category;
-  brand: string;
-  series: string; // ซีรีส์ของ Kohler (ProductBrandName)
-  material?: string; // key ในตาราง materials · ไม่มี = ไม่ระบุวัสดุ (Kumin 99480T)
-  name: { th: string; en: string };
-  desc: { th: string; en: string };
-  specs: { label: string; value: string }[];
-  price: { th: string; en: string };
-  featured?: boolean;
-  images: string[];
-  scenes?: string[];
-};
-
 const ASK = { th: 'สอบถามราคา', en: 'Price on request' };
 const CHROME = { label: 'สี', value: 'โครเมียมขัดเงา (Polished Chrome)' };
 const img = (slug: string) => [`/media/products/${slug}-1.webp`];
@@ -260,31 +246,3 @@ export const products: Product[] = [
     images: img('marcato-3676x-2kd'),
   },
 ];
-
-export function relatedProducts(list: Product[], slug: string, n = 3) {
-  const cur = list.find((p) => p.slug === slug);
-  if (!cur) return [];
-  return list.filter((p) => p.category === cur.category && p.slug !== slug).slice(0, n);
-}
-
-// ── ตัวกรองหน้าสินค้ารวม ──
-export type FacetKey = 'category' | 'series' | 'material' | 'brand';
-export type Picked = Record<FacetKey, string[]>;
-export const FACETS: FacetKey[] = ['category', 'series', 'material', 'brand'];
-// ตัวกรองย่อยที่แสดงหลังเลือกหมวดแล้ว · แบรนด์แสดงเฉพาะหมวดที่มีหลายผู้ผลิต
-export const SUB_FACETS = (multiBrand: boolean): FacetKey[] => (multiBrand ? ['series', 'material', 'brand'] : ['series', 'material']);
-
-// ค่าที่มีในกลุ่มพร้อมจำนวน นับเฉพาะสินค้าในหมวดที่เลือก
-export function facetOptions(list: Product[], category: Category, k: FacetKey): [string, number][] {
-  const counts = new Map<string, number>();
-  for (const p of list) {
-    const v = p[k];
-    if (p.category === category && v) counts.set(v, (counts.get(v) ?? 0) + 1);
-  }
-  return Array.from(counts);
-}
-
-// ในกลุ่มเดียวกัน = หรือ · ข้ามกลุ่ม = และ · กลุ่มที่ไม่ได้เลือก = ไม่กรอง · สินค้าที่ไม่มีค่าในกลุ่มที่เลือก = ไม่ผ่าน
-export function filterProducts(list: Product[], picked: Picked): Product[] {
-  return list.filter((p) => FACETS.every((k) => picked[k].length === 0 || picked[k].includes(p[k] ?? '')));
-}

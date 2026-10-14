@@ -12,7 +12,7 @@ import FinishDots from './FinishDots';
 import { useLang } from './LangProvider';
 import { useCatalog } from './CatalogProvider';
 import { finishesFor } from '@/lib/finishes';
-import type { Product } from '@/lib/products';
+import type { Product } from '@/lib/product-filters';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { lang, t } = useLang();

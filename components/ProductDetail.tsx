@@ -10,7 +10,7 @@ import ParallaxImage from './ParallaxImage';
 import ProductCard from './ProductCard';
 import FinishDots from './FinishDots';
 import { useLang } from './LangProvider';
-import { relatedProducts } from '@/lib/products';
+import { relatedProducts } from '@/lib/product-filters';
 import { useCatalog } from './CatalogProvider';
 import { finishesFor } from '@/lib/finishes';
 

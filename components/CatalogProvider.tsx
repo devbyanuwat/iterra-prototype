@@ -3,7 +3,7 @@
 // สินค้าที่เผยแพร่ หมวด และวัสดุจาก DB · root layout โหลดครั้งเดียวต่อ request แล้วส่งให้ component ฝั่ง client
 // ponytail: ส่งสินค้าทั้งชุดไปทุกหน้า (เท่ากับที่ bundle เดิมฝัง lib/products.ts ไว้) ถ้าสินค้าเกินหลักร้อยให้ย้ายการค้นหาไปฝั่ง server
 import { createContext, useContext } from 'react';
-import type { Product } from '@/lib/products';
+import type { Product } from '@/lib/product-filters';
 import type { Lang } from '@/lib/i18n';
 
 type Name = { th: string; en: string };

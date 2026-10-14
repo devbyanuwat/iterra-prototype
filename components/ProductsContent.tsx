@@ -10,7 +10,7 @@ import Reveal from './Reveal';
 import ProductCard from './ProductCard';
 import { useLang } from './LangProvider';
 import { useCatalog } from './CatalogProvider';
-import { SUB_FACETS, facetOptions, filterProducts, type FacetKey, type Picked, type Product } from '@/lib/products';
+import { SUB_FACETS, facetOptions, filterProducts, type FacetKey, type Picked, type Product } from '@/lib/product-filters';
 
 type Sort = 'featured' | 'name' | 'category';
 type Cat = string; // key ของหมวด หรือ 'all'
