@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>บันทึกการอัปเดต ฉบับภายใน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&family=Noto+Sans+Thai:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root { --paper: #faf9f7; --ink: #1c1917; --warm-300: #d6d3cc; --warm-500: #78716c; --stone-600: #57534e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: Inter, 'Noto Sans Thai', system-ui, sans-serif; font-weight: 300; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  main { max-width: 960px; margin: 0 auto; padding: 72px 24px 96px; }
+  .label { margin: 0 0 14px; font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--warm-500); }
+  h1 { margin: 0; font-size: 40px; font-weight: 200; letter-spacing: 0.025em; line-height: 1.2; }
+  h2 { margin: 0 0 4px; font-size: 26px; font-weight: 200; letter-spacing: 0.025em; }
+  h3 { margin: 24px 0 8px; font-size: 14px; font-weight: 400; }
+  .intro { max-width: 36rem; margin: 14px 0 0; font-size: 14px; color: var(--stone-600); }
+  section { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--ink); break-inside: avoid-page; }
+  ul { margin: 0; padding: 0; list-style: none; }
+  li { padding: 10px 0; font-size: 14px; border-bottom: 1px solid var(--warm-300); break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { padding: 0 12px 8px 0; text-align: left; font-size: 11px; font-weight: 400; color: var(--stone-600); border-bottom: 1px solid var(--ink); }
+  td { padding: 10px 12px 10px 0; vertical-align: top; border-bottom: 1px solid var(--warm-300); }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
+  .tag { display: inline-block; padding: 2px 8px; border: 1px solid var(--ink); font-size: 11px; font-weight: 400; white-space: nowrap; }
+  .tag.done { background: var(--ink); color: var(--paper); }
+  .tag.todo { border-style: dashed; border-color: var(--warm-500); color: var(--stone-600); }
+  .muted { color: var(--stone-600); }
+  footer { margin-top: 64px; padding-top: 16px; border-top: 1px solid var(--warm-300); font-size: 12px; color: var(--stone-600); }
+  @media print { main { padding: 0; } section { margin-top: 32px; } }
+</style>
+</head>
+<body>
+<main>
+<p class="label">Changelog · Internal</p>
+<h1>บันทึกการอัปเดต<br>ฉบับภายใน</h1>
+<p class="intro">สร้างจาก <code>docs/releases/changelog.db</code> ห้ามส่งฉบับนี้ให้ลูกค้า</p>
+<section>
+  <p class="label">ยังไม่ได้รายงานลูกค้า</p>
+  <h2>16 งาน</h2>
+  <table>
+<thead><tr><th>เสร็จเมื่อ</th><th>ชนิด</th><th>งาน</th><th>PR</th><th>commit</th><th>สถานะ</th></tr></thead>
+<tbody>
+<tr><td><code>2026-10-03 12:00</code></td><td>เพิ่มใหม่</td><td>หน้าแรกปรับเป็นเว็บครัวโดยเฉพาะ พร้อมวิดีโอเปิดหน้า</td><td>#1</td><td><code>3c96e97 4797afa</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-03 12:00</code></td><td>เพิ่มใหม่</td><td>ดูแคตตาล็อกบนเว็บได้ทันที ไม่ต้องดาวน์โหลด</td><td>#1</td><td><code>81d4dc0</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-03 12:00</code></td><td>เพิ่มใหม่</td><td>หน้าสินค้า 10 รายการ พร้อมตัวกรองหมวดหมู่</td><td>#1</td><td><code>82d5f22 db5e3c4</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-03 12:00</code></td><td>เพิ่มใหม่</td><td>หน้าตัวอย่างวัสดุและผิวงาน</td><td>#1</td><td><code>4f5b32b d68fcd0</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-05 12:00</code></td><td>ปรับปรุง</td><td>แยกตู้ วัสดุ และสี ให้เลือกได้ชัดขึ้น</td><td>#4</td><td><code>6fd62e3</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-07 12:00</code></td><td>เพิ่มใหม่</td><td>ระบบนับสถิติผู้เข้าชม เริ่มทำงานเมื่อผู้เข้าชมยินยอมเท่านั้น<br><span class="muted">@vercel/analytics after consent</span></td><td>#5</td><td><code>7c200c9</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 13:00</code></td><td>เพิ่มใหม่</td><td>ปุ่มลอยติดต่อและปุ่มกลับขึ้นด้านบน</td><td>#6</td><td><code>d6a0849</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 13:29</code></td><td>เพิ่มใหม่</td><td>ช่องค้นหาทั้งเว็บ</td><td>#6</td><td><code>9c6991d</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 13:40</code></td><td>เพิ่มใหม่</td><td>กล่องประกาศเมื่อเปิดเว็บ</td><td>#6</td><td><code>8b5019a</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 14:00</code></td><td>เพิ่มใหม่</td><td>หน้าผลงานอ้างอิง และเมนูไปหน้านี้</td><td>#6</td><td><code>46c8808 e516299 fbacda1</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 16:00</code></td><td>ปรับปรุง</td><td>ปุ่ม LINE มีไอคอนแชตให้เห็นชัดขึ้น</td><td>#7</td><td><code>8a47b68</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 16:10</code></td><td>ปรับปรุง</td><td>ปุ่มกลับขึ้นด้านบนแสดงเร็วขึ้น หลังเลื่อนลงเล็กน้อย</td><td>#8</td><td><code>f4c523c</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 16:20</code></td><td>เพิ่มใหม่</td><td>แถบขอความยินยอมคุกกี้ พร้อมหน้าตั้งค่า</td><td>#8</td><td><code>e2ae550</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 16:30</code></td><td>เพิ่มใหม่</td><td>หน้านโยบายความเป็นส่วนตัว (ข้อความตัวอย่าง รอข้อความจริงจากลูกค้า)</td><td>#8</td><td><code>a89c2b1</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 16:40</code></td><td>เพิ่มใหม่</td><td>หน้าไม่พบหน้า (404) พร้อมลิงก์ไปหน้าแรก สินค้า และค้นหา</td><td>#9</td><td><code>7560ac5</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 20:00</code></td><td>ปรับปรุง</td><td>การ์ดผลงานเลื่อนเมาส์ผ่านแล้วสลับรูปให้ดู พร้อมแสดงรายละเอียดงาน</td><td>#10</td><td><code>56b6f31 21af6f6 4d85531 a6808dd</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+</tbody>
+</table>
+</section>
+<section>
+  <p class="label">Version</p>
+  <h2>ยังไม่ปล่อย</h2>
+  <table>
+<thead><tr><th>เสร็จเมื่อ</th><th>ชนิด</th><th>งาน</th><th>PR</th><th>commit</th><th>สถานะ</th></tr></thead>
+<tbody>
+<tr><td><code>2026-10-10 15:39</code></td><td>งานภายใน</td><td>design.md สำหรับทีม</td><td></td><td><code>ea849bf</code></td><td><span class="tag">ภายใน</span></td></tr>
+<tr><td><code>2026-10-10 20:55</code></td><td>งานภายใน</td><td>สรุป requirement สำหรับลูกค้า (HTML)</td><td></td><td><code>9216492</code></td><td><span class="tag">ภายใน</span></td></tr>
+<tr><td><code>2026-10-12 00:59</code></td><td>งานภายใน</td><td>แผนงาน 4 สัปดาห์ พร้อมนัดพบและงวดจ่าย</td><td></td><td><code>26e1aa7</code></td><td><span class="tag">ภายใน</span></td></tr>
+<tr><td><code>2026-10-12 16:50</code></td><td>งานภายใน</td><td>แผนทีมหลังบ้าน พร้อมวัน deploy</td><td></td><td><code>2ac59e0</code></td><td><span class="tag">ภายใน</span></td></tr>
+<tr><td><code>2026-10-12 17:47</code></td><td>งานภายใน</td><td>รูปแบบหลังบ้านใน design.md และรายการ ISO อ้างอิง</td><td></td><td><code>2bba04b</code></td><td><span class="tag">ภายใน</span></td></tr>
+<tr><td><code>2026-10-12 18:08</code></td><td>งานภายใน</td><td>กติกา AI ในรีโป (AGENTS.md, CLAUDE.md)</td><td></td><td><code>bdab82e</code></td><td><span class="tag">ภายใน</span></td></tr>
+<tr><td><code>2026-10-12 18:10</code></td><td>งานภายใน</td><td>git hook กันงานหลุดขอบเขตและ push เข้า main</td><td></td><td><code>9fe8e42</code></td><td><span class="tag">ภายใน</span></td></tr>
+</tbody>
+</table>
+</section>
+<section>
+  <p class="label">Version</p>
+  <h2>v0.4</h2>
+  <table>
+<thead><tr><th>เสร็จเมื่อ</th><th>ชนิด</th><th>งาน</th><th>PR</th><th>commit</th><th>สถานะ</th></tr></thead>
+<tbody>
+<tr><td><code>2026-10-10 13:00</code></td><td>เพิ่มใหม่</td><td>ปุ่มลอยติดต่อและปุ่มกลับขึ้นด้านบน</td><td>#6</td><td><code>d6a0849</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 13:29</code></td><td>เพิ่มใหม่</td><td>ช่องค้นหาทั้งเว็บ</td><td>#6</td><td><code>9c6991d</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 13:40</code></td><td>เพิ่มใหม่</td><td>กล่องประกาศเมื่อเปิดเว็บ</td><td>#6</td><td><code>8b5019a</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 14:00</code></td><td>เพิ่มใหม่</td><td>หน้าผลงานอ้างอิง และเมนูไปหน้านี้</td><td>#6</td><td><code>46c8808 e516299 fbacda1</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 16:00</code></td><td>ปรับปรุง</td><td>ปุ่ม LINE มีไอคอนแชตให้เห็นชัดขึ้น</td><td>#7</td><td><code>8a47b68</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 16:10</code></td><td>ปรับปรุง</td><td>ปุ่มกลับขึ้นด้านบนแสดงเร็วขึ้น หลังเลื่อนลงเล็กน้อย</td><td>#8</td><td><code>f4c523c</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 16:20</code></td><td>เพิ่มใหม่</td><td>แถบขอความยินยอมคุกกี้ พร้อมหน้าตั้งค่า</td><td>#8</td><td><code>e2ae550</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 16:30</code></td><td>เพิ่มใหม่</td><td>หน้านโยบายความเป็นส่วนตัว (ข้อความตัวอย่าง รอข้อความจริงจากลูกค้า)</td><td>#8</td><td><code>a89c2b1</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 16:40</code></td><td>เพิ่มใหม่</td><td>หน้าไม่พบหน้า (404) พร้อมลิงก์ไปหน้าแรก สินค้า และค้นหา</td><td>#9</td><td><code>7560ac5</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-10 20:00</code></td><td>ปรับปรุง</td><td>การ์ดผลงานเลื่อนเมาส์ผ่านแล้วสลับรูปให้ดู พร้อมแสดงรายละเอียดงาน</td><td>#10</td><td><code>56b6f31 21af6f6 4d85531 a6808dd</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+</tbody>
+</table>
+</section>
+<section>
+  <p class="label">Version</p>
+  <h2>v0.3</h2>
+  <table>
+<thead><tr><th>เสร็จเมื่อ</th><th>ชนิด</th><th>งาน</th><th>PR</th><th>commit</th><th>สถานะ</th></tr></thead>
+<tbody>
+<tr><td><code>2026-10-07 12:00</code></td><td>เพิ่มใหม่</td><td>ระบบนับสถิติผู้เข้าชม เริ่มทำงานเมื่อผู้เข้าชมยินยอมเท่านั้น<br><span class="muted">@vercel/analytics after consent</span></td><td>#5</td><td><code>7c200c9</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+</tbody>
+</table>
+</section>
+<section>
+  <p class="label">Version</p>
+  <h2>v0.2</h2>
+  <table>
+<thead><tr><th>เสร็จเมื่อ</th><th>ชนิด</th><th>งาน</th><th>PR</th><th>commit</th><th>สถานะ</th></tr></thead>
+<tbody>
+<tr><td><code>2026-10-05 12:00</code></td><td>ปรับปรุง</td><td>แยกตู้ วัสดุ และสี ให้เลือกได้ชัดขึ้น</td><td>#4</td><td><code>6fd62e3</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+</tbody>
+</table>
+</section>
+<section>
+  <p class="label">Version</p>
+  <h2>v0.1</h2>
+  <table>
+<thead><tr><th>เสร็จเมื่อ</th><th>ชนิด</th><th>งาน</th><th>PR</th><th>commit</th><th>สถานะ</th></tr></thead>
+<tbody>
+<tr><td><code>2026-10-03 12:00</code></td><td>เพิ่มใหม่</td><td>หน้าแรกปรับเป็นเว็บครัวโดยเฉพาะ พร้อมวิดีโอเปิดหน้า</td><td>#1</td><td><code>3c96e97 4797afa</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-03 12:00</code></td><td>เพิ่มใหม่</td><td>ดูแคตตาล็อกบนเว็บได้ทันที ไม่ต้องดาวน์โหลด</td><td>#1</td><td><code>81d4dc0</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-03 12:00</code></td><td>เพิ่มใหม่</td><td>หน้าสินค้า 10 รายการ พร้อมตัวกรองหมวดหมู่</td><td>#1</td><td><code>82d5f22 db5e3c4</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-03 12:00</code></td><td>เพิ่มใหม่</td><td>หน้าตัวอย่างวัสดุและผิวงาน</td><td>#1</td><td><code>4f5b32b d68fcd0</code></td><td><span class="tag todo">ยังไม่ได้รายงาน</span></td></tr>
+<tr><td><code>2026-10-03 14:00</code></td><td>งานภายใน</td><td>สตูดิโอห้องครัว 3 มิติ (ช่วงทดลอง ซ่อนไว้)<br><span class="muted">frozen /lab/room/</span></td><td>#2</td><td><code>fe2cc1f b267b58 a3aaa09 5e7f4cc</code></td><td><span class="tag">ภายใน</span></td></tr>
+<tr><td><code>2026-10-03 16:00</code></td><td>งานภายใน</td><td>สตูดิโอ: สีอ่างล้างจาน แท็บ จุดนำทาง</td><td>#3</td><td><code></code></td><td><span class="tag">ภายใน</span></td></tr>
+</tbody>
+</table>
+</section>
+<section>
+  <p class="label">ประวัติการส่งรายงาน</p>
+  <h2>0 ครั้ง</h2>
+  <p class="muted">ยังไม่เคยส่ง</p>
+</section>
+</main>
+</body>
+</html>
