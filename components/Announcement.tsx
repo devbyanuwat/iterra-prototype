@@ -31,15 +31,10 @@ export default function Announcement({ data: A }: { data: AnnouncementData | nul
       // มี dialog อื่นเปิดอยู่ (กำลังค้นหา): ไม่เด้งทับ รอบนี้ข้ามไป
       if (document.querySelector('dialog[open]')) return;
       ref.current?.showModal();
+      // จำว่าเห็นแล้วตั้งแต่ตอนเปิด ไม่รอ event close เพราะ browser ไม่ยิง close ในการปิดครั้งแรกเสมอไป
+      markSeen(A.id, store());
     }, 1000);
-    // ใช้ listener ของเบราว์เซอร์แทน onClose ของ React เพราะการปิดครั้งแรกหลัง hydrate onClose ไม่ทำงาน
-    const d = ref.current;
-    const seen = () => markSeen(A.id, store());
-    d?.addEventListener('close', seen);
-    return () => {
-      clearTimeout(timer);
-      d?.removeEventListener('close', seen);
-    };
+    return () => clearTimeout(timer);
     // ตั้งใจรันครั้งเดียวตอน mount ตามพฤติกรรมเดิม
   }, []);
 
