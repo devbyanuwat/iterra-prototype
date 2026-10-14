@@ -1,0 +1,84 @@
+#!/bin/sh
+# Blocks commits that leave the agreed scope. The rules are in AGENTS.md.
+# A local hook can be skipped with --no-verify: only the lead does that.
+
+bad=0
+fail() {
+  printf 'pre-commit: %s\n' "$1" >&2
+  bad=1
+}
+
+branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || echo detached)
+if [ "$branch" = "main" ]; then
+  fail "commits on main are blocked. Cut a task branch from origin/main."
+fi
+
+staged=$(git diff --cached --name-only --diff-filter=ACMRD)
+[ -z "$staged" ] && exit $bad
+
+# U+0E4E and the en dash, as UTF-8 bytes, so this file stays plain ASCII.
+e4e=$(printf '\340\271\216')
+ndash=$(printf '\342\200\223')
+q="[\"']"
+secret="BEGIN [A-Z ]*PRIVATE KEY|[a-z]+://[^:/@[:space:]]+:[^@/[:space:]]+@|(password|passwd|secret|token|api[_-]?key)${q}?[[:space:]]*[:=][[:space:]]*${q}[A-Za-z0-9_+/=.-]{16,}${q}"
+
+protected=""
+while IFS= read -r f; do
+  case "$f" in
+    .env.example | */.env.example) ;;
+    .env | .env.* | */.env | */.env.*)
+      fail "$f looks like an env file. Secrets stay out of the repo."
+      ;;
+  esac
+
+  case "$f" in
+    design.md | AGENTS.md | CLAUDE.md | tsconfig.json | next.config.* | tailwind.config.* | postcss.config.* | \
+      .githooks/* | docs/pm/* | docs/quotation/* | app/lab/* | components/room/*)
+      protected="$protected
+  $f"
+      ;;
+  esac
+
+  case "$f" in
+    *.ts | *.tsx | *.js | *.mjs | *.css | *.md | *.html | *.json)
+      added=$(git diff --cached --no-color -U0 -- "$f" | grep '^+' | grep -v '^+++ ')
+      if printf '%s\n' "$added" | LC_ALL=C grep -q "$e4e"; then
+        fail "$f adds U+0E4E. Retype the Thai tone mark."
+      fi
+      if printf '%s\n' "$added" | LC_ALL=C grep -q "$ndash"; then
+        fail "$f adds an en dash. Use a hyphen or a word."
+      fi
+      if printf '%s\n' "$added" | LC_ALL=C grep -Eiq "$secret"; then
+        fail "$f adds something that looks like a secret."
+      fi
+      ;;
+  esac
+done <<EOF
+$staged
+EOF
+
+# package.json: scripts may change, the dependency lists may not.
+if printf '%s\n' "$staged" | grep -qx 'package.json'; then
+  if ! node -e '
+    const { execSync } = require("node:child_process");
+    const read = (ref) => {
+      try {
+        return JSON.parse(execSync("git show " + ref + ":package.json", { stdio: ["ignore", "pipe", "ignore"] }));
+      } catch {
+        return {};
+      }
+    };
+    const deps = (p) => JSON.stringify([p.dependencies, p.devDependencies, p.peerDependencies, p.optionalDependencies]);
+    process.exit(deps(read("HEAD")) === deps(read("")) ? 0 : 1);
+  '; then
+    protected="$protected
+  package.json (dependencies changed)"
+  fi
+fi
+
+if [ -n "$protected" ] && [ "${ITERRA_ALLOW_PROTECTED:-}" != "1" ]; then
+  fail "protected files are staged:$protected
+These need the lead's approval. See AGENTS.md."
+fi
+
+exit $bad

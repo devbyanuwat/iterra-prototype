@@ -1,0 +1,11 @@
+#!/bin/sh
+# Blocks pushes to main. Work reaches main through a pull request.
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    printf 'pre-push: pushes to main are blocked. Open a pull request.\n' >&2
+    exit 1
+  fi
+done
+
+exit 0

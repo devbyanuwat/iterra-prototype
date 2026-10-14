@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แผนงาน เว็บไซต์ ITERRA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+Thai:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* สีและตัวอักษรตาม design.md ที่ root ของ repo */
+  :root {
+    --paper: #faf9f7;
+    --ink: #1c1917;
+    --warm-100: #f5f4f1;
+    --warm-300: #d6d3cc;
+    --warm-500: #78716c;
+    --stone-600: #57534e;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Inter, 'Noto Sans Thai', system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+  main { max-width: 1040px; margin: 0 auto; padding: 96px 24px 112px; }
+  .label {
+    margin: 0 0 16px;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--warm-500);
+  }
+  h1 { margin: 0; font-size: 44px; font-weight: 200; letter-spacing: 0.025em; line-height: 1.2; }
+  h2 { margin: 0 0 8px; font-size: 30px; font-weight: 200; letter-spacing: 0.025em; line-height: 1.3; }
+  .intro { max-width: 34rem; margin: 16px 0 0; font-size: 14px; color: var(--warm-500); }
+  .note { margin: 8px 0 0; font-size: 12px; font-weight: 400; color: var(--stone-600); }
+  section { margin-top: 88px; }
+  .sub { margin: 0 0 28px; max-width: 34rem; font-size: 14px; color: var(--warm-500); }
+
+  .counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 56px; border-top: 1px solid var(--warm-300); border-bottom: 1px solid var(--warm-300); }
+  .counts div { padding: 24px 0; }
+  .counts div + div { padding-left: 24px; border-left: 1px solid var(--warm-300); }
+  .counts b { display: block; font-size: 40px; font-weight: 200; line-height: 1.1; }
+  .counts span { font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--warm-500); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    padding: 0 16px 12px 0;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--warm-500);
+    border-bottom: 1px solid var(--ink);
+  }
+  td { padding: 16px 16px 16px 0; vertical-align: top; border-bottom: 1px solid var(--warm-300); }
+  td:first-child { width: 24%; font-weight: 400; }
+  td:last-child, th:last-child { width: 132px; padding-right: 0; }
+  .tag { display: inline-block; padding: 4px 10px; border: 1px solid var(--warm-300); font-size: 11px; font-weight: 400; white-space: nowrap; }
+  .tag.done { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+  .tag.sample { border-color: var(--ink); }
+  .tag.todo { color: var(--stone-600); border-style: dashed; border-color: var(--warm-500); }
+
+  ul { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--ink); }
+  li { padding: 14px 0; font-size: 14px; border-bottom: 1px solid var(--warm-300); }
+  li b { font-weight: 400; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  footer { margin-top: 96px; padding-top: 24px; border-top: 1px solid var(--warm-300); font-size: 12px; font-weight: 400; color: var(--stone-600); }
+
+  @media (max-width: 720px) {
+    main { padding: 64px 24px 80px; }
+    h1 { font-size: 34px; }
+    h2 { font-size: 26px; }
+    section { margin-top: 64px; }
+    .counts b { font-size: 30px; }
+    .counts div + div { padding-left: 14px; }
+    .counts span { letter-spacing: 0.12em; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    thead { display: none; }
+    tr { padding: 16px 0; border-bottom: 1px solid var(--warm-300); }
+    td, td:first-child, td:last-child { width: 100%; padding: 0 0 6px; border: 0; }
+    tbody tr:first-child { border-top: 1px solid var(--ink); }
+  }
+  @media print {
+    main { max-width: none; padding: 0; }
+    section { margin-top: 40px; }
+    tr, li { break-inside: avoid; }
+    h2 { break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="label">Project Plan</p>
+  <h1>แผนงาน<br>เว็บไซต์ ITERRA</h1>
+  <p class="intro">แผน 4 สัปดาห์ พัฒนา 2 สัปดาห์ ทดสอบ 2 สัปดาห์ พร้อมวันนัดเข้าพบ สิ่งที่ต้องได้จากลูกค้า และเงื่อนไขงวดจ่าย</p>
+  <p class="note">จัดทำวันที่ 12 ตุลาคม 2569 · วันที่และงวดจ่ายเป็นข้อเสนอ รอยืนยันกับลูกค้าในนัดครั้งที่ 1</p>
+
+  <section>
+    <p class="label">01 Timeline</p>
+    <h2>กำหนดการ 4 สัปดาห์</h2>
+    <p class="sub">12 ตุลาคม ถึง 6 พฤศจิกายน 2569</p>
+    <table>
+      <thead><tr><th>ช่วง</th><th>งาน</th><th>ผู้ทำ</th></tr></thead>
+      <tbody>
+        <tr><td>สัปดาห์ 1<br>12 ถึง 16 ต.ค.</td><td><b>พัฒนา</b> เชื่อมแบบฟอร์มติดต่อให้ส่งอีเมลจริง ตั้งโดเมนและอีเมลของร้าน รับเนื้อหาจริงจากลูกค้า</td><td>ทีมพัฒนา</td></tr>
+        <tr><td>สัปดาห์ 2<br>19 ถึง 23 ต.ค.</td><td><b>พัฒนา</b> ใส่เนื้อหาจริงทุกหน้า แก้ข้อความตามที่ลูกค้าอ่านทวน สาธิตงานปลายสัปดาห์</td><td>ทีมพัฒนา</td></tr>
+        <tr><td>สัปดาห์ 3<br>26 ถึง 30 ต.ค.</td><td><b>ทดสอบ</b> ทีมทดสอบทุกหน้า บนมือถือ แท็บเล็ต คอมพิวเตอร์ ทั้งสองภาษา แก้ข้อบกพร่องที่พบ</td><td>ทีมพัฒนา</td></tr>
+        <tr><td>สัปดาห์ 4<br>2 ถึง 6 พ.ย.</td><td><b>ทดสอบ</b> ลูกค้าทดลองใช้และแจ้งแก้ไข ทีมแก้รอบสุดท้าย ตรวจรับและเปิดใช้เว็บบนโดเมนจริง</td><td>ลูกค้าและทีมพัฒนา</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <p class="label">02 นัดเข้าพบ</p>
+    <h2>นัดหมาย 3 ครั้ง</h2>
+    <p class="sub">แต่ละครั้งมีเรื่องที่ต้องตัดสินใจให้จบในวันนั้น</p>
+    <table>
+      <thead><tr><th>วัน</th><th>หัวข้อและสิ่งที่ต้องได้</th><th>เกี่ยวกับงวด</th></tr></thead>
+      <tbody>
+        <tr><td>ครั้งที่ 1<br>อังคาร 13 ต.ค.</td><td>ยืนยันเอกสาร requirement ยืนยันแผนงานและงวดจ่าย ส่งรายการเนื้อหาที่ต้องเตรียม เลือกชื่อโดเมน</td><td>งวดที่ 1</td></tr>
+        <tr><td>ครั้งที่ 2<br>ศุกร์ 23 ต.ค.</td><td>สาธิตงานพัฒนาที่เสร็จ เว็บมีเนื้อหาจริง แบบฟอร์มส่งอีเมลได้ ลูกค้ายืนยันว่าครบตาม requirement</td><td><span class="tag done">งวดที่ 2</span></td></tr>
+        <tr><td>ครั้งที่ 3<br>ศุกร์ 6 พ.ย.</td><td>ตรวจรับงานหลังทดสอบ เปิดใช้เว็บบนโดเมนจริง ส่งมอบเอกสารและสิทธิ์การดูแล</td><td>งวดที่ 3</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <p class="label">03 งวดจ่าย</p>
+    <h2>เงื่อนไขการชำระ</h2>
+    <p class="sub">จำนวนเงินแต่ละงวดเว้นไว้ รอตกลงกับลูกค้า</p>
+    <table>
+      <thead><tr><th>งวด</th><th>เงื่อนไขที่ถือว่าถึงกำหนด</th><th>จำนวนเงิน</th></tr></thead>
+      <tbody>
+        <tr><td>งวดที่ 1<br>13 ต.ค.</td><td>ลูกค้ายืนยัน requirement และแผนงานในนัดครั้งที่ 1</td><td>________</td></tr>
+        <tr><td>งวดที่ 2<br>23 ต.ค.</td><td>งานพัฒนาเสร็จและสาธิตผ่านในนัดครั้งที่ 2: งานในหมวด 04 ครบทุกข้อ ยกเว้นข้อที่ลูกค้าส่งเนื้อหาช้ากว่ากำหนด</td><td>________</td></tr>
+        <tr><td>งวดที่ 3<br>6 พ.ย.</td><td>ลูกค้าตรวจรับหลังทดสอบ และเว็บเปิดใช้บนโดเมนจริง</td><td>________</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <p class="label">04 งานที่ต้องทำ</p>
+    <h2>งานพัฒนาใน 2 สัปดาห์</h2>
+    <p class="sub">มาจากข้อที่ยังไม่ทำและข้อที่รอเนื้อหาจริงในเอกสาร requirement</p>
+    <table>
+      <thead><tr><th>งาน</th><th>รายละเอียด</th><th>เสร็จภายใน</th></tr></thead>
+      <tbody>
+        <tr><td>แบบฟอร์มติดต่อ</td><td>ข้อความจากหน้าติดต่อส่งถึงอีเมลของร้าน พร้อมข้อความยืนยันให้ผู้ส่ง</td><td>16 ต.ค.</td></tr>
+        <tr><td>โดเมนและอีเมล</td><td>ชี้โดเมนของร้านมาที่เว็บ เปิดบัญชีอีเมลของร้าน</td><td>16 ต.ค.</td></tr>
+        <tr><td>ข้อมูลติดต่อและ LINE</td><td>ที่อยู่ โทรศัพท์ อีเมล เวลาทำการ และ LINE ID จริง</td><td>20 ต.ค.</td></tr>
+        <tr><td>ผลงานอ้างอิง</td><td>ใส่โครงการจริง รูปโครงการละหลายรูป และสินค้าที่ใช้</td><td>21 ต.ค.</td></tr>
+        <tr><td>บทความ</td><td>ใส่บทความจริง หรือคงบทความตัวอย่างตามที่ลูกค้ายืนยัน</td><td>21 ต.ค.</td></tr>
+        <tr><td>ประกาศและนโยบาย</td><td>ข้อความประกาศตอนเข้าเว็บ และนโยบายความเป็นส่วนตัวฉบับจริง</td><td>22 ต.ค.</td></tr>
+        <tr><td>แก้ข้อความ</td><td>แก้ตามผลอ่านทวนของลูกค้า ทั้งไทยและอังกฤษ</td><td>22 ต.ค.</td></tr>
+      </tbody>
+    </table>
+    <p class="note">ไม่อยู่ในแผนนี้: หน้ารายละเอียดรายโครงการ และการเปิดห้องจำลองให้คนทั่วไปใช้ ทำเป็นงานแยกได้ภายหลัง</p>
+  </section>
+
+  <section>
+    <p class="label">05 รอจากลูกค้า</p>
+    <h2>สิ่งที่ต้องได้ และวันที่ต้องได้</h2>
+    <p class="sub">ถ้าได้ช้ากว่าวันที่ระบุ งานข้อนั้นจะเลื่อนออกไปเท่ากับจำนวนวันที่ช้า</p>
+    <table>
+      <thead><tr><th>รายการ</th><th>รายละเอียด</th><th>ภายใน</th></tr></thead>
+      <tbody>
+        <tr><td>ยืนยัน requirement</td><td>อ่านและยืนยันเอกสารสรุป requirement</td><td>13 ต.ค.</td></tr>
+        <tr><td>โดเมน</td><td>ชื่อโดเมนที่จะใช้ และผู้มีสิทธิ์ตั้งค่า</td><td>13 ต.ค.</td></tr>
+        <tr><td>อีเมลปลายทาง</td><td>อีเมลที่รับข้อความจากแบบฟอร์ม และจำนวนบัญชีอีเมลที่ต้องการ</td><td>14 ต.ค.</td></tr>
+        <tr><td>ข้อมูลติดต่อ</td><td>ที่อยู่ โทรศัพท์ เวลาทำการ LINE ID</td><td>14 ต.ค.</td></tr>
+        <tr><td>ผลงานอ้างอิง</td><td>ชื่อ ที่ตั้ง ประเภท ปี รูป และสินค้าที่ใช้ ของแต่ละโครงการ</td><td>16 ต.ค.</td></tr>
+        <tr><td>บทความและประกาศ</td><td>เนื้อหาบทความ ข้อความและรูปของประกาศ หรือแจ้งว่าไม่ใช้</td><td>16 ต.ค.</td></tr>
+        <tr><td>นโยบายความเป็นส่วนตัว</td><td>ฉบับที่ผ่านการตรวจทางกฎหมาย</td><td>16 ต.ค.</td></tr>
+        <tr><td>อ่านทวนข้อความ</td><td>รายการแก้ไขข้อความทุกหน้า รวมตัวเลขสรุปในหน้าแรก</td><td>19 ต.ค.</td></tr>
+        <tr><td>ผลทดลองใช้</td><td>รายการแก้ไขจากการทดลองใช้ในสัปดาห์ที่ 4</td><td>4 พ.ย.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>ITERRA Project Plan · อ้างอิงเอกสารสรุป requirement วันที่ 10 ตุลาคม 2569 · ค่าบริการโฮสต์และอีเมลอยู่ในเอกสารประมาณการแยก</footer>
+</main>
+</body>
+</html>

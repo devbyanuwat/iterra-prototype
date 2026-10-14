@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>บันทึกการอัปเดต เว็บไซต์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&family=Noto+Sans+Thai:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root { --paper: #faf9f7; --ink: #1c1917; --warm-300: #d6d3cc; --warm-500: #78716c; --stone-600: #57534e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: Inter, 'Noto Sans Thai', system-ui, sans-serif; font-weight: 300; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  main { max-width: 960px; margin: 0 auto; padding: 72px 24px 96px; }
+  .label { margin: 0 0 14px; font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--warm-500); }
+  h1 { margin: 0; font-size: 40px; font-weight: 200; letter-spacing: 0.025em; line-height: 1.2; }
+  h2 { margin: 0 0 4px; font-size: 26px; font-weight: 200; letter-spacing: 0.025em; }
+  h3 { margin: 24px 0 8px; font-size: 14px; font-weight: 400; }
+  .intro { max-width: 36rem; margin: 14px 0 0; font-size: 14px; color: var(--stone-600); }
+  section { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--ink); break-inside: avoid-page; }
+  ul { margin: 0; padding: 0; list-style: none; }
+  li { padding: 10px 0; font-size: 14px; border-bottom: 1px solid var(--warm-300); break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { padding: 0 12px 8px 0; text-align: left; font-size: 11px; font-weight: 400; color: var(--stone-600); border-bottom: 1px solid var(--ink); }
+  td { padding: 10px 12px 10px 0; vertical-align: top; border-bottom: 1px solid var(--warm-300); }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
+  .tag { display: inline-block; padding: 2px 8px; border: 1px solid var(--ink); font-size: 11px; font-weight: 400; white-space: nowrap; }
+  .tag.done { background: var(--ink); color: var(--paper); }
+  .tag.todo { border-style: dashed; border-color: var(--warm-500); color: var(--stone-600); }
+  .muted { color: var(--stone-600); }
+  footer { margin-top: 64px; padding-top: 16px; border-top: 1px solid var(--warm-300); font-size: 12px; color: var(--stone-600); }
+  @media print { main { padding: 0; } section { margin-top: 32px; } }
+</style>
+</head>
+<body>
+<main>
+<p class="label">Release Notes</p>
+<h1>บันทึกการอัปเดต<br>เว็บไซต์</h1>
+<p class="intro">สรุปสิ่งที่เพิ่มและปรับปรุงในแต่ละเวอร์ชัน เวอร์ชันล่าสุดอยู่ด้านบน</p>
+<section>
+  <p class="label">Version</p>
+  <h2>v0.4</h2>
+  <h3>เพิ่มใหม่</h3>
+  <ul>
+    <li>ปุ่มลอยติดต่อและปุ่มกลับขึ้นด้านบน</li>
+    <li>ช่องค้นหาทั้งเว็บ</li>
+    <li>กล่องประกาศเมื่อเปิดเว็บ</li>
+    <li>หน้าผลงานอ้างอิง และเมนูไปหน้านี้</li>
+    <li>แถบขอความยินยอมคุกกี้ พร้อมหน้าตั้งค่า</li>
+    <li>หน้านโยบายความเป็นส่วนตัว (ข้อความตัวอย่าง รอข้อความจริงจากลูกค้า)</li>
+    <li>หน้าไม่พบหน้า (404) พร้อมลิงก์ไปหน้าแรก สินค้า และค้นหา</li>
+  </ul>
+  <h3>ปรับปรุง</h3>
+  <ul>
+    <li>ปุ่ม LINE มีไอคอนแชตให้เห็นชัดขึ้น</li>
+    <li>ปุ่มกลับขึ้นด้านบนแสดงเร็วขึ้น หลังเลื่อนลงเล็กน้อย</li>
+    <li>การ์ดผลงานเลื่อนเมาส์ผ่านแล้วสลับรูปให้ดู พร้อมแสดงรายละเอียดงาน</li>
+  </ul>
+</section>
+<section>
+  <p class="label">Version</p>
+  <h2>v0.3</h2>
+  <h3>เพิ่มใหม่</h3>
+  <ul>
+    <li>ระบบนับสถิติผู้เข้าชม เริ่มทำงานเมื่อผู้เข้าชมยินยอมเท่านั้น</li>
+  </ul>
+</section>
+<section>
+  <p class="label">Version</p>
+  <h2>v0.2</h2>
+  <h3>ปรับปรุง</h3>
+  <ul>
+    <li>แยกตู้ วัสดุ และสี ให้เลือกได้ชัดขึ้น</li>
+  </ul>
+</section>
+<section>
+  <p class="label">Version</p>
+  <h2>v0.1</h2>
+  <h3>เพิ่มใหม่</h3>
+  <ul>
+    <li>หน้าแรกปรับเป็นเว็บครัวโดยเฉพาะ พร้อมวิดีโอเปิดหน้า</li>
+    <li>ดูแคตตาล็อกบนเว็บได้ทันที ไม่ต้องดาวน์โหลด</li>
+    <li>หน้าสินค้า 10 รายการ พร้อมตัวกรองหมวดหมู่</li>
+    <li>หน้าตัวอย่างวัสดุและผิวงาน</li>
+  </ul>
+</section>
+</main>
+</body>
+</html>
