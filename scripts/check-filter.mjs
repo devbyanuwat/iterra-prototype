@@ -1,8 +1,8 @@
 // เช็กตรรกะตัวกรองหน้าสินค้ารวมกับข้อมูลสินค้าจริง: npm run check:filter
 import assert from 'node:assert/strict';
-import { products, filterProducts } from '../lib/products.ts';
+import { products, filterProducts, facetOptions, SUB_FACETS, CATEGORIES } from '../lib/products.ts';
 
-const none = { category: [], series: [], material: [] };
+const none = { category: [], series: [], material: [], brand: [] };
 const slugs = (picked) => filterProducts(products, { ...none, ...picked }).map((p) => p.slug);
 
 // ไม่เลือกอะไร = ได้ทุกชิ้น
@@ -20,5 +20,15 @@ assert.deepEqual(slugs({ category: ['faucet'], material: ['stainless'] }), []);
 // สินค้าที่ไม่มีข้อมูลวัสดุไม่ผ่านตัวกรองวัสดุ
 assert.ok(!slugs({ material: ['brass'] }).includes('kumin-99480t-4'));
 assert.ok(slugs({ series: ['Kumin'] }).includes('kumin-99480t-4'));
+
+// 7 หมวด · แบรนด์แสดงเฉพาะหมวดที่มีหลายผู้ผลิต
+assert.equal(CATEGORIES.length, 7);
+assert.ok(SUB_FACETS('faucet').includes('brand'));
+assert.ok(!SUB_FACETS('wardrobe').includes('brand'));
+// ตัวเลือกนับเฉพาะหมวดที่เลือก: ซีรีส์ของอ่างไม่โผล่ในก๊อก · หมวดที่ยังไม่มีสินค้า = ไม่มีตัวเลือก
+assert.ok(!facetOptions(products, 'faucet', 'series').some(([v]) => v === 'Toccata'));
+assert.deepEqual(facetOptions(products, 'wardrobe', 'series'), []);
+assert.deepEqual(slugs({ category: ['wardrobe'] }), []);
+assert.equal(slugs({ brand: ['KOHLER'] }).length, products.length);
 
 console.log('ผ่าน: ตัวกรองสินค้า');

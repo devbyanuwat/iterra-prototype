@@ -92,3 +92,16 @@ html:has(dialog[open]) {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* หลังบ้าน (mockup): กระจกแบบ iOS 26 · ความทึบมาจาก --glass ที่ผู้ใช้ปรับเองได้
+   ใช้เฉพาะใต้ /admin/ หน้าเว็บฝั่งลูกค้ายังมุมเหลี่ยมไม่มีเงาตาม design.md */
+.glass {
+  background: rgb(255 255 255 / var(--glass, 0.6));
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgb(255 255 255 / 0.6);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    inset 0 -1px 0 rgb(255 255 255 / 0.3),
+    0 12px 40px rgb(28 25 23 / 0.12);
+}
