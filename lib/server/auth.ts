@@ -24,6 +24,7 @@ export async function verifyPassword(pw: string, stored: string): Promise<boolea
   const [kind, salt, hash] = stored.split('$');
   if (kind !== 'scrypt' || !salt || !hash) return false;
   const want = Buffer.from(hash, 'hex');
+  if (want.length !== 64) return false;
   const got = await scryptAsync(pw, Buffer.from(salt, 'hex'), want.length);
   return timingSafeEqual(got, want);
 }

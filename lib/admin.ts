@@ -15,11 +15,14 @@ export async function requireAdmin() {
   return admin;
 }
 
-// IP มาจาก nginx (x-forwarded-for) · ผสม IP_SALT ก่อน hash เพราะ IPv4 มีน้อยพอจะไล่ย้อนกลับได้
+// IP มาจาก nginx · ผสม IP_SALT ก่อน hash เพราะ IPv4 มีน้อยพอจะไล่ย้อนกลับได้
+// nginx ต้องตั้ง `proxy_set_header X-Real-IP $remote_addr;` และห้ามเปิดพอร์ต Node ตรงสู่ภายนอก ไม่งั้น header นี้ปลอมได้
 export async function ipHash(): Promise<string> {
   const h = await headers();
-  const ip = h.get('x-forwarded-for')?.split(',')[0].trim() || h.get('x-real-ip') || 'local';
-  return sha256(`${process.env.IP_SALT ?? ''}:${ip}`);
+  const ip = h.get('x-real-ip')?.trim() || h.get('x-forwarded-for')?.split(',').at(-1)?.trim() || 'local';
+  const salt = process.env.IP_SALT;
+  if (!salt && process.env.NODE_ENV === 'production') throw new Error('IP_SALT is not set');
+  return sha256(`${salt ?? ''}:${ip}`);
 }
 
 // ทุก Server Function ของหลังบ้านผ่านตัวนี้: ตรวจ session ก่อนเสมอ แล้วแปล error ที่ผู้ใช้แก้เองได้เป็นข้อความ

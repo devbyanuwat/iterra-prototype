@@ -57,6 +57,7 @@ try {
   assert.ok(await verifyPassword(pw, (await c.query('select password_hash from admin_users')).rows[0].password_hash));
   assert.equal(await verifyPassword('wrong', (await c.query('select password_hash from admin_users')).rows[0].password_hash), false);
   await assert.rejects(upsertAdmin(c, 'b@example.test', 'B', 'short'), /12/);
+  assert.equal(await verifyPassword('anything', 'scrypt$ab$zz'), false);
   // อีเมลไม่สนตัวพิมพ์และช่องว่าง
   const s1 = await login(c, ' ADMIN@example.test', pw, 'ip-a', 14);
   assert.ok('token' in s1);
