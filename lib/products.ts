@@ -2,12 +2,24 @@
 // ทุกรหัสมีสี/วัสดุเดียว (ก๊อก = โครเมียมขัดเงา) เว็บ Kohler ไม่มีตัวเลือกสี · จุดสีในหน้าเว็บเป็นสีตัวอย่างเพื่อเดโม ดู lib/finishes.ts
 // ภาพ: scripts/build-media.sh products · images = ภาพตัดพื้นหลัง (contain) · scenes = ภาพใช้งานจริง (cover)
 
-export type Category = 'faucet' | 'sink';
+// 7 หมวดตามโจทย์ลูกค้า (Notes 2026-10-08) · multiBrand = หมวดที่ต้องมีสินค้าจากผู้ผลิตอื่นอย่างน้อย 3 แบรนด์
+// ── ตอนนี้มีข้อมูลจริงแค่ก๊อกกับอ่างของ KOHLER หมวดอื่นรอข้อมูลจากลูกค้า ──
+export const CATEGORIES = [
+  { key: 'kitchen', multiBrand: false },
+  { key: 'wardrobe', multiBrand: false },
+  { key: 'accessory', multiBrand: false },
+  { key: 'faucet', multiBrand: true },
+  { key: 'sink', multiBrand: true },
+  { key: 'appliance', multiBrand: true },
+  { key: 'countertop', multiBrand: true },
+] as const;
+export type Category = (typeof CATEGORIES)[number]['key'];
 export type Material = 'brass' | 'stainless' | 'castIron';
 
 export type Product = {
   slug: string; // ตรงกับ slug บน kohler.co.th
   category: Category;
+  brand: string;
   series: string; // ซีรีส์ของ Kohler (ProductBrandName)
   material?: Material; // ไม่มี = Kohler ไม่ระบุวัสดุ (Kumin 99480T)
   name: { th: string; en: string };
@@ -27,6 +39,7 @@ export const products: Product[] = [
   {
     slug: 'elate-13963t-c4',
     category: 'faucet',
+    brand: 'KOHLER',
     series: 'Elate',
     material: 'brass',
     name: { th: 'Elate™ ก๊อกผสมอ่างล้างจาน หัวฝักบัวดึงได้', en: 'Elate™ Pull-Out Kitchen Faucet' },
@@ -51,6 +64,7 @@ export const products: Product[] = [
   {
     slug: 'kumin-99480t-4',
     category: 'faucet',
+    brand: 'KOHLER',
     series: 'Kumin',
     name: { th: 'Kumin™ ก๊อกผสมอ่างล้างจาน', en: 'Kumin™ Single-Control Kitchen Faucet' },
     desc: {
@@ -70,6 +84,7 @@ export const products: Product[] = [
   {
     slug: 'elate-15609x-4',
     category: 'faucet',
+    brand: 'KOHLER',
     series: 'Elate',
     material: 'brass',
     name: { th: 'Elate™ ก๊อกผสมอ่างล้างจาน', en: 'Elate™ Single-Control Kitchen Faucet' },
@@ -90,6 +105,7 @@ export const products: Product[] = [
   {
     slug: 'taut-21370t-4cd',
     category: 'faucet',
+    brand: 'KOHLER',
     series: 'Taut',
     material: 'brass',
     name: { th: 'Taut™ ก๊อกเดี่ยวอ่างล้างจาน', en: 'Taut™ Cold-Water Swing-Spout Kitchen Faucet' },
@@ -112,6 +128,7 @@ export const products: Product[] = [
   {
     slug: 'kumin-30946t-4',
     category: 'faucet',
+    brand: 'KOHLER',
     series: 'Kumin',
     material: 'brass',
     name: { th: 'Kumin™ ก๊อกเดี่ยวอ่างล้างจาน', en: 'Kumin™ Cold-Water Kitchen Faucet' },
@@ -134,6 +151,7 @@ export const products: Product[] = [
   {
     slug: 'taut-21366t-4',
     category: 'faucet',
+    brand: 'KOHLER',
     series: 'Taut',
     material: 'brass',
     name: { th: 'Taut™ ก๊อกผสมอ่างล้างจาน หัวฝักบัวดึงลง', en: 'Taut™ Pull-Down Kitchen Faucet' },
@@ -156,6 +174,7 @@ export const products: Product[] = [
   {
     slug: 'toccata-3644x-2kd',
     category: 'sink',
+    brand: 'KOHLER',
     series: 'Toccata',
     material: 'stainless',
     name: { th: 'Toccata™ ซิงก์สเตนเลส 1 หลุม', en: 'Toccata™ Single-Bowl Stainless Sink' },
@@ -176,6 +195,7 @@ export const products: Product[] = [
   {
     slug: 'indio-3885x-2sd',
     category: 'sink',
+    brand: 'KOHLER',
     series: 'Indio',
     material: 'castIron',
     name: { th: 'Indio™ ซิงก์เหล็กหล่อ 2 หลุม', en: 'Indio™ Smart Divide Cast-Iron Double Sink' },
@@ -199,6 +219,7 @@ export const products: Product[] = [
   {
     slug: 'toccata-3645x-2kd',
     category: 'sink',
+    brand: 'KOHLER',
     series: 'Toccata',
     material: 'stainless',
     name: { th: 'Toccata™ ซิงก์สเตนเลส 2 หลุม', en: 'Toccata™ Double-Bowl Stainless Sink' },
@@ -220,6 +241,7 @@ export const products: Product[] = [
   {
     slug: 'marcato-3676x-2kd',
     category: 'sink',
+    brand: 'KOHLER',
     series: 'Marcato',
     material: 'stainless',
     name: { th: 'Marcato™ ซิงก์สเตนเลส 1 หลุมครึ่ง', en: 'Marcato™ 1.5-Bowl Stainless Sink' },
@@ -252,9 +274,22 @@ export function relatedProducts(slug: string, n = 3) {
 }
 
 // ── ตัวกรองหน้าสินค้ารวม ──
-export type FacetKey = 'category' | 'series' | 'material';
+export type FacetKey = 'category' | 'series' | 'material' | 'brand';
 export type Picked = Record<FacetKey, string[]>;
-export const FACETS: FacetKey[] = ['category', 'series', 'material'];
+export const FACETS: FacetKey[] = ['category', 'series', 'material', 'brand'];
+// ตัวกรองย่อยที่แสดงหลังเลือกหมวดแล้ว · แบรนด์แสดงเฉพาะหมวดที่มีหลายผู้ผลิต
+export const SUB_FACETS = (c: Category): FacetKey[] =>
+  CATEGORIES.find((x) => x.key === c)?.multiBrand ? ['series', 'material', 'brand'] : ['series', 'material'];
+
+// ค่าที่มีในกลุ่มพร้อมจำนวน นับเฉพาะสินค้าในหมวดที่เลือก
+export function facetOptions(list: Product[], category: Category, k: FacetKey): [string, number][] {
+  const counts = new Map<string, number>();
+  for (const p of list) {
+    const v = p[k];
+    if (p.category === category && v) counts.set(v, (counts.get(v) ?? 0) + 1);
+  }
+  return Array.from(counts);
+}
 
 // ในกลุ่มเดียวกัน = หรือ · ข้ามกลุ่ม = และ · กลุ่มที่ไม่ได้เลือก = ไม่กรอง · สินค้าที่ไม่มีค่าในกลุ่มที่เลือก = ไม่ผ่าน
 export function filterProducts(list: Product[], picked: Picked): Product[] {

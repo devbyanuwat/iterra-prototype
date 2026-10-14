@@ -1,6 +1,6 @@
 'use client';
 
-// หน้าสินค้ารวมแบบรายการ: breadcrumb → หัวข้อ → ตัวกรองซ้าย (หมวด/ซีรีส์/วัสดุ) + ตารางการ์ดขวา พร้อมจำนวนที่พบและเรียงลำดับ
+// หน้าสินค้ารวม: breadcrumb → หัวข้อ → แถบหมวด 7 หมวด → ตัวกรองซ้าย (ซีรีส์/วัสดุ/แบรนด์ แสดงหลังเลือกหมวด) + ตารางการ์ดขวา
 // ตัวกรองอยู่ใน state ของหน้า ไม่ผูก URL
 // ponytail: ย้อนกลับจากหน้า detail แล้วตัวกรองรีเซ็ต · ผูก query string เมื่อต้องแชร์ลิงก์ที่กรองแล้ว
 
@@ -9,38 +9,42 @@ import Link from 'next/link';
 import Reveal from './Reveal';
 import ProductCard from './ProductCard';
 import { useLang } from './LangProvider';
-import { FACETS, filterProducts, products, type FacetKey, type Picked } from '@/lib/products';
+import {
+  CATEGORIES,
+  SUB_FACETS,
+  facetOptions,
+  filterProducts,
+  products,
+  type Category,
+  type FacetKey,
+  type Picked,
+} from '@/lib/products';
 
 type Sort = 'featured' | 'name' | 'category';
-const NONE: Picked = { category: [], series: [], material: [] };
+type Cat = Category | 'all';
+const NONE: Picked = { category: [], series: [], material: [], brand: [] };
+const ORDER = CATEGORIES.map((c) => c.key as string);
+const count = (c: Category) => products.filter((p) => p.category === c).length;
 
-// ค่าที่มีในแต่ละกลุ่มพร้อมจำนวนสินค้า (นับจากสินค้าทั้งหมด ไม่เปลี่ยนตามตัวกรอง)
-const OPTIONS = Object.fromEntries(
-  FACETS.map((k) => {
-    const counts = new Map<string, number>();
-    for (const p of products) {
-      const v = p[k];
-      if (v) counts.set(v, (counts.get(v) ?? 0) + 1);
-    }
-    return [k, Array.from(counts)];
-  }),
-) as Record<FacetKey, [string, number][]>;
-
-function Facets({ picked, toggle }: { picked: Picked; toggle: (k: FacetKey, v: string) => void }) {
+function Facets({ cat, picked, toggle }: { cat: Category; picked: Picked; toggle: (k: FacetKey, v: string) => void }) {
   const { t } = useLang();
   const title: Record<FacetKey, string> = {
     category: t.products.facetCategory,
     series: t.products.facetSeries,
     material: t.products.facetMaterial,
+    brand: t.products.facetBrand,
   };
-  const label = (k: FacetKey, v: string) =>
-    ({ category: t.common.category[v], series: v, material: t.common.material[v] })[k];
+  const label = (k: FacetKey, v: string) => (k === 'material' ? t.common.material[v] : v);
+  const groups = SUB_FACETS(cat)
+    .map((k) => [k, facetOptions(products, cat, k)] as const)
+    .filter(([, opts]) => opts.length > 0);
+  if (groups.length === 0) return <p className="py-5 text-sm font-light text-stone-600">{t.products.waiting}</p>;
   return (
     <div className="divide-y divide-warm-200 border-y border-warm-200">
-      {FACETS.map((k) => (
+      {groups.map(([k, opts]) => (
         <fieldset key={k} className="pb-4">
           <legend className="pb-2 pt-5 text-[11px] font-normal uppercase tracking-widest2 text-warm-500">{title[k]}</legend>
-          {OPTIONS[k].map(([v, n]) => (
+          {opts.map(([v, n]) => (
             <label key={v} className="flex min-h-[2.25rem] cursor-pointer items-center gap-3 text-sm font-light">
               <input
                 type="checkbox"
@@ -61,16 +65,21 @@ function Facets({ picked, toggle }: { picked: Picked; toggle: (k: FacetKey, v: s
 
 export default function ProductsContent() {
   const { lang, t } = useLang();
+  const [cat, setCat] = useState<Cat>('all');
   const [picked, setPicked] = useState<Picked>(NONE);
   const [sort, setSort] = useState<Sort>('featured');
+  const pickCat = (c: Cat) => {
+    setCat(c);
+    setPicked(NONE);
+  };
 
   const toggle = (k: FacetKey, v: string) =>
     setPicked((p) => ({ ...p, [k]: p[k].includes(v) ? p[k].filter((x) => x !== v) : [...p[k], v] }));
-  const active = FACETS.reduce((n, k) => n + picked[k].length, 0);
+  const active = picked.series.length + picked.material.length + picked.brand.length;
 
-  const shown = filterProducts(products, picked).sort((a, b) => {
+  const shown = filterProducts(products, { ...picked, category: cat === 'all' ? [] : [cat] }).sort((a, b) => {
     if (sort === 'name') return a.name[lang].localeCompare(b.name[lang], lang);
-    if (sort === 'category') return a.category.localeCompare(b.category);
+    if (sort === 'category') return ORDER.indexOf(a.category) - ORDER.indexOf(b.category);
     return Number(!!b.featured) - Number(!!a.featured);
   });
 
@@ -101,6 +110,29 @@ export default function ProductsContent() {
         </Reveal>
       </section>
 
+      <nav aria-label={t.products.facetCategory} className="px-6 pb-10 md:px-[6vw]">
+        <ul className="flex flex-wrap gap-2">
+          {(['all', ...ORDER] as Cat[]).map((c) => {
+            const n = c === 'all' ? products.length : count(c);
+            return (
+              <li key={c}>
+                <button
+                  type="button"
+                  aria-pressed={cat === c}
+                  onClick={() => pickCat(c)}
+                  className={`inline-flex min-h-11 items-center gap-2 border px-4 text-sm font-light transition-colors focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink active:scale-[0.98] ${
+                    cat === c ? 'border-ink bg-ink text-paper' : 'border-warm-300 hover:border-ink'
+                  }`}
+                >
+                  {t.common.category[c]}
+                  <span className={cat === c ? 'text-warm-300' : 'text-stone-600'}>({n})</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
       <section className="px-6 pb-28 md:px-[6vw] lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-12">
         {/* จอใหญ่: ตัวกรองติดด้านซ้าย · จอเล็ก: พับอยู่ใน <details> ด้านล่าง */}
         <aside className="hidden lg:sticky lg:top-28 lg:block lg:self-start">
@@ -108,7 +140,11 @@ export default function ProductsContent() {
             <h2 className="text-base font-light tracking-wide">{t.products.filterBy}</h2>
             {active > 0 && clearBtn}
           </div>
-          <Facets picked={picked} toggle={toggle} />
+          {cat === 'all' ? (
+            <p className="py-5 text-sm font-light text-stone-600">{t.products.pickCategory}</p>
+          ) : (
+            <Facets cat={cat} picked={picked} toggle={toggle} />
+          )}
         </aside>
 
         <div>
@@ -122,7 +158,11 @@ export default function ProductsContent() {
               <span aria-hidden className="hidden group-open:inline">−</span>
             </summary>
             <div className="pb-5">
-              <Facets picked={picked} toggle={toggle} />
+              {cat === 'all' ? (
+                <p className="py-5 text-sm font-light text-stone-600">{t.products.pickCategory}</p>
+              ) : (
+                <Facets cat={cat} picked={picked} toggle={toggle} />
+              )}
               {active > 0 && <div className="mt-4">{clearBtn}</div>}
             </div>
           </details>
@@ -152,9 +192,9 @@ export default function ProductsContent() {
               ))}
             </div>
           ) : (
-            <div className="border border-warm-200 px-6 py-16 text-center">
-              <p className="text-sm font-light">{t.products.empty}</p>
-              <div className="mt-6">{clearBtn}</div>
+            <div className="border border-dashed border-warm-500 px-6 py-16 text-center">
+              <p className="text-sm font-light">{active > 0 ? t.products.empty : t.products.waiting}</p>
+              {active > 0 && <div className="mt-6">{clearBtn}</div>}
             </div>
           )}
         </div>
