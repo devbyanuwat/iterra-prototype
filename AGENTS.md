@@ -67,3 +67,5 @@ through the lead.
 - Hooks live in `.githooks/` and `npm install` turns them on. They block commits on `main`, secrets, the banned characters and protected files, and they block pushes to `main`.
 - Approval in chat does not get a protected file past the hook. A plan must name each task that changes a protected file, and that task ends with the files staged: the lead commits them with the override. An agent never sets the override.
 - Join commit and push with `&&`, never `;`. Never push after a commit failed.
+- Commit messages and pull request text carry no trace of an AI tool: no `Co-Authored-By` line for a tool, no "Generated with" line, no tool names. `.githooks/commit-msg` blocks them; check PR text with `sh .githooks/commit-msg <file>`.
+- To open a pull request, follow `.claude/skills/open-pr/SKILL.md`.
