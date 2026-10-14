@@ -2,8 +2,11 @@ import { fileURLToPath } from 'node:url';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // เลิก static export (2026-10-15): หลังบ้านต้องมี server และ DB
   trailingSlash: true,
+  // รูปอัปโหลดผ่าน Server Function ไม่เกิน 5 MB (MAX_IMAGE) บวกส่วนหัว multipart ราว 20 KB
+  // proxy.ts พักข้อมูลได้ 10 MB ตามค่าเริ่มต้น (proxyClientMaxBodySize) จึงไม่ต้องตั้งเพิ่ม
+  experimental: { serverActions: { bodySizeLimit: '6mb' } },
   images: { unoptimized: true },
   // ไม่ต้องให้ Next เขียน AGENTS.md / CLAUDE.md ทับในโปรเจกต์
   agentRules: false,

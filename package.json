@@ -11,19 +11,25 @@
     "check:filter": "node --no-warnings --experimental-strip-types scripts/check-filter.mjs",
     "check:artwork": "node scripts/check-artwork.mjs",
     "check:search": "node --no-warnings --experimental-strip-types scripts/check-search.mjs",
-    "check:room": "node --no-warnings --experimental-strip-types scripts/check-room.mjs"
+    "check:room": "node --no-warnings --experimental-strip-types scripts/check-room.mjs",
+    "db:migrate": "node --env-file-if-exists=.env scripts/db-migrate.mjs",
+    "db:seed": "node --no-warnings --experimental-strip-types --env-file-if-exists=.env db/seed.mjs",
+    "db:admin": "node --no-warnings --experimental-strip-types --env-file-if-exists=.env scripts/db-create-admin.mjs",
+    "check:db": "node --no-warnings --experimental-strip-types --env-file-if-exists=.env scripts/check-db.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
     "gsap": "^3.12.5",
     "lenis": "^1.1.14",
     "next": "^16.3.3",
+    "pg": "^8.23.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "three": "^0.170.0"
   },
   "devDependencies": {
     "@types/node": "^26.4.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "@types/three": "^0.170.0",
