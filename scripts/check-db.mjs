@@ -158,6 +158,9 @@ try {
   const elate = all.find((p) => p.slug === 'elate-13963t-c4');
   assert.equal(elate.brand, 'KOHLER');
   assert.ok(elate.specs.includes(': '), 'สเปกแปลงเป็นข้อความบรรทัดละข้อ');
+  // วันที่แก้ล่าสุดเป็นเวลาไทย: 20:00 UTC = 03:00 วันถัดไปที่กรุงเทพ
+  await c.query("update products set updated_at = '2026-10-14T20:00:00Z' where id = $1", [elate.id]);
+  assert.equal((await prod.listAdmin(c)).find((p) => p.id === elate.id).updated, '2026-10-15');
 
   const draft = {
     slug: '', category: 'sink', brandId: elate.brandId, material: 'stainless', series: 'Test',

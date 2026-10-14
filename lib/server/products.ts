@@ -31,7 +31,8 @@ const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 // รูปต้องเป็นไฟล์ในเว็บเอง: ของเดิมใน public/media หรือที่อัปโหลดใน /uploads
 const okImage = (s: unknown) => typeof s === 'string' && /^\/(media|uploads)\/[\w./-]+$/.test(s) && !s.includes('..');
 const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
-const SELECT = `select p.*, p.id::int as pid, p.brand_id::int as bid, b.name as brand_name
+const SELECT = `select p.*, p.id::int as pid, p.brand_id::int as bid, b.name as brand_name,
+                       to_char(p.updated_at at time zone 'Asia/Bangkok', 'YYYY-MM-DD') as updated_day
                   from products p join brands b on b.id = p.brand_id`;
 
 export function parseSpecs(text: string): { label: string; value: string }[] {
@@ -68,7 +69,7 @@ export async function listAdmin(db: Db): Promise<AdminProduct[]> {
     images: x.images,
     published: x.published,
     featured: x.featured,
-    updated: (x.updated_at as Date).toISOString().slice(0, 10),
+    updated: x.updated_day, // วันตามเวลาไทย ไม่ขึ้นกับ timezone ของ Node
   }));
 }
 
