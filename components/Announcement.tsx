@@ -32,7 +32,14 @@ export default function Announcement({ data: A }: { data: AnnouncementData | nul
       if (document.querySelector('dialog[open]')) return;
       ref.current?.showModal();
     }, 1000);
-    return () => clearTimeout(timer);
+    // ใช้ listener ของเบราว์เซอร์แทน onClose ของ React เพราะการปิดครั้งแรกหลัง hydrate onClose ไม่ทำงาน
+    const d = ref.current;
+    const seen = () => markSeen(A.id, store());
+    d?.addEventListener('close', seen);
+    return () => {
+      clearTimeout(timer);
+      d?.removeEventListener('close', seen);
+    };
     // ตั้งใจรันครั้งเดียวตอน mount ตามพฤติกรรมเดิม
   }, []);
 
@@ -44,7 +51,6 @@ export default function Announcement({ data: A }: { data: AnnouncementData | nul
       ref={ref}
       data-lenis-prevent
       aria-labelledby="announcement-title"
-      onClose={() => markSeen(A.id, store())}
       onClick={(e) => e.target === e.currentTarget && close()}
       className="w-[min(92vw,440px)] bg-paper p-0 text-ink backdrop:bg-ink/60"
     >
