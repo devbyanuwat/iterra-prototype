@@ -10,11 +10,13 @@ import TiltCard from './TiltCard';
 import Placeholder from './Placeholder';
 import FinishDots from './FinishDots';
 import { useLang } from './LangProvider';
+import { useCatalog } from './CatalogProvider';
 import { finishesFor } from '@/lib/finishes';
 import type { Product } from '@/lib/products';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { lang, t } = useLang();
+  const { catName } = useCatalog();
   const finishes = finishesFor(product);
   const [finishId, setFinishId] = useState(finishes[0].id);
   const tint = finishes.find((f) => f.id === finishId)?.tint || 'none';
@@ -36,7 +38,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </Link>
         <div className="px-1 pb-2 pt-4">
           <p className="text-[10px] uppercase tracking-widest2 text-warm-500">
-            {t.common.category[product.category]}
+            {catName(product.category, lang)}
           </p>
           <h3 className="mt-1.5 text-base font-light tracking-wide">
             <Link href={href} className="underline-offset-4 hover:underline focus-visible:underline">

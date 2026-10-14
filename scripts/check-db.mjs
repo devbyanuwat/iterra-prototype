@@ -193,6 +193,24 @@ try {
   await assert.rejects(prod.setPublished(c, id, true), /ไม่พบสินค้านี้/);
   assert.equal((await prod.listAdmin(c)).length, products.length);
 
+  // ── หน้าเว็บอ่าน DB (Task 8) ──
+  const pub = await prod.listPublished(c);
+  assert.deepEqual(pub.map((p) => p.slug).sort(), products.map((p) => p.slug).sort());
+  for (const seedP of products) {
+    const p = pub.find((x) => x.slug === seedP.slug);
+    assert.deepEqual(
+      [p.category, p.brand, p.series, p.material, p.name, p.desc, p.specs, p.price, p.images, p.scenes, !!p.featured],
+      [seedP.category, seedP.brand, seedP.series, seedP.material, seedP.name, seedP.desc, seedP.specs, seedP.price, seedP.images, seedP.scenes, !!seedP.featured],
+      `สินค้า ${seedP.slug} จาก DB ต้องตรงกับข้อมูลเดิม`,
+    );
+  }
+  // ซ่อนแล้วหายจากหน้าเว็บ ทั้งรายการและหน้ารายละเอียด
+  await c.query("update products set published = false where slug = 'elate-13963t-c4'");
+  assert.ok(!(await prod.listPublished(c)).some((p) => p.slug === 'elate-13963t-c4'));
+  assert.equal(await prod.getPublished(c, 'elate-13963t-c4'), null);
+  await c.query("update products set published = true where slug = 'elate-13963t-c4'");
+  assert.equal((await prod.getPublished(c, 'elate-13963t-c4')).name.en, products.find((p) => p.slug === 'elate-13963t-c4').name.en);
+  assert.equal(await prod.getPublished(c, 'no-such-product'), null);
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {
   c.release();

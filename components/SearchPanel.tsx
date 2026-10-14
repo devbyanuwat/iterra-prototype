@@ -8,17 +8,18 @@ import Link from 'next/link';
 import { useLang } from './LangProvider';
 import { buildIndex, search, GROUPS } from '@/lib/search';
 import { PAGES } from '@/lib/i18n';
-import { products } from '@/lib/products';
+import { useCatalog } from './CatalogProvider';
 import { posts } from '@/lib/posts';
 import { projects } from '@/lib/projects';
 
-const index = buildIndex({ products, posts, projects, pages: PAGES });
 
 export default function SearchPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { lang, t } = useLang();
   const ref = useRef<HTMLDialogElement>(null);
   const [query, setQuery] = useState('');
-  const results = useMemo(() => search(index, query), [query]);
+  const { products } = useCatalog();
+  const index = useMemo(() => buildIndex({ products, posts, projects, pages: PAGES }), [products]);
+  const results = useMemo(() => search(index, query), [index, query]);
 
   useEffect(() => {
     const d = ref.current;

@@ -1,6 +1,8 @@
 // สินค้า: เขียนจากหลังบ้าน (Task 6) และอ่านให้หน้าเว็บ (Task 8)
 // import แค่ type เพื่อให้ scripts/check-db.mjs รันไฟล์นี้ด้วย Node ได้ตรง ๆ
 
+import type { Product } from '../products';
+
 type Db = { query(text: string, values?: unknown[]): Promise<{ rows: any[]; rowCount: number | null }> };
 
 export class InputError extends Error {
@@ -129,4 +131,34 @@ export async function setPublished(db: Db, id: number, published: boolean): Prom
   if (!Number.isInteger(id)) throw new InputError('ไม่พบสินค้านี้ อาจถูกลบไปแล้ว');
   const r = await db.query('update products set published = $2, updated_at = now() where id = $1', [id, published === true]);
   if (r.rowCount === 0) throw new InputError('ไม่พบสินค้านี้ อาจถูกลบไปแล้ว');
+}
+
+// ── อ่านให้หน้าเว็บ (Task 8) · เฉพาะที่เผยแพร่ ──
+const ASK = { th: 'สอบถามราคา', en: 'Price on request' };
+
+function toProduct(r: any): Product {
+  return {
+    slug: r.slug,
+    category: r.category_key,
+    brand: r.brand_name,
+    series: r.series,
+    ...(r.material_key ? { material: r.material_key } : {}),
+    name: { th: r.name_th, en: r.name_en },
+    desc: { th: r.desc_th, en: r.desc_en },
+    specs: r.specs,
+    price: r.price_th ? { th: r.price_th, en: r.price_en ?? r.price_th } : ASK,
+    featured: r.featured,
+    images: r.images,
+    ...(r.scenes.length ? { scenes: r.scenes } : {}),
+  };
+}
+
+export async function listPublished(db: Db): Promise<Product[]> {
+  const r = await db.query(`${SELECT} where p.published order by p.sort, p.id`);
+  return r.rows.map(toProduct);
+}
+
+export async function getPublished(db: Db, slug: string): Promise<Product | null> {
+  const r = await db.query(`${SELECT} where p.published and p.slug = $1`, [slug]);
+  return r.rows[0] ? toProduct(r.rows[0]) : null;
 }

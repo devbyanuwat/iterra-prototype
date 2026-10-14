@@ -10,15 +10,17 @@ import ParallaxImage from './ParallaxImage';
 import ProductCard from './ProductCard';
 import FinishDots from './FinishDots';
 import { useLang } from './LangProvider';
-import { getProduct, relatedProducts } from '@/lib/products';
+import { relatedProducts } from '@/lib/products';
+import { useCatalog } from './CatalogProvider';
 import { finishesFor } from '@/lib/finishes';
 
 export default function ProductDetail({ slug }: { slug: string }) {
   const { lang, t } = useLang();
   const [finishId, setFinishId] = useState<string | null>(null);
-  const product = getProduct(slug);
+  const { products, catName } = useCatalog();
+  const product = products.find((p) => p.slug === slug);
   if (!product) return null;
-  const related = relatedProducts(slug);
+  const related = relatedProducts(products, slug);
   const finishes = finishesFor(product);
   const finish = finishes.find((f) => f.id === finishId) ?? finishes[0];
 
@@ -58,7 +60,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
           <div className="lg:sticky lg:top-28 lg:self-start">
             <Reveal>
               <p className="mb-3 text-[11px] uppercase tracking-widest2 text-warm-500">
-                {t.common.category[product.category]}
+                {catName(product.category, lang)}
               </p>
               <h1 className="text-3xl font-extralight leading-snug tracking-wide md:text-4xl">
                 {product.name[lang]}

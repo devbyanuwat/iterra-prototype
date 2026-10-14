@@ -1,11 +1,14 @@
 import type { MetadataRoute } from 'next';
-import { products } from '@/lib/products';
 import { posts } from '@/lib/posts';
 import { SITE_URL } from '@/lib/site';
+import { db } from '@/lib/db';
+import { listPublished } from '@/lib/server/products';
 
-export const dynamic = 'force-static';
+// สินค้ามาจาก DB จึงสร้างตอน request (เดิม force-static ตอน build)
+export const dynamic = 'force-dynamic';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const products = await listPublished(db);
   const now = new Date();
   const staticPages = ['', '/about/', '/products/', '/catalog/', '/articles/', '/projects/', '/contact/', '/privacy/'].map((p) => ({
     url: `${SITE_URL}${p}`,

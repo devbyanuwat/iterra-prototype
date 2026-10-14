@@ -9,33 +9,36 @@ import Link from 'next/link';
 import Reveal from './Reveal';
 import ProductCard from './ProductCard';
 import { useLang } from './LangProvider';
-import {
-  CATEGORIES,
-  SUB_FACETS,
-  facetOptions,
-  filterProducts,
-  products,
-  type Category,
-  type FacetKey,
-  type Picked,
-} from '@/lib/products';
+import { useCatalog } from './CatalogProvider';
+import { SUB_FACETS, facetOptions, filterProducts, type FacetKey, type Picked, type Product } from '@/lib/products';
 
 type Sort = 'featured' | 'name' | 'category';
-type Cat = Category | 'all';
+type Cat = string; // key ของหมวด หรือ 'all'
 const NONE: Picked = { category: [], series: [], material: [], brand: [] };
-const ORDER = CATEGORIES.map((c) => c.key as string);
-const count = (c: Category) => products.filter((p) => p.category === c).length;
 
-function Facets({ cat, picked, toggle }: { cat: Category; picked: Picked; toggle: (k: FacetKey, v: string) => void }) {
-  const { t } = useLang();
+function Facets({
+  products,
+  cat,
+  multiBrand,
+  picked,
+  toggle,
+}: {
+  products: Product[];
+  cat: string;
+  multiBrand: boolean;
+  picked: Picked;
+  toggle: (k: FacetKey, v: string) => void;
+}) {
+  const { lang, t } = useLang();
+  const { matName } = useCatalog();
   const title: Record<FacetKey, string> = {
     category: t.products.facetCategory,
     series: t.products.facetSeries,
     material: t.products.facetMaterial,
     brand: t.products.facetBrand,
   };
-  const label = (k: FacetKey, v: string) => (k === 'material' ? t.common.material[v] : v);
-  const groups = SUB_FACETS(cat)
+  const label = (k: FacetKey, v: string) => (k === 'material' ? matName(v, lang) : v);
+  const groups = SUB_FACETS(multiBrand)
     .map((k) => [k, facetOptions(products, cat, k)] as const)
     .filter(([, opts]) => opts.length > 0);
   if (groups.length === 0) return <p className="py-5 text-sm font-light text-stone-600">{t.products.waiting}</p>;
@@ -68,6 +71,10 @@ export default function ProductsContent() {
   const [cat, setCat] = useState<Cat>('all');
   const [picked, setPicked] = useState<Picked>(NONE);
   const [sort, setSort] = useState<Sort>('featured');
+  const { products, categories, catName } = useCatalog();
+  const ORDER = categories.map((c) => c.key);
+  const count = (c: string) => products.filter((p) => p.category === c).length;
+  const multiBrand = categories.find((c) => c.key === cat)?.multiBrand ?? false;
   const pickCat = (c: Cat) => {
     setCat(c);
     setPicked(NONE);
@@ -124,7 +131,7 @@ export default function ProductsContent() {
                     cat === c ? 'border-ink bg-ink text-paper' : 'border-warm-300 hover:border-ink'
                   }`}
                 >
-                  {t.common.category[c]}
+                  {c === 'all' ? t.common.category.all : catName(c, lang)}
                   <span className={cat === c ? 'text-warm-300' : 'text-stone-600'}>({n})</span>
                 </button>
               </li>
@@ -143,7 +150,7 @@ export default function ProductsContent() {
           {cat === 'all' ? (
             <p className="py-5 text-sm font-light text-stone-600">{t.products.pickCategory}</p>
           ) : (
-            <Facets cat={cat} picked={picked} toggle={toggle} />
+            <Facets products={products} cat={cat} multiBrand={multiBrand} picked={picked} toggle={toggle} />
           )}
         </aside>
 
@@ -161,7 +168,7 @@ export default function ProductsContent() {
               {cat === 'all' ? (
                 <p className="py-5 text-sm font-light text-stone-600">{t.products.pickCategory}</p>
               ) : (
-                <Facets cat={cat} picked={picked} toggle={toggle} />
+                <Facets products={products} cat={cat} multiBrand={multiBrand} picked={picked} toggle={toggle} />
               )}
               {active > 0 && <div className="mt-4">{clearBtn}</div>}
             </div>

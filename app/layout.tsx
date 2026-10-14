@@ -8,7 +8,15 @@ import FloatingActions from '@/components/FloatingActions';
 import Announcement from '@/components/Announcement';
 import CookieConsent from '@/components/CookieConsent';
 import JsonLd from '@/components/JsonLd';
+import { CatalogProvider } from '@/components/CatalogProvider';
+import { db } from '@/lib/db';
+import { listPublished } from '@/lib/server/products';
+import { listCategories, listMaterials } from '@/lib/server/taxonomy';
 import { CONTACT, SITE_NAME, SITE_TAGLINE_EN, SITE_TAGLINE_TH, SITE_URL } from '@/lib/site';
+
+// ทุกหน้าอ่าน DB ตอน request: หลังบ้านบันทึกแล้วหน้าเว็บเห็นทันที ไม่ต้อง revalidate และ next build ไม่ต้องต่อ DB
+// ponytail: ไม่มี cache ถ้าคนเข้าเยอะจน DB ช้า ค่อยใส่ unstable_cache พร้อม revalidateTag ตอนบันทึก
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -45,7 +53,8 @@ const organizationJsonLd = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const [products, categories, materials] = await Promise.all([listPublished(db), listCategories(db), listMaterials(db)]);
   return (
     <html lang="th">
       <head>
@@ -58,6 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <LangProvider>
+          <CatalogProvider value={{ products, categories, materials }}>
           <SmoothScroll />
           <Nav />
           <main>{children}</main>
@@ -65,6 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <FloatingActions />
           <Announcement />
           <CookieConsent />
+        </CatalogProvider>
         </LangProvider>
         <JsonLd data={organizationJsonLd} />
       </body>

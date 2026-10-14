@@ -12,7 +12,7 @@ import ParallaxImage from '@/components/ParallaxImage';
 import ProductCard from '@/components/ProductCard';
 import Placeholder from '@/components/Placeholder';
 import { useLang } from '@/components/LangProvider';
-import { featuredProducts } from '@/lib/products';
+import { useCatalog } from '@/components/CatalogProvider';
 import { posts } from '@/lib/posts';
 
 // ภาพเรื่องราวจากแคตตาล็อก KOHLER Kitchens 2026 (ลำดับตรงกับ t.home.storySlides) · scripts/build-media.sh scenes
@@ -61,7 +61,8 @@ function StoryRows() {
 // reveal หัวข้อ ใบหลัก แล้วรายการทีละแถว (เหตุผล: ลำดับความสำคัญ สินค้าหลักมาก่อน) · รูปย่อขยายตอน hover (เหตุผล: บอกว่าแถวนี้กดได้)
 function FeaturedProducts() {
   const { lang, t } = useLang();
-  const [lead, ...rest] = featuredProducts;
+  const [lead, ...rest] = useCatalog().products.filter((p) => p.featured);
+  if (!lead) return null;
   return (
     <section className="border-t border-warm-200 px-6 py-24 md:px-[8vw] md:py-32">
       <Reveal className="mb-14 flex items-end justify-between gap-6">
