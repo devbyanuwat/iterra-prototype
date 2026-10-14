@@ -9,6 +9,7 @@ import { posts } from '../lib/posts.ts';
 import { projects } from '../lib/projects.ts';
 import { ANNOUNCEMENT } from '../lib/announcement.ts';
 import * as tax from '../lib/server/taxonomy.ts';
+import { imageExt, newName, resolveInside } from '../lib/server/uploads.ts';
 import { login, logout, sessionUser, sha256, upsertAdmin, verifyPassword } from '../lib/server/auth.ts';
 
 const url = process.env.TEST_DATABASE_URL ?? 'postgres://localhost:5433/iterra_test';
@@ -124,6 +125,23 @@ try {
   await tax.saveMaterial(c, { key: 'quartz', th: 'ควอตซ์', en: 'Quartz' }, true);
   await tax.deleteMaterial(c, 'quartz');
   await assert.rejects(tax.deleteMaterial(c, 'stainless'), (e) => e.code === '23503');
+
+  // ── อัปโหลด (Task 5) ──
+  const bytes = (...xs) => new Uint8Array([...xs, ...new Array(16).fill(0)]);
+  const ascii = (s) => new Uint8Array([...Buffer.from(s), ...new Array(16).fill(0)]);
+  assert.equal(imageExt(bytes(0xff, 0xd8, 0xff, 0xe0)), 'jpg');
+  assert.equal(imageExt(bytes(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)), 'png');
+  assert.equal(imageExt(ascii('RIFF\0\0\0\0WEBPVP8 ')), 'webp');
+  // ชื่อไฟล์ .jpg แต่ข้างในเป็น SVG หรือ HTML ต้องไม่ผ่าน
+  assert.equal(imageExt(ascii('<svg xmlns="http://www.w3.org/2000/svg">')), null);
+  assert.equal(imageExt(ascii('<!doctype html><script>')), null);
+  assert.equal(imageExt(new Uint8Array(0)), null);
+  assert.match(newName('webp', new Date(2026, 9, 15)), /^2026\/10\/[0-9a-f]{24}\.webp$/);
+  assert.equal(resolveInside('/srv/up', ['2026', '10', 'a.webp']), '/srv/up/2026/10/a.webp');
+  assert.equal(resolveInside('/srv/up', ['..', 'etc', 'passwd']), null);
+  assert.equal(resolveInside('/srv/up', ['2026', '..', '..', 'x']), null);
+  assert.equal(resolveInside('/srv/up', ['..', 'up-evil', 'x']), null);
+  assert.equal(resolveInside('/srv/up', []), null);
 
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {
