@@ -21,6 +21,7 @@ const MENU: MenuItem[] = [
   { href: '/admin/products/', label: 'สินค้า', icon: 'box', bar: true },
   { href: '/admin/articles/', label: 'บทความ', icon: 'doc', bar: true },
   { href: '/admin/projects/', label: 'ผลงาน', icon: 'house', bar: true },
+  { href: '/admin/inquiries/', label: 'ข้อความติดต่อ', icon: 'mail', bar: true },
   { href: '/admin/categories/', label: 'หมวด แบรนด์ วัสดุ', icon: 'tag' },
   { href: '/admin/announcement/', label: 'ประกาศ', icon: 'megaphone' },
   { href: '/admin/catalog/', label: 'แคตตาล็อก', icon: 'book' },

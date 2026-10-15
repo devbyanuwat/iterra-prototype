@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import sharp from 'sharp';
 import { migrate } from './db-migrate.mjs';
+import * as inq from '../lib/server/inquiries.ts';
 import { readFileSync } from 'node:fs';
 import { CATALOG } from '../lib/catalog.ts';
 import * as cat from '../lib/server/catalog.ts';
@@ -499,6 +500,50 @@ try {
     // กลับเป็นไฟล์เดิม: ภาพรายหน้ากลับมา
     await cat.saveCatalog(c, CATALOG.pdf, 49, 18);
     assert.equal((await info()).images, true);
+  }
+  // ── ฟอร์มติดต่อ (แผน 2 Task 5) ──
+  {
+    const ok = { name: 'คุณทดสอบ', email: 'buyer@example.test', message: 'สนใจซิงก์ 90 ซม.', website: '' };
+    assert.equal(await inq.submitInquiry(c, ok, 'ip-q'), null);
+    assert.deepEqual(
+      (await c.query('select name, email, message, ip_hash, emailed_at, handled_at from inquiries order by id desc limit 1')).rows[0],
+      { name: 'คุณทดสอบ', email: 'buyer@example.test', message: 'สนใจซิงก์ 90 ซม.', ip_hash: 'ip-q', emailed_at: null, handled_at: null },
+    );
+    // ช่องบนหน้าเว็บคือ อีเมลหรือเบอร์โทร: เบอร์โทรผ่าน
+    assert.equal(await inq.submitInquiry(c, { ...ok, email: '081-234 5678' }, 'ip-q2'), null);
+    assert.equal(await inq.submitInquiry(c, { ...ok, email: '+66 81 234 5678' }, 'ip-q2'), null);
+    const stored = await count('inquiries');
+    // ช่องดักบอทมีค่า: ตอบเหมือนสำเร็จ แต่ไม่เก็บ
+    assert.equal(await inq.submitInquiry(c, { ...ok, website: 'http://spam.example' }, 'ip-q3'), null);
+    // ข้อมูลผิด: ได้รหัสข้อผิด และไม่เก็บ
+    assert.equal(await inq.submitInquiry(c, { ...ok, name: '  ' }, 'ip-q3'), 'name');
+    assert.equal(await inq.submitInquiry(c, { ...ok, name: 'ก'.repeat(101) }, 'ip-q3'), 'name');
+    assert.equal(await inq.submitInquiry(c, { ...ok, email: 'not-an-email' }, 'ip-q3'), 'email');
+    assert.equal(await inq.submitInquiry(c, { ...ok, email: '12345' }, 'ip-q3'), 'email');
+    assert.equal(await inq.submitInquiry(c, { ...ok, email: '' }, 'ip-q3'), 'email');
+    assert.equal(await inq.submitInquiry(c, { ...ok, message: '' }, 'ip-q3'), 'message');
+    assert.equal(await inq.submitInquiry(c, { ...ok, message: 'ก'.repeat(2001) }, 'ip-q3'), 'message');
+    assert.equal(await inq.submitInquiry(c, { ...ok, name: '<b>x</b>' }, 'ip-q3'), 'chars');
+    assert.equal(await inq.submitInquiry(c, { ...ok, message: 'hi <script>alert(1)</script>' }, 'ip-q3'), 'chars');
+    assert.equal(await inq.submitInquiry(c, { name: 1, email: null, message: {} }, 'ip-q3'), 'name');
+    assert.equal(await count('inquiries'), stored);
+    // 3 ข้อความต่อ IP ใน 10 นาที · IP อื่นยังส่งได้ · พ้น 10 นาทีส่งได้อีก
+    for (let i = 0; i < 3; i++) assert.equal(await inq.submitInquiry(c, ok, 'ip-r'), null);
+    assert.equal(await inq.submitInquiry(c, ok, 'ip-r'), 'limit');
+    assert.equal(await inq.submitInquiry(c, ok, 'ip-s'), null);
+    await c.query("update inquiries set created_at = now() - interval '11 minutes' where ip_hash = 'ip-r'");
+    assert.equal(await inq.submitInquiry(c, ok, 'ip-r'), null);
+    // กล่องข้อความหลังบ้าน: ใหม่สุดก่อน ไม่ส่ง ip_hash ไปหน้าจอ · ทำเครื่องหมายจัดการแล้ว
+    const list = await inq.listInquiries(c);
+    assert.equal(list.length, await count('inquiries'));
+    assert.deepEqual(Object.keys(list[0]).sort(), ['created', 'email', 'handled', 'id', 'message', 'name']);
+    assert.ok(list.every((x, i) => i === 0 || list[i - 1].created >= x.created), 'ใหม่สุดก่อน');
+    assert.equal(list[0].handled, false);
+    await inq.markHandled(c, list[0].id);
+    assert.equal((await inq.listInquiries(c)).find((x) => x.id === list[0].id).handled, true);
+    await inq.markHandled(c, list[0].id);
+    await assert.rejects(inq.markHandled(c, 999999), /ไม่พบข้อความนี้/);
+    await assert.rejects(inq.markHandled(c, 'x'), /ไม่พบข้อความนี้/);
   }
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {
