@@ -168,6 +168,8 @@ export const dict = {
       close: 'ปิด',
       prev: 'หน้าก่อน',
       next: 'หน้าถัดไป',
+      openPdf: 'เปิดดู PDF',
+      noPreview: 'ฉบับนี้ยังไม่มีภาพตัวอย่างรายหน้า เปิดดูจากไฟล์ PDF ได้เลย',
     },
     contact: {
       title: 'ติดต่อเรา',
@@ -348,6 +350,8 @@ export const dict = {
       close: 'Close',
       prev: 'Previous page',
       next: 'Next page',
+      openPdf: 'Open the PDF',
+      noPreview: 'This edition has no page previews yet. Open the PDF to read it.',
     },
     contact: {
       title: 'Contact Us',

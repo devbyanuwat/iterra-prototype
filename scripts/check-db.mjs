@@ -4,6 +4,9 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import sharp from 'sharp';
 import { migrate } from './db-migrate.mjs';
+import { readFileSync } from 'node:fs';
+import { CATALOG } from '../lib/catalog.ts';
+import * as cat from '../lib/server/catalog.ts';
 import * as proj from '../lib/server/projects.ts';
 import * as post from '../lib/server/posts.ts';
 import { audit } from '../lib/server/audit.ts';
@@ -455,6 +458,47 @@ try {
     assert.equal(await count(`products where id = ${ids[1]}`), 1);
     await assert.rejects(proj.saveProject(c, id, draft), /ไม่พบผลงานนี้/);
     await assert.rejects(proj.setProjectPublished(c, id, true), /ไม่พบผลงานนี้/);
+  }
+  // ── แคตตาล็อก PDF (แผน 2 Task 4) ──
+  {
+    const pdf = (s) => new Uint8Array(Buffer.from(s, 'latin1'));
+    const two = pdf(
+      '%PDF-1.4\n1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n2 0 obj << /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >> endobj\n' +
+        '3 0 obj << /Type /Page /Parent 2 0 R >> endobj\n4 0 obj << /Type/Page/Parent 2 0 R >> endobj\n%%EOF\n',
+    );
+    assert.equal(cat.isPdf(two), true);
+    assert.equal(cat.pdfPageCount(two), 2);
+    // ไฟล์จริงที่หน้าเว็บใช้อยู่: 49 หน้า 18 MB (ปัดขึ้นแบบ du -m)
+    const real = new Uint8Array(readFileSync('public/media/catalog/kohler-kitchens-2026.pdf'));
+    assert.equal(cat.pdfPageCount(real), CATALOG.pages);
+    assert.equal(cat.pdfSizeMb(real.length), CATALOG.pdfSizeMB);
+    assert.equal(cat.pdfSizeMb(1), 1);
+    // ชื่อ .pdf แต่ข้างในเป็นอย่างอื่น
+    assert.equal(cat.isPdf(pdf('<!doctype html><script>alert(1)</script>')), false);
+    assert.equal(cat.isPdf(pdf(' %PDF-1.4')), false);
+    assert.equal(cat.isPdf(new Uint8Array(0)), false);
+    // หาโครงหน้าไม่เจอ = 0 (ไม่ทราบ หน้าเว็บไม่แสดงจำนวนหน้า)
+    assert.equal(cat.pdfPageCount(pdf('%PDF-1.7\n%%EOF\n')), 0);
+    assert.equal(cat.MAX_PDF, 30 * 1024 * 1024);
+    assert.equal(cat.BUILT_PDF, CATALOG.pdf, 'ภาพรายหน้าใน public/media/catalog สร้างจากไฟล์นี้');
+    const info = async () => {
+      const { updated: _u, ...x } = await cat.getCatalog(c);
+      return x;
+    };
+    // seed: ไฟล์เดิม มีภาพรายหน้า
+    assert.deepEqual(await info(), { pdf: CATALOG.pdf, pages: 49, sizeMb: 18, images: true });
+    // เปลี่ยนไฟล์แล้ว ภาพรายหน้าชุดเดิมต้องไม่แสดง
+    await cat.saveCatalog(c, '/uploads/2026/10/abc.pdf', 12, 3);
+    assert.deepEqual(await info(), { pdf: '/uploads/2026/10/abc.pdf', pages: 12, sizeMb: 3, images: false });
+    for (const bad of ['/etc/passwd', 'https://evil.example/x.pdf', '/uploads/../x.pdf', '/uploads/2026/10/a.webp', 'javascript:alert(1)']) {
+      await assert.rejects(cat.saveCatalog(c, bad, 1, 1), { name: 'InputError' }, bad);
+    }
+    await assert.rejects(cat.saveCatalog(c, '/uploads/a.pdf', -1, 1), { name: 'InputError' });
+    await assert.rejects(cat.saveCatalog(c, '/uploads/a.pdf', 1, 0), { name: 'InputError' });
+    assert.equal((await info()).pdf, '/uploads/2026/10/abc.pdf', 'ข้อมูลผิดไม่แตะแถวเดิม');
+    // กลับเป็นไฟล์เดิม: ภาพรายหน้ากลับมา
+    await cat.saveCatalog(c, CATALOG.pdf, 49, 18);
+    assert.equal((await info()).images, true);
   }
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {

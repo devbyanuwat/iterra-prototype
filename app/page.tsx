@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import HomeContent from '@/components/home/HomeContent';
 import { SITE_TAGLINE_TH, SITE_TAGLINE_EN } from '@/lib/site';
+import { db } from '@/lib/db';
+import { getCatalog } from '@/lib/server/catalog';
 
 export const metadata: Metadata = {
   title: `ITERRA — ${SITE_TAGLINE_TH} | ${SITE_TAGLINE_EN}`,
@@ -9,6 +11,6 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
 };
 
-export default function HomePage() {
-  return <HomeContent />;
+export default async function HomePage() {
+  return <HomeContent catalog={await getCatalog(db)} />;
 }

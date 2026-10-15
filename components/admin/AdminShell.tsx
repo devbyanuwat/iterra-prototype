@@ -23,6 +23,7 @@ const MENU: MenuItem[] = [
   { href: '/admin/projects/', label: 'ผลงาน', icon: 'house', bar: true },
   { href: '/admin/categories/', label: 'หมวด แบรนด์ วัสดุ', icon: 'tag' },
   { href: '/admin/announcement/', label: 'ประกาศ', icon: 'megaphone' },
+  { href: '/admin/catalog/', label: 'แคตตาล็อก', icon: 'book' },
 ];
 const MORE_LABEL = 'อื่น ๆ: เมนูที่เหลือ ความทึบกระจก เปิดหน้าเว็บ ออกจากระบบ';
 
