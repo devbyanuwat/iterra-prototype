@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import sharp from 'sharp';
 import { migrate } from './db-migrate.mjs';
+import { prune } from './db-prune.mjs';
 import * as slog from '../lib/server/search-log.ts';
 import * as inq from '../lib/server/inquiries.ts';
 import { readFileSync } from 'node:fs';
@@ -610,6 +611,40 @@ try {
     assert.equal(await slog.logSearch(c, 'brand new', false, 1, 2), false, 'มี 2 คำแล้ว = เต็มเพดาน 2');
     assert.equal(await slog.logSearch(c, 'elate', false, 1, 2), true);
     assert.equal((await row('elate')).searches, 3);
+  }
+  // ── ล้างข้อมูลเก่า (แผน 2 Task 7) ──
+  {
+    const uid = (await c.query("select id::int as id from admin_users where email = 'admin@example.test'")).rows[0].id;
+    await c.query(
+      "insert into login_attempts (ip_hash, at) values ('prune-old', now() - interval '91 days'), ('prune-new', now() - interval '89 days')",
+    );
+    await c.query(
+      `insert into sessions (token_hash, user_id, expires_at, last_seen_at) values
+         ('prune-expired', $1, now() - interval '1 second', now()),
+         ('prune-idle', $1, now() + interval '1 day', now() - interval '121 minutes'),
+         ('prune-live', $1, now() + interval '1 day', now())`,
+      [uid],
+    );
+    await c.query(
+      `insert into audit_log (at, action, entity) values
+         (now() - interval '366 days', 'prune-old', 'test'), (now() - interval '364 days', 'prune-new', 'test')`,
+    );
+    await c.query(
+      "insert into search_queries (day, query, searches) values (current_date - 401, 'prune-old', 1), (current_date - 399, 'prune-new', 1)",
+    );
+    await c.query(
+      "insert into inquiries (name, email, message, ip_hash, created_at) values ('เก่า', 'old@example.test', 'เก่ามาก', 'prune', now() - interval '1000 days')",
+    );
+    const r = await prune(c, 120);
+    assert.ok(r.loginAttempts >= 1 && r.sessions >= 2 && r.audit >= 1 && r.searches >= 1, JSON.stringify(r));
+    const left = async (sql) => (await c.query(sql)).rows.map((x) => Object.values(x)[0]).sort();
+    assert.deepEqual(await left("select ip_hash from login_attempts where ip_hash like 'prune-%'"), ['prune-new']);
+    assert.deepEqual(await left("select token_hash from sessions where token_hash like 'prune-%'"), ['prune-live']);
+    assert.deepEqual(await left("select action from audit_log where action like 'prune-%'"), ['prune-new']);
+    assert.deepEqual(await left("select query from search_queries where query like 'prune-%'"), ['prune-new']);
+    assert.equal(await count("inquiries where ip_hash = 'prune'"), 1, 'ข้อความติดต่อไม่ลบ รอฝ่ายกฎหมาย');
+    // รันซ้ำทันที ไม่มีอะไรให้ลบ
+    assert.deepEqual(await prune(c, 120), { loginAttempts: 0, sessions: 0, audit: 0, searches: 0 });
   }
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {
