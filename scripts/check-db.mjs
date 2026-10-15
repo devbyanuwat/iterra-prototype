@@ -69,8 +69,8 @@ try {
   assert.equal((await sessionUser(c, s1.token))?.email, 'admin@example.test');
   assert.equal(await sessionUser(c, 'not-a-token'), null);
   assert.equal(await sessionUser(c, undefined), null);
-  // ผิด 10 ครั้งจาก IP เดียว: ครั้งต่อไปรหัสถูกก็ไม่ผ่าน · IP อื่นยังเข้าได้
-  for (let i = 0; i < 10; i++) assert.deepEqual(await login(c, 'admin@example.test', 'wrong', 'ip-b', 14), { error: 'invalid' });
+  // ผิด 5 ครั้งจาก IP เดียว: ครั้งต่อไปรหัสถูกก็ไม่ผ่าน · IP อื่นยังเข้าได้
+  for (let i = 0; i < 5; i++) assert.deepEqual(await login(c, 'admin@example.test', 'wrong', 'ip-b', 14), { error: 'invalid' });
   assert.deepEqual(await login(c, 'admin@example.test', pw, 'ip-b', 14), { error: 'locked' });
   assert.ok('token' in (await login(c, 'admin@example.test', pw, 'ip-c', 14)));
   // หมดอายุ

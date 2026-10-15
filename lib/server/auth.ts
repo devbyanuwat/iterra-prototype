@@ -6,7 +6,7 @@ type Db = { query(text: string, values?: unknown[]): Promise<{ rows: any[]; rowC
 export type Admin = { id: number; email: string; name: string };
 
 export const SESSION_COOKIE = 'iterra_session';
-const MAX_ATTEMPTS = 10;
+const MAX_ATTEMPTS = 5;
 const WINDOW_MIN = 15;
 
 const scryptAsync = (pw: string, salt: Buffer, len: number) =>
