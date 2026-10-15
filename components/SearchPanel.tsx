@@ -2,7 +2,7 @@
 
 // แผงค้นหาเต็มจอ: <dialog> แบบ modal (เบราว์เซอร์จัดการ focus, Escape และชั้นบนสุดให้)
 // data-lenis-prevent: ไม่ให้ Lenis เลื่อนหน้าข้างหลังตอนเลื่อนผลค้นหา
-// สถิติคำค้น: นับครั้งเดียวต่อการเปิดแผง ตอนกดผล หรือตอนปิดแผงโดยไม่กด · ส่งแล้วไม่รอผล ค้นหาทำในเบราว์เซอร์จึงใช้ได้แม้ DB ล่ม
+// สถิติคำค้น: นับครั้งเดียวต่อการเปิดแผง ตอนกดผล หรือตอนปิดแผงโดยไม่กด (ตอนปิดใช้คำล่าสุดที่ไม่ว่าง เพราะ Escape ในช่องค้นหาล้างข้อความก่อน) · ส่งแล้วไม่รอผล ค้นหาทำในเบราว์เซอร์จึงใช้ได้แม้ DB ล่ม
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -20,12 +20,18 @@ export default function SearchPanel({ open, onClose }: { open: boolean; onClose:
   const index = useMemo(() => buildIndex({ products, posts, projects, pages: PAGES }), [products, posts, projects]);
   const results = useMemo(() => search(index, query), [index, query]);
   const logged = useRef(false);
+  const last = useRef({ q: '', n: 0 });
+
+  // จำคำล่าสุดที่ไม่ว่างพร้อมจำนวนผล: Escape ในช่องค้นหาล้างข้อความก่อนแผงปิด ตอนปิดจึงใช้คำนี้แทนช่องที่ว่างแล้ว
+  useEffect(() => {
+    if (query.trim()) last.current = { q: query, n: results.length };
+  }, [query, results]);
 
   // ปิดแผงทุกทาง (Escape ปุ่มปิด กดผล) วิ่งผ่าน onClose ของ dialog · กดผลนับก่อนแล้ว ตอนปิดจึงไม่นับซ้ำ
-  const report = (clicked: boolean) => {
-    if (logged.current || query.trim() === '') return;
+  const report = (clicked: boolean, q: string, n: number) => {
+    if (logged.current || q.trim() === '') return;
     logged.current = true;
-    logSearchAction(query, clicked, results.length).catch(() => {});
+    logSearchAction(q, clicked, n).catch(() => {});
   };
 
   useEffect(() => {
@@ -34,6 +40,7 @@ export default function SearchPanel({ open, onClose }: { open: boolean; onClose:
     if (open && !d.open) {
       setQuery('');
       logged.current = false;
+      last.current = { q: '', n: 0 };
       d.showModal();
     } else if (!open && d.open) d.close();
   }, [open]);
@@ -43,7 +50,7 @@ export default function SearchPanel({ open, onClose }: { open: boolean; onClose:
       ref={ref}
       data-lenis-prevent
       onClose={() => {
-        report(false);
+        report(false, last.current.q, last.current.n);
         onClose();
       }}
       aria-label={t.search.open}
@@ -77,7 +84,7 @@ export default function SearchPanel({ open, onClose }: { open: boolean; onClose:
                     <Link
                       href={e.href}
                       onClick={() => {
-                        report(true);
+                        report(true, query, results.length);
                         onClose();
                       }}
                       className="flex min-h-11 items-center border-b border-paper/10 py-2 text-lg font-extralight tracking-wide hover:text-paper/70 focus-visible:outline focus-visible:outline-1 focus-visible:outline-paper"

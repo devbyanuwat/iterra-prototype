@@ -10,9 +10,11 @@ export const MAX_DAILY_QUERIES = 5000;
 export function normalizeQuery(q: unknown): string | null {
   if (typeof q !== 'string') return null;
   const s = q.toLowerCase().trim().replace(/\s+/g, ' ');
-  if (s.length < 2 || /[<>]/.test(s)) return null;
-  // ดูเหมือนอีเมล หรือมีตัวเลขติดกันตั้งแต่ 8 หลัก (เบอร์โทร เลขบัตร เลขบัญชี) ไม่เก็บ · ตัดช่องว่างกับ - ก่อนนับ เบอร์ที่เว้นวรรคก็โดน
-  if (/\S@\S/.test(s) || /[0-9๐-๙]{8,}/.test(s.replace(/[\s-]/g, ''))) return null;
+  if (s.length < 2) return null;
+  // ตรวจบนรูป NFKC ที่ตัดทุกอย่างยกเว้นตัวอักษรกับตัวเลขออก: จุด ทับ วงเล็บ อักขระเต็มความกว้าง และช่องว่างความกว้างศูนย์ จึงซ่อนเบอร์โทรหรืออีเมลไม่ได้
+  // มี @ < > หรือตัวเลขติดกันตั้งแต่ 8 หลัก (เบอร์โทร เลขบัตร เลขบัญชี) ไม่เก็บ · คำที่เก็บคือคำเดิม s ไม่ใช่ k เพราะ NFKC เปลี่ยนสระอำของไทย
+  const k = s.normalize('NFKC');
+  if (/[@<>]/.test(k) || /[0-9๐-๙]{8,}/.test(k.replace(/[^\p{L}\p{N}]/gu, ''))) return null;
   return s.slice(0, 60).trim();
 }
 

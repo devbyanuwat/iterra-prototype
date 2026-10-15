@@ -575,6 +575,19 @@ try {
     assert.equal(N('081-234-5678'), null);
     assert.equal(N('๐๘๑๒๓๔๕๖๗๘'), null);
     assert.equal(N('<script>'), null);
+    // รูปแบบที่เคยหลุด: วงเล็บ จุด ทับ ช่องว่างรอบ @ @ เต็มความกว้าง เลขเต็มความกว้าง ช่องว่างความกว้างศูนย์
+    assert.equal(N('(02) 123-4567'), null);
+    assert.equal(N('081.234.5678'), null);
+    assert.equal(N('081/234/5678'), null);
+    assert.equal(N('4111.1111.1111.1111'), null);
+    assert.equal(N('me @ example.com'), null);
+    assert.equal(N('me@ gmail.com'), null);
+    assert.equal(N('me\uFF20example.com'), null);
+    assert.equal(N('\uFF10\uFF18\uFF11\uFF12\uFF13\uFF14\uFF15\uFF16\uFF17\uFF18'), null);
+    assert.equal(N('081\u200B2345678'), null);
+    // ต้องยังเก็บ: ที่เก็บคือคำเดิม ไม่ใช่รูป NFKC (NFKC เปลี่ยนสระอำ)
+    assert.equal(N('สมชาย 0812345'), 'สมชาย 0812345');
+    assert.equal(N('น้ำ'), 'น้ำ');
 
     const day = (await c.query("select (now() at time zone 'Asia/Bangkok')::date::text as d")).rows[0].d;
     const row = async (q) =>
