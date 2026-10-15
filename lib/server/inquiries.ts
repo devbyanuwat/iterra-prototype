@@ -25,6 +25,8 @@ const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
 
 // คืน null = รับแล้ว (หรือเป็นบอทที่ตอบเหมือนรับ) · คืนรหัส = ไม่เก็บ
 export async function submitInquiry(db: Db, input: InquiryInput, ipHash: string): Promise<InquiryError | null> {
+  // เรียกมือด้วยค่าว่างหรือไม่ใช่ object: ตอบเป็นข้อมูลผิด ไม่ใช่ error ของ server
+  if (!input || typeof input !== 'object') return 'name';
   // บอทกรอกช่องที่คนมองไม่เห็น: ตอบเหมือนสำเร็จ ไม่บอกว่าโดนจับ และไม่เก็บ
   if (str(input.website)) return null;
   const name = str(input.name);
@@ -35,7 +37,9 @@ export async function submitInquiry(db: Db, input: InquiryInput, ipHash: string)
   const phone = PHONE.test(email) && digits(email) >= 9 && digits(email) <= 15;
   if (email.length > 200 || !(EMAIL.test(email) || phone)) return 'email';
   if (!message || message.length > 2000) return 'message';
-  // ponytail: นับแล้วค่อยเขียน คำขอที่มาพร้อมกันหลายอันอาจเกิน 3 ได้เล็กน้อย พอสำหรับกันสแปมรายเครื่อง
+  // ล็อกรายค่า ip hash ให้คำขอที่มาพร้อมกันจาก IP เดียวต่อคิวกัน การนับจึงเชื่อถือได้
+  // ล็อกนี้ใช้ได้เฉพาะใน transaction (ปล่อยเมื่อ commit) ตัว action เรียกผ่าน inTx
+  await db.query('select pg_advisory_xact_lock(hashtext($1))', [ipHash]);
   const n = await db.query(
     'select count(*)::int as n from inquiries where ip_hash = $1 and created_at > now() - make_interval(mins => $2)',
     [ipHash, WINDOW_MIN],

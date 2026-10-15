@@ -63,7 +63,7 @@ export default function ContactContent() {
         <div className="mt-16 grid gap-16 lg:grid-cols-2 lg:gap-[6vw]">
           {/* ฟอร์ม */}
           <Reveal>
-            <form onSubmit={handleSubmit} noValidate className="relative space-y-7">
+            <form method="post" onSubmit={handleSubmit} noValidate className="relative space-y-7">
               <div>
                 <label htmlFor="name" className={caption}>
                   {t.contact.name}

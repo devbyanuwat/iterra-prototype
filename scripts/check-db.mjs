@@ -526,10 +526,13 @@ try {
     assert.equal(await inq.submitInquiry(c, { ...ok, name: '<b>x</b>' }, 'ip-q3'), 'chars');
     assert.equal(await inq.submitInquiry(c, { ...ok, message: 'hi <script>alert(1)</script>' }, 'ip-q3'), 'chars');
     assert.equal(await inq.submitInquiry(c, { name: 1, email: null, message: {} }, 'ip-q3'), 'name');
+    assert.equal(await inq.submitInquiry(c, null, 'ip-q3'), 'name');
     assert.equal(await count('inquiries'), stored);
     // 3 ข้อความต่อ IP ใน 10 นาที · IP อื่นยังส่งได้ · พ้น 10 นาทีส่งได้อีก
     for (let i = 0; i < 3; i++) assert.equal(await inq.submitInquiry(c, ok, 'ip-r'), null);
+    const beforeLimit = await count('inquiries');
     assert.equal(await inq.submitInquiry(c, ok, 'ip-r'), 'limit');
+    assert.equal(await count('inquiries'), beforeLimit, 'ถูกปฏิเสธแล้วไม่เก็บ');
     assert.equal(await inq.submitInquiry(c, ok, 'ip-s'), null);
     await c.query("update inquiries set created_at = now() - interval '11 minutes' where ip_hash = 'ip-r'");
     assert.equal(await inq.submitInquiry(c, ok, 'ip-r'), null);
@@ -537,7 +540,12 @@ try {
     const list = await inq.listInquiries(c);
     assert.equal(list.length, await count('inquiries'));
     assert.deepEqual(Object.keys(list[0]).sort(), ['created', 'email', 'handled', 'id', 'message', 'name']);
-    assert.ok(list.every((x, i) => i === 0 || list[i - 1].created >= x.created), 'ใหม่สุดก่อน');
+    // แถวที่ย้อนเวลาไปแล้ว (ip-r รอบแรก) ต้องอยู่ท้าย · ที่เหลือเรียง id มากไปน้อย (created มีความละเอียดระดับนาที จึงเทียบ id)
+    const oldIds = (await c.query("select id::int as id from inquiries where created_at < now() - interval '5 minutes' order by id desc")).rows.map((r) => r.id);
+    assert.equal(oldIds.length, 3);
+    assert.deepEqual(list.slice(-3).map((x) => x.id), oldIds, 'แถวเก่าอยู่ท้าย');
+    const fresh = list.slice(0, -3);
+    assert.ok(fresh.every((x, i) => i === 0 || fresh[i - 1].id > x.id), 'ใหม่สุดก่อน');
     assert.equal(list[0].handled, false);
     await inq.markHandled(c, list[0].id);
     assert.equal((await inq.listInquiries(c)).find((x) => x.id === list[0].id).handled, true);
