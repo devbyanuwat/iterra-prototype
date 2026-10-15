@@ -30,7 +30,12 @@ export type AnnouncementInput = {
   resetSeen: boolean;
 };
 
-const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
+// < และ > ไม่มีเหตุให้ใช้ในข้อความหลังบ้าน ปฏิเสธไว้ก่อน เผื่อวันหน้ามีที่ไหนเผลอแสดงเป็น HTML
+const str = (v: unknown) => {
+  const s = typeof v === 'string' ? v.trim() : '';
+  if (/[<>]/.test(s)) throw new InputError('ห้ามใช้เครื่องหมาย < หรือ >');
+  return s;
+};
 
 export async function getAnnouncement(db: Db): Promise<AnnouncementData | null> {
   const a = (await db.query('select * from announcement where id = 1')).rows[0];
@@ -52,7 +57,8 @@ export async function saveAnnouncement(db: Db, input: AnnouncementInput): Promis
   const href = str(input.href);
   const ctaTh = str(input.ctaTh);
   // ลิงก์ในเว็บเอง หรือ https เท่านั้น กัน javascript: และ data:
-  if (href && !/^(\/(?!\/)\S*|https:\/\/\S+)$/.test(href)) throw new InputError('ลิงก์ต้องขึ้นต้นด้วย / หรือ https://');
+  // \ ห้ามด้วย เพราะเบราว์เซอร์อ่าน /\evil.com เป็น //evil.com
+  if (href && (!/^(\/(?!\/)\S*|https:\/\/\S+)$/.test(href) || href.includes('\\'))) throw new InputError('ลิงก์ต้องขึ้นต้นด้วย / หรือ https://');
   if (href && !ctaTh) throw new InputError('กรุณากรอกข้อความปุ่มภาษาไทย');
   const image = str(input.image);
   if (image && (!/^\/(media|uploads)\/[\w./-]+$/.test(image) || image.includes('..'))) throw new InputError('ที่อยู่รูปไม่ถูกต้อง');

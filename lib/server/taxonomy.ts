@@ -17,6 +17,7 @@ export class InputError extends Error {
 function text(v: unknown, msg: string, max = 120): string {
   const s = typeof v === 'string' ? v.trim() : '';
   if (!s) throw new InputError(msg);
+  if (/[<>]/.test(s)) throw new InputError('ห้ามใช้เครื่องหมาย < หรือ >');
   if (s.length > max) throw new InputError(`ยาวเกิน ${max} ตัวอักษร`);
   return s;
 }

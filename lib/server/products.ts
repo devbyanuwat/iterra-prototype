@@ -32,7 +32,12 @@ export type ProductInput = Omit<AdminProduct, 'id' | 'brand' | 'updated'>;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 // รูปต้องเป็นไฟล์ในเว็บเอง: ของเดิมใน public/media หรือที่อัปโหลดใน /uploads
 const okImage = (s: unknown) => typeof s === 'string' && /^\/(media|uploads)\/[\w./-]+$/.test(s) && !s.includes('..');
-const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
+// < และ > ไม่มีเหตุให้ใช้ในข้อความหลังบ้าน ปฏิเสธไว้ก่อน เผื่อวันหน้ามีที่ไหนเผลอแสดงเป็น HTML
+const str = (v: unknown) => {
+  const s = typeof v === 'string' ? v.trim() : '';
+  if (/[<>]/.test(s)) throw new InputError('ห้ามใช้เครื่องหมาย < หรือ >');
+  return s;
+};
 const SELECT = `select p.*, p.id::int as pid, p.brand_id::int as bid, b.name as brand_name,
                        to_char(p.updated_at at time zone 'Asia/Bangkok', 'YYYY-MM-DD') as updated_day
                   from products p join brands b on b.id = p.brand_id`;

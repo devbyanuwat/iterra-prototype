@@ -107,6 +107,10 @@ try {
   await assert.rejects(tax.saveCategory(c, { key: 'wardrobe', th: 'x', en: 'x', multiBrand: false }, true), (e) => e.code === '23505');
   await assert.rejects(tax.saveCategory(c, { key: 'Bad Key', th: 'x', en: 'x', multiBrand: false }, true), { name: 'InputError' });
   await assert.rejects(tax.saveCategory(c, { key: 'tiles', th: '  ', en: 'Tiles', multiBrand: false }, true), { name: 'InputError' });
+  // ช่องข้อความหลังบ้านไม่รับ < และ > (เลือกปฏิเสธ ไม่ลบเงียบ ๆ)
+  await assert.rejects(tax.saveCategory(c, { key: 'tiles', th: 'กระเบื้อง<b>', en: 'Tiles', multiBrand: false }, true), /< หรือ >/);
+  await assert.rejects(tax.saveBrand(c, null, '<img src=x onerror=alert(1)>'), /< หรือ >/);
+  await assert.rejects(tax.saveMaterial(c, { key: 'glass', th: 'แก้ว', en: 'Glass >' }, true), /< หรือ >/);
   // แก้ชื่อและ multiBrand · แก้รายการที่ไม่มีอยู่
   await tax.saveCategory(c, { key: 'wardrobe', th: 'ตู้', en: 'Closets', multiBrand: true }, false);
   assert.deepEqual((await tax.listCategories(c)).find((x) => x.key === 'wardrobe').name, { th: 'ตู้', en: 'Closets' });
@@ -188,6 +192,9 @@ try {
   await assert.rejects(prod.saveProduct(c, null, { ...draft, slug: 'Bad Slug' }), { name: 'InputError' });
   await assert.rejects(prod.saveProduct(c, null, { ...draft, images: ['javascript:alert(1)'] }), { name: 'InputError' });
   await assert.rejects(prod.saveProduct(c, null, { ...draft, images: ['/uploads/../../etc/passwd'] }), { name: 'InputError' });
+  await assert.rejects(prod.saveProduct(c, null, { ...draft, th: 'ซิงก์ </script><script>x()</script>' }), /< หรือ >/);
+  await assert.rejects(prod.saveProduct(c, null, { ...draft, series: 'A>B' }), /< หรือ >/);
+  await assert.rejects(prod.saveProduct(c, null, { ...draft, specs: 'วัสดุ: <b>ทอง</b>' }), /< หรือ >/);
   await assert.rejects(prod.saveProduct(c, null, { ...draft, slug: 'test-sink-90' }), (e) => e.code === '23505');
   // แท็บอื่นลบไปแล้ว: แก้ไม่ได้ และไม่สร้างใหม่
   await prod.deleteProduct(c, id);
@@ -233,6 +240,11 @@ try {
   await assert.rejects(saveAnnouncement(c, { ...input, href: 'javascript:alert(1)', ctaTh: 'กด' }), { name: 'InputError' });
   await assert.rejects(saveAnnouncement(c, { ...input, href: '/contact/' }), /ข้อความปุ่ม/);
   await assert.rejects(saveAnnouncement(c, { ...input, image: 'https://evil.example/x.png' }), { name: 'InputError' });
+  await assert.rejects(saveAnnouncement(c, { ...input, titleTh: 'นัดชม<img src=x>' }), /< หรือ >/);
+  await assert.rejects(saveAnnouncement(c, { ...input, bodyEn: 'Book <b>now</b>' }), /< หรือ >/);
+  await assert.rejects(saveAnnouncement(c, { ...input, href: '/contact/', ctaTh: 'นัด<b>' }), /< หรือ >/);
+  // /\evil.com เบราว์เซอร์อ่านเป็น //evil.com พาออกนอกเว็บ
+  await assert.rejects(saveAnnouncement(c, { ...input, href: '/\\evil.com', ctaTh: 'กด' }), /ลิงก์ต้อง/);
   await saveAnnouncement(c, { ...input, href: 'https://line.me/ti/p/x', ctaTh: 'แชต', image: '/uploads/2026/10/a.webp' });
   assert.deepEqual((await getAnnouncement(c)).cta, { label: { th: 'แชต', en: 'แชต' }, href: 'https://line.me/ti/p/x' });
   // ── แปลงรูปเป็น WebP (Task 10) ──
