@@ -13,6 +13,7 @@ import { db } from '@/lib/db';
 import { listPublished } from '@/lib/server/products';
 import { getAnnouncement } from '@/lib/server/announcement';
 import { listCategories, listMaterials } from '@/lib/server/taxonomy';
+import { listPublishedPosts } from '@/lib/server/posts';
 import { CONTACT, SITE_NAME, SITE_TAGLINE_EN, SITE_TAGLINE_TH, SITE_URL } from '@/lib/site';
 
 // ทุกหน้าอ่าน DB ตอน request: หลังบ้านบันทึกแล้วหน้าเว็บเห็นทันที ไม่ต้อง revalidate และ next build ไม่ต้องต่อ DB
@@ -55,11 +56,12 @@ const organizationJsonLd = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [products, categories, materials, announcement] = await Promise.all([
+  const [products, categories, materials, announcement, posts] = await Promise.all([
     listPublished(db),
     listCategories(db),
     listMaterials(db),
     getAnnouncement(db),
+    listPublishedPosts(db),
   ]);
   return (
     <html lang="th">
@@ -73,7 +75,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <LangProvider>
-          <CatalogProvider value={{ products, categories, materials }}>
+          <CatalogProvider value={{ products, categories, materials, posts }}>
           <SmoothScroll />
           <Nav />
           <main>{children}</main>

@@ -13,7 +13,6 @@ import ProductCard from '@/components/ProductCard';
 import Placeholder from '@/components/Placeholder';
 import { useLang } from '@/components/LangProvider';
 import { useCatalog } from '@/components/CatalogProvider';
-import { posts } from '@/lib/posts';
 
 // ภาพเรื่องราวจากแคตตาล็อก KOHLER Kitchens 2026 (ลำดับตรงกับ t.home.storySlides) · scripts/build-media.sh scenes
 const STORY_IMAGES = [1, 2, 3].map((n) => `/media/scenes/story-${n}.webp`);
@@ -124,7 +123,7 @@ function Stats() {
 
 function LatestPosts() {
   const { lang, t } = useLang();
-  const latest = posts.slice(0, 3);
+  const latest = useCatalog().posts.slice(0, 3);
   return (
     <section className="px-6 py-24 md:px-[8vw] md:py-32">
       <Reveal className="mb-14 flex items-end justify-between">

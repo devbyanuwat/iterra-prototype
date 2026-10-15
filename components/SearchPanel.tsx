@@ -9,7 +9,6 @@ import { useLang } from './LangProvider';
 import { buildIndex, search, GROUPS } from '@/lib/search';
 import { PAGES } from '@/lib/i18n';
 import { useCatalog } from './CatalogProvider';
-import { posts } from '@/lib/posts';
 import { projects } from '@/lib/projects';
 
 
@@ -17,8 +16,8 @@ export default function SearchPanel({ open, onClose }: { open: boolean; onClose:
   const { lang, t } = useLang();
   const ref = useRef<HTMLDialogElement>(null);
   const [query, setQuery] = useState('');
-  const { products } = useCatalog();
-  const index = useMemo(() => buildIndex({ products, posts, projects, pages: PAGES }), [products]);
+  const { products, posts } = useCatalog();
+  const index = useMemo(() => buildIndex({ products, posts, projects, pages: PAGES }), [products, posts]);
   const results = useMemo(() => search(index, query), [index, query]);
 
   useEffect(() => {

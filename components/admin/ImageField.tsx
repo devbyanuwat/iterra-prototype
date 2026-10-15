@@ -9,10 +9,12 @@ export default function ImageField({
   value,
   onChange,
   multiple = true,
+  max = Infinity,
 }: {
   value: string[];
   onChange: (v: string[]) => void;
   multiple?: boolean;
+  max?: number; // จำนวนรูปสูงสุดเมื่อ multiple · ครบแล้วซ่อนช่องอัปโหลด
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -51,7 +53,7 @@ export default function ImageField({
           ))}
         </ul>
       )}
-      {(multiple || value.length === 0) && (
+      {(multiple ? value.length < max : value.length === 0) && (
         <label className="block cursor-pointer rounded-2xl border border-dashed border-warm-500 bg-white/40 px-6 py-6 text-center text-sm transition focus-within:border-ink hover:border-ink">
           {busy ? 'กำลังอัปโหลด' : 'กดเพื่อเลือกรูป'}
           <span className="mt-1 block text-xs text-stone-600">JPG, PNG หรือ WebP ไม่เกิน 5 MB</span>

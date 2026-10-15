@@ -1,6 +1,5 @@
-// ── MOCK DATA ──
-// จุดเปลี่ยนเป็นของจริง #2: แทนที่บทความ mock ในไฟล์นี้ด้วยบทความจริง
-// (หรือ map จาก CMS — โครงสร้าง type ตรงไปตรงมา)
+// ── ข้อมูลตัวอย่าง ── ใช้ seed DB (db/seed.mjs) และ scripts/check-search.mjs เท่านั้น
+// หน้าเว็บอ่านบทความจาก DB แล้ว (lib/server/posts.ts) แก้บทความที่ /admin/articles/
 
 export type Post = {
   slug: string;
@@ -8,10 +7,12 @@ export type Post = {
   excerpt: { th: string; en: string };
   date: string; // ISO
   cover: string; // ภาพปก 16:9 จาก scripts/build-media.sh scenes
-  inline: [string, string]; // ภาพประกอบหลังย่อหน้าที่ 2 และ 4
+  inline: string[]; // ภาพประกอบหลังย่อหน้าที่ 2 และ 4 ไม่เกิน 2 รูป
   tag: string;
   body: string[]; // ย่อหน้าภาษาไทย
 };
+// การ์ดบทความ: หน้าแรกและการค้นหาใช้ ไม่ต้องส่งเนื้อหาเต็มไปทุกหน้า
+export type PostCard = Omit<Post, 'body' | 'inline'>;
 
 export const posts: Post[] = [
   {

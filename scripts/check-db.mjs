@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import sharp from 'sharp';
 import { migrate } from './db-migrate.mjs';
+import * as post from '../lib/server/posts.ts';
 import { audit } from '../lib/server/audit.ts';
 import { seed } from '../db/seed.mjs';
 import { products } from '../lib/products.ts';
@@ -334,6 +335,67 @@ try {
     // เปิดใช้ใหม่ด้วย db:admin (upsertAdmin ล้าง disabled_at) ให้ส่วนถัดไปใช้บัญชีนี้ต่อ
     await upsertAdmin(c, 'admin@example.test', 'ผู้ทดสอบ', pw2);
     assert.ok('token' in (await login(c, 'admin@example.test', pw2, 'ip-i', 14)));
+  }
+  // ── บทความ (แผน 2 Task 2) ──
+  {
+    // หน้าเว็บ: ตรงกับข้อมูลเดิมทุกช่อง เรียงวันที่ใหม่ก่อน (หน้าบทความจึงแสดงเหมือนเดิม)
+    const cards = await post.listPublishedPosts(c);
+    assert.deepEqual(cards.map((p) => p.slug), posts.map((p) => p.slug));
+    for (const seedP of posts) {
+      const { body: _b, inline: _i, ...card } = seedP;
+      assert.deepEqual(cards.find((p) => p.slug === seedP.slug), card, `การ์ดบทความ ${seedP.slug}`);
+      assert.deepEqual(await post.getPublishedPost(c, seedP.slug), { ...seedP }, `บทความ ${seedP.slug} จาก DB ต้องตรงกับข้อมูลเดิม`);
+    }
+    assert.equal(await post.getPublishedPost(c, 'no-such-post'), null);
+    assert.deepEqual(post.paragraphs('ก\n\nข\n \n\nค\n'), ['ก', 'ข', 'ค']);
+
+    // หลังบ้าน: ร่างไม่ขึ้นหน้าเว็บ และเปิดจากลิงก์ตรงไม่ได้
+    assert.equal((await post.listAdminPosts(c)).length, posts.length);
+    const draft = {
+      slug: '', titleTh: 'ทดสอบบทความ', titleEn: 'Test Post One', excerptTh: 'สั้น ๆ', excerptEn: '', tagTh: 'ทดสอบ',
+      bodyTh: 'ย่อหน้าแรก\n\nย่อหน้าสอง\n\n\nย่อหน้าสาม', cover: '/uploads/2026/10/a.webp', inline: [], published: false,
+    };
+    const pid = await post.savePost(c, null, draft);
+    const row = (await post.listAdminPosts(c)).find((p) => p.id === pid);
+    assert.equal(row.slug, 'test-post-one', 'slug ว่าง = สร้างจากหัวข้ออังกฤษ');
+    assert.equal(row.date, '', 'ไม่ติ๊กเผยแพร่ = ร่าง');
+    assert.equal(row.published, false);
+    assert.equal(await post.getPublishedPost(c, 'test-post-one'), null);
+    assert.ok(!(await post.listPublishedPosts(c)).some((p) => p.slug === 'test-post-one'));
+    // เผยแพร่: วันที่วันนี้ตามเวลาไทย ขึ้นเป็นบทความล่าสุด
+    await post.setPostPublished(c, pid, true);
+    const today = (await c.query("select to_char((now() at time zone 'Asia/Bangkok')::date, 'YYYY-MM-DD') as d")).rows[0].d;
+    const shown = await post.getPublishedPost(c, 'test-post-one');
+    assert.equal(shown.date, today);
+    assert.deepEqual(shown.body, ['ย่อหน้าแรก', 'ย่อหน้าสอง', 'ย่อหน้าสาม']);
+    assert.deepEqual(shown.excerpt, { th: 'สั้น ๆ', en: 'สั้น ๆ' }, 'ไม่กรอกอังกฤษ = ใช้ไทย');
+    assert.deepEqual(shown.title, { th: 'ทดสอบบทความ', en: 'Test Post One' });
+    assert.equal((await post.listPublishedPosts(c))[0].slug, 'test-post-one');
+    // แก้แล้ววันเผยแพร่เดิมไม่เปลี่ยน · ซ่อนแล้วหายจากหน้าเว็บ
+    await c.query("update posts set published_at = '2026-01-02' where id = $1", [pid]);
+    await post.savePost(c, pid, { ...draft, slug: 'test-post-one', titleTh: 'ทดสอบ 2', inline: ['/media/scenes/a.webp'], published: true });
+    assert.equal((await post.getPublishedPost(c, 'test-post-one')).date, '2026-01-02');
+    assert.deepEqual((await post.getPublishedPost(c, 'test-post-one')).inline, ['/media/scenes/a.webp']);
+    await post.setPostPublished(c, pid, false);
+    assert.equal(await post.getPublishedPost(c, 'test-post-one'), null);
+    // ข้อมูลผิด
+    await assert.rejects(post.savePost(c, null, { ...draft, titleTh: ' ' }), /หัวข้อ/);
+    await assert.rejects(post.savePost(c, null, { ...draft, bodyTh: '' }), /เนื้อหา/);
+    await assert.rejects(post.savePost(c, null, { ...draft, cover: '' }), /รูปปก/);
+    await assert.rejects(post.savePost(c, null, { ...draft, cover: 'https://evil.example/x.webp' }), /ที่อยู่รูป/);
+    await assert.rejects(post.savePost(c, null, { ...draft, inline: ['/media/a.webp', '/media/b.webp', '/media/c.webp'] }), /ไม่เกิน 2 รูป/);
+    await assert.rejects(post.savePost(c, null, { ...draft, inline: ['/uploads/../../etc/passwd'] }), /ที่อยู่รูป/);
+    await assert.rejects(post.savePost(c, null, { ...draft, slug: 'Bad Slug' }), { name: 'InputError' });
+    await assert.rejects(post.savePost(c, null, { ...draft, bodyTh: 'ดู <script>x()</script>' }), /< หรือ >/);
+    await assert.rejects(post.savePost(c, null, { ...draft, titleEn: 'A > B' }), /< หรือ >/);
+    await assert.rejects(post.savePost(c, null, { ...draft, tagTh: 'a<b' }), /< หรือ >/);
+    await assert.rejects(post.savePost(c, null, { ...draft, slug: 'test-post-one' }), (e) => e.code === '23505');
+    // แท็บอื่นลบไปแล้ว: แก้ไม่ได้ และไม่สร้างใหม่
+    assert.equal(await post.deletePost(c, pid), 'test-post-one');
+    assert.equal(await post.deletePost(c, pid), null);
+    await assert.rejects(post.savePost(c, pid, draft), /ไม่พบบทความนี้/);
+    await assert.rejects(post.setPostPublished(c, pid, true), /ไม่พบบทความนี้/);
+    assert.equal((await post.listAdminPosts(c)).length, posts.length);
   }
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {

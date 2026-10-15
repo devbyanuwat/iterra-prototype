@@ -15,14 +15,15 @@ const GLASS_KEY = 'admin:glass';
 // stone-600 บนพื้นนี้ = 4.5:1 พอดี จึงอ่านผ่านทุกภาพพื้นหลัง · ต่ำกว่านี้ต้องวัดจาก pixel ของภาพจริง
 const GLASS_MIN = 0.7;
 const GLASS_MAX = 0.95;
-const MENU = [
-  { href: '/admin/products/', label: 'สินค้า', icon: 'box' },
+// bar = อยู่บนแถบลอยของมือถือ (ไม่เกิน 4 อัน ปุ่มละกว้างพอแตะบนจอ 375) ที่เหลืออยู่ใน sheet อื่น ๆ · rail ของ iPad และ sidebar แสดงครบ
+type MenuItem = { href: string; label: string; icon: keyof typeof ICON_PATHS; bar?: boolean };
+const MENU: MenuItem[] = [
+  { href: '/admin/products/', label: 'สินค้า', icon: 'box', bar: true },
+  { href: '/admin/articles/', label: 'บทความ', icon: 'doc', bar: true },
   { href: '/admin/categories/', label: 'หมวด แบรนด์ วัสดุ', icon: 'tag' },
   { href: '/admin/announcement/', label: 'ประกาศ', icon: 'megaphone' },
-] as const;
-// ทำในแผนที่ 2
-const LATER = ['บทความ', 'ผลงาน', 'แคตตาล็อก'];
-const MORE_LABEL = 'อื่น ๆ: ความทึบกระจก เปิดหน้าเว็บ ออกจากระบบ';
+];
+const MORE_LABEL = 'อื่น ๆ: เมนูที่เหลือ ความทึบกระจก เปิดหน้าเว็บ ออกจากระบบ';
 
 const ICON_PATHS = {
   box: (
@@ -41,6 +42,30 @@ const ICON_PATHS = {
     <>
       <path d="M4 10v4a1 1 0 0 0 1 1h2.5L14 19V5L7.5 9H5a1 1 0 0 0-1 1z" />
       <path d="M17.5 9.2a4 4 0 0 1 0 5.6M8 15l1 4.5" />
+    </>
+  ),
+  doc: (
+    <>
+      <path d="M6.5 3.5h8l3.5 3.5v13.5h-11.5z" />
+      <path d="M14.5 3.5V7H18M9 11.5h6M9 15h6" />
+    </>
+  ),
+  house: (
+    <>
+      <path d="M4 20.5h16M6 20.5V9.5L12 4.5l6 5v11" />
+      <path d="M10 20.5v-5h4v5" />
+    </>
+  ),
+  book: (
+    <>
+      <path d="M4 5.5c2.7-1.3 5.3-1.3 8 0v14c-2.7-1.3-5.3-1.3-8 0z" />
+      <path d="M12 5.5c2.7-1.3 5.3-1.3 8 0v14c-2.7-1.3-5.3-1.3-8 0z" />
+    </>
+  ),
+  mail: (
+    <>
+      <rect x="3.5" y="5.5" width="17" height="13" rx="1.5" />
+      <path d="m4 6.5 8 6.5 8-6.5" />
     </>
   ),
   person: (
@@ -88,9 +113,16 @@ export default function AdminShell({ name, children }: { name: string; children:
       <p className="mt-1 truncate text-xs text-stone-600">หลังบ้าน · {name}</p>
     </div>
   );
-  const later = LATER.map((x) => (
-    <li key={x}>
-      <span className="flex min-h-11 items-center whitespace-nowrap rounded-full px-4 text-sm text-stone-600">{x}</span>
+  // เมนูที่ไม่อยู่บนแถบลอยของมือถือ แสดงใน sheet อื่น ๆ · ตั้งแต่ md มี rail ครบทุกเมนูแล้ว จึงซ่อน
+  const sheetLinks = MENU.filter((m) => !m.bar).map((m) => (
+    <li key={m.href}>
+      <Link
+        href={m.href}
+        aria-current={path.startsWith(m.href) ? 'page' : undefined}
+        className={`${ghost} w-full justify-center bg-white/60 text-center`}
+      >
+        {m.label}
+      </Link>
     </li>
   ));
   // sheet ใช้ปุ่ม 2 ช่องเท่ากันตาม mockup · sidebar ใช้ปุ่มแบบเดิม
@@ -193,7 +225,6 @@ export default function AdminShell({ name, children }: { name: string; children:
                   </li>
                 );
               })}
-              {later}
             </ul>
           </nav>
           <div className="mt-auto space-y-4">{settings(false)}</div>
@@ -205,7 +236,7 @@ export default function AdminShell({ name, children }: { name: string; children:
       {/* มือถือ: แถบลอยแบบ IG แคปซูลกระจก ไอคอนล้วน แท็บที่เลือกมีแคปซูลเทารอง */}
       <nav aria-label="เมนูหลังบ้าน" className="fixed inset-x-3 z-10 mx-auto max-w-md md:hidden" style={{ bottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}>
         <ul className="glass flex h-16 items-center rounded-full px-2 shadow-[0_10px_30px_rgb(28_25_23/0.18)]">
-          {MENU.map((m) => {
+          {MENU.filter((m) => m.bar).map((m) => {
             const on = path.startsWith(m.href);
             return (
               <li key={m.href} className="flex-1">
@@ -245,10 +276,9 @@ export default function AdminShell({ name, children }: { name: string; children:
           <div id="admin-more-title" tabIndex={-1} autoFocus className="outline-none">
             {brand}
           </div>
-          <div>
-            <p className="mb-2 text-sm">เมนูที่จะมาในแผนที่ 2</p>
-            <ul className="flex flex-wrap gap-1">{later}</ul>
-          </div>
+          <nav aria-label="เมนูอื่น" className="md:hidden">
+            <ul className="grid grid-cols-2 gap-2">{sheetLinks}</ul>
+          </nav>
           {settings(true)}
           <button type="button" className={`${ghost} w-full justify-center`} onClick={() => moreRef.current?.close()}>
             ปิด

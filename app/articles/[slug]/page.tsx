@@ -1,21 +1,22 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import JsonLd from '@/components/JsonLd';
 import Reveal from '@/components/Reveal';
 import ParallaxImage from '@/components/ParallaxImage';
-import { getPost, posts } from '@/lib/posts';
+import { db } from '@/lib/db';
+import { getPublishedPost } from '@/lib/server/posts';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return posts.map((p) => ({ slug: p.slug }));
-}
+// metadata กับหน้าใช้ query เดียวกันใน request เดียว · เฉพาะที่เผยแพร่ ร่างจึงได้หน้า 404
+const getPost = cache((slug: string) => getPublishedPost(db, slug));
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPost(slug);
   if (!post) return {};
   return {
     title: post.title.th,
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPost(slug);
   if (!post) notFound();
 
   const jsonLd = {
