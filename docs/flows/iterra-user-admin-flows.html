@@ -89,10 +89,18 @@
   table.rel { margin-top: 20px; font-size: 13px; }
   table.rel td:not(:last-child) { font-family: ui-monospace, Menlo, monospace; }
   @media (max-width: 480px) { .grid { padding: 20px 16px 12px; gap: 14px 4px; grid-template-columns: repeat(4, minmax(0, 1fr)); } .ico { width: 60px; height: 60px; border-radius: 14px; font-size: 19px; } .lbl { font-size: 11px; } .page { padding: 22px 16px 40px; } h2 { font-size: 26px; } .tables { grid-template-columns: minmax(0, 1fr); } }
+  /* ตัวชี้แบบ iPad: JS ใส่ ptr-on เมื่อขยับเมาส์หรือ trackpad จริงเท่านั้น จอสัมผัสไม่เห็น */
+  html.ptr-on, html.ptr-on * { cursor: none !important; }
+  .ptr { position: fixed; left: 0; top: 0; z-index: 50; width: 20px; height: 20px; border-radius: 10px; background: rgb(87 83 78 / 0.5); box-shadow: 0 0 0 1px rgb(255 255 255 / 0.45); pointer-events: none; opacity: 0; transition: opacity 0.2s, border-radius 0.25s var(--ease), background-color 0.25s, box-shadow 0.25s, scale 0.15s var(--ease); }
+  .ptr.on { opacity: 1; }
+  .ptr.hl { background: rgb(255 255 255 / 0.22); box-shadow: 0 10px 30px rgb(28 25 23 / 0.16); }
+  .ptr.btn { background: rgb(28 25 23 / 0.1); box-shadow: none; }
+  .ptr.beam { background: rgb(28 25 23 / 0.6); box-shadow: none; }
+  .ptr.down { scale: 0.85; }
   /* พิมพ์หรือแปลง PDF: ไม่มีหน้าโฮม เรียงทุกแอปต่อกันบนพื้นขาว */
   @media print {
     body { background: #fff; } .stage { display: block; padding: 0; } .device, .screen { all: unset; display: block; }
-    .wall, .home, .bar, .home-ind { display: none !important; }
+    .wall, .home, .bar, .home-ind, .ptr { display: none !important; }
     .win, .win[hidden] { display: block !important; position: static; background: #fff; -webkit-backdrop-filter: none; backdrop-filter: none; }
     .scroll { overflow: visible; } .page, .page[hidden] { display: block !important; break-after: page; }
   }
@@ -215,6 +223,76 @@
   addEventListener('popstate', () => { const id = location.hash.slice(1); if (NAMES[id]) open(id, null, false); else close(true); });
   const start = location.hash.slice(1);
   if (NAMES[start]) open(start, null, false);
+})();
+
+// ตัวชี้แบบ iPad: จุดกลมตามเมาส์ ยืดเป็นกรอบเมื่อชี้ไอคอนหรือปุ่ม หดเป็นแท่งเมื่อชี้ข้อความ
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const root = document.documentElement, DOT = 20;
+  const TEXT = 'p, td, th, h2, h3, li, .bar b, .status span, text, tspan';
+  const dot = document.createElement('div');
+  dot.className = 'ptr'; dot.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(dot);
+  let on = false, down = false, raf = 0, lifted = null;
+  let mx = 0, my = 0, x = 0, y = 0, w = DOT, h = DOT;
+
+  function lift(ico, t) {
+    if (lifted && lifted !== ico) { lifted.style.transform = ''; lifted.style.boxShadow = ''; }
+    lifted = ico;
+    if (ico) { ico.style.transform = t; ico.style.boxShadow = 'inset 0 1px 0 rgb(255 255 255 / 0.6), 0 14px 28px rgb(28 25 23 / 0.28)'; }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!on) return;
+    const el = document.elementFromPoint(mx, my);
+    const app = el && el.closest('.app'), btn = el && el.closest('.close, .home-ind');
+    let tx = mx, ty = my, tw = DOT, th = DOT, r = DOT / 2, mode = '';
+    if (app) {
+      // กรอบไอคอนจาก offset (ไม่รวม transform ของการลอย) กันกรอบวิ่งตามตัวเอง
+      const ico = app.querySelector('.ico'), a = app.getBoundingClientRect();
+      const L = a.left + ico.offsetLeft - app.offsetLeft, T = a.top + ico.offsetTop - app.offsetTop, S = ico.offsetWidth;
+      const dx = Math.max(-1, Math.min(1, (mx - L - S / 2) / (S / 2))), dy = Math.max(-1, Math.min(1, (my - T - S / 2) / (S / 2)));
+      const k = reduce.matches ? 0 : 1, s = down ? 0.96 : 1.08;
+      lift(ico, 'perspective(300px) translate(' + dx * 4 * k + 'px, ' + dy * 4 * k + 'px) rotateY(' + dx * 8 * k + 'deg) rotateX(' + -dy * 8 * k + 'deg) scale(' + s + ')');
+      tx = L + S / 2 + dx * 4 * k; ty = T + S / 2 + dy * 4 * k; tw = th = S + 16; r = 24; mode = 'hl';
+    } else {
+      lift(null);
+      if (btn) {
+        const b = btn.getBoundingClientRect(), ind = btn.id === 'ind';
+        const dx = (mx - b.left - b.width / 2) / b.width, dy = (my - b.top - b.height / 2) / b.height, k = reduce.matches ? 0 : 3;
+        tx = b.left + b.width / 2 + dx * k; ty = b.top + b.height / 2 + dy * k;
+        tw = b.width + (ind ? 16 : 0); th = b.height + (ind ? 18 : 0); r = th / 2; mode = 'btn';
+      } else if (el && el.closest(TEXT)) {
+        th = Math.round(parseFloat(getComputedStyle(el).fontSize) * 1.3); tw = 3; r = 1.5; mode = 'beam';
+      }
+    }
+    const f = reduce.matches ? 1 : 0.3;
+    x += (tx - x) * f; y += (ty - y) * f; w += (tw - w) * f; h += (th - h) * f;
+    dot.style.transform = 'translate(' + (x - w / 2) + 'px, ' + (y - h / 2) + 'px)';
+    dot.style.width = w + 'px'; dot.style.height = h + 'px'; dot.style.borderRadius = r + 'px';
+    dot.className = 'ptr on' + (mode ? ' ' + mode : '') + (down ? ' down' : '');
+    if (Math.abs(tx - x) + Math.abs(ty - y) + Math.abs(tw - w) + Math.abs(th - h) > 0.3) req();
+  }
+  const req = () => { if (!raf) raf = requestAnimationFrame(frame); };
+
+  function hide() {
+    if (!on) return;
+    on = false; down = false; lift(null);
+    root.classList.remove('ptr-on'); dot.className = 'ptr';
+  }
+
+  addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return hide();
+    mx = e.clientX; my = e.clientY;
+    if (!on) { on = true; x = mx; y = my; root.classList.add('ptr-on'); }
+    req();
+  }, { passive: true });
+  addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') return hide(); down = true; req(); });
+  addEventListener('pointerup', () => { down = false; req(); });
+  addEventListener('scroll', req, { capture: true, passive: true });
+  root.addEventListener('mouseleave', hide);
+  addEventListener('blur', hide);
 })();
 </script>
 </body>
