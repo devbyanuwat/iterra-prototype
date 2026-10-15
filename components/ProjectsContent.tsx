@@ -7,12 +7,11 @@ import Link from 'next/link';
 import Reveal from './Reveal';
 import ProjectSlides from './ProjectSlides';
 import { useLang } from './LangProvider';
-import { projects } from '@/lib/projects';
 import { useCatalog } from './CatalogProvider';
 
 export default function ProjectsContent() {
   const { lang, t } = useLang();
-  const { products } = useCatalog();
+  const { products, projects } = useCatalog();
   return (
     <>
       <section className="px-6 pb-14 pt-36 md:px-[8vw] md:pb-20 md:pt-44">

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import sharp from 'sharp';
 import { migrate } from './db-migrate.mjs';
+import * as proj from '../lib/server/projects.ts';
 import * as post from '../lib/server/posts.ts';
 import { audit } from '../lib/server/audit.ts';
 import { seed } from '../db/seed.mjs';
@@ -396,6 +397,64 @@ try {
     await assert.rejects(post.savePost(c, pid, draft), /ไม่พบบทความนี้/);
     await assert.rejects(post.setPostPublished(c, pid, true), /ไม่พบบทความนี้/);
     assert.equal((await post.listAdminPosts(c)).length, posts.length);
+  }
+  // ── ผลงาน (แผน 2 Task 3) ──
+  {
+    // หน้าเว็บ: ตรงกับข้อมูลเดิม (สินค้าเทียบเป็นชุด เพราะเรียงตาม sort ของสินค้า project_products ไม่มีลำดับ)
+    const pub = await proj.listPublishedProjects(c);
+    assert.deepEqual(pub.map((p) => p.slug), projects.map((p) => p.slug));
+    for (const seedP of projects) {
+      const p = pub.find((x) => x.slug === seedP.slug);
+      assert.deepEqual(
+        { ...p, products: [...p.products].sort() },
+        { ...seedP, products: [...new Set(seedP.products)].sort() },
+        `ผลงาน ${seedP.slug} จาก DB ต้องตรงกับข้อมูลเดิม`,
+      );
+    }
+    // หลังบ้าน: สร้างแบบยังไม่เผยแพร่ สินค้าซ้ำเก็บครั้งเดียว
+    const ids = (await prod.listAdmin(c)).slice(0, 2).map((p) => p.id);
+    const num = (a) => [...a].sort((x, y) => x - y);
+    const draft = {
+      slug: '', th: 'บ้านทดสอบ', en: 'Test House', locationTh: 'กรุงเทพฯ', locationEn: '', typeTh: 'บ้านเดี่ยว', typeEn: '',
+      year: '2026', images: ['/uploads/2026/10/a.webp'], products: [ids[0], ids[1], ids[0]], published: false,
+    };
+    const id = await proj.saveProject(c, null, draft);
+    const row = (await proj.listAdminProjects(c)).find((p) => p.id === id);
+    assert.equal(row.slug, 'test-house', 'slug ว่าง = สร้างจากชื่ออังกฤษ');
+    assert.deepEqual(num(row.products), num(ids));
+    assert.equal(row.year, '2026');
+    assert.ok(!(await proj.listPublishedProjects(c)).some((p) => p.slug === 'test-house'), 'ยังไม่เผยแพร่ ต้องไม่เห็น');
+    await proj.setProjectPublished(c, id, true);
+    const shown = (await proj.listPublishedProjects(c)).find((p) => p.slug === 'test-house');
+    assert.ok(shown, 'เผยแพร่แล้วต้องเห็น');
+    assert.deepEqual(shown.location, { th: 'กรุงเทพฯ', en: 'กรุงเทพฯ' }, 'ไม่กรอกอังกฤษ = ใช้ไทย');
+    assert.equal(shown.year, 2026);
+    assert.equal((await proj.listPublishedProjects(c)).at(-1).slug, 'test-house', 'ผลงานใหม่ไปอยู่ท้าย');
+    // แก้รายการสินค้า = แทนทั้งชุด · สินค้าที่ซ่อนอยู่ไม่โผล่บนหน้าเว็บ
+    await proj.saveProject(c, id, { ...draft, slug: 'test-house', products: [ids[1]], published: true });
+    assert.deepEqual((await proj.listAdminProjects(c)).find((p) => p.id === id).products, [ids[1]]);
+    await c.query('update products set published = false where id = $1', [ids[1]]);
+    assert.deepEqual((await proj.listPublishedProjects(c)).find((p) => p.slug === 'test-house').products, []);
+    await c.query('update products set published = true where id = $1', [ids[1]]);
+    assert.equal((await proj.listPublishedProjects(c)).find((p) => p.slug === 'test-house').products.length, 1);
+    // ข้อมูลผิด
+    await assert.rejects(proj.saveProject(c, null, { ...draft, th: '' }), /ชื่อผลงาน/);
+    await assert.rejects(proj.saveProject(c, null, { ...draft, year: '26' }), /ปี/);
+    await assert.rejects(proj.saveProject(c, null, { ...draft, year: '1500' }), /ปี/);
+    await assert.rejects(proj.saveProject(c, null, { ...draft, images: [] }), /อย่างน้อย 1 รูป/);
+    await assert.rejects(proj.saveProject(c, null, { ...draft, images: ['javascript:alert(1)'] }), /ที่อยู่รูป/);
+    await assert.rejects(proj.saveProject(c, null, { ...draft, products: [999999] }), /ไม่พบสินค้า/);
+    await assert.rejects(proj.saveProject(c, null, { ...draft, products: ['1'] }), /ไม่พบสินค้า/);
+    await assert.rejects(proj.saveProject(c, null, { ...draft, locationTh: 'กทม<b>' }), /< หรือ >/);
+    await assert.rejects(proj.saveProject(c, null, { ...draft, typeEn: 'House >' }), /< หรือ >/);
+    await assert.rejects(proj.saveProject(c, null, { ...draft, slug: 'test-house' }), (e) => e.code === '23505');
+    // ลบ: ลิงก์สินค้าหายตาม (on delete cascade) แต่สินค้ายังอยู่
+    assert.equal(await proj.deleteProject(c, id), 'test-house');
+    assert.equal(await proj.deleteProject(c, id), null);
+    assert.equal(await count(`project_products where project_id = ${id}`), 0);
+    assert.equal(await count(`products where id = ${ids[1]}`), 1);
+    await assert.rejects(proj.saveProject(c, id, draft), /ไม่พบผลงานนี้/);
+    await assert.rejects(proj.setProjectPublished(c, id, true), /ไม่พบผลงานนี้/);
   }
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {
