@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import sharp from 'sharp';
 import { migrate } from './db-migrate.mjs';
+import * as slog from '../lib/server/search-log.ts';
 import * as inq from '../lib/server/inquiries.ts';
 import { readFileSync } from 'node:fs';
 import { CATALOG } from '../lib/catalog.ts';
@@ -31,14 +32,14 @@ try {
   await c.query('drop schema public cascade; create schema public');
 
   // ── migrate (Task 1) ──
-  assert.deepEqual(await migrate(c), ['001_init.sql', '002_audit_session_idle.sql']);
+  assert.deepEqual(await migrate(c), ['001_init.sql', '002_audit_session_idle.sql', '003_search_queries.sql']);
   assert.deepEqual(await migrate(c), [], 'รันซ้ำต้องไม่รันไฟล์เดิม');
   const tables = (await c.query("select table_name from information_schema.tables where table_schema = 'public'")).rows
     .map((r) => r.table_name)
     .sort();
   assert.deepEqual(tables, [
     'admin_users', 'announcement', 'audit_log', 'brands', 'catalog', 'categories', 'inquiries', 'login_attempts',
-    'materials', 'posts', 'products', 'project_products', 'projects', 'schema_migrations', 'sessions',
+    'materials', 'posts', 'products', 'project_products', 'projects', 'schema_migrations', 'search_queries', 'sessions',
   ]);
   // ตารางค่าชุดเดียวมีได้แถวเดียว
   await assert.rejects(
@@ -552,6 +553,50 @@ try {
     await inq.markHandled(c, list[0].id);
     await assert.rejects(inq.markHandled(c, 999999), /ไม่พบข้อความนี้/);
     await assert.rejects(inq.markHandled(c, 'x'), /ไม่พบข้อความนี้/);
+  }
+  // ── สถิติคำค้น (แผน 2 Task 6) ──
+  {
+    const N = slog.normalizeQuery;
+    assert.equal(N('  Elate   SINK '), 'elate sink');
+    assert.equal(N('ซิงก์'), 'ซิงก์');
+    assert.equal(N('KOHLER 2026'), 'kohler 2026');
+    assert.equal(N('1234567'), '1234567', '7 หลักยังเก็บได้ เช่นรหัสรุ่น');
+    assert.equal(N('x'.repeat(70)).length, 60);
+    // สั้นเกิน ว่าง ไม่ใช่ข้อความ ไม่เก็บ
+    assert.equal(N('a'), null);
+    assert.equal(N('   '), null);
+    assert.equal(N(42), null);
+    assert.equal(N(null), null);
+    // ข้อมูลส่วนบุคคลไม่เก็บ: อีเมล เบอร์โทร เลขยาว (ทั้งเลขอารบิกและเลขไทย)
+    assert.equal(N('me@example.com'), null);
+    assert.equal(N('ติดต่อ somchai@mail.co.th'), null);
+    assert.equal(N('0812345678'), null);
+    assert.equal(N('081 234 5678'), null);
+    assert.equal(N('081-234-5678'), null);
+    assert.equal(N('๐๘๑๒๓๔๕๖๗๘'), null);
+    assert.equal(N('<script>'), null);
+
+    const day = (await c.query("select (now() at time zone 'Asia/Bangkok')::date::text as d")).rows[0].d;
+    const row = async (q) =>
+      (await c.query('select searches, clicks, zero_results from search_queries where day = $1 and query = $2', [day, q])).rows[0];
+    // กดผล = ค้น 1 กด 1 · ปิดแผงโดยไม่กด = ค้น 1 (ไม่พบผล 1 เมื่อผลเป็น 0)
+    assert.equal(await slog.logSearch(c, 'Elate', true, 3), true);
+    assert.equal(await slog.logSearch(c, ' elate ', false, 3), true);
+    assert.equal(await slog.logSearch(c, 'zzqq', false, 0), true);
+    assert.deepEqual(await row('elate'), { searches: 2, clicks: 1, zero_results: 0 });
+    assert.deepEqual(await row('zzqq'), { searches: 1, clicks: 0, zero_results: 1 });
+    assert.equal(await slog.logSearch(c, 'me@example.com', false, 0), false);
+    assert.equal(await count("search_queries where query like '%@%'"), 0);
+    // ตารางไม่มีคอลัมน์ที่ระบุตัวคน
+    const cols = (
+      await c.query("select column_name from information_schema.columns where table_name = 'search_queries' order by ordinal_position")
+    ).rows.map((r) => r.column_name);
+    assert.deepEqual(cols, ['day', 'query', 'searches', 'clicks', 'zero_results']);
+    // เพดานคำใหม่ต่อวัน: คำที่มีแล้วยังนับต่อ คำใหม่ไม่เพิ่มแถว
+    assert.equal(await count(`search_queries where day = '${day}'`), 2);
+    assert.equal(await slog.logSearch(c, 'brand new', false, 1, 2), false, 'มี 2 คำแล้ว = เต็มเพดาน 2');
+    assert.equal(await slog.logSearch(c, 'elate', false, 1, 2), true);
+    assert.equal((await row('elate')).searches, 3);
   }
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {

@@ -13,7 +13,7 @@ const COPY = {
     title: 'นโยบายความเป็นส่วนตัว',
     draft: 'ร่างตัวอย่างสำหรับเดโม ยังไม่ผ่านการตรวจทางกฎหมาย',
     sections: [
-      { h: 'ข้อมูลที่เราเก็บ', p: ['เมื่อคุณติดต่อเราผ่านแบบฟอร์ม โทรศัพท์ อีเมล หรือ LINE เราเก็บชื่อ ช่องทางติดต่อ และข้อความที่คุณส่งมา เพื่อใช้ตอบกลับและนัดหมายเข้าชมโชว์รูม', 'เมื่อคุณเปิดเว็บไซต์ และอนุญาตคุกกี้หมวดสถิติ เราเก็บข้อมูลการเข้าชมแบบรวม เช่น หน้าที่เปิดดู ประเภทอุปกรณ์ และประเทศ โดยไม่ระบุตัวบุคคล'] },
+      { h: 'ข้อมูลที่เราเก็บ', p: ['เมื่อคุณติดต่อเราผ่านแบบฟอร์ม โทรศัพท์ อีเมล หรือ LINE เราเก็บชื่อ ช่องทางติดต่อ และข้อความที่คุณส่งมา เพื่อใช้ตอบกลับและนัดหมายเข้าชมโชว์รูม', 'เมื่อคุณเปิดเว็บไซต์ และอนุญาตคุกกี้หมวดสถิติ เราเก็บข้อมูลการเข้าชมแบบรวม เช่น หน้าที่เปิดดู ประเภทอุปกรณ์ และประเทศ โดยไม่ระบุตัวบุคคล', 'เมื่อคุณใช้ช่องค้นหาในเว็บไซต์ เราเก็บคำค้นเป็นยอดนับรวมรายวันแบบไม่ระบุตัวบุคคล ไม่ผูกกับ IP คุกกี้ หรือตัวคุณ และไม่เก็บคำค้นที่ดูเหมือนอีเมลหรือเบอร์โทร เราใช้ยอดนี้ดูว่าผู้เข้าชมมองหาอะไร'] },
       { h: 'คุกกี้และการจัดเก็บในเบราว์เซอร์', p: ['จำเป็น: จำตัวเลือกคุกกี้ของคุณ และจำว่าคุณปิดประกาศแล้ว เปิดตลอดเพราะเว็บไซต์ต้องใช้', 'สถิติ: นับจำนวนผู้เข้าชมและหน้าที่เปิดดู ทำงานเฉพาะเมื่อคุณอนุญาต', 'การตลาด: ขณะนี้เว็บไซต์ยังไม่มีการใช้งานหมวดนี้'] },
       { h: 'ผู้ให้บริการที่เกี่ยวข้อง', p: ['เว็บไซต์ให้บริการผ่านผู้ให้บริการโฮสติงและระบบสถิติ ซึ่งประมวลผลข้อมูลตามคำสั่งของเราเท่านั้น เราไม่ขายข้อมูลส่วนบุคคลของคุณ'] },
       { h: 'สิทธิของคุณ', p: ['ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 คุณมีสิทธิขอเข้าถึง ขอแก้ไข ขอลบ คัดค้านการประมวลผล และถอนความยินยอมได้ทุกเมื่อ'] },
@@ -25,7 +25,7 @@ const COPY = {
     title: 'Privacy policy',
     draft: 'Sample draft for the demo. It has not had a legal review.',
     sections: [
-      { h: 'What we collect', p: ['When you contact us by form, phone, email or LINE, we keep your name, contact details and message so we can reply and arrange a showroom visit.', 'When you browse the site and allow statistics cookies, we collect aggregate visit data such as pages opened, device type and country. It does not identify you.'] },
+      { h: 'What we collect', p: ['When you contact us by form, phone, email or LINE, we keep your name, contact details and message so we can reply and arrange a showroom visit.', 'When you browse the site and allow statistics cookies, we collect aggregate visit data such as pages opened, device type and country. It does not identify you.', 'When you use the site search, we keep anonymous daily counts of the search terms. They are not linked to your IP address, cookies or you, and terms that look like an email address or phone number are not kept. We use these counts to see what visitors look for.'] },
       { h: 'Cookies and browser storage', p: ['Necessary: remembers your cookie choice and that you closed the announcement. Always on, because the site needs it.', 'Statistics: counts visitors and the pages they open. Runs only if you allow it.', 'Marketing: the site does not use this category yet.'] },
       { h: 'Service providers', p: ['The site runs on a hosting provider and a statistics service, which process data only on our instructions. We do not sell your personal data.'] },
       { h: 'Your rights', p: ['Under Thailand’s Personal Data Protection Act B.E. 2562 you may ask to access, correct or delete your data, object to processing, and withdraw consent at any time.'] },
