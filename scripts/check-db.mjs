@@ -383,6 +383,9 @@ try {
     await post.savePost(c, pid, { ...draft, slug: 'test-post-one', titleTh: 'ทดสอบ 2', inline: ['/media/scenes/a.webp'], published: true });
     assert.equal((await post.getPublishedPost(c, 'test-post-one')).date, '2026-01-02');
     assert.deepEqual((await post.getPublishedPost(c, 'test-post-one')).inline, ['/media/scenes/a.webp']);
+    // ล้างช่อง slug ตอนแก้ = ใช้ slug เดิม ลิงก์สาธารณะไม่เปลี่ยน
+    await post.savePost(c, pid, { ...draft, slug: '', titleEn: 'Changed Title', published: true });
+    assert.equal((await post.listAdminPosts(c)).find((p) => p.id === pid).slug, 'test-post-one', 'แก้แล้วล้าง slug ต้องคง slug เดิม');
     await post.setPostPublished(c, pid, false);
     assert.equal(await post.getPublishedPost(c, 'test-post-one'), null);
     // ข้อมูลผิด
@@ -439,6 +442,9 @@ try {
     // แก้รายการสินค้า = แทนทั้งชุด · สินค้าที่ซ่อนอยู่ไม่โผล่บนหน้าเว็บ
     await proj.saveProject(c, id, { ...draft, slug: 'test-house', products: [ids[1]], published: true });
     assert.deepEqual((await proj.listAdminProjects(c)).find((p) => p.id === id).products, [ids[1]]);
+    // ล้างช่อง slug ตอนแก้ = ใช้ slug เดิม
+    await proj.saveProject(c, id, { ...draft, slug: '', en: 'Changed Name', products: [ids[1]], published: true });
+    assert.equal((await proj.listAdminProjects(c)).find((p) => p.id === id).slug, 'test-house', 'แก้แล้วล้าง slug ต้องคง slug เดิม');
     await c.query('update products set published = false where id = $1', [ids[1]]);
     assert.deepEqual((await proj.listPublishedProjects(c)).find((p) => p.slug === 'test-house').products, []);
     await c.query('update products set published = true where id = $1', [ids[1]]);
@@ -505,7 +511,7 @@ try {
   }
   // ── ฟอร์มติดต่อ (แผน 2 Task 5) ──
   {
-    const ok = { name: 'คุณทดสอบ', email: 'buyer@example.test', message: 'สนใจซิงก์ 90 ซม.', website: '' };
+    const ok = { name: 'คุณทดสอบ', email: 'buyer@example.test', message: 'สนใจซิงก์ 90 ซม.', hp_x: '' };
     assert.equal(await inq.submitInquiry(c, ok, 'ip-q'), null);
     assert.deepEqual(
       (await c.query('select name, email, message, ip_hash, emailed_at, handled_at from inquiries order by id desc limit 1')).rows[0],
@@ -516,7 +522,7 @@ try {
     assert.equal(await inq.submitInquiry(c, { ...ok, email: '+66 81 234 5678' }, 'ip-q2'), null);
     const stored = await count('inquiries');
     // ช่องดักบอทมีค่า: ตอบเหมือนสำเร็จ แต่ไม่เก็บ
-    assert.equal(await inq.submitInquiry(c, { ...ok, website: 'http://spam.example' }, 'ip-q3'), null);
+    assert.equal(await inq.submitInquiry(c, { ...ok, hp_x: 'http://spam.example' }, 'ip-q3'), null);
     // ข้อมูลผิด: ได้รหัสข้อผิด และไม่เก็บ
     assert.equal(await inq.submitInquiry(c, { ...ok, name: '  ' }, 'ip-q3'), 'name');
     assert.equal(await inq.submitInquiry(c, { ...ok, name: 'ก'.repeat(101) }, 'ip-q3'), 'name');

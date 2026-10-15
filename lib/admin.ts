@@ -8,7 +8,8 @@ import { SESSION_COOKIE, sessionUser, sha256, type Admin } from './server/auth';
 export type Result = { ok: true } | { ok: false; error: string };
 
 // ไม่ได้ใช้กี่นาทีแล้วต้องเข้าสู่ระบบใหม่ (spec หัวข้อ 11.3)
-const IDLE_MIN = Math.floor(Number(process.env.SESSION_IDLE_MIN)) || 120;
+const idleN = Math.floor(Number(process.env.SESSION_IDLE_MIN));
+const IDLE_MIN = idleN > 0 ? idleN : 120;
 
 // ตรวจ session จริงจาก DB ทุกหน้าและทุก Server Function ของหลังบ้าน (proxy.ts แค่ดูว่ามี cookie)
 export const currentAdmin = cache(async () => sessionUser(db, (await cookies()).get(SESSION_COOKIE)?.value, IDLE_MIN));

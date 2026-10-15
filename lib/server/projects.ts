@@ -71,8 +71,10 @@ export async function saveProject(db: Db, id: number | null, input: ProjectInput
   const en = text(input.en, 120);
   const locationTh = text(input.locationTh, 120);
   const typeTh = text(input.typeTh, 120);
-  const slug = text(input.slug, 80) || slugFrom(en) || `project-${Date.now().toString(36)}`;
-  if (!SLUG.test(slug)) throw new InputError('slug ใช้ a-z ตัวเลข และ - เท่านั้น');
+  // แก้แล้วล้างช่อง slug = คง slug เดิม (null → coalesce ตอน update) ไม่งั้นลิงก์สาธารณะเปลี่ยนเงียบ ๆ
+  const given = text(input.slug, 80);
+  const slug = given || (id === null ? slugFrom(en) || `project-${Date.now().toString(36)}` : null);
+  if (slug !== null && !SLUG.test(slug)) throw new InputError('slug ใช้ a-z ตัวเลข และ - เท่านั้น');
   const year = text(input.year, 10);
   if (!/^\d{4}$/.test(year) || Number(year) < 1900 || Number(year) > 2100) {
     throw new InputError('กรุณากรอกปีที่เสร็จเป็น ค.ศ. 4 หลัก เช่น 2026');
@@ -101,7 +103,7 @@ export async function saveProject(db: Db, id: number | null, input: ProjectInput
     pid = r.rows[0].id;
   } else {
     const r = await db.query(
-      `update projects set slug = $1, name_th = $2, name_en = $3, location_th = $4, location_en = $5, type_th = $6, type_en = $7,
+      `update projects set slug = coalesce($1, slug), name_th = $2, name_en = $3, location_th = $4, location_en = $5, type_th = $6, type_en = $7,
          year = $8, images = $9, published = $10
        where id = $11`,
       [...v, id],

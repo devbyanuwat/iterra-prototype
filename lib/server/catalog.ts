@@ -33,7 +33,7 @@ export function pdfPageCount(b: Uint8Array): number {
   const s = Buffer.from(b.buffer, b.byteOffset, b.byteLength).toString('latin1');
   const pages = (s.match(/\/Type\s*\/Page(?![A-Za-z])/g) ?? []).length;
   const counts = Array.from(s.matchAll(/\/Count\s+(\d+)/g), (m) => Number(m[1]));
-  return Math.max(pages, 0, ...counts);
+  return counts.reduce((a, b) => Math.max(a, b), Math.max(pages, 0));
 }
 
 // MB ปัดขึ้นแบบ du -m (ไฟล์ 18,008,076 ไบต์ = 18 ตรงกับที่หน้าเว็บแสดงเดิม)

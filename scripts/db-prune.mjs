@@ -4,7 +4,8 @@ import { pathToFileURL } from 'node:url';
 import pg from 'pg';
 
 // client เป็น pg.Client, PoolClient หรือ Pool ก็ได้ (แต่ละคำสั่งไม่ต้องอยู่ transaction เดียวกัน)
-export async function prune(client, idleMin = Math.floor(Number(process.env.SESSION_IDLE_MIN)) || 120) {
+const idleN = Math.floor(Number(process.env.SESSION_IDLE_MIN));
+export async function prune(client, idleMin = idleN > 0 ? idleN : 120) {
   const n = async (sql, values = []) => (await client.query(sql, values)).rowCount;
   return {
     loginAttempts: await n("delete from login_attempts where at < now() - interval '90 days'"),

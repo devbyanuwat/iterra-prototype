@@ -1,7 +1,7 @@
 'use client';
 
 // หน้าติดต่อ: ฟอร์มส่งเข้า DB ผ่าน submitInquiryAction (app/contact/actions.ts) · ยังไม่ส่งอีเมล ผู้ดูแลอ่านที่ /admin/inquiries/
-// ช่อง website ซ่อนไว้ดักบอท · ตรวจข้อมูลจริงที่ฝั่ง server แล้วแปลรหัสข้อผิดตามภาษาจาก lib/i18n.ts
+// ช่อง hp_x ซ่อนไว้ดักบอท · ตรวจข้อมูลจริงที่ฝั่ง server แล้วแปลรหัสข้อผิดตามภาษาจาก lib/i18n.ts
 // + แผนที่ placeholder (ของจริงฝัง Google Maps embed ตรงนี้)
 
 import { useEffect, useRef, useState } from 'react';
@@ -37,7 +37,7 @@ export default function ContactContent() {
         name: fd.get('name'),
         email: fd.get('email'),
         message: fd.get('message'),
-        website: fd.get('website'),
+        hp_x: fd.get('hp_x'),
       });
     } catch {
       r = { ok: false, error: 'server' };
@@ -84,8 +84,8 @@ export default function ContactContent() {
               </div>
               {/* ช่องดักบอท: คนมองไม่เห็นและ Tab ไปไม่ถึง บอทที่กรอกทุกช่องจะกรอกช่องนี้ */}
               <div aria-hidden className="absolute -left-[9999px] top-0 h-px w-px overflow-hidden">
-                <label htmlFor="website">Website</label>
-                <input id="website" name="website" tabIndex={-1} autoComplete="off" />
+                <label htmlFor="hp_x">Website</label>
+                <input id="hp_x" name="hp_x" tabIndex={-1} autoComplete="off" />
               </div>
               <p role="alert" className="min-h-5 text-[13px] font-light text-[#9f2d20]">
                 {error && t.contact.errors[error]}

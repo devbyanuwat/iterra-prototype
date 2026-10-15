@@ -167,7 +167,7 @@ export default function ProjectsAdmin({ projects, products }: { projects: AdminP
         {shown.length === 0 ? (
           <div className="glass rounded-[28px] px-6 py-14 text-center">{empty}</div>
         ) : (
-          <ul className="grid gap-3 sm:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {shown.map((p) => (
               <li key={p.id} className="glass rounded-[24px] p-3">
                 <button type="button" onClick={() => open({ ...p })} className="flex w-full items-start gap-3 rounded-2xl p-1 text-left">

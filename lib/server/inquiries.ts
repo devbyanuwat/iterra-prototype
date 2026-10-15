@@ -10,7 +10,7 @@ export class InputError extends Error {
 }
 
 // ทุกช่องมาจากเบราว์เซอร์ จึงเป็น unknown จนกว่าจะตรวจ
-export type InquiryInput = { name: unknown; email: unknown; message: unknown; website?: unknown };
+export type InquiryInput = { name: unknown; email: unknown; message: unknown; hp_x?: unknown };
 // หน้าเว็บแปลรหัสเป็นข้อความไทยหรืออังกฤษเอง (t.contact.errors ใน lib/i18n.ts)
 export type InquiryError = 'name' | 'email' | 'message' | 'chars' | 'limit';
 export type AdminInquiry = { id: number; name: string; email: string; message: string; created: string; handled: boolean };
@@ -28,7 +28,7 @@ export async function submitInquiry(db: Db, input: InquiryInput, ipHash: string)
   // เรียกมือด้วยค่าว่างหรือไม่ใช่ object: ตอบเป็นข้อมูลผิด ไม่ใช่ error ของ server
   if (!input || typeof input !== 'object') return 'name';
   // บอทกรอกช่องที่คนมองไม่เห็น: ตอบเหมือนสำเร็จ ไม่บอกว่าโดนจับ และไม่เก็บ
-  if (str(input.website)) return null;
+  if (str(input.hp_x)) return null;
   const name = str(input.name);
   const email = str(input.email);
   const message = str(input.message);

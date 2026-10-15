@@ -41,7 +41,7 @@ export default function InquiriesAdmin({ items }: { items: AdminInquiry[] }) {
       {items.length === 0 ? (
         <div className="glass rounded-[28px] px-6 py-14 text-center text-sm">ยังไม่มีข้อความ</div>
       ) : (
-        <ul className="grid gap-3 xl:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-3 xl:grid-cols-2">
           {items.map((x) => (
             <li key={x.id} className="glass rounded-[24px] p-4 md:p-5">
               <div className="flex items-start justify-between gap-3">

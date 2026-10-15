@@ -77,8 +77,10 @@ export async function savePost(db: Db, id: number | null, input: PostInput): Pro
   const titleTh = text(input.titleTh, 200, 'กรุณากรอกหัวข้อภาษาไทย');
   const titleEn = text(input.titleEn, 200);
   const bodyTh = text(input.bodyTh, 20000, 'กรุณากรอกเนื้อหา');
-  const slug = text(input.slug, 80) || slugFrom(titleEn) || `post-${Date.now().toString(36)}`;
-  if (!SLUG.test(slug)) throw new InputError('slug ใช้ a-z ตัวเลข และ - เท่านั้น');
+  // แก้แล้วล้างช่อง slug = คง slug เดิม (null → coalesce ตอน update) ไม่งั้นลิงก์สาธารณะเปลี่ยนเงียบ ๆ
+  const given = text(input.slug, 80);
+  const slug = given || (id === null ? slugFrom(titleEn) || `post-${Date.now().toString(36)}` : null);
+  if (slug !== null && !SLUG.test(slug)) throw new InputError('slug ใช้ a-z ตัวเลข และ - เท่านั้น');
   const cover = text(input.cover, 300);
   if (!cover) throw new InputError('กรุณาใส่รูปปก');
   const inline = Array.isArray(input.inline) ? input.inline : [];
@@ -99,7 +101,7 @@ export async function savePost(db: Db, id: number | null, input: PostInput): Pro
     return r.rows[0].id;
   }
   const r = await db.query(
-    `update posts set slug = $1, title_th = $2, title_en = $3, excerpt_th = $4, excerpt_en = $5, body_th = $6, tag_th = $7,
+    `update posts set slug = coalesce($1, slug), title_th = $2, title_en = $3, excerpt_th = $4, excerpt_en = $5, body_th = $6, tag_th = $7,
        cover = $8, inline = $9, published_at = case when $10::boolean then coalesce(published_at, ${TODAY}) end, updated_at = now()
      where id = $11`,
     [...v, id],
@@ -137,7 +139,12 @@ function toCard(x: any): PostCard {
 }
 
 export async function listPublishedPosts(db: Db): Promise<PostCard[]> {
-  const r = await db.query(`${SELECT} where p.published_at is not null order by p.published_at desc, p.id desc`);
+  // เลือกเฉพาะคอลัมน์ที่การ์ดใช้ · ไม่ดึงเนื้อบทความ เพราะ root layout เรียกทุก request
+  const r = await db.query(
+    `select p.slug, p.title_th, p.title_en, p.excerpt_th, p.excerpt_en, p.cover, p.tag_th,
+            to_char(p.published_at, 'YYYY-MM-DD') as day
+       from posts p where p.published_at is not null order by p.published_at desc, p.id desc`,
+  );
   return r.rows.map(toCard);
 }
 
