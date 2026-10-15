@@ -1,6 +1,6 @@
 # ITERRA backend: Next.js + PostgreSQL
 
-ร่างวันที่ 15 ตุลาคม 2569 · สถานะ: รอ lead ตรวจ
+ร่างวันที่ 15 ตุลาคม 2569 · แก้ 16 ตุลาคม 2569 เพิ่มขอบเขตแผน 2 (หัวข้อ 11) · สถานะ: รอ lead ตรวจ
 
 ## 1. เป้าหมายและขอบเขต
 
@@ -9,7 +9,8 @@
 - กำหนดการ: งานพัฒนาจบ 30 ต.ค. 2569 สาธิต 31 ต.ค. ส่งมอบ 14 พ.ย. ลูกค้าใช้งานจริง 20 พ.ย.
 - งานรายวันต่อบทบาท: `docs/plan/iterra-team-plan.html`
 - ปฏิทินที่ส่งลูกค้า: `docs/plan/iterra-client-timeline.html`
-- ไม่อยู่ในขอบเขต: ห้องจำลอง 3D (`app/lab/`, `components/room/`), สีผิวสินค้า (`lib/finishes.ts` เป็นข้อมูลเดโม อยู่ในโค้ดต่อ), สิทธิ์หลายระดับ, audit log, ตั้งเวลาประกาศ
+- ไม่อยู่ในขอบเขต: ห้องจำลอง 3D (`app/lab/`, `components/room/`), สีผิวสินค้า (`lib/finishes.ts` เป็นข้อมูลเดโม อยู่ในโค้ดต่อ), สิทธิ์หลายระดับ, ตั้งเวลาประกาศ, หน้าดู audit log ในหลังบ้าน (อ่านด้วย psql ไปก่อน), การส่งอีเมลจากฟอร์มติดต่อ (SMTP ทำรอบถัดไป), security headers, Tailwind 4, สำรองข้อมูลและ deploy
+- อยู่ในขอบเขต (lead เพิ่ม 2026-10-16): audit log, สถิติคำค้น, session หมดเวลาเมื่อไม่ใช้งาน, สคริปต์ปิดบัญชี, การล้างข้อมูลเก่า รายละเอียดหัวข้อ 11
 
 ## 2. สถาปัตยกรรม
 
@@ -18,10 +19,10 @@
 - ต่อ DB ด้วย dependency ใหม่ 1 ตัว: `pg` (ต้องได้อนุมัติ) เขียน SQL ล้วน ไม่ใช้ ORM
 - การแก้ข้อมูลจากหลังบ้านใช้ Server Functions (ดู `node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md`)
 - root layout ตั้ง `dynamic = 'force-dynamic'`: ทุกหน้าอ่าน DB ตอน request จึงเห็นข้อมูลใหม่ทันทีโดยไม่ต้องเรียก `revalidatePath` และ `next build` ไม่ต้องต่อ DB (lead อนุมัติ 2026-10-15) ถ้าคนเข้าเยอะจน DB ช้า ค่อยใส่ cache พร้อม revalidate ตอนบันทึก
-- Route Handler ใช้เฉพาะ 2 จุด: ส่งไฟล์ที่อัปโหลด (`/uploads/...`) และ endpoint ที่ต้องรับ multipart ถ้า Server Function รับไม่ไหว
+- Route Handler ใช้เฉพาะ 2 จุด: ส่งไฟล์ที่อัปโหลด (`/uploads/...`) และรับไฟล์แคตตาล็อก PDF (`/api/catalog-pdf/`) เพราะ Server Function รับได้ไม่เกิน `serverActions.bodySizeLimit` 6 MB และ `proxy.ts` ที่ครอบ `/admin/*` พักข้อมูลได้แค่ 10 MB (`proxyClientMaxBodySize`) เกินนั้นตัดทิ้งเงียบ ๆ route นี้อยู่นอก `/admin` จึงไม่ต้องแก้ `next.config.mjs` และตรวจ session เองทุกครั้ง
 - `proxy.ts` (ชื่อใหม่ของ middleware ใน Next 16) ใช้แค่ redirect คนที่ไม่มี cookie ออกจาก `/admin/` การตรวจสิทธิ์จริงทำซ้ำทุก Server Function และทุกหน้า admin ตามที่เอกสาร Next บอกว่า proxy ไม่ใช่ที่สำหรับ authorization
 - ที่ตั้ง DB (สมมติฐาน ยังไม่ยืนยัน): ตอนพัฒนาใช้ PostgreSQL 16 ในเครื่อง ตอนใช้งานจริงลง Node กับ PostgreSQL บน VPS ของทีมเครื่องเดียวกัน
-- ค่าตั้ง: `DATABASE_URL`, `UPLOAD_DIR`, `SESSION_DAYS`, `IP_SALT`, `SMTP_URL`, `INQUIRY_TO` อยู่ใน `.env` ห้าม commit
+- ค่าตั้ง: `DATABASE_URL`, `UPLOAD_DIR`, `SESSION_DAYS`, `SESSION_IDLE_MIN`, `IP_SALT`, `SMTP_URL`, `INQUIRY_TO` อยู่ใน `.env` ห้าม commit
 
 ### โครงไฟล์
 
@@ -39,7 +40,7 @@ proxy.ts
 
 ## 3. Schema
 
-13 ตาราง และ `schema_migrations` ของตัว migrate
+15 ตาราง และ `schema_migrations` ของตัว migrate · `audit_log`, `sessions.last_seen_at` และ `search_queries` มาในแผน 2 (migration 002 และ 003)
 
 ```sql
 create table schema_migrations (
@@ -57,11 +58,23 @@ create table admin_users (
   created_at    timestamptz not null default now()
 );
 create table sessions (
-  token_hash text primary key,                 -- sha256 ของ token ใน cookie ไม่เก็บ token ตรง
-  user_id    bigint not null references admin_users on delete cascade,
-  expires_at timestamptz not null,
-  created_at timestamptz not null default now()
+  token_hash   text primary key,               -- sha256 ของ token ใน cookie ไม่เก็บ token ตรง
+  user_id      bigint not null references admin_users on delete cascade,
+  expires_at   timestamptz not null,
+  created_at   timestamptz not null default now(),
+  last_seen_at timestamptz not null default now()  -- ใช้ครั้งล่าสุด เขียนไม่เกินทุก 5 นาที
 );
+-- ใครทำอะไรกับอะไร เมื่อไร · ลบบัญชีที่มีประวัติไม่ได้ ใช้ปิดบัญชีแทน
+create table audit_log (
+  id        bigint generated always as identity primary key,
+  at        timestamptz not null default now(),
+  user_id   bigint references admin_users,     -- null = สคริปต์บน server
+  action    text not null,                     -- login, logout, create, update, delete, publish, unpublish, upload, replace, handle, disable
+  entity    text not null,                     -- admin_user, product, category, brand, material, announcement, file, post, project, catalog, inquiry
+  entity_id text,
+  detail    jsonb
+);
+create index on audit_log (at);
 create table login_attempts (
   ip_hash text not null,
   at      timestamptz not null default now()
@@ -180,6 +193,16 @@ create table inquiries (
   created_at timestamptz not null default now()
 );
 create index on inquiries (ip_hash, created_at);
+
+-- สถิติคำค้น: ยอดรวมรายวันต่อคำ ไม่มี IP session หรือ cookie
+create table search_queries (
+  day          date not null,                  -- วันตามเวลาไทย
+  query        text not null,                  -- ตัวพิมพ์เล็ก ตัดช่องว่าง ไม่เกิน 60 ตัว
+  searches     int not null default 0,
+  clicks       int not null default 0,
+  zero_results int not null default 0,
+  primary key (day, query)
+);
 ```
 
 ### เหตุผลของการออกแบบ
@@ -194,7 +217,9 @@ create index on inquiries (ip_hash, created_at);
 | ราคา | ข้อความ null = สอบถามราคา | ห้ามใส่ราคาเอง รอข้อมูลจากลูกค้า |
 | ฟอร์มติดต่อ | 3 ช่องตามฟอร์มเดิม (`components/ContactContent.tsx`) | เก็บลง DB ก่อนส่งอีเมล ถ้า SMTP ยังไม่พร้อม ข้อความไม่หาย |
 | IP | เก็บ sha256 ของ `IP_SALT` ต่อด้วย IP | พอสำหรับนับจำนวนครั้ง ไม่เก็บข้อมูลส่วนบุคคลเกินจำเป็น · ผสม salt เพราะ IPv4 มีน้อยพอจะไล่ย้อนกลับได้ (lead อนุมัติ 2026-10-15) |
-| สถิติ | ไม่มีตาราง | ใช้ Umami |
+| สถิติการเข้าชม | ไม่มีตาราง | ใช้ Umami |
+| สถิติคำค้น | `search_queries` ยอดรวมรายวัน | ไม่มี IP session หรือ cookie จึงเก็บได้กับทุกคนโดยไม่ต้องขอความยินยอม (lead เคาะ 2026-10-16) |
+| audit log | ตารางเดียว ทุกการแก้ของหลังบ้านเขียนใน transaction เดียวกับการแก้ | แก้สำเร็จต้องมีบันทึก บันทึกไม่ได้ก็ไม่แก้ |
 
 ## 4. Seed
 
@@ -217,18 +242,18 @@ create index on inquiries (ip_hash, created_at);
 ## 5. Login และความปลอดภัย
 
 - รหัสผ่าน: `crypto.scrypt` พร้อม salt สุ่มต่อผู้ใช้ เทียบด้วย `timingSafeEqual`
-- session: token สุ่ม 32 ไบต์ใน cookie `httpOnly`, `secure`, `sameSite=lax`, path `/` อายุ `SESSION_DAYS` (ค่าเริ่มต้น 14 วัน) DB เก็บแค่ sha256 ของ token
+- session: token สุ่ม 32 ไบต์ใน cookie `httpOnly`, `secure`, `sameSite=lax`, path `/` อายุ `SESSION_DAYS` (ค่าเริ่มต้น 14 วัน) DB เก็บแค่ sha256 ของ token · ไม่ได้ใช้เกิน `SESSION_IDLE_MIN` นาที (ค่าเริ่มต้น 120) ต้องเข้าสู่ระบบใหม่
 - ออกจากระบบ: ลบแถว session
-- ปิดบัญชี: ตั้ง `disabled_at` session เดิมใช้ไม่ได้ทันที
-- กันเดารหัส: เกิน 10 ครั้งต่อ IP ใน 15 นาที ตอบเหมือนรหัสผิด
-- ฟอร์มติดต่อ: ช่องดักบอท (honeypot) และไม่เกิน 5 ข้อความต่อ IP ต่อชั่วโมง
-- อัปโหลด: รับเฉพาะ webp, jpeg, png ไม่เกิน 5 MB และ PDF ไม่เกิน 30 MB ตั้งชื่อไฟล์ใหม่แบบสุ่ม ไม่ใช้ชื่อจากผู้ใช้
+- ปิดบัญชี: `npm run db:disable-admin` ตั้ง `disabled_at` ลบ session ทั้งหมดของบัญชีนั้น และเขียน audit · เปิดใหม่ด้วย `npm run db:admin`
+- กันเดารหัส: ผิดครบ 5 ครั้งต่อ IP ใน 15 นาที ล็อก ตอบเหมือนรหัสผิด
+- ฟอร์มติดต่อ: ช่องดักบอท (honeypot) และไม่เกิน 3 ข้อความต่อ IP ใน 10 นาที ช่องติดต่อรับอีเมลหรือเบอร์โทรตามป้ายเดิมบนหน้าเว็บ ห้าม `<` และ `>` · นโยบายความเป็นส่วนตัวต้องผ่านฝ่ายกฎหมายก่อนฟอร์มเก็บข้อมูลจริงบน production
+- อัปโหลด: รับเฉพาะ webp, jpeg, png ไม่เกิน 5 MB และ PDF ไม่เกิน 30 MB (ตรวจไบต์แรก `%PDF-`) ตั้งชื่อไฟล์ใหม่แบบสุ่ม ไม่ใช้ชื่อจากผู้ใช้
 - ทุก query ใช้ parameter ของ `pg` ห้ามต่อ string
 - หน้า admin ทุกหน้ายัง `noindex, nofollow`
 
 ## 6. Server Functions ต่อหัวข้อ
 
-ทุกตัวตรวจ session ก่อน ยกเว้นฟอร์มติดต่อกับ login
+ทุกตัวตรวจ session ก่อน ยกเว้นฟอร์มติดต่อ บันทึกคำค้น และ login · ทุกการแก้ของหลังบ้านเขียน audit ใน transaction เดียวกัน
 
 | หัวข้อ | ฟังก์ชัน |
 |---|---|
@@ -237,12 +262,13 @@ create index on inquiries (ip_hash, created_at);
 | brands | list, create, update, delete (ล้มเมื่อมีสินค้า) |
 | materials | list, create, update, delete (ล้มเมื่อมีสินค้า) |
 | products | list (กรองหมวด แบรนด์ คำค้น), get, create, update, delete, setPublished |
-| uploads | uploadImage, uploadPdf คืน path ใต้ `/uploads/` |
+| uploads | uploadImage คืน path ใต้ `/uploads/` (PDF ไปทาง Route Handler ของ catalog) |
 | announcement | get, update, resetSeen (สุ่ม `seen_key` ใหม่) |
 | posts | list, get, create, update, delete, publish, unpublish |
 | projects | list, get, create, update, delete, setProducts |
-| catalog | get, replacePdf |
+| catalog | get, replacePdf (Route Handler `POST /api/catalog-pdf/`) |
 | inquiries | submit (สาธารณะ), list, markHandled |
+| search log | logSearch (สาธารณะ ส่งแล้วไม่รอผล) |
 
 หน้าเว็บอ่านผ่าน query ฝั่ง server เฉพาะแถวที่ `published` หรือ `published_at` ไม่เป็น null
 
@@ -257,6 +283,8 @@ create index on inquiries (ip_hash, created_at);
 ## 8. การทดสอบ
 
 - สคริปต์ `check:db` ใหม่ รันกับ DB ทดสอบ: migrate จาก DB ว่าง, seed, ลบหมวดที่มีสินค้าต้องล้ม, session หมดอายุต้องใช้ไม่ได้, login เกินจำนวนต้องโดนกัน, path อัปโหลดที่มี `..` ต้องโดนปฏิเสธ
+- แผน 2 เพิ่ม: audit ของ login logout และการปิดบัญชี, session ไม่ได้ใช้นาน, บทความและผลงานตรงกับข้อมูลเดิม, ร่างเปิดจากลิงก์ตรงไม่ได้, PDF ปลอม, ฟอร์มติดต่อ (ช่องดักบอท จำนวนต่อ IP ข้อมูลผิด), คำค้นที่เป็นอีเมลหรือเบอร์โทรไม่ถูกเก็บ, ล้างข้อมูลเก่าด้วยแถวย้อนวันที่
+- `check:overflow` ไม่ไล่หน้าหลังบ้าน เพราะต้อง login ในสคริปต์ หน้าหลังบ้านตรวจด้วย browser ทีละงาน
 - `check:filter`, `check:search`, `check:overflow` เดิมต้องผ่านหลังหน้าเว็บย้ายไปอ่าน DB
 - `npx tsc --noEmit` และ `npm run build` ผ่าน
 
@@ -270,6 +298,52 @@ create index on inquiries (ip_hash, created_at);
 ## 10. ความเสี่ยง
 
 - Vercel preview ของแต่ละ PR จะใช้ไม่ได้เมื่อหน้าเว็บต้องต่อ DB ทีมตรวจงานบนเครื่องทดสอบแทน
-- การสร้างภาพแต่ละหน้าจาก PDF ด้วย `scripts/build-media.sh` ยังไม่ได้ตรวจว่ารันบน server ได้ ถ้าไม่ได้ หน้าแคตตาล็อกเปิด PDF ตรงไปก่อน
+- การสร้างภาพแต่ละหน้าจาก PDF ด้วย `scripts/build-media.sh` ไม่รันบน server (ต้องใช้ pdftoppm และ cwebp และต้องจำกัดหน่วยความจำตาม `docs/pm/standards.md`) ตัดสินแล้ว (2026-10-16): ภาพรายหน้าใน `public/media/catalog` ใช้เฉพาะกับไฟล์ที่สร้างภาพชุดนั้น เปลี่ยน PDF แล้วหน้าแคตตาล็อกให้เปิด PDF ตรง และหน้าแรกซ่อนภาพปก
 - เครื่องทดสอบต้องพร้อม 21 ต.ค. ไม่งั้น deploy รอบ 1 และวันที่ผู้ดูแลระบบเริ่มเพิ่มสินค้าเลื่อนตาม
 - เนื้อหาจากลูกค้ามาช้า ทางสำรองอยู่ในแผนทีมหัวข้อ 04
+
+## 11. ส่วนที่เพิ่มในแผน 2 (16 ตุลาคม 2569)
+
+แผนงาน: `docs/superpowers/plans/2026-10-16-backend-content-security.md`
+
+### 11.1 Audit log
+
+- บันทึก: login สำเร็จ, ออกจากระบบ, ปิดบัญชี และทุกการเพิ่ม แก้ ลบ เผยแพร่ ซ่อน อัปโหลด ของหลังบ้าน (สินค้า หมวด แบรนด์ วัสดุ ประกาศ ไฟล์ บทความ ผลงาน แคตตาล็อก ข้อความติดต่อ)
+- login ไม่สำเร็จยังอยู่ใน `login_attempts` ตามเดิม
+- `adminAction` รันการแก้กับการเขียน audit ใน transaction เดียว และส่ง id ของผู้ดูแลให้ action
+- `detail` เก็บแค่สิ่งที่ช่วยอ่านย้อนหลัง เช่นชื่อหรือ slug ไม่เก็บข้อมูลส่วนบุคคลของคนนอก
+- ยังไม่มีหน้าดูในหลังบ้าน อ่านด้วย psql
+
+### 11.2 สถิติคำค้น
+
+- เก็บกับทุกคน ไม่ต้องขอความยินยอม เพราะเป็นยอดรวมรายวัน ไม่มี IP session หรือ cookie (lead เคาะ 2026-10-16)
+- นับตอนกดผลค้นหา (ค้น 1 กด 1) หรือตอนปิดแผงค้นหาที่มีคำค้นโดยไม่กด (ค้น 1 และไม่พบผล 1 เมื่อผลเป็น 0) นับครั้งเดียวต่อการเปิดแผง
+- ฝั่ง server: ตัวพิมพ์เล็ก ตัดช่องว่างหัวท้าย ช่องว่างซ้อนเหลือช่องเดียว ไม่เกิน 60 ตัว ไม่เก็บคำสั้นกว่า 2 ตัว คำที่ดูเหมือนอีเมล คำที่มีตัวเลขติดกันตั้งแต่ 8 หลัก และคำที่มี `<` หรือ `>`
+- คำใหม่ไม่เกิน 5,000 คำต่อวัน กันบอทยิงคำสุ่ม คำที่มีแล้วนับต่อได้
+- ส่งแล้วไม่รอผล DB ล่มการค้นหายังใช้ได้
+- หน้านโยบายความเป็นส่วนตัวมีประโยคบอกว่าเก็บยอดนับคำค้นแบบไม่ระบุตัวบุคคล
+
+### 11.3 Session หมดเวลาเมื่อไม่ใช้งาน
+
+- ไม่ได้ใช้เกิน `SESSION_IDLE_MIN` นาที (ค่าเริ่มต้น 120) ใช้ไม่ได้ ต้องเข้าสู่ระบบใหม่
+- `last_seen_at` เขียนไม่เกินทุก 5 นาที ไม่ให้ทุกการกดเขียน DB
+- อายุสูงสุด `SESSION_DAYS` ยังอยู่
+
+### 11.4 สคริปต์ปิดบัญชี
+
+- `npm run db:disable-admin` อ่าน `ADMIN_EMAIL` จาก env แบบเดียวกับ `db:admin`
+- ตั้ง `disabled_at` ลบ session ทั้งหมด และเขียน audit (`user_id` เป็น null เพราะสคริปต์เป็นผู้ทำ) ในคำสั่ง SQL เดียว
+- `.env` บนเครื่องพัฒนามี `ADMIN_EMAIL` ของบัญชีพัฒนา ต้องส่ง `ADMIN_EMAIL=...` นำหน้าคำสั่งทุกครั้ง
+- เปิดบัญชีใหม่ด้วย `npm run db:admin` อีเมลเดิม รหัสใหม่
+
+### 11.5 ระยะเก็บข้อมูลและการล้าง
+
+`npm run db:prune` รันวันละครั้งด้วย cron บน server (ตั้งตอน deploy)
+
+| ข้อมูล | เก็บ |
+|---|---|
+| `login_attempts` | 90 วัน |
+| `sessions` | ลบเมื่อหมดอายุ หรือไม่ได้ใช้เกิน `SESSION_IDLE_MIN` |
+| `audit_log` | 365 วัน |
+| `search_queries` | 400 วัน (เทียบปีต่อปีได้) |
+| `inquiries` | ไม่ลบ รอฝ่ายกฎหมายกำหนดระยะ |
