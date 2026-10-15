@@ -10,5 +10,6 @@ export const CONTACT = {
   line: '@iterra',
   address_th: '888 ถนนสุขุมวิท แขวงคลองตัน เขตคลองเตย กรุงเทพฯ 10110',
   address_en: '888 Sukhumvit Rd., Khlong Tan, Khlong Toei, Bangkok 10110',
-  hours_th: 'เปิดทุกวัน 10:00 – 19:00 น.',
+  hours_th: 'เปิดทุกวัน 10:00 ถึง 19:00 น.',
+  hours_en: 'Open daily 10:00 to 19:00',
 };

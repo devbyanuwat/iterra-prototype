@@ -37,7 +37,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
         </nav>
 
         <div className="grid gap-14 lg:grid-cols-[1.2fr_1fr] lg:gap-[6vw]">
-          {/* แกลเลอรี parallax — ภาพคู่–คี่เลื่อนสวนทิศกัน */}
+          {/* แกลเลอรี parallax — ภาพคู่-คี่เลื่อนสวนทิศกัน */}
           {/* --tint ปรับสีเฉพาะภาพตัดพื้นหลัง (contain) ภาพบรรยากาศ (cover) ไม่ถูกปรับ */}
           <div className="space-y-8" style={{ '--tint': finish.tint || 'none' } as CSSProperties}>
             {[
