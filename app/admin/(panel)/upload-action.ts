@@ -2,12 +2,14 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { db } from '@/lib/db';
 import { requireAdmin } from '@/lib/admin';
+import { audit } from '@/lib/server/audit';
 import { MAX_IMAGE, imageExt, newName, toWebp, type UploadResult } from '@/lib/server/uploads';
 
 // อัปโหลดรูปทีละไฟล์ไปเก็บใน UPLOAD_DIR · คืน URL ใต้ /uploads/ ให้ฟอร์มเก็บลง DB ตอนกดบันทึก
 export async function uploadImageAction(form: FormData): Promise<UploadResult> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const root = process.env.UPLOAD_DIR;
   if (!root) throw new Error('ยังไม่ได้ตั้ง UPLOAD_DIR ใน .env');
   const file = form.get('file');
@@ -26,5 +28,8 @@ export async function uploadImageAction(form: FormData): Promise<UploadResult> {
   const full = path.join(root, name);
   await mkdir(path.dirname(full), { recursive: true });
   await writeFile(full, webp);
-  return { ok: true, url: `/uploads/${name}` };
+  const url = `/uploads/${name}`;
+  // ไฟล์ที่อัปโหลดแต่ไม่ได้กดบันทึกฟอร์มก็ยังมีบันทึก ใช้ตามหาไฟล์ค้างได้
+  await audit(db, admin.id, 'upload', 'file', url);
+  return { ok: true, url };
 }

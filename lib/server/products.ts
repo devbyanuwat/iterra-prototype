@@ -127,9 +127,11 @@ export async function saveProduct(db: Db, id: number | null, input: ProductInput
   return id;
 }
 
-export async function deleteProduct(db: Db, id: number): Promise<void> {
+// คืน slug ของแถวที่ลบ ให้ audit อ่านย้อนหลังได้ · ไม่มีแถวแล้ว = null
+export async function deleteProduct(db: Db, id: number): Promise<string | null> {
   if (!Number.isInteger(id)) throw new InputError('ไม่พบสินค้านี้');
-  await db.query('delete from products where id = $1', [id]);
+  const r = await db.query('delete from products where id = $1 returning slug', [id]);
+  return r.rows[0]?.slug ?? null;
 }
 
 export async function setPublished(db: Db, id: number, published: boolean): Promise<void> {

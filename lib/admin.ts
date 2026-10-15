@@ -1,15 +1,19 @@
 import { cache } from 'react';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import type { PoolClient } from 'pg';
 import { db } from './db';
-import { SESSION_COOKIE, sessionUser, sha256 } from './server/auth';
+import { SESSION_COOKIE, sessionUser, sha256, type Admin } from './server/auth';
 
 export type Result = { ok: true } | { ok: false; error: string };
 
-// ตรวจ session จริงจาก DB ทุกหน้าและทุก Server Function ของหลังบ้าน (proxy.ts แค่ดูว่ามี cookie)
-export const currentAdmin = cache(async () => sessionUser(db, (await cookies()).get(SESSION_COOKIE)?.value));
+// ไม่ได้ใช้กี่นาทีแล้วต้องเข้าสู่ระบบใหม่ (spec หัวข้อ 11.3)
+const IDLE_MIN = Math.floor(Number(process.env.SESSION_IDLE_MIN)) || 120;
 
-export async function requireAdmin() {
+// ตรวจ session จริงจาก DB ทุกหน้าและทุก Server Function ของหลังบ้าน (proxy.ts แค่ดูว่ามี cookie)
+export const currentAdmin = cache(async () => sessionUser(db, (await cookies()).get(SESSION_COOKIE)?.value, IDLE_MIN));
+
+export async function requireAdmin(): Promise<Admin> {
   const admin = await currentAdmin();
   if (!admin) redirect('/admin/login/');
   return admin;
@@ -25,12 +29,28 @@ export async function ipHash(): Promise<string> {
   return sha256(`${salt ?? ''}:${ip}`);
 }
 
-// ทุก Server Function ของหลังบ้านผ่านตัวนี้: ตรวจ session ก่อนเสมอ แล้วแปล error ที่ผู้ใช้แก้เองได้เป็นข้อความ
-// error อื่นโยนต่อ ให้ Next แสดงหน้า error แทนการกลืนเงียบ
-export async function adminAction(fn: () => Promise<unknown>): Promise<Result> {
-  await requireAdmin();
+// งานแก้ข้อมูลกับ audit อยู่ใน transaction เดียว: แก้สำเร็จต้องมีบันทึก บันทึกไม่ได้ก็ไม่แก้
+export async function inTx<T>(fn: (tx: PoolClient) => Promise<T>): Promise<T> {
+  const tx = await db.connect();
   try {
-    await fn();
+    await tx.query('begin');
+    const out = await fn(tx);
+    await tx.query('commit');
+    return out;
+  } catch (e) {
+    await tx.query('rollback').catch(() => {});
+    throw e;
+  } finally {
+    tx.release();
+  }
+}
+
+// ทุก Server Function ของหลังบ้านผ่านตัวนี้: ตรวจ session ก่อนเสมอ แล้วส่ง transaction กับผู้ดูแลให้ fn เขียน audit
+// error ที่ผู้ใช้แก้เองได้แปลเป็นข้อความ error อื่นโยนต่อ ให้ Next แสดงหน้า error แทนการกลืนเงียบ
+export async function adminAction(fn: (tx: PoolClient, admin: Admin) => Promise<unknown>): Promise<Result> {
+  const admin = await requireAdmin();
+  try {
+    await inTx((tx) => fn(tx, admin));
     return { ok: true };
   } catch (e) {
     if (e instanceof Error && e.name === 'InputError') return { ok: false, error: e.message };

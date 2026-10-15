@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import sharp from 'sharp';
 import { migrate } from './db-migrate.mjs';
+import { audit } from '../lib/server/audit.ts';
 import { seed } from '../db/seed.mjs';
 import { products } from '../lib/products.ts';
 import { posts } from '../lib/posts.ts';
@@ -13,7 +14,7 @@ import * as tax from '../lib/server/taxonomy.ts';
 import * as prod from '../lib/server/products.ts';
 import { getAnnouncement, saveAnnouncement } from '../lib/server/announcement.ts';
 import { imageExt, newName, resolveInside, toWebp, MAX_EDGE } from '../lib/server/uploads.ts';
-import { login, logout, sessionUser, sha256, upsertAdmin, verifyPassword } from '../lib/server/auth.ts';
+import { disableAdmin, login, logout, sessionUser, sha256, upsertAdmin, verifyPassword } from '../lib/server/auth.ts';
 
 const url = process.env.TEST_DATABASE_URL ?? 'postgres://localhost:5433/iterra_test';
 assert.ok(new URL(url).pathname.endsWith('_test'), `ไม่รันกับ ${url}: ชื่อ DB ต้องลงท้าย _test`);
@@ -24,13 +25,13 @@ try {
   await c.query('drop schema public cascade; create schema public');
 
   // ── migrate (Task 1) ──
-  assert.deepEqual(await migrate(c), ['001_init.sql']);
+  assert.deepEqual(await migrate(c), ['001_init.sql', '002_audit_session_idle.sql']);
   assert.deepEqual(await migrate(c), [], 'รันซ้ำต้องไม่รันไฟล์เดิม');
   const tables = (await c.query("select table_name from information_schema.tables where table_schema = 'public'")).rows
     .map((r) => r.table_name)
     .sort();
   assert.deepEqual(tables, [
-    'admin_users', 'announcement', 'brands', 'catalog', 'categories', 'inquiries', 'login_attempts',
+    'admin_users', 'announcement', 'audit_log', 'brands', 'catalog', 'categories', 'inquiries', 'login_attempts',
     'materials', 'posts', 'products', 'project_products', 'projects', 'schema_migrations', 'sessions',
   ]);
   // ตารางค่าชุดเดียวมีได้แถวเดียว
@@ -269,6 +270,70 @@ try {
     assert.equal(fixed.orientation, undefined);
     // ไฟล์เสียหรือไม่ใช่รูป: InputError ข้อความไทย
     await assert.rejects(toWebp(new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3])), (e) => e.name === 'InputError');
+  }
+  // ── audit log, session ไม่ได้ใช้นาน, ปิดบัญชี (แผน 2 Task 1) ──
+  {
+    const pw2 = 'another long password';
+    const uid = (await c.query("select id::int as id from admin_users where email = 'admin@example.test'")).rows[0].id;
+    const last = async () =>
+      (await c.query('select user_id::int as u, action, entity, entity_id, detail from audit_log order by id desc limit 1')).rows[0];
+    // login สำเร็จเขียน audit · login ผิดไม่เขียน (อยู่ใน login_attempts แทน)
+    const logins = await count("audit_log where action = 'login'");
+    const s = await login(c, 'admin@example.test', pw2, 'ip-g', 14);
+    assert.ok('token' in s);
+    assert.deepEqual(await last(), { u: uid, action: 'login', entity: 'admin_user', entity_id: String(uid), detail: null });
+    assert.deepEqual(await login(c, 'admin@example.test', 'wrong', 'ip-g', 14), { error: 'invalid' });
+    assert.equal(await count("audit_log where action = 'login'"), logins + 1);
+    // ออกจากระบบเขียน audit · token ที่ไม่มีจริงไม่เขียน
+    await logout(c, s.token);
+    assert.deepEqual(await last(), { u: uid, action: 'logout', entity: 'admin_user', entity_id: String(uid), detail: null });
+    const rows = await count('audit_log');
+    await logout(c, 'not-a-token');
+    assert.equal(await count('audit_log'), rows);
+    // audit() เก็บ id เป็นข้อความ และ detail เป็น jsonb · ผู้ใช้ที่ไม่มีจริงโดน FK
+    await audit(c, uid, 'update', 'product', 42, { name: 'ซิงก์' });
+    assert.deepEqual(await last(), { u: uid, action: 'update', entity: 'product', entity_id: '42', detail: { name: 'ซิงก์' } });
+    await audit(c, null, 'disable', 'admin_user', null);
+    assert.deepEqual(await last(), { u: null, action: 'disable', entity: 'admin_user', entity_id: null, detail: null });
+    await assert.rejects(audit(c, 999999, 'update', 'product', 1), (e) => e.code === '23503');
+    // ลบสินค้าคืน slug ให้ audit · ไม่มีแถวแล้วได้ null
+    const brandId = (await tax.listBrands(c))[0].id;
+    const tmp = await prod.saveProduct(c, null, {
+      slug: 'audit-tmp', category: 'sink', brandId, material: '', series: '', th: 'ชั่วคราว', en: '', descTh: '', descEn: '',
+      specs: '', images: [], published: false, featured: false,
+    });
+    assert.equal(await prod.deleteProduct(c, tmp), 'audit-tmp');
+    assert.equal(await prod.deleteProduct(c, tmp), null);
+
+    // session ไม่ได้ใช้เกิน 120 นาที (ค่าเริ่มต้น) ใช้ไม่ได้ แม้ยังไม่ครบ 14 วัน
+    const t = (await login(c, 'admin@example.test', pw2, 'ip-h', 14)).token;
+    const seen = (mins) =>
+      c.query('update sessions set last_seen_at = now() - make_interval(mins => $2) where token_hash = $1', [sha256(t), mins]);
+    const fresh = async () =>
+      (await c.query("select last_seen_at > now() - interval '1 minute' as f from sessions where token_hash = $1", [sha256(t)])).rows[0].f;
+    await seen(121);
+    assert.equal(await sessionUser(c, t), null);
+    await seen(119);
+    assert.equal((await sessionUser(c, t))?.id, uid);
+    assert.equal(await fresh(), true, 'ใช้หลังห่างเกิน 5 นาที: เขียนเวลาใช้งานใหม่');
+    await seen(3);
+    assert.ok(await sessionUser(c, t));
+    assert.equal(await fresh(), false, 'ห่างไม่ถึง 5 นาที: ไม่เขียน DB');
+    assert.equal(await sessionUser(c, t, 2), null, 'ตั้ง SESSION_IDLE_MIN สั้นลงได้');
+
+    // ปิดบัญชี: ตั้ง disabled_at ลบ session ทั้งหมด เขียน audit (ผู้ทำคือสคริปต์ จึงไม่มี user_id)
+    assert.equal(await disableAdmin(c, ' ADMIN@Example.test '), uid);
+    assert.equal(await count(`sessions where user_id = ${uid}`), 0);
+    assert.ok((await c.query('select disabled_at from admin_users where id = $1', [uid])).rows[0].disabled_at);
+    assert.deepEqual(await last(), {
+      u: null, action: 'disable', entity: 'admin_user', entity_id: String(uid), detail: { email: 'admin@example.test' },
+    });
+    assert.equal(await sessionUser(c, t), null);
+    assert.equal(await disableAdmin(c, 'admin@example.test'), null, 'ปิดซ้ำ = ไม่พบบัญชีที่ใช้งานอยู่');
+    assert.equal(await disableAdmin(c, 'nobody@example.test'), null);
+    // เปิดใช้ใหม่ด้วย db:admin (upsertAdmin ล้าง disabled_at) ให้ส่วนถัดไปใช้บัญชีนี้ต่อ
+    await upsertAdmin(c, 'admin@example.test', 'ผู้ทดสอบ', pw2);
+    assert.ok('token' in (await login(c, 'admin@example.test', pw2, 'ip-i', 14)));
   }
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {

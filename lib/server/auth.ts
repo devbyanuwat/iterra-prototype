@@ -54,23 +54,55 @@ export async function login(
   }
   const token = randomBytes(32).toString('base64url');
   const expires = new Date(Date.now() + days * 86_400_000);
-  await db.query('insert into sessions (token_hash, user_id, expires_at) values ($1, $2, $3)', [sha256(token), u.rows[0].id, expires]);
+  // สร้าง session กับ audit login ในคำสั่งเดียว
+  await db.query(
+    `with s as (insert into sessions (token_hash, user_id, expires_at) values ($1, $2, $3) returning user_id)
+     insert into audit_log (user_id, action, entity, entity_id) select user_id, 'login', 'admin_user', user_id::text from s`,
+    [sha256(token), u.rows[0].id, expires],
+  );
   return { token, expires };
 }
 
-export async function sessionUser(db: Db, token: string | undefined): Promise<Admin | null> {
+// ไม่ได้ใช้เกิน idleMin นาที = ใช้ไม่ได้ (spec หัวข้อ 11.3) · อายุสูงสุดยังเป็น expires_at
+// เขียน last_seen_at ไม่เกินทุก 5 นาที ไม่ให้ทุกการกดเขียน DB
+export async function sessionUser(db: Db, token: string | undefined, idleMin = 120): Promise<Admin | null> {
   if (!token) return null;
+  const hash = sha256(token);
   const r = await db.query(
-    `select u.id::int as id, u.email, u.name
+    `select u.id::int as id, u.email, u.name, s.last_seen_at < now() - interval '5 minutes' as stale
        from sessions s join admin_users u on u.id = s.user_id
-      where s.token_hash = $1 and s.expires_at > now() and u.disabled_at is null`,
-    [sha256(token)],
+      where s.token_hash = $1 and s.expires_at > now() and u.disabled_at is null
+        and s.last_seen_at > now() - make_interval(mins => $2)`,
+    [hash, idleMin],
   );
-  return r.rows[0] ?? null;
+  const row = r.rows[0];
+  if (!row) return null;
+  if (row.stale) await db.query('update sessions set last_seen_at = now() where token_hash = $1', [hash]);
+  return { id: row.id, email: row.email, name: row.name };
 }
 
+// ลบ session กับเขียน audit logout ในคำสั่งเดียว · token ที่ไม่มีจริงไม่เขียนอะไร
 export async function logout(db: Db, token: string | undefined): Promise<void> {
-  if (token) await db.query('delete from sessions where token_hash = $1', [sha256(token)]);
+  if (!token) return;
+  await db.query(
+    `with d as (delete from sessions where token_hash = $1 returning user_id)
+     insert into audit_log (user_id, action, entity, entity_id) select user_id, 'logout', 'admin_user', user_id::text from d`,
+    [sha256(token)],
+  );
+}
+
+// ปิดบัญชี (พนักงานลาออก): ตั้ง disabled_at ลบ session ทั้งหมด และเขียน audit ในคำสั่งเดียว
+// คืน id ของบัญชีที่ปิด · ไม่พบบัญชีที่ยังใช้งานอยู่ = null · เปิดใหม่ด้วย upsertAdmin (npm run db:admin)
+export async function disableAdmin(db: Db, email: string): Promise<number | null> {
+  const r = await db.query(
+    `with u as (update admin_users set disabled_at = now() where email = $1 and disabled_at is null returning id),
+          s as (delete from sessions where user_id in (select id from u)),
+          a as (insert into audit_log (action, entity, entity_id, detail)
+                select 'disable', 'admin_user', id::text, jsonb_build_object('email', $1::text) from u)
+     select id::int as id from u`,
+    [email.trim().toLowerCase()],
+  );
+  return r.rows[0]?.id ?? null;
 }
 
 // สร้างบัญชีใหม่ หรือรีเซ็ตรหัสบัญชีเดิม · รีเซ็ตแล้วตัด session เก่าทั้งหมดของบัญชีนั้น

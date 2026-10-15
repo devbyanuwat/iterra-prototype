@@ -16,7 +16,8 @@
     "db:migrate": "node --env-file-if-exists=.env scripts/db-migrate.mjs",
     "db:seed": "node --no-warnings --experimental-strip-types --env-file-if-exists=.env db/seed.mjs",
     "db:admin": "node --no-warnings --experimental-strip-types --env-file-if-exists=.env scripts/db-create-admin.mjs",
-    "check:db": "node --no-warnings --experimental-strip-types --env-file-if-exists=.env scripts/check-db.mjs"
+    "check:db": "node --no-warnings --experimental-strip-types --env-file-if-exists=.env scripts/check-db.mjs",
+    "db:disable-admin": "node --no-warnings --experimental-strip-types --env-file-if-exists=.env scripts/db-disable-admin.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
