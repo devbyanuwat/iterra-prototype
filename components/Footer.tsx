@@ -34,7 +34,7 @@ export default function Footer() {
             <p>{lang === 'th' ? CONTACT.address_th : CONTACT.address_en}</p>
             <p>{CONTACT.phone} · LINE {CONTACT.line}</p>
             <p>{CONTACT.email}</p>
-            <p>{CONTACT.hours_th}</p>
+            <p>{lang === 'th' ? CONTACT.hours_th : CONTACT.hours_en}</p>
           </address>
         </div>
       </div>

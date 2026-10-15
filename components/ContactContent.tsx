@@ -11,7 +11,7 @@ import { useLang } from './LangProvider';
 import { CONTACT } from '@/lib/site';
 
 export default function ContactContent() {
-  const { t } = useLang();
+  const { lang, t } = useLang();
   const [toast, setToast] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -84,10 +84,10 @@ export default function ContactContent() {
           {/* ข้อมูล + แผนที่ */}
           <Reveal delay={0.15}>
             <address className="mb-8 space-y-2.5 text-sm font-light not-italic leading-relaxed text-stone-600">
-              <p>{CONTACT.address_th}</p>
+              <p>{lang === 'th' ? CONTACT.address_th : CONTACT.address_en}</p>
               <p>{CONTACT.phone} · LINE {CONTACT.line}</p>
               <p>{CONTACT.email}</p>
-              <p>{CONTACT.hours_th}</p>
+              <p>{lang === 'th' ? CONTACT.hours_th : CONTACT.hours_en}</p>
             </address>
             <Placeholder label="แผนที่ Google Maps (ฝังของจริงตรงนี้)" ratio="16/9" />
           </Reveal>
