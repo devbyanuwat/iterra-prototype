@@ -25,6 +25,8 @@ export default function AnnouncementAdmin({ data }: { data: AnnouncementData | n
   const router = useRouter();
   const [v, setV] = useState(() => fromData(data));
   const [lang, setLang] = useState<'th' | 'en'>('th');
+  // จอเล็กกว่า lg ตัวอย่างวางข้างฟอร์มไม่ได้ จึงพับเก็บไว้บนฟอร์ม (docs/mockups/admin-mobile.html)
+  const [preview, setPreview] = useState(false);
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -109,7 +111,18 @@ export default function AnnouncementAdmin({ data }: { data: AnnouncementData | n
           </button>
         </form>
 
-        <aside className="space-y-3 lg:sticky lg:top-6 lg:self-start" aria-label="ตัวอย่างประกาศ">
+        <aside className="order-first space-y-3 lg:sticky lg:top-6 lg:order-none lg:self-start" aria-label="ตัวอย่างประกาศ">
+          <button
+            type="button"
+            aria-expanded={preview}
+            aria-controls="announcement-preview"
+            onClick={() => setPreview(!preview)}
+            className="glass flex min-h-11 w-full items-center justify-between rounded-[28px] px-5 py-3 text-sm lg:hidden"
+          >
+            {preview ? 'ซ่อนตัวอย่างประกาศ' : 'ดูตัวอย่างประกาศ'}
+            <span className="text-stone-600">{preview ? 'แตะเพื่อพับ' : 'แตะเพื่อเปิด'}</span>
+          </button>
+          <div id="announcement-preview" className={`space-y-3 lg:block ${preview ? '' : 'hidden'}`}>
           <div className="flex gap-2">
             {(['th', 'en'] as const).map((l) => (
               <button key={l} type="button" aria-pressed={lang === l} className={pill(lang === l)} onClick={() => setLang(l)}>
@@ -130,6 +143,7 @@ export default function AnnouncementAdmin({ data }: { data: AnnouncementData | n
             </div>
           </div>
           {!v.enabled && <p className="text-xs text-stone-600">ประกาศปิดอยู่ หน้าเว็บจะไม่เด้ง</p>}
+          </div>
         </aside>
       </div>
     </>
