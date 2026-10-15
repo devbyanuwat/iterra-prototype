@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>ITERRA หลังบ้าน บนมือถือ (mockup)</title>
+<!--
+  Mockup หลังบ้านบนจอมือถือถึง 768px (2026-10-15)
+  เป็นต้นแบบให้แก้ components/admin/AdminShell.tsx และหน้าใน app/admin/(panel)/
+  จอตั้งแต่ 1024px (lg) ใช้ sidebar เดิม ไม่ใช้แถบลอยนี้
+  คลาส .glass ก๊อปจาก app/globals.css · คลาสปุ่มและช่องกรอกก๊อปจาก components/admin/ui.ts
+  ข้อมูลสินค้า หมวด วัสดุ ประกาศ คือข้อมูลใน iterra_dev วันที่ทำ mockup
+  เปิดไฟล์นี้ตรงจาก repo ได้เลย รูปอ้างอิง public/ ด้วย path สัมพัทธ์
+-->
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#faf9f7',
+          ink: '#1c1917',
+          warm: { 100: '#f5f4f1', 200: '#e9e7e2', 300: '#d6d3cc', 400: '#a8a29e', 500: '#78716c' },
+        },
+        fontFamily: { sans: ['Inter', 'Noto Sans Thai', 'system-ui', 'sans-serif'] },
+      },
+    },
+  };
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+Thai:wght@200;300;400;500&display=swap">
+<style>
+  .glass {
+    background: rgb(255 255 255 / var(--glass, 0.6));
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgb(255 255 255 / 0.6);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.9),
+      inset 0 -1px 0 rgb(255 255 255 / 0.3),
+      0 12px 40px rgb(28 25 23 / 0.12);
+  }
+  /* แถบลอยแบบ IG: เงาหนากว่าการ์ดเพราะลอยทับเนื้อหา */
+  .tabbar { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 10px 30px rgb(28 25 23 / 0.18), 0 2px 6px rgb(28 25 23 / 0.08); }
+  .tab[aria-current='page'] .tab-pill { background: rgb(28 25 23 / 0.07); }
+  .tab[aria-current='page'] svg { stroke-width: 2; }
+  .side[aria-current='page'] { background: #1c1917; color: #faf9f7; }
+  .side:not([aria-current='page']):hover { background: rgb(255 255 255 / 0.7); }
+  dialog::backdrop { background: rgb(28 25 23 / 0.35); }
+  dialog.sheet { margin: auto 0 0; max-width: 100%; width: 100%; max-height: 92dvh; padding: 0; background: transparent; }
+  dialog.sheet[open] { animation: up 0.28s cubic-bezier(0.2, 0.9, 0.3, 1); }
+  @keyframes up { from { transform: translateY(24px); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { dialog.sheet[open] { animation: none; } }
+  .scroll-x { scrollbar-width: none; }
+  .scroll-x::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body class="bg-warm-200 font-sans font-normal text-ink antialiased">
+
+<div id="root" style="--glass: 0.8">
+  <!-- พื้นหลังเดิมของหลังบ้าน: ภาพครัวจางกับแสงอุ่น 2 ดวง -->
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0">
+    <img src="../../public/media/scenes/about-hero.webp" alt="" class="h-full w-full object-cover opacity-70">
+    <div class="absolute -left-24 top-1/4 h-96 w-96 rounded-full bg-amber-200/60 blur-3xl"></div>
+    <div class="absolute -right-24 bottom-0 h-[28rem] w-[28rem] rounded-full bg-stone-300/70 blur-3xl"></div>
+  </div>
+
+  <!-- มือถือ (ต่ำกว่า 768): แถบลอยด้านล่าง · iPad และจอคอม (ตั้งแต่ 768): sidebar ซ้ายแบบหน้าต่างเดิม -->
+  <div class="relative mx-auto grid max-w-7xl md:grid-cols-[14rem_minmax(0,1fr)] md:gap-4 md:p-4 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-6 lg:p-6">
+  <aside class="glass sticky top-4 hidden h-[calc(100dvh-2rem)] flex-col gap-6 rounded-[28px] p-5 md:flex lg:top-6 lg:h-[calc(100dvh-3rem)]">
+    <div>
+      <p class="text-lg font-light tracking-[0.3em]">ITERRA</p>
+      <p class="mt-1 truncate text-xs text-stone-600">หลังบ้าน · แอดมิน</p>
+    </div>
+    <nav aria-label="เมนูหลังบ้าน">
+      <ul class="flex flex-col gap-1">
+        <li><button type="button" data-tab="products" aria-current="page" class="side flex min-h-11 w-full items-center whitespace-nowrap rounded-full px-4 text-sm">สินค้า</button></li>
+        <li><button type="button" data-tab="taxonomy" class="side flex min-h-11 w-full items-center whitespace-nowrap rounded-full px-4 text-sm">หมวด แบรนด์ วัสดุ</button></li>
+        <li><button type="button" data-tab="announcement" class="side flex min-h-11 w-full items-center whitespace-nowrap rounded-full px-4 text-sm">ประกาศ</button></li>
+        <li><span class="flex min-h-11 items-center px-4 text-sm text-stone-600">บทความ</span></li>
+        <li><span class="flex min-h-11 items-center px-4 text-sm text-stone-600">ผลงาน</span></li>
+        <li><span class="flex min-h-11 items-center px-4 text-sm text-stone-600">แคตตาล็อก</span></li>
+      </ul>
+    </nav>
+    <div class="mt-auto space-y-4">
+      <label class="block text-sm">ความทึบของกระจก <span class="glass-v text-stone-600">80%</span>
+        <input type="range" min="0.7" max="0.95" step="0.05" value="0.8" class="glass-in mt-2 block w-full accent-ink">
+      </label>
+      <div class="flex flex-wrap gap-1">
+        <a href="#" class="ghost">เปิดหน้าเว็บ</a>
+        <button type="button" class="ghost">ออกจากระบบ</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- เนื้อหา: บนมือถือเว้นล่าง 7rem + safe area ไม่ให้การ์ดสุดท้ายโดนแถบลอยบัง -->
+  <main class="relative min-w-0 space-y-4 px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:px-0 md:pb-4 md:pt-0">
+
+    <div role="status" id="toast" class="pointer-events-none fixed inset-x-4 top-[max(1rem,env(safe-area-inset-top))] z-40 mx-auto max-w-sm rounded-full bg-ink px-5 py-3 text-center text-sm text-paper opacity-0 transition-opacity"></div>
+
+    <!-- ── หน้า สินค้า ── -->
+    <section data-page="products" class="space-y-4">
+      <header class="glass flex items-end justify-between gap-4 rounded-[28px] p-5">
+        <div>
+          <h1 class="text-2xl font-extralight tracking-wide">สินค้า</h1>
+          <p class="mt-1 text-sm text-stone-600"><span id="count">10</span> รายการ</p>
+        </div>
+        <button type="button" class="solid" data-open-form>เพิ่มสินค้า</button>
+      </header>
+
+      <!-- มือถือ: pill หมวดเลื่อนข้างแถวเดียว ยืดออกนอกขอบจอให้รู้ว่าเลื่อนได้ · iPad ขึ้นไป: ตัดบรรทัดแบบเดิม -->
+      <ul id="cats" class="scroll-x -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0" aria-label="หมวดสินค้า"></ul>
+
+      <div class="glass flex gap-2 rounded-[28px] p-3">
+        <input type="search" id="q" placeholder="ค้นหาชื่อ ซีรีส์ หรือแบรนด์" aria-label="ค้นหาสินค้า" class="input min-w-0 flex-1">
+        <select aria-label="กรองตามแบรนด์" class="input shrink-0" style="width: 7.25rem">
+          <option>ทุกแบรนด์</option>
+          <option>KOHLER</option>
+        </select>
+      </div>
+
+      <!-- การ์ดสินค้า: มือถือแนวนอน 2 คอลัมน์ · iPad แนวตั้งมี sidebar กินที่ จึงกลับเป็น 1 คอลัมน์ · จอกว้าง 2 คอลัมน์ -->
+      <ul id="list" class="grid gap-3 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2"></ul>
+    </section>
+
+    <!-- ── หน้า หมวด แบรนด์ วัสดุ ── -->
+    <section data-page="taxonomy" class="hidden space-y-4">
+      <header class="glass rounded-[28px] p-5">
+        <h1 class="text-2xl font-extralight tracking-wide">หมวด แบรนด์ วัสดุ</h1>
+        <p class="mt-1 text-sm text-stone-600">ลบได้เฉพาะรายการที่ยังไม่มีสินค้าใช้</p>
+      </header>
+      <div id="tax" class="space-y-4"></div>
+    </section>
+
+    <!-- ── หน้า ประกาศ ── -->
+    <section data-page="announcement" class="hidden space-y-4">
+      <header class="glass rounded-[28px] p-5">
+        <h1 class="text-2xl font-extralight tracking-wide">ประกาศ</h1>
+        <p class="mt-1 text-sm text-stone-600">เด้งครั้งเดียวต่อการเปิดเว็บ คนที่กดปิดแล้วจะไม่เห็นซ้ำ จนกว่าจะติ๊ก แสดงอีกครั้ง</p>
+      </header>
+
+      <!-- ตัวอย่างพับเก็บไว้บนมือถือ เพราะวางข้างฟอร์มไม่ได้ -->
+      <details class="glass rounded-[28px] p-5">
+        <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between text-sm">
+          ดูตัวอย่างประกาศ
+          <span class="text-stone-600">แตะเพื่อเปิด</span>
+        </summary>
+        <div class="mt-3 overflow-hidden bg-paper">
+          <img src="../../public/media/scenes/about-hero.webp" alt="" class="aspect-[16/9] w-full object-cover">
+          <div class="p-5">
+            <p class="text-lg font-light tracking-wide">นัดชมโชว์รูม ITERRA</p>
+            <p class="mt-2 text-sm font-light leading-relaxed text-stone-600">สัมผัสก๊อกและซิงก์ครัวรุ่นจริง พร้อมที่ปรึกษาช่วยเลือกให้เข้ากับครัวของคุณ นัดหมายล่วงหน้าได้ทุกวัน</p>
+            <span class="mt-5 inline-flex min-h-11 items-center bg-ink px-6 text-[11px] uppercase tracking-[0.22em] text-paper">นัดหมายเข้าชม</span>
+          </div>
+        </div>
+      </details>
+
+      <form class="glass space-y-4 rounded-[28px] p-5" onsubmit="event.preventDefault(); toast('บันทึกแล้ว')">
+        <label class="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked class="h-5 w-5 accent-ink"> เปิดประกาศ</label>
+        <label class="block"><span class="label">ไทย: หัวข้อ (จำเป็น)</span><input class="input" value="นัดชมโชว์รูม ITERRA"></label>
+        <label class="block"><span class="label">English: หัวข้อ</span><input class="input" value="Visit the ITERRA showroom"></label>
+        <label class="block"><span class="label">ไทย: เนื้อหา (จำเป็น)</span><textarea rows="4" class="input h-auto py-2">สัมผัสก๊อกและซิงก์ครัวรุ่นจริง พร้อมที่ปรึกษาช่วยเลือกให้เข้ากับครัวของคุณ นัดหมายล่วงหน้าได้ทุกวัน</textarea></label>
+        <label class="block"><span class="label">English: เนื้อหา</span><textarea rows="4" class="input h-auto py-2">See the faucets and sinks in person, with a consultant to help you choose what fits your kitchen. Book any day of the week.</textarea></label>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block"><span class="label">ไทย: ข้อความปุ่ม</span><input class="input" value="นัดหมายเข้าชม"></label>
+          <label class="block"><span class="label">English: ข้อความปุ่ม</span><input class="input" value="Book a visit"></label>
+        </div>
+        <label class="block"><span class="label">ลิงก์ของปุ่ม</span><input class="input" value="/contact/"><span class="mt-1 block text-xs text-stone-600">เช่น /contact/ หรือ https://... · เว้นว่าง = ไม่มีปุ่ม</span></label>
+        <div>
+          <p class="label">รูป (16:9)</p>
+          <div class="flex items-center gap-3">
+            <img src="../../public/media/scenes/about-hero.webp" alt="รูปหลัก" class="h-16 w-28 rounded-xl object-cover">
+            <button type="button" class="ghost text-[#9f2d20]">ลบรูป</button>
+          </div>
+        </div>
+        <label class="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" class="h-5 w-5 accent-ink"> แสดงอีกครั้งกับคนที่ปิดไปแล้ว</label>
+        <button type="submit" class="solid w-full justify-center">บันทึก</button>
+      </form>
+    </section>
+
+  </main>
+  </div>
+
+  <!-- ── แถบลอยแบบ IG (เฉพาะมือถือ ต่ำกว่า 768): แคปซูลกระจก ไอคอนล้วน แท็บที่เลือกมีแคปซูลเทารอง ── -->
+  <nav aria-label="เมนูหลังบ้าน" class="fixed inset-x-3 z-30 mx-auto max-w-md md:hidden" style="bottom: calc(0.75rem + env(safe-area-inset-bottom))">
+    <ul class="glass tabbar flex h-16 items-center rounded-full px-2">
+      <li class="flex-1"><button type="button" class="tab flex h-16 w-full items-center justify-center" data-tab="products" aria-label="สินค้า" aria-current="page">
+        <span class="tab-pill flex h-12 w-full items-center justify-center rounded-full transition-colors">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4z"/><path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9"/></svg>
+        </span></button></li>
+      <li class="flex-1"><button type="button" class="tab flex h-16 w-full items-center justify-center" data-tab="taxonomy" aria-label="หมวด แบรนด์ วัสดุ">
+        <span class="tab-pill flex h-12 w-full items-center justify-center rounded-full transition-colors">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1.4 1.4 0 0 1 0 2l-6.5 6.5a1.4 1.4 0 0 1-2 0z"/><circle cx="8" cy="8" r="1.4"/></svg>
+        </span></button></li>
+      <li class="flex-1"><button type="button" class="tab flex h-16 w-full items-center justify-center" data-tab="announcement" aria-label="ประกาศ">
+        <span class="tab-pill flex h-12 w-full items-center justify-center rounded-full transition-colors">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4a1 1 0 0 0 1 1h2.5L14 19V5L7.5 9H5a1 1 0 0 0-1 1z"/><path d="M17.5 9.2a4 4 0 0 1 0 5.6M8 15l1 4.5"/></svg>
+        </span></button></li>
+      <li class="flex-1"><button type="button" class="tab flex h-16 w-full items-center justify-center" data-more aria-label="อื่น ๆ: ความทึบกระจก เปิดหน้าเว็บ ออกจากระบบ" aria-haspopup="dialog">
+        <span class="tab-pill flex h-12 w-full items-center justify-center rounded-full transition-colors">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="10" r="3"/><path d="M6.6 18.2a6.2 6.2 0 0 1 10.8 0"/></svg>
+        </span></button></li>
+    </ul>
+  </nav>
+
+  <!-- ── sheet อื่น ๆ ── -->
+  <dialog id="more" class="sheet" aria-labelledby="more-title">
+    <div class="glass mx-2 mb-[max(0.5rem,env(safe-area-inset-bottom))] space-y-5 rounded-[28px] p-5">
+      <div class="mx-auto h-1.5 w-10 rounded-full bg-stone-400/60" aria-hidden="true"></div>
+      <div>
+        <p id="more-title" tabindex="-1" autofocus class="outline-none text-lg font-light tracking-[0.3em]">ITERRA</p>
+        <p class="mt-1 text-xs text-stone-600">หลังบ้าน · แอดมิน</p>
+      </div>
+      <div>
+        <p class="label">เมนูที่จะมาในแผนที่ 2</p>
+        <ul class="flex flex-wrap gap-1 text-sm text-stone-600">
+          <li class="flex min-h-11 items-center rounded-full px-4">บทความ</li>
+          <li class="flex min-h-11 items-center rounded-full px-4">ผลงาน</li>
+          <li class="flex min-h-11 items-center rounded-full px-4">แคตตาล็อก</li>
+        </ul>
+      </div>
+      <label class="block text-sm">ความทึบของกระจก <span class="glass-v text-stone-600">80%</span>
+        <input type="range" min="0.7" max="0.95" step="0.05" value="0.8" class="glass-in mt-3 block h-11 w-full accent-ink">
+      </label>
+      <div class="grid grid-cols-2 gap-2">
+        <a href="#" class="ghost justify-center bg-white/60">เปิดหน้าเว็บ</a>
+        <button type="button" class="ghost justify-center bg-white/60 text-[#9f2d20]">ออกจากระบบ</button>
+      </div>
+      <button type="button" class="ghost w-full justify-center" data-close>ปิด</button>
+    </div>
+  </dialog>
+
+  <!-- ── sheet ฟอร์มสินค้า: เต็มจอ ปุ่มบันทึกติดล่าง ── -->
+  <dialog id="form" class="sheet" aria-labelledby="form-title">
+    <form method="dialog" class="glass flex max-h-[92dvh] flex-col rounded-t-[28px]" style="--glass: 0.92">
+      <div class="flex items-center justify-between gap-2 border-b border-white/70 px-3 py-2">
+        <button type="button" class="ghost" data-close>ยกเลิก</button>
+        <h2 id="form-title" tabindex="-1" autofocus class="outline-none min-w-0 truncate text-base">เพิ่มสินค้า</h2>
+        <span class="w-[4.5rem]" aria-hidden="true"></span>
+      </div>
+      <div class="space-y-4 overflow-y-auto px-5 py-4">
+        <div class="grid grid-cols-2 gap-3">
+          <label class="block"><span class="label">หมวด (จำเป็น)</span><select id="f-cat" class="input"></select></label>
+          <label class="block"><span class="label">แบรนด์ (จำเป็น)</span><select class="input"><option>KOHLER</option></select></label>
+          <label class="block"><span class="label">ซีรีส์</span><input id="f-series" class="input"></label>
+          <label class="block"><span class="label">วัสดุ</span><select class="input"><option>ไม่ระบุ</option><option>ทองเหลือง</option><option>สเตนเลสสตีล</option><option>เหล็กหล่อ</option></select></label>
+        </div>
+        <label class="block"><span class="label">ไทย: ชื่อสินค้า (จำเป็น)</span><input id="f-th" class="input"></label>
+        <label class="block"><span class="label">English: ชื่อสินค้า</span><input class="input"></label>
+        <label class="block"><span class="label">slug (ส่วนท้ายลิงก์)</span><input class="input"><span class="mt-1 block text-xs text-stone-600">เว้นว่างได้ ระบบสร้างจากชื่อภาษาอังกฤษ · ใช้ a-z ตัวเลข และ -</span></label>
+        <label class="block"><span class="label">ไทย: รายละเอียด</span><textarea rows="3" class="input h-auto py-2"></textarea></label>
+        <label class="block"><span class="label">English: รายละเอียด</span><textarea rows="3" class="input h-auto py-2"></textarea></label>
+        <label class="block"><span class="label">สเปก</span><span class="-mt-1 mb-2 block text-xs text-stone-600">บรรทัดละ 1 ข้อ เช่น วัสดุ: ทองเหลือง</span><textarea rows="3" class="input h-auto py-2"></textarea></label>
+        <div>
+          <p class="label">รูปสินค้า (รูปแรกคือรูปหลัก)</p>
+          <div class="flex flex-wrap gap-2">
+            <img id="f-img" alt="รูปหลัก" class="hidden h-20 w-20 rounded-xl bg-white object-contain">
+            <span class="flex h-20 min-w-[8rem] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-warm-500 px-3 text-center text-sm">กดเพื่อเลือกรูป<span class="text-xs text-stone-600">JPG, PNG หรือ WebP ไม่เกิน 5 MB</span></span>
+          </div>
+        </div>
+        <label class="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked class="h-5 w-5 accent-ink"> แสดงบนหน้าเว็บ</label>
+        <label class="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" class="h-5 w-5 accent-ink"> สินค้าเด่นหน้าแรก</label>
+      </div>
+      <div class="border-t border-white/70 px-5 pt-3" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom))">
+        <button type="submit" class="solid w-full justify-center" onclick="toast('บันทึกแล้ว')">บันทึก</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ── sheet ยืนยันลบ ── -->
+  <dialog id="del" class="sheet" aria-labelledby="del-title">
+    <div class="glass mx-2 mb-[max(0.5rem,env(safe-area-inset-bottom))] space-y-4 rounded-[28px] p-5" style="--glass: 0.92">
+      <h2 id="del-title" tabindex="-1" autofocus class="outline-none text-base"></h2>
+      <p class="text-sm text-stone-600">สินค้านี้จะหายจากหน้าเว็บ และกู้คืนไม่ได้ ถ้าแค่ไม่อยากให้เห็น ใช้ปุ่มซ่อนแทน</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" class="ghost justify-center bg-white/60" data-close>ยกเลิก</button>
+        <button type="button" id="del-ok" class="inline-flex min-h-11 items-center justify-center rounded-full bg-[#9f2d20] px-6 text-sm text-paper active:scale-[0.98]">ลบ</button>
+      </div>
+    </div>
+  </dialog>
+</div>
+
+<style type="text/tailwindcss">
+  /* ก๊อปจาก components/admin/ui.ts */
+  .input { @apply h-11 w-full rounded-xl border border-white/70 bg-white/70 px-3 text-base font-normal text-ink outline-none transition focus:border-ink focus:bg-white; }
+  .label { @apply mb-2 block text-sm font-normal text-ink; }
+  .solid { @apply inline-flex min-h-11 items-center rounded-full bg-ink px-6 text-sm font-normal text-paper transition hover:bg-stone-700 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink disabled:opacity-50; }
+  .ghost { @apply inline-flex min-h-11 items-center rounded-full px-4 text-sm font-normal text-ink transition hover:bg-white/70 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink disabled:cursor-not-allowed disabled:opacity-40; }
+  .pill { @apply inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 text-sm font-normal transition active:scale-[0.98]; }
+</style>
+
+<script>
+  const IMG = '../../public/media/products/';
+  const CATS = [
+    { key: 'kitchen', th: 'ชุดครัว', en: 'Kitchen sets', multi: false },
+    { key: 'wardrobe', th: 'ตู้เสื้อผ้า', en: 'Wardrobes', multi: false },
+    { key: 'accessory', th: 'อุปกรณ์เสริม', en: 'Accessories', multi: false },
+    { key: 'faucet', th: 'ก๊อกล้างจาน', en: 'Kitchen faucets', multi: true },
+    { key: 'sink', th: 'อ่างล้างจาน', en: 'Kitchen sinks', multi: true },
+    { key: 'appliance', th: 'เครื่องใช้ไฟฟ้า', en: 'Appliances', multi: true },
+    { key: 'countertop', th: 'ท็อปหิน', en: 'Stone countertops', multi: true },
+  ];
+  const MATERIALS = [
+    { th: 'ทองเหลือง', en: 'Brass', n: 5 },
+    { th: 'สเตนเลสสตีล', en: 'Stainless steel', n: 3 },
+    { th: 'เหล็กหล่อ', en: 'Cast iron', n: 1 },
+  ];
+  let products = [
+    ['Elate™ ก๊อกผสมอ่างล้างจาน หัวฝักบัวดึงได้', 'faucet', 'Elate', 'elate-13963t-c4-1.webp'],
+    ['Kumin™ ก๊อกผสมอ่างล้างจาน', 'faucet', 'Kumin', 'kumin-99480t-4-1.webp'],
+    ['Elate™ ก๊อกผสมอ่างล้างจาน', 'faucet', 'Elate', 'elate-15609x-4-1.webp'],
+    ['Taut™ ก๊อกเดี่ยวอ่างล้างจาน', 'faucet', 'Taut', 'taut-21370t-4cd-1.webp'],
+    ['Kumin™ ก๊อกเดี่ยวอ่างล้างจาน', 'faucet', 'Kumin', 'kumin-30946t-4-1.webp'],
+    ['Taut™ ก๊อกผสมอ่างล้างจาน หัวฝักบัวดึงลง', 'faucet', 'Taut', 'taut-21366t-4-1.webp'],
+    ['Toccata™ ซิงก์สเตนเลส 1 หลุม', 'sink', 'Toccata', 'toccata-3644x-2kd-1.webp'],
+    ['Indio™ ซิงก์เหล็กหล่อ 2 หลุม', 'sink', 'Indio', 'indio-3885x-2sd-1.webp'],
+    ['Toccata™ ซิงก์สเตนเลส 2 หลุม', 'sink', 'Toccata', 'toccata-3645x-2kd-1.webp'],
+    ['Marcato™ ซิงก์สเตนเลส 1 หลุมครึ่ง', 'sink', 'Marcato', 'marcato-3676x-2kd-1.webp'],
+  ].map(([th, category, series, img], id) => ({ id, th, category, series, img: IMG + img, published: true, updated: '2026-10-15' }));
+
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const catName = (k) => CATS.find((c) => c.key === k)?.th ?? k;
+  let cat = 'all';
+  let toDelete = null;
+
+  function toast(text) {
+    const t = $('#toast');
+    t.textContent = text;
+    t.style.opacity = 1;
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => (t.style.opacity = 0), 2200);
+  }
+
+  function renderCats() {
+    const count = (k) => (k === 'all' ? products.length : products.filter((p) => p.category === k).length);
+    $('#cats').innerHTML = ['all', ...CATS.map((c) => c.key)]
+      .map((k) => {
+        const on = k === cat;
+        return `<li><button type="button" data-cat="${k}" aria-pressed="${on}" class="pill ${on ? 'bg-ink text-paper' : 'glass text-ink'}">${k === 'all' ? 'ทั้งหมด' : catName(k)}<span class="${on ? 'text-warm-300' : 'text-stone-600'}">${count(k)}</span></button></li>`;
+      })
+      .join('');
+  }
+
+  function renderList() {
+    const q = $('#q').value.trim().toLowerCase();
+    const shown = products.filter((p) => (cat === 'all' || p.category === cat) && (!q || `${p.th} ${p.series} KOHLER`.toLowerCase().includes(q)));
+    $('#count').textContent = products.length;
+    $('#list').innerHTML = shown.length
+      ? shown
+          .map(
+            (p) => `
+      <li class="glass rounded-[24px] p-3">
+        <button type="button" data-edit="${p.id}" class="flex w-full items-start gap-3 rounded-2xl p-1 text-left">
+          <span class="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white"><img src="${p.img}" alt="" class="h-full w-full object-contain"></span>
+          <span class="min-w-0 flex-1">
+            <span class="line-clamp-2 block text-sm leading-snug">${esc(p.th)}</span>
+            <span class="mt-1 block truncate text-xs text-stone-600">${catName(p.category)} · KOHLER ${esc(p.series)}</span>
+            <span class="mt-2 flex items-center gap-2 text-xs">
+              <span class="rounded-full px-2.5 py-0.5 ${p.published ? 'bg-ink text-paper' : 'border border-ink text-ink'}">${p.published ? 'เผยแพร่' : 'ซ่อน'}</span>
+              <span class="text-stone-600">${p.updated}</span>
+            </span>
+          </span>
+        </button>
+        <div class="mt-2 grid grid-cols-3 gap-1.5">
+          <button type="button" data-edit="${p.id}" class="ghost justify-center bg-white/60">แก้ไข</button>
+          <button type="button" data-toggle="${p.id}" class="ghost justify-center bg-white/60">${p.published ? 'ซ่อน' : 'แสดง'}</button>
+          <button type="button" data-del="${p.id}" class="ghost justify-center bg-white/60 text-[#9f2d20]">ลบ</button>
+        </div>
+      </li>`,
+          )
+          .join('')
+      : `<li class="glass rounded-[28px] px-6 py-14 text-center sm:col-span-2"><p class="text-sm">ยังไม่มีสินค้าในหมวดนี้</p><button type="button" class="solid mt-5" data-open-form>เพิ่มสินค้า</button></li>`;
+  }
+
+  function renderTax() {
+    const count = (k) => products.filter((p) => p.category === k).length;
+    const row = (title, sub, n, kind) => `
+      <li class="flex items-center gap-2 py-2">
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-sm">${title}</p>
+          <p class="truncate text-xs text-stone-600">${sub} · สินค้า ${n} ชิ้น</p>
+        </div>
+        <button type="button" class="ghost px-3" onclick="toast('เปิดฟอร์มแก้ไข${kind}')">แก้ไข</button>
+        <button type="button" class="ghost px-3 text-[#9f2d20]" ${n > 0 ? 'disabled title="ยังมีสินค้าใช้อยู่ ลบไม่ได้"' : ''}>ลบ</button>
+      </li>`;
+    const box = (title, add, rows) => `
+      <section class="glass rounded-[28px] p-5">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-lg font-light">${title}</h2>
+          <button type="button" class="ghost bg-white/60" onclick="toast('เปิดฟอร์ม${add}')">${add}</button>
+        </div>
+        <ul class="mt-2 divide-y divide-white/70">${rows}</ul>
+      </section>`;
+    $('#tax').innerHTML =
+      box('หมวด', 'เพิ่มหมวด', CATS.map((c) => row(c.th, `${c.en} · ${c.multi ? 'หลายแบรนด์' : 'แบรนด์เดียว'}`, count(c.key), 'หมวด')).join('')) +
+      box('แบรนด์', 'เพิ่มแบรนด์', row('KOHLER', 'แบรนด์', products.length, 'แบรนด์')) +
+      box('วัสดุ', 'เพิ่มวัสดุ', MATERIALS.map((m) => row(m.th, m.en, m.n, 'วัสดุ')).join(''));
+  }
+
+  function openForm(p) {
+    $('#form-title').textContent = p ? `แก้ไข ${p.th}` : 'เพิ่มสินค้า';
+    $('#f-cat').innerHTML = CATS.map((c) => `<option ${p && p.category === c.key ? 'selected' : ''}>${c.th}</option>`).join('');
+    $('#f-th').value = p ? p.th : '';
+    $('#f-series').value = p ? p.series : '';
+    $('#f-img').src = p ? p.img : '';
+    $('#f-img').classList.toggle('hidden', !p);
+    $('#form').showModal();
+  }
+
+  function show(page) {
+    document.querySelectorAll('[data-page]').forEach((s) => s.classList.toggle('hidden', s.dataset.page !== page));
+    document.querySelectorAll('[data-tab]').forEach((t) => (t.dataset.tab === page ? t.setAttribute('aria-current', 'page') : t.removeAttribute('aria-current')));
+    window.scrollTo(0, 0);
+  }
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('button, a');
+    if (!t) return;
+    const d = t.dataset;
+    if (d.tab) show(d.tab);
+    else if (d.more !== undefined) $('#more').showModal();
+    else if (d.close !== undefined) t.closest('dialog').close();
+    else if (d.cat) { cat = d.cat; renderCats(); renderList(); }
+    else if (d.openForm !== undefined) openForm(null);
+    else if (d.edit) openForm(products.find((p) => p.id === +d.edit));
+    else if (d.toggle) {
+      const p = products.find((x) => x.id === +d.toggle);
+      p.published = !p.published;
+      renderList();
+      toast(`${p.published ? 'แสดง' : 'ซ่อน'} ${p.th} แล้ว`);
+    } else if (d.del) {
+      toDelete = products.find((p) => p.id === +d.del);
+      $('#del-title').textContent = `ลบ ${toDelete.th}`;
+      $('#del').showModal();
+    } else if (t.id === 'del-ok') {
+      products = products.filter((p) => p !== toDelete);
+      $('#del').close();
+      renderCats();
+      renderList();
+      renderTax();
+      toast(`ลบ ${toDelete.th} แล้ว`);
+    } else if (t.getAttribute('href') === '#') e.preventDefault();
+  });
+  // แตะพื้นหลังนอก sheet = ปิด
+  document.querySelectorAll('dialog').forEach((dlg) => dlg.addEventListener('click', (e) => e.target === dlg && dlg.close()));
+  $('#q').addEventListener('input', renderList);
+  document.querySelectorAll('.glass-in').forEach((r) =>
+    r.addEventListener('input', (e) => {
+      $('#root').style.setProperty('--glass', e.target.value);
+      document.querySelectorAll('.glass-in').forEach((x) => (x.value = e.target.value));
+      document.querySelectorAll('.glass-v').forEach((x) => (x.textContent = `${Math.round(e.target.value * 100)}%`));
+    }),
+  );
+
+  renderCats();
+  renderList();
+  renderTax();
+</script>
+</body>
+</html>
