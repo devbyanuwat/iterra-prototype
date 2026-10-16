@@ -2,6 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
+<script>document.documentElement.classList.add('js')</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Checklist ส่งมอบ ITERRA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -9,46 +10,81 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+Thai:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
   /* พื้นและตัวอักษรตาม design.md · สีประเภทใช้ชุดเดียวกับปฏิทินลูกค้า ทุกป้ายมีคำกำกับ ไม่ใช้สีอย่างเดียว */
-  :root { --paper: #faf9f7; --ink: #1c1917; --warm-100: #f5f4f1; --warm-300: #d6d3cc; --warm-500: #78716c; --stone-600: #57534e; --stone-700: #44403c; }
+  :root { --paper: #faf9f7; --ink: #1c1917; --warm-100: #f5f4f1; --warm-200: #e9e7e2; --warm-300: #d6d3cc; --warm-500: #78716c; --stone-600: #57534e; --stone-700: #44403c; --late: #9f2d20; }
   * { box-sizing: border-box; }
-  html { -webkit-font-smoothing: antialiased; }
+  html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body { margin: 0; background: var(--paper); color: var(--ink); font-family: Inter, 'Noto Sans Thai', system-ui, sans-serif; font-weight: 300; line-height: 1.6; }
   main { max-width: 1120px; margin: 0 auto; padding: 72px 24px 96px; }
   .label { margin: 0 0 14px; font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--stone-600); }
   h1 { margin: 0; font-size: 40px; font-weight: 200; letter-spacing: 0.025em; line-height: 1.2; }
   h2 { margin: 0; font-size: 26px; font-weight: 200; letter-spacing: 0.025em; line-height: 1.3; }
   .intro { max-width: 44rem; margin: 14px 0 0; font-size: 14px; color: var(--stone-600); }
-  .keys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 36px 0 0; border-top: 1px solid var(--ink); }
-  .keys div { padding: 16px 16px 16px 0; border-bottom: 1px solid var(--warm-300); }
-  .keys b { display: block; font-size: 22px; font-weight: 200; }
-  .keys span { font-size: 13px; color: var(--stone-600); }
-  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; margin-top: 20px; font-size: 13px; }
-  .meter { flex: 1 1 240px; height: 6px; background: var(--warm-300); }
-  .meter i { display: block; height: 100%; width: 0; background: var(--ink); transition: width 0.3s; }
-  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0; padding: 0; list-style: none; }
 
+  /* แถบเส้นเวลา: กว้างตามจำนวนวันจริง หมุดคือวันนัด เส้นแดงคือวันนี้ */
+  .track { position: relative; margin: 44px 0 0; padding-top: 52px; }
+  .miles { position: absolute; inset: 0 0 auto 0; height: 52px; }
+  .mile { position: absolute; bottom: 10px; transform: translateX(-50%); font-size: 11px; line-height: 1.35; text-align: center; white-space: nowrap; color: var(--stone-700); }
+  .mile b { display: block; font-size: 13px; font-weight: 500; color: var(--ink); }
+  .mile:last-child { transform: translateX(-100%); text-align: right; }
+  .rail { position: relative; height: 40px; background: var(--warm-200); }
+  .band { position: absolute; top: 0; bottom: 0; display: grid; place-items: center; border-left: 1px solid var(--paper); font-size: 12px; font-weight: 500; color: var(--ink); text-decoration: none; }
+  .band:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; z-index: 2; }
+  .b1, .b4 { background: var(--warm-300); } .b2, .b6 { background: #e4e1db; }
+  .b3, .b5 { background: var(--ink); color: var(--paper); }
+  .pin { position: absolute; top: -10px; bottom: 0; width: 0; border-left: 1px solid var(--ink); }
+  .now { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--late); }
+  .now::after { content: 'วันนี้'; position: absolute; top: calc(100% + 2px); left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: 500; color: var(--late); white-space: nowrap; }
+  .ticks { position: relative; height: 34px; border-top: 1px solid var(--ink); }
+  .ticks span { position: absolute; top: 14px; padding-left: 4px; border-left: 1px solid var(--warm-300); font-size: 11px; color: var(--stone-600); white-space: nowrap; }
+
+  .phases { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 8px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--ink); }
+  .pcard { display: flex; flex-direction: column; gap: 2px; height: 100%; padding: 12px 12px 14px 0; border-bottom: 1px solid var(--warm-300); color: var(--ink); text-decoration: none; }
+  .phases li + li .pcard { padding-left: 12px; border-left: 1px solid var(--warm-300); }
+  .pcard:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .pn { font-size: 22px; font-weight: 200; line-height: 1.1; }
+  .pw { font-size: 12px; font-weight: 500; }
+  .pt { flex: 1; font-size: 13px; line-height: 1.4; color: var(--stone-700); }
+  .pm { display: block; height: 3px; margin-top: 8px; background: var(--warm-300); }
+  .pm i { display: block; height: 100%; width: 0; background: var(--ink); transition: width 0.3s; }
+  .pc { font-size: 11px; color: var(--stone-600); }
+
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; margin-top: 24px; font-size: 13px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0; padding: 0; list-style: none; }
   .chip { display: inline-block; padding: 1px 8px; border-left: 3px solid; font-size: 11px; font-weight: 400; white-space: nowrap; }
   .send { background: #9f2d20; border-color: #9f2d20; color: #faf9f7; }
   .do   { background: #e7e5e4; border-color: #57534e; color: #1c1917; }
   .wait { background: #fbeed3; border-color: #a86a00; color: #5c3a00; }
   .st { display: inline-block; font-size: 11px; font-weight: 400; color: var(--stone-700); white-space: nowrap; }
   .st::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; border: 1px solid var(--stone-700); vertical-align: 1px; }
-  .st.done::before, .st.branch::before { background: var(--stone-700); }
+  .st.done::before { background: var(--stone-700); }
   .st.branch::before { background: linear-gradient(90deg, var(--stone-700) 50%, transparent 50%); }
   .st.unk { color: #5c3a00; } .st.unk::before { border-style: dashed; border-color: #a86a00; }
+  .late { display: none; padding: 0 6px; border: 1px solid var(--late); font-size: 11px; font-weight: 500; color: var(--late); white-space: nowrap; }
+  .item.overdue .late, .late.key { display: inline-block; }
+  .total { margin-left: auto; }
 
-  section.phase { margin-top: 56px; break-inside: avoid-page; }
-  .ph { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding-bottom: 12px; border-bottom: 1px solid var(--ink); }
+  /* แต่ละช่วงเป็นเส้นเวลาแนวตั้ง: จุดบนเส้นคือวันกำหนด งานของวันนั้นอยู่ใต้วันที่ */
+  section.phase { margin-top: 64px; scroll-margin-top: 16px; }
+  .ph { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding-bottom: 12px; border-bottom: 1px solid var(--ink); break-after: avoid; }
   .ph .when { font-size: 13px; font-weight: 500; }
   .ph .note { flex-basis: 100%; margin: 0; font-size: 13px; color: var(--stone-600); }
   .ph .n { margin-left: auto; font-size: 12px; color: var(--stone-600); }
   ol { margin: 0; padding: 0; list-style: none; }
-  .item { display: grid; grid-template-columns: 28px minmax(0, 1fr) 11rem 8.5rem 7.5rem; gap: 6px 16px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--warm-300); break-inside: avoid; }
+  .days { position: relative; padding: 8px 0 0 32px; }
+  .days::before { content: ''; position: absolute; left: 7px; top: 26px; bottom: 0; border-left: 1px solid var(--warm-300); }
+  .day { position: relative; padding-top: 12px; }
+  .dot { position: absolute; left: -30px; top: 19px; width: 11px; height: 11px; border: 1px solid var(--ink); border-radius: 50%; background: var(--paper); }
+  .day.past .dot { background: var(--ink); }
+  .day.is-today .dot { border-color: var(--late); background: var(--late); box-shadow: 0 0 0 4px rgb(159 45 32 / 0.15); }
+  .dlabel { margin: 0; font-size: 13px; font-weight: 500; }
+  .today-tag { display: none; margin-left: 8px; font-size: 11px; color: var(--late); }
+  .day.is-today .today-tag { display: inline; }
+  .item { display: grid; grid-template-columns: 28px minmax(0, 1fr) 12rem 8.5rem; gap: 6px 16px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--warm-300); break-inside: avoid; }
   .task { margin: 0; font-size: 14px; font-weight: 400; }
   .proof { margin: 2px 0 0; font-size: 12px; color: var(--stone-600); }
-  .meta { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-  .who, .due { font-size: 13px; }
-  .due { font-weight: 400; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+  .who { font-size: 13px; }
   .item.checked .task { text-decoration: line-through; text-decoration-color: var(--warm-500); color: var(--stone-600); }
   .tick { position: relative; display: block; width: 28px; height: 28px; margin-top: -3px; cursor: pointer; }
   .tick input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
@@ -56,9 +92,8 @@
   .tick input:checked + span { background: var(--ink); }
   .tick input:checked + span::after { content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid var(--paper); border-width: 0 2px 2px 0; transform: rotate(45deg); }
   .tick input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
-  .head { display: grid; grid-template-columns: 28px minmax(0, 1fr) 11rem 8.5rem 7.5rem; gap: 16px; padding: 10px 0 6px; font-size: 11px; font-weight: 400; color: var(--stone-600); }
 
-  .decide { margin-top: 64px; padding: 24px; border: 1px solid var(--ink); break-inside: avoid; }
+  .decide { margin-top: 72px; padding: 24px; border: 1px solid var(--ink); break-inside: avoid; }
   .decide ol { counter-reset: d; }
   .decide li { counter-increment: d; display: grid; grid-template-columns: 2rem 10rem minmax(0, 1fr); gap: 4px 12px; padding: 10px 0; border-bottom: 1px solid var(--warm-300); font-size: 14px; }
   .decide li::before { content: counter(d); font-weight: 400; }
@@ -68,35 +103,43 @@
   .actions { margin-top: 12px; }
   .actions button { min-height: 36px; padding: 6px 14px; border: 1px solid var(--ink); background: none; font: inherit; font-size: 13px; color: var(--ink); cursor: pointer; }
   .actions button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  html:not(.js) .actions { display: none; }
   footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--warm-300); font-size: 12px; color: var(--stone-600); }
 
-  /* จอแคบ: แต่ละข้อเรียงเป็นบล็อก ช่องติ๊กอยู่ซ้าย ป้ายและวันอยู่ใต้ข้อความ */
   @media screen and (max-width: 760px) {
     main { padding: 48px 16px 72px; }
     h1 { font-size: 32px; }
-    .keys { grid-template-columns: minmax(0, 1fr); }
-    .head { display: none; }
+    .mile { font-size: 10px; } .mile b { font-size: 12px; }
+    .track { padding-top: 88px; } .miles { height: 88px; }
+    .mile:nth-child(2) { bottom: 46px; transform: translateX(-100%); text-align: right; }
+    .rail .pin:nth-of-type(2) { top: -46px; }
+    .ticks span:nth-child(even) { display: none; }
+    .phases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .phases li:nth-child(odd) .pcard { padding-left: 0; border-left: 0; }
+    .phases li:nth-child(even) .pcard { padding-left: 12px; border-left: 1px solid var(--warm-300); }
+    .total { margin-left: 0; }
+    .days { padding-left: 26px; }
+    .dot { left: -24px; }
+    .days::before { left: 6px; }
     .item { grid-template-columns: 28px minmax(0, 1fr); gap: 2px 12px; }
-    .item .who, .item .due { font-size: 12px; line-height: 1.5; }
-    .item .meta, .item .who, .item .due { grid-column: 2; }
-    .item .meta { flex-direction: row; flex-wrap: wrap; gap: 6px 10px; }
+    .item .meta, .item .who { grid-column: 2; }
+    .item .who { font-size: 12px; }
     .item .who::before { content: 'ผู้รับผิดชอบ: '; color: var(--stone-600); }
-    .item .due::before { content: 'กำหนด: '; font-weight: 300; color: var(--stone-600); }
     .decide { padding: 16px; }
     .decide li { grid-template-columns: 1.5rem minmax(0, 1fr); }
     .decide li span:last-child { grid-column: 2; }
   }
   @media print {
     @page { size: A4; margin: 12mm; }
-    main { max-width: none; padding: 0; }
-    .actions, .meter { display: none; }
     body { background: #fff; font-size: 12px; }
+    main { max-width: none; padding: 0; }
     h1 { font-size: 30px; } h2 { font-size: 20px; }
-    section.phase { margin-top: 28px; break-inside: auto; }
-    .ph { break-after: avoid; }
-    .item, .head { grid-template-columns: 22px minmax(0, 1fr) 8.5rem 7rem 6.5rem; gap: 4px 10px; padding: 8px 0; }
-    .task { font-size: 12px; } .proof, .who, .due { font-size: 11px; }
+    .actions { display: none; }
+    section.phase { margin-top: 28px; }
+    .item { grid-template-columns: 22px minmax(0, 1fr) 10rem 7rem; gap: 4px 10px; padding: 8px 0; }
+    .task { font-size: 12px; } .proof, .who { font-size: 11px; }
     .tick span { left: 2px; top: 4px; width: 16px; height: 16px; }
+    .pn { font-size: 18px; } .pt { font-size: 11px; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
@@ -105,444 +148,552 @@
 <main>
   <p class="label">Delivery checklist · Internal</p>
   <h1>Checklist ส่งมอบ</h1>
-  <p class="intro">สิ่งที่ต้องส่งลูกค้า งานที่ทีมต้องทำ และข้อมูลที่รอจากลูกค้า เรียงตามปฏิทินงานที่ส่งลูกค้า ตั้งแต่เริ่มงานหลังบ้านจนถึงเริ่มใช้งานจริง ทุกข้อมีผู้รับผิดชอบ วันกำหนด และหลักฐานที่ใช้ปิดข้อ</p>
+  <p class="intro">สิ่งที่ต้องส่งลูกค้า งานที่ทีมต้องทำ และข้อมูลที่รอจากลูกค้า วางบนเส้นเวลาตามปฏิทินงานที่ส่งลูกค้า ตั้งแต่เริ่มงานหลังบ้าน 16 ต.ค. จนลูกค้าเริ่มใช้งานจริง 20 พ.ย. ทุกข้อมีผู้รับผิดชอบ วันกำหนด และหลักฐานที่ใช้ปิดข้อ</p>
 
-  <div class="keys">
-    <div><b>ส. 31 ต.ค.</b><span>นัดครั้งที่ 2 · สาธิต · งวดที่ 2</span></div>
-    <div><b>ส. 14 พ.ย.</b><span>นัดครั้งที่ 3 · ตรวจรับ · งวดที่ 3</span></div>
-    <div><b>ศ. 20 พ.ย.</b><span>ลูกค้าเริ่มใช้งานจริง</span></div>
+  <div class="track" aria-label="เส้นเวลา 16 ต.ค. ถึง 20 พ.ย.">
+    <div class="miles"><span class="mile" style="left:43.056%"><b>31 ต.ค.</b>สาธิต · งวด 2</span><span class="mile" style="left:81.944%"><b>14 พ.ย.</b>ตรวจรับ · งวด 3</span><span class="mile" style="left:98.611%"><b>20 พ.ย.</b>ใช้งานจริง</span></div>
+    <div class="rail"><a class="band b1" href="#p1" style="left:0.000%;width:5.556%" aria-label="ช่วง 1 เริ่มงานหลังบ้าน">1</a><a class="band b2" href="#p2" style="left:8.333%;width:33.333%" aria-label="ช่วง 2 พัฒนาและทดสอบบนเครื่องทดสอบ">2</a><a class="band b3" href="#p3" style="left:41.667%;width:2.778%" aria-label="ช่วง 3 นัดครั้งที่ 2 · สาธิต · งวดที่ 2">3</a><a class="band b4" href="#p4" style="left:47.222%;width:33.333%" aria-label="ช่วง 4 ลูกค้าทดลองใช้ และย้ายขึ้นเครื่องจริง">4</a><a class="band b5" href="#p5" style="left:80.556%;width:2.778%" aria-label="ช่วง 5 นัดครั้งที่ 3 · ตรวจรับ · งวดที่ 3">5</a><a class="band b6" href="#p6" style="left:83.333%;width:16.667%" aria-label="ช่วง 6 เฝ้าดูระบบ และเริ่มใช้งานจริง">6</a><i class="pin" style="left:43.056%"></i><i class="pin" style="left:81.944%"></i><i class="pin" style="left:98.611%"></i><i class="now" id="now" hidden></i></div>
+    <div class="ticks"><span style="left:8.333%">19 ต.ค.</span><span style="left:27.778%">26 ต.ค.</span><span style="left:47.222%">2 พ.ย.</span><span style="left:66.667%">9 พ.ย.</span><span style="left:86.111%">16 พ.ย.</span></div>
   </div>
+  <ol class="phases">
+    <li><a href="#p1" class="pcard" data-phase="p1">
+      <span class="pn">1</span><span class="pw">16 ถึง 17 ต.ค.</span><span class="pt">เริ่มงานหลังบ้าน</span>
+      <span class="pm" aria-hidden="true"><i></i></span><span class="pc">8 ข้อ</span>
+    </a></li>
+    <li><a href="#p2" class="pcard" data-phase="p2">
+      <span class="pn">2</span><span class="pw">19 ถึง 30 ต.ค.</span><span class="pt">พัฒนาและทดสอบบนเครื่องทดสอบ</span>
+      <span class="pm" aria-hidden="true"><i></i></span><span class="pc">15 ข้อ</span>
+    </a></li>
+    <li><a href="#p3" class="pcard" data-phase="p3">
+      <span class="pn">3</span><span class="pw">ส. 31 ต.ค.</span><span class="pt">นัดครั้งที่ 2 · สาธิต · งวดที่ 2</span>
+      <span class="pm" aria-hidden="true"><i></i></span><span class="pc">7 ข้อ</span>
+    </a></li>
+    <li><a href="#p4" class="pcard" data-phase="p4">
+      <span class="pn">4</span><span class="pw">2 ถึง 13 พ.ย.</span><span class="pt">ลูกค้าทดลองใช้ และย้ายขึ้นเครื่องจริง</span>
+      <span class="pm" aria-hidden="true"><i></i></span><span class="pc">12 ข้อ</span>
+    </a></li>
+    <li><a href="#p5" class="pcard" data-phase="p5">
+      <span class="pn">5</span><span class="pw">ส. 14 พ.ย.</span><span class="pt">นัดครั้งที่ 3 · ตรวจรับ · งวดที่ 3</span>
+      <span class="pm" aria-hidden="true"><i></i></span><span class="pc">9 ข้อ</span>
+    </a></li>
+    <li><a href="#p6" class="pcard" data-phase="p6">
+      <span class="pn">6</span><span class="pw">15 ถึง 20 พ.ย. และหลังจากนั้น</span><span class="pt">เฝ้าดูระบบ และเริ่มใช้งานจริง</span>
+      <span class="pm" aria-hidden="true"><i></i></span><span class="pc">4 ข้อ</span>
+    </a></li>
+  </ol>
   <div class="bar">
     <ul class="legend">
       <li><span class="chip send">ส่งลูกค้า</span> 21 ข้อ</li>
       <li><span class="chip do">ทำภายใน</span> 29 ข้อ</li>
       <li><span class="chip wait">รอจากลูกค้า</span> 5 ข้อ</li>
     </ul>
-    <div class="meter" aria-hidden="true"><i id="meter"></i></div>
-    <span id="progress" aria-live="polite">ติ๊กแล้ว 0 จาก 55 ข้อ</span>
+    <span class="total" id="progress" aria-live="polite">ทั้งหมด 55 ข้อ</span>
   </div>
   <div class="bar">
-    <ul class="legend"><li><span class="st done">เสร็จ</span></li><li><span class="st branch">เสร็จบน branch รอ PR</span></li><li><span class="st todo">ยังไม่เริ่ม</span></li><li><span class="st unk">ยังไม่ได้ตรวจ</span></li></ul>
+    <ul class="legend"><li><span class="st done">เสร็จ</span></li><li><span class="st branch">เสร็จบน branch รอ PR</span></li><li><span class="st todo">ยังไม่เริ่ม</span></li><li><span class="st unk">ยังไม่ได้ตรวจ</span></li><li><span class="late key">เลยกำหนด</span> ยังไม่ติ๊กและเลยวันกำหนดแล้ว</li></ul>
   </div>
 
-  <section class="phase" aria-labelledby="h-p1">
+  <section class="phase" id="p1" aria-labelledby="h-p1">
     <div class="ph"><span class="when">1 · 16 ถึง 17 ต.ค.</span><h2 id="h-p1">เริ่มงานหลังบ้าน</h2><span class="n">8 ข้อ</span><p class="note">ล็อกสิ่งที่จะสร้าง และขอข้อมูลชุดแรกจากลูกค้า</p></div>
-    <div class="head" aria-hidden="true"><span></span><span>งาน</span><span>ประเภทและสถานะ</span><span>ผู้รับผิดชอบ</span><span>กำหนด</span></div>
-    <ol>
-      <li class="item" data-id="p1-1" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ล็อก spec ตารางฐานข้อมูล และรูปแบบ API"><span></span></label>
-        <div class="body"><p class="task">ล็อก spec ตารางฐานข้อมูล และรูปแบบ API</p><p class="proof">หลักฐาน: spec backend ใน docs/superpowers/specs (branch docs/backend-spec)</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st branch">เสร็จบน branch รอ PR</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ศ. 16 ต.ค.</div>
+    <ol class="days">
+      <li class="day" data-due="2026-10-16">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">ศ. 16 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p1-1" data-due="2026-10-16" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ล็อก spec ตารางฐานข้อมูล และรูปแบบ API"><span></span></label>
+            <div class="body"><p class="task">ล็อก spec ตารางฐานข้อมูล และรูปแบบ API</p><p class="proof">หลักฐาน: spec backend ใน docs/superpowers/specs (branch docs/backend-spec)</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st branch">เสร็จบน branch รอ PR</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p1-2" data-due="2026-10-16" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ตัดสินจำนวนคนในทีม ถ้าคนเดียวควบ Backend กับ Frontend หลังบ้าน งานสัปดาห์ 19 ถึง 23 ต.ค. จะเลย"><span></span></label>
+            <div class="body"><p class="task">ตัดสินจำนวนคนในทีม ถ้าคนเดียวควบ Backend กับ Frontend หลังบ้าน งานสัปดาห์ 19 ถึง 23 ต.ค. จะเลย</p><p class="proof">หลักฐาน: รายชื่อคนต่อบทบาทในแผนทีม</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st unk">ยังไม่ได้ตรวจ</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p1-3" data-due="2026-10-16" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ส่งปฏิทินงานฉบับปรับ: สาธิต 31 ต.ค. ตรวจรับ 14 พ.ย. ใช้งานจริง 20 พ.ย."><span></span></label>
+            <div class="body"><p class="task">ส่งปฏิทินงานฉบับปรับ: สาธิต 31 ต.ค. ตรวจรับ 14 พ.ย. ใช้งานจริง 20 พ.ย.</p><p class="proof">หลักฐาน: อีเมลที่ส่ง พร้อมไฟล์ PDF</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p1-4" data-due="2026-10-16" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="บันทึกการประชุมครั้งที่ 1: requirement ที่ตกลง และงวดที่ 1 ถ้ายังไม่เคยส่ง"><span></span></label>
+            <div class="body"><p class="task">บันทึกการประชุมครั้งที่ 1: requirement ที่ตกลง และงวดที่ 1 ถ้ายังไม่เคยส่ง</p><p class="proof">หลักฐาน: อีเมลที่ลูกค้าตอบรับ</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p1-5" data-due="2026-10-16" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="migration seed สินค้าเดิม และตัวเชื่อมฐานข้อมูล"><span></span></label>
+            <div class="body"><p class="task">migration seed สินค้าเดิม และตัวเชื่อมฐานข้อมูล</p><p class="proof">หลักฐาน: branch feat/backend-foundation</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st branch">เสร็จบน branch รอ PR</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Backend</div>
+          </li>
+          <li class="item" data-id="p1-6" data-due="2026-10-16" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="เตรียม VPS สำหรับเครื่องทดสอบ"><span></span></label>
+            <div class="body"><p class="task">เตรียม VPS สำหรับเครื่องทดสอบ</p><p class="proof">หลักฐาน: ที่อยู่เครื่องทดสอบ</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st unk">ยังไม่ได้ตรวจ</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p1-2" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ตัดสินจำนวนคนในทีม ถ้าคนเดียวควบ Backend กับ Frontend หลังบ้าน งานสัปดาห์ 19 ถึง 23 ต.ค. จะเลย"><span></span></label>
-        <div class="body"><p class="task">ตัดสินจำนวนคนในทีม ถ้าคนเดียวควบ Backend กับ Frontend หลังบ้าน งานสัปดาห์ 19 ถึง 23 ต.ค. จะเลย</p><p class="proof">หลักฐาน: รายชื่อคนต่อบทบาทในแผนทีม</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st unk">ยังไม่ได้ตรวจ</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ศ. 16 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p1-3" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ส่งปฏิทินงานฉบับปรับ: สาธิต 31 ต.ค. ตรวจรับ 14 พ.ย. ใช้งานจริง 20 พ.ย."><span></span></label>
-        <div class="body"><p class="task">ส่งปฏิทินงานฉบับปรับ: สาธิต 31 ต.ค. ตรวจรับ 14 พ.ย. ใช้งานจริง 20 พ.ย.</p><p class="proof">หลักฐาน: อีเมลที่ส่ง พร้อมไฟล์ PDF</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ศ. 16 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p1-4" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="บันทึกการประชุมครั้งที่ 1: requirement ที่ตกลง และงวดที่ 1 ถ้ายังไม่เคยส่ง"><span></span></label>
-        <div class="body"><p class="task">บันทึกการประชุมครั้งที่ 1: requirement ที่ตกลง และงวดที่ 1 ถ้ายังไม่เคยส่ง</p><p class="proof">หลักฐาน: อีเมลที่ลูกค้าตอบรับ</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ศ. 16 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p1-5" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="migration seed สินค้าเดิม และตัวเชื่อมฐานข้อมูล"><span></span></label>
-        <div class="body"><p class="task">migration seed สินค้าเดิม และตัวเชื่อมฐานข้อมูล</p><p class="proof">หลักฐาน: branch feat/backend-foundation</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st branch">เสร็จบน branch รอ PR</span></div>
-        <div class="who">Backend</div>
-        <div class="due">ศ. 16 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p1-6" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="เตรียม VPS สำหรับเครื่องทดสอบ"><span></span></label>
-        <div class="body"><p class="task">เตรียม VPS สำหรับเครื่องทดสอบ</p><p class="proof">หลักฐาน: ที่อยู่เครื่องทดสอบ</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st unk">ยังไม่ได้ตรวจ</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">ศ. 16 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p1-7" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ยืนยันขอบเขต ข้อมูลติดต่อ และอีเมลรับฟอร์ม"><span></span></label>
-        <div class="body"><p class="task">ยืนยันขอบเขต ข้อมูลติดต่อ และอีเมลรับฟอร์ม</p><p class="proof">หลักฐาน: ข้อความยืนยันจากลูกค้า</p></div>
-        <div class="meta"><span class="chip wait">รอจากลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span></div>
-        <div class="who">ลูกค้า</div>
-        <div class="due">ส. 17 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p1-8" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ชื่อและอีเมลผู้ดูแลระบบ ถ้ายังไม่ได้ สร้างบัญชีชั่วคราวไปก่อน"><span></span></label>
-        <div class="body"><p class="task">ชื่อและอีเมลผู้ดูแลระบบ ถ้ายังไม่ได้ สร้างบัญชีชั่วคราวไปก่อน</p><p class="proof">หลักฐาน: รายชื่อผู้ดูแลระบบ</p></div>
-        <div class="meta"><span class="chip wait">รอจากลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span></div>
-        <div class="who">ลูกค้า</div>
-        <div class="due">ส. 17 ต.ค.</div>
+      <li class="day" data-due="2026-10-17">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">ส. 17 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p1-7" data-due="2026-10-17" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ยืนยันขอบเขต ข้อมูลติดต่อ และอีเมลรับฟอร์ม"><span></span></label>
+            <div class="body"><p class="task">ยืนยันขอบเขต ข้อมูลติดต่อ และอีเมลรับฟอร์ม</p><p class="proof">หลักฐาน: ข้อความยืนยันจากลูกค้า</p></div>
+            <div class="meta"><span class="chip wait">รอจากลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">ลูกค้า</div>
+          </li>
+          <li class="item" data-id="p1-8" data-due="2026-10-17" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ชื่อและอีเมลผู้ดูแลระบบ ถ้ายังไม่ได้ สร้างบัญชีชั่วคราวไปก่อน"><span></span></label>
+            <div class="body"><p class="task">ชื่อและอีเมลผู้ดูแลระบบ ถ้ายังไม่ได้ สร้างบัญชีชั่วคราวไปก่อน</p><p class="proof">หลักฐาน: รายชื่อผู้ดูแลระบบ</p></div>
+            <div class="meta"><span class="chip wait">รอจากลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">ลูกค้า</div>
+          </li>
+        </ol>
       </li>
     </ol>
   </section>
-  <section class="phase" aria-labelledby="h-p2">
+  <section class="phase" id="p2" aria-labelledby="h-p2">
     <div class="ph"><span class="when">2 · 19 ถึง 30 ต.ค.</span><h2 id="h-p2">พัฒนาและทดสอบบนเครื่องทดสอบ</h2><span class="n">15 ข้อ</span><p class="note">deploy 3 รอบ ทดสอบ 3 รอบ ปิดรับฟีเจอร์ใหม่ 29 ต.ค.</p></div>
-    <div class="head" aria-hidden="true"><span></span><span>งาน</span><span>ประเภทและสถานะ</span><span>ผู้รับผิดชอบ</span><span>กำหนด</span></div>
-    <ol>
-      <li class="item" data-id="p2-1" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="รีวิวแล้วเปิด PR ของ backend เข้า main (ตอนนี้ feat/backend-content นำหน้า main อยู่ 37 commit)"><span></span></label>
-        <div class="body"><p class="task">รีวิวแล้วเปิด PR ของ backend เข้า main (ตอนนี้ feat/backend-content นำหน้า main อยู่ 37 commit)</p><p class="proof">หลักฐาน: PR ที่ผ่านรีวิว</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st branch">เสร็จบน branch รอ PR</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">จ. 19 ต.ค.</div>
+    <ol class="days">
+      <li class="day" data-due="2026-10-19">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">จ. 19 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p2-1" data-due="2026-10-19" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="รีวิวแล้วเปิด PR ของ backend เข้า main (ตอนนี้ feat/backend-content นำหน้า main อยู่ 37 commit)"><span></span></label>
+            <div class="body"><p class="task">รีวิวแล้วเปิด PR ของ backend เข้า main (ตอนนี้ feat/backend-content นำหน้า main อยู่ 37 commit)</p><p class="proof">หลักฐาน: PR ที่ผ่านรีวิว</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st branch">เสร็จบน branch รอ PR</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p2-2" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="เครื่องทดสอบพร้อม: Node, PostgreSQL, nginx, HTTPS, deploy จาก GitHub, pg_dump ทุกวัน ตั้ง X-Real-IP และ IP_SALT"><span></span></label>
-        <div class="body"><p class="task">เครื่องทดสอบพร้อม: Node, PostgreSQL, nginx, HTTPS, deploy จาก GitHub, pg_dump ทุกวัน ตั้ง X-Real-IP และ IP_SALT</p><p class="proof">หลักฐาน: เปิดหน้าเว็บและหลังบ้านบนเครื่องทดสอบได้</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st unk">ยังไม่ได้ตรวจ</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">พ. 21 ต.ค.</div>
+      <li class="day" data-due="2026-10-21">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">พ. 21 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p2-2" data-due="2026-10-21" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="เครื่องทดสอบพร้อม: Node, PostgreSQL, nginx, HTTPS, deploy จาก GitHub, pg_dump ทุกวัน ตั้ง X-Real-IP และ IP_SALT"><span></span></label>
+            <div class="body"><p class="task">เครื่องทดสอบพร้อม: Node, PostgreSQL, nginx, HTTPS, deploy จาก GitHub, pg_dump ทุกวัน ตั้ง X-Real-IP และ IP_SALT</p><p class="proof">หลักฐาน: เปิดหน้าเว็บและหลังบ้านบนเครื่องทดสอบได้</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st unk">ยังไม่ได้ตรวจ</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+          <li class="item" data-id="p2-3" data-due="2026-10-21" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="รายชื่อแบรนด์ และข้อมูลสินค้าพร้อมรูป"><span></span></label>
+            <div class="body"><p class="task">รายชื่อแบรนด์ และข้อมูลสินค้าพร้อมรูป</p><p class="proof">หลักฐาน: ไฟล์ที่ได้รับ</p></div>
+            <div class="meta"><span class="chip wait">รอจากลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">ลูกค้า</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p2-3" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="รายชื่อแบรนด์ และข้อมูลสินค้าพร้อมรูป"><span></span></label>
-        <div class="body"><p class="task">รายชื่อแบรนด์ และข้อมูลสินค้าพร้อมรูป</p><p class="proof">หลักฐาน: ไฟล์ที่ได้รับ</p></div>
-        <div class="meta"><span class="chip wait">รอจากลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span></div>
-        <div class="who">ลูกค้า</div>
-        <div class="due">พ. 21 ต.ค.</div>
+      <li class="day" data-due="2026-10-23">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">ศ. 23 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p2-4" data-due="2026-10-23" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="deploy รอบ 1: login หมวด สินค้า ประกาศ"><span></span></label>
+            <div class="body"><p class="task">deploy รอบ 1: login หมวด สินค้า ประกาศ</p><p class="proof">หลักฐาน: รายการ commit ที่ขึ้นเครื่องทดสอบ</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+          <li class="item" data-id="p2-5" data-due="2026-10-23" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ทดสอบรอบ 1: login สิทธิ์เข้า /admin/ หมวด สินค้า ประกาศ"><span></span></label>
+            <div class="body"><p class="task">ทดสอบรอบ 1: login สิทธิ์เข้า /admin/ หมวด สินค้า ประกาศ</p><p class="proof">หลักฐาน: ผลทดสอบรอบ 1</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">QA</div>
+          </li>
+          <li class="item" data-id="p2-6" data-due="2026-10-23" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="บันทึกการอัปเดตประจำสัปดาห์ และสถานะข้อมูลที่รอจากลูกค้า: ได้แล้ว ยังขาด หรือช้ากี่วัน"><span></span></label>
+            <div class="body"><p class="task">บันทึกการอัปเดตประจำสัปดาห์ และสถานะข้อมูลที่รอจากลูกค้า: ได้แล้ว ยังขาด หรือช้ากี่วัน</p><p class="proof">หลักฐาน: client.pdf ฉบับสัปดาห์นั้น</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p2-4" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="deploy รอบ 1: login หมวด สินค้า ประกาศ"><span></span></label>
-        <div class="body"><p class="task">deploy รอบ 1: login หมวด สินค้า ประกาศ</p><p class="proof">หลักฐาน: รายการ commit ที่ขึ้นเครื่องทดสอบ</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">ศ. 23 ต.ค.</div>
+      <li class="day" data-due="2026-10-26">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">จ. 26 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p2-7" data-due="2026-10-26" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="เปิดบัญชีผู้ดูแลระบบบนเครื่องทดสอบ (npm run db:admin) ให้ลูกค้าเริ่มเพิ่มสินค้า ส่งรหัสผ่านแยกช่องทางกับชื่อผู้ใช้"><span></span></label>
+            <div class="body"><p class="task">เปิดบัญชีผู้ดูแลระบบบนเครื่องทดสอบ (npm run db:admin) ให้ลูกค้าเริ่มเพิ่มสินค้า ส่งรหัสผ่านแยกช่องทางกับชื่อผู้ใช้</p><p class="proof">หลักฐาน: ผู้ดูแลระบบเข้าระบบได้</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p2-5" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ทดสอบรอบ 1: login สิทธิ์เข้า /admin/ หมวด สินค้า ประกาศ"><span></span></label>
-        <div class="body"><p class="task">ทดสอบรอบ 1: login สิทธิ์เข้า /admin/ หมวด สินค้า ประกาศ</p><p class="proof">หลักฐาน: ผลทดสอบรอบ 1</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">QA</div>
-        <div class="due">ศ. 23 ต.ค.</div>
+      <li class="day" data-due="2026-10-30">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">26 ถึง 30 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p2-8" data-due="2026-10-30" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="หน้าขั้นตอนออกแบบ และช่วงราคา KOL"><span></span></label>
+            <div class="body"><p class="task">หน้าขั้นตอนออกแบบ และช่วงราคา KOL</p><p class="proof">หลักฐาน: หน้าใหม่ผ่าน check:overflow</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Frontend เว็บ</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p2-6" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="บันทึกการอัปเดตประจำสัปดาห์ และสถานะข้อมูลที่รอจากลูกค้า: ได้แล้ว ยังขาด หรือช้ากี่วัน"><span></span></label>
-        <div class="body"><p class="task">บันทึกการอัปเดตประจำสัปดาห์ และสถานะข้อมูลที่รอจากลูกค้า: ได้แล้ว ยังขาด หรือช้ากี่วัน</p><p class="proof">หลักฐาน: client.pdf ฉบับสัปดาห์นั้น</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ศ. 23 ต.ค.</div>
+      <li class="day" data-due="2026-10-27">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">อ. 27 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p2-9" data-due="2026-10-27" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="deploy รอบ 2: บทความ ผลงาน"><span></span></label>
+            <div class="body"><p class="task">deploy รอบ 2: บทความ ผลงาน</p><p class="proof">หลักฐาน: รายการ commit ที่ขึ้นเครื่องทดสอบ</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p2-7" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="เปิดบัญชีผู้ดูแลระบบบนเครื่องทดสอบ (npm run db:admin) ให้ลูกค้าเริ่มเพิ่มสินค้า ส่งรหัสผ่านแยกช่องทางกับชื่อผู้ใช้"><span></span></label>
-        <div class="body"><p class="task">เปิดบัญชีผู้ดูแลระบบบนเครื่องทดสอบ (npm run db:admin) ให้ลูกค้าเริ่มเพิ่มสินค้า ส่งรหัสผ่านแยกช่องทางกับชื่อผู้ใช้</p><p class="proof">หลักฐาน: ผู้ดูแลระบบเข้าระบบได้</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">จ. 26 ต.ค.</div>
+      <li class="day" data-due="2026-10-28">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">พ. 28 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p2-10" data-due="2026-10-28" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ทดสอบรอบ 2: บทความ ผลงาน และทดสอบซ้ำส่วนสินค้า"><span></span></label>
+            <div class="body"><p class="task">ทดสอบรอบ 2: บทความ ผลงาน และทดสอบซ้ำส่วนสินค้า</p><p class="proof">หลักฐาน: ผลทดสอบรอบ 2</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">QA</div>
+          </li>
+          <li class="item" data-id="p2-11" data-due="2026-10-28" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="เนื้อหาส่วนเสริม และข้อความประกาศ ถ้ายังไม่ได้ ใช้ข้อความตัวอย่าง"><span></span></label>
+            <div class="body"><p class="task">เนื้อหาส่วนเสริม และข้อความประกาศ ถ้ายังไม่ได้ ใช้ข้อความตัวอย่าง</p><p class="proof">หลักฐาน: ข้อความที่ได้รับ</p></div>
+            <div class="meta"><span class="chip wait">รอจากลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">ลูกค้า</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p2-8" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="หน้าขั้นตอนออกแบบ และช่วงราคา KOL"><span></span></label>
-        <div class="body"><p class="task">หน้าขั้นตอนออกแบบ และช่วงราคา KOL</p><p class="proof">หลักฐาน: หน้าใหม่ผ่าน check:overflow</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Frontend เว็บ</div>
-        <div class="due">26 ถึง 30 ต.ค.</div>
+      <li class="day" data-due="2026-10-29">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">พฤ. 29 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p2-12" data-due="2026-10-29" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="deploy รอบ 3 แล้วปิดรับฟีเจอร์ใหม่"><span></span></label>
+            <div class="body"><p class="task">deploy รอบ 3 แล้วปิดรับฟีเจอร์ใหม่</p><p class="proof">หลักฐาน: รายการ commit ที่ขึ้นเครื่องทดสอบ</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p2-9" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="deploy รอบ 2: บทความ ผลงาน"><span></span></label>
-        <div class="body"><p class="task">deploy รอบ 2: บทความ ผลงาน</p><p class="proof">หลักฐาน: รายการ commit ที่ขึ้นเครื่องทดสอบ</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">อ. 27 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p2-10" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ทดสอบรอบ 2: บทความ ผลงาน และทดสอบซ้ำส่วนสินค้า"><span></span></label>
-        <div class="body"><p class="task">ทดสอบรอบ 2: บทความ ผลงาน และทดสอบซ้ำส่วนสินค้า</p><p class="proof">หลักฐาน: ผลทดสอบรอบ 2</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">QA</div>
-        <div class="due">พ. 28 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p2-11" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="เนื้อหาส่วนเสริม และข้อความประกาศ ถ้ายังไม่ได้ ใช้ข้อความตัวอย่าง"><span></span></label>
-        <div class="body"><p class="task">เนื้อหาส่วนเสริม และข้อความประกาศ ถ้ายังไม่ได้ ใช้ข้อความตัวอย่าง</p><p class="proof">หลักฐาน: ข้อความที่ได้รับ</p></div>
-        <div class="meta"><span class="chip wait">รอจากลูกค้า</span><span class="st unk">ยังไม่ได้ตรวจ</span></div>
-        <div class="who">ลูกค้า</div>
-        <div class="due">พ. 28 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p2-12" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="deploy รอบ 3 แล้วปิดรับฟีเจอร์ใหม่"><span></span></label>
-        <div class="body"><p class="task">deploy รอบ 3 แล้วปิดรับฟีเจอร์ใหม่</p><p class="proof">หลักฐาน: รายการ commit ที่ขึ้นเครื่องทดสอบ</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">พฤ. 29 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p2-13" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ทดสอบรอบ 3 และทดสอบซ้ำก่อนสาธิต บนมือถือ และทั้ง 2 ภาษา"><span></span></label>
-        <div class="body"><p class="task">ทดสอบรอบ 3 และทดสอบซ้ำก่อนสาธิต บนมือถือ และทั้ง 2 ภาษา</p><p class="proof">หลักฐาน: ผลทดสอบรอบ 3</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">QA</div>
-        <div class="due">ศ. 30 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p2-14" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ตรวจ SEO sitemap และ check:overflow ทุกหน้า"><span></span></label>
-        <div class="body"><p class="task">ตรวจ SEO sitemap และ check:overflow ทุกหน้า</p><p class="proof">หลักฐาน: ผล npm run check:overflow</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Frontend เว็บ</div>
-        <div class="due">ศ. 30 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p2-15" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="บันทึกการอัปเดตประจำสัปดาห์ และสถานะข้อมูลที่รอจากลูกค้า"><span></span></label>
-        <div class="body"><p class="task">บันทึกการอัปเดตประจำสัปดาห์ และสถานะข้อมูลที่รอจากลูกค้า</p><p class="proof">หลักฐาน: client.pdf ฉบับสัปดาห์นั้น</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ศ. 30 ต.ค.</div>
+      <li class="day" data-due="2026-10-30">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">ศ. 30 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p2-13" data-due="2026-10-30" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ทดสอบรอบ 3 และทดสอบซ้ำก่อนสาธิต บนมือถือ และทั้ง 2 ภาษา"><span></span></label>
+            <div class="body"><p class="task">ทดสอบรอบ 3 และทดสอบซ้ำก่อนสาธิต บนมือถือ และทั้ง 2 ภาษา</p><p class="proof">หลักฐาน: ผลทดสอบรอบ 3</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">QA</div>
+          </li>
+          <li class="item" data-id="p2-14" data-due="2026-10-30" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ตรวจ SEO sitemap และ check:overflow ทุกหน้า"><span></span></label>
+            <div class="body"><p class="task">ตรวจ SEO sitemap และ check:overflow ทุกหน้า</p><p class="proof">หลักฐาน: ผล npm run check:overflow</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Frontend เว็บ</div>
+          </li>
+          <li class="item" data-id="p2-15" data-due="2026-10-30" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="บันทึกการอัปเดตประจำสัปดาห์ และสถานะข้อมูลที่รอจากลูกค้า"><span></span></label>
+            <div class="body"><p class="task">บันทึกการอัปเดตประจำสัปดาห์ และสถานะข้อมูลที่รอจากลูกค้า</p><p class="proof">หลักฐาน: client.pdf ฉบับสัปดาห์นั้น</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
     </ol>
   </section>
-  <section class="phase" aria-labelledby="h-p3">
+  <section class="phase" id="p3" aria-labelledby="h-p3">
     <div class="ph"><span class="when">3 · ส. 31 ต.ค.</span><h2 id="h-p3">นัดครั้งที่ 2 · สาธิต · งวดที่ 2</h2><span class="n">7 ข้อ</span><p class="note">สาธิตบนเครื่องทดสอบ และส่งเอกสารชุดสาธิต</p></div>
-    <div class="head" aria-hidden="true"><span></span><span>งาน</span><span>ประเภทและสถานะ</span><span>ผู้รับผิดชอบ</span><span>กำหนด</span></div>
-    <ol>
-      <li class="item" data-id="p3-1" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="บันทึกการอัปเดต v0.5 ระบบหลังบ้าน พร้อมภาพหน้าจอ"><span></span></label>
-        <div class="body"><p class="task">บันทึกการอัปเดต v0.5 ระบบหลังบ้าน พร้อมภาพหน้าจอ</p><p class="proof">หลักฐาน: client.pdf ฉบับ v0.5</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ส. 31 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p3-2" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="เอกสารภาพรวมระบบ: flow ผู้เข้าชมและแอดมิน ฐานข้อมูล ส่วน server และความเป็นส่วนตัวยังต้องเขียนเพิ่ม"><span></span></label>
-        <div class="body"><p class="task">เอกสารภาพรวมระบบ: flow ผู้เข้าชมและแอดมิน ฐานข้อมูล ส่วน server และความเป็นส่วนตัวยังต้องเขียนเพิ่ม</p><p class="proof">หลักฐาน: docs/flows/kohler-user-admin-flows.html (branch docs/flowcharts)</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st branch">เสร็จบน branch รอ PR</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ส. 31 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p3-3" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ร่างคู่มือผู้ดูแลระบบ"><span></span></label>
-        <div class="body"><p class="task">ร่างคู่มือผู้ดูแลระบบ</p><p class="proof">หลักฐาน: ไฟล์คู่มือ</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Frontend หลังบ้าน</div>
-        <div class="due">ส. 31 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p3-4" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="แผนทดลองใช้สำหรับลูกค้า 2 ถึง 11 พ.ย.: รายการให้ลองทำ และแบบฟอร์มแจ้งแก้ไข"><span></span></label>
-        <div class="body"><p class="task">แผนทดลองใช้สำหรับลูกค้า 2 ถึง 11 พ.ย.: รายการให้ลองทำ และแบบฟอร์มแจ้งแก้ไข</p><p class="proof">หลักฐาน: ไฟล์แผนทดลองใช้</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">QA</div>
-        <div class="due">ส. 31 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p3-5" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="สาธิตงานบนเครื่องทดสอบ"><span></span></label>
-        <div class="body"><p class="task">สาธิตงานบนเครื่องทดสอบ</p><p class="proof">หลักฐาน: ลูกค้ารับทราบในบันทึกการประชุม</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ส. 31 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p3-6" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="บันทึกการประชุมครั้งที่ 2: สิ่งที่ตกลง และรายการขอแก้"><span></span></label>
-        <div class="body"><p class="task">บันทึกการประชุมครั้งที่ 2: สิ่งที่ตกลง และรายการขอแก้</p><p class="proof">หลักฐาน: อีเมลที่ลูกค้าตอบรับ</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ส. 31 ต.ค.</div>
-      </li>
-      <li class="item" data-id="p3-7" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="เอกสารเรียกเก็บงวดที่ 2 ตามที่ตกลงไว้"><span></span></label>
-        <div class="body"><p class="task">เอกสารเรียกเก็บงวดที่ 2 ตามที่ตกลงไว้</p><p class="proof">หลักฐาน: เอกสารเรียกเก็บที่ส่งแล้ว</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ส. 31 ต.ค.</div>
+    <ol class="days">
+      <li class="day" data-due="2026-10-31">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">ส. 31 ต.ค.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p3-1" data-due="2026-10-31" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="บันทึกการอัปเดต v0.5 ระบบหลังบ้าน พร้อมภาพหน้าจอ"><span></span></label>
+            <div class="body"><p class="task">บันทึกการอัปเดต v0.5 ระบบหลังบ้าน พร้อมภาพหน้าจอ</p><p class="proof">หลักฐาน: client.pdf ฉบับ v0.5</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p3-2" data-due="2026-10-31" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="เอกสารภาพรวมระบบ: flow ผู้เข้าชมและแอดมิน ฐานข้อมูล ส่วน server และความเป็นส่วนตัวยังต้องเขียนเพิ่ม"><span></span></label>
+            <div class="body"><p class="task">เอกสารภาพรวมระบบ: flow ผู้เข้าชมและแอดมิน ฐานข้อมูล ส่วน server และความเป็นส่วนตัวยังต้องเขียนเพิ่ม</p><p class="proof">หลักฐาน: docs/flows/kohler-user-admin-flows.html (branch docs/flowcharts)</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st branch">เสร็จบน branch รอ PR</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p3-3" data-due="2026-10-31" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ร่างคู่มือผู้ดูแลระบบ"><span></span></label>
+            <div class="body"><p class="task">ร่างคู่มือผู้ดูแลระบบ</p><p class="proof">หลักฐาน: ไฟล์คู่มือ</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Frontend หลังบ้าน</div>
+          </li>
+          <li class="item" data-id="p3-4" data-due="2026-10-31" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="แผนทดลองใช้สำหรับลูกค้า 2 ถึง 11 พ.ย.: รายการให้ลองทำ และแบบฟอร์มแจ้งแก้ไข"><span></span></label>
+            <div class="body"><p class="task">แผนทดลองใช้สำหรับลูกค้า 2 ถึง 11 พ.ย.: รายการให้ลองทำ และแบบฟอร์มแจ้งแก้ไข</p><p class="proof">หลักฐาน: ไฟล์แผนทดลองใช้</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">QA</div>
+          </li>
+          <li class="item" data-id="p3-5" data-due="2026-10-31" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="สาธิตงานบนเครื่องทดสอบ"><span></span></label>
+            <div class="body"><p class="task">สาธิตงานบนเครื่องทดสอบ</p><p class="proof">หลักฐาน: ลูกค้ารับทราบในบันทึกการประชุม</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p3-6" data-due="2026-10-31" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="บันทึกการประชุมครั้งที่ 2: สิ่งที่ตกลง และรายการขอแก้"><span></span></label>
+            <div class="body"><p class="task">บันทึกการประชุมครั้งที่ 2: สิ่งที่ตกลง และรายการขอแก้</p><p class="proof">หลักฐาน: อีเมลที่ลูกค้าตอบรับ</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p3-7" data-due="2026-10-31" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="เอกสารเรียกเก็บงวดที่ 2 ตามที่ตกลงไว้"><span></span></label>
+            <div class="body"><p class="task">เอกสารเรียกเก็บงวดที่ 2 ตามที่ตกลงไว้</p><p class="proof">หลักฐาน: เอกสารเรียกเก็บที่ส่งแล้ว</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
     </ol>
   </section>
-  <section class="phase" aria-labelledby="h-p4">
+  <section class="phase" id="p4" aria-labelledby="h-p4">
     <div class="ph"><span class="when">4 · 2 ถึง 13 พ.ย.</span><h2 id="h-p4">ลูกค้าทดลองใช้ และย้ายขึ้นเครื่องจริง</h2><span class="n">12 ข้อ</span><p class="note">ทดลองใช้ถึง 11 พ.ย. แก้และย้ายเครื่อง 12 ถึง 13 พ.ย.</p></div>
-    <div class="head" aria-hidden="true"><span></span><span>งาน</span><span>ประเภทและสถานะ</span><span>ผู้รับผิดชอบ</span><span>กำหนด</span></div>
-    <ol>
-      <li class="item" data-id="p4-1" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="หลังบ้านแคตตาล็อก และฟอร์มติดต่อ ตอนนี้เก็บข้อความลงหลังบ้าน ยังไม่ส่งอีเมล"><span></span></label>
-        <div class="body"><p class="task">หลังบ้านแคตตาล็อก และฟอร์มติดต่อ ตอนนี้เก็บข้อความลงหลังบ้าน ยังไม่ส่งอีเมล</p><p class="proof">หลักฐาน: branch feat/backend-content</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st branch">เสร็จบน branch รอ PR</span></div>
-        <div class="who">Backend</div>
-        <div class="due">2 ถึง 6 พ.ย.</div>
+    <ol class="days">
+      <li class="day" data-due="2026-11-06">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">2 ถึง 6 พ.ย.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p4-1" data-due="2026-11-06" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="หลังบ้านแคตตาล็อก และฟอร์มติดต่อ ตอนนี้เก็บข้อความลงหลังบ้าน ยังไม่ส่งอีเมล"><span></span></label>
+            <div class="body"><p class="task">หลังบ้านแคตตาล็อก และฟอร์มติดต่อ ตอนนี้เก็บข้อความลงหลังบ้าน ยังไม่ส่งอีเมล</p><p class="proof">หลักฐาน: branch feat/backend-content</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st branch">เสร็จบน branch รอ PR</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Backend</div>
+          </li>
+          <li class="item" data-id="p4-2" data-due="2026-11-06" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ตั้งเครื่องจริงแบบเดียวกับเครื่องทดสอบ พร้อม Umami และ Uptime Kuma"><span></span></label>
+            <div class="body"><p class="task">ตั้งเครื่องจริงแบบเดียวกับเครื่องทดสอบ พร้อม Umami และ Uptime Kuma</p><p class="proof">หลักฐาน: เปิดเครื่องจริงได้ และตัวเฝ้าแจ้งเตือนได้</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+          <li class="item" data-id="p4-3" data-due="2026-11-06" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ทดสอบกู้ข้อมูลจากชุดสำรองให้สำเร็จ 1 ครั้ง"><span></span></label>
+            <div class="body"><p class="task">ทดสอบกู้ข้อมูลจากชุดสำรองให้สำเร็จ 1 ครั้ง</p><p class="proof">หลักฐาน: บันทึกการกู้คืน: วันที่ ชุดสำรอง ผล</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p4-2" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ตั้งเครื่องจริงแบบเดียวกับเครื่องทดสอบ พร้อม Umami และ Uptime Kuma"><span></span></label>
-        <div class="body"><p class="task">ตั้งเครื่องจริงแบบเดียวกับเครื่องทดสอบ พร้อม Umami และ Uptime Kuma</p><p class="proof">หลักฐาน: เปิดเครื่องจริงได้ และตัวเฝ้าแจ้งเตือนได้</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">2 ถึง 6 พ.ย.</div>
+      <li class="day" data-due="2026-11-11">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">2 ถึง 11 พ.ย.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p4-4" data-due="2026-11-11" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ทดสอบทุกส่วน และทดสอบเต็มชุด 9 ถึง 11 พ.ย."><span></span></label>
+            <div class="body"><p class="task">ทดสอบทุกส่วน และทดสอบเต็มชุด 9 ถึง 11 พ.ย.</p><p class="proof">หลักฐาน: ผลทดสอบเต็มชุด</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">QA</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p4-3" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ทดสอบกู้ข้อมูลจากชุดสำรองให้สำเร็จ 1 ครั้ง"><span></span></label>
-        <div class="body"><p class="task">ทดสอบกู้ข้อมูลจากชุดสำรองให้สำเร็จ 1 ครั้ง</p><p class="proof">หลักฐาน: บันทึกการกู้คืน: วันที่ ชุดสำรอง ผล</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">2 ถึง 6 พ.ย.</div>
+      <li class="day" data-due="2026-11-11">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">10 ถึง 11 พ.ย.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p4-5" data-due="2026-11-11" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ทดสอบ performance: ภาพหลักหน้าแรกบนมือถือ อัปโหลด PDF 18 MB และผู้ใช้พร้อมกัน เกณฑ์ยังเป็นข้อเสนอ ยังไม่ได้ตกลงกับลูกค้า"><span></span></label>
+            <div class="body"><p class="task">ทดสอบ performance: ภาพหลักหน้าแรกบนมือถือ อัปโหลด PDF 18 MB และผู้ใช้พร้อมกัน เกณฑ์ยังเป็นข้อเสนอ ยังไม่ได้ตกลงกับลูกค้า</p><p class="proof">หลักฐาน: ค่าที่วัดได้จริง</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">QA</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p4-4" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ทดสอบทุกส่วน และทดสอบเต็มชุด 9 ถึง 11 พ.ย."><span></span></label>
-        <div class="body"><p class="task">ทดสอบทุกส่วน และทดสอบเต็มชุด 9 ถึง 11 พ.ย.</p><p class="proof">หลักฐาน: ผลทดสอบเต็มชุด</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">QA</div>
-        <div class="due">2 ถึง 11 พ.ย.</div>
+      <li class="day" data-due="2026-11-11">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">ระหว่างทดลองใช้<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p4-6" data-due="2026-11-11" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="บันทึกข้อบกพร่องที่แชร์กับลูกค้า: พบอะไร แก้แล้วหรือยัง"><span></span></label>
+            <div class="body"><p class="task">บันทึกข้อบกพร่องที่แชร์กับลูกค้า: พบอะไร แก้แล้วหรือยัง</p><p class="proof">หลักฐาน: ลิงก์บันทึกที่ลูกค้าเปิดได้</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p4-5" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ทดสอบ performance: ภาพหลักหน้าแรกบนมือถือ อัปโหลด PDF 18 MB และผู้ใช้พร้อมกัน เกณฑ์ยังเป็นข้อเสนอ ยังไม่ได้ตกลงกับลูกค้า"><span></span></label>
-        <div class="body"><p class="task">ทดสอบ performance: ภาพหลักหน้าแรกบนมือถือ อัปโหลด PDF 18 MB และผู้ใช้พร้อมกัน เกณฑ์ยังเป็นข้อเสนอ ยังไม่ได้ตกลงกับลูกค้า</p><p class="proof">หลักฐาน: ค่าที่วัดได้จริง</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">QA</div>
-        <div class="due">10 ถึง 11 พ.ย.</div>
+      <li class="day" data-due="2026-11-11">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">พ. 11 พ.ย.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p4-7" data-due="2026-11-11" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="รายการแก้ไขจากการทดลองใช้"><span></span></label>
+            <div class="body"><p class="task">รายการแก้ไขจากการทดลองใช้</p><p class="proof">หลักฐาน: แบบฟอร์มแจ้งแก้ไขที่ได้รับ</p></div>
+            <div class="meta"><span class="chip wait">รอจากลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">ลูกค้า</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p4-6" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="บันทึกข้อบกพร่องที่แชร์กับลูกค้า: พบอะไร แก้แล้วหรือยัง"><span></span></label>
-        <div class="body"><p class="task">บันทึกข้อบกพร่องที่แชร์กับลูกค้า: พบอะไร แก้แล้วหรือยัง</p><p class="proof">หลักฐาน: ลิงก์บันทึกที่ลูกค้าเปิดได้</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ระหว่างทดลองใช้</div>
+      <li class="day" data-due="2026-11-13">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">12 ถึง 13 พ.ย.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p4-8" data-due="2026-11-13" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ตัดสินว่าข้อไหนต้องแก้ก่อนส่งมอบ แล้วอนุมัติย้ายขึ้นเครื่องจริง"><span></span></label>
+            <div class="body"><p class="task">ตัดสินว่าข้อไหนต้องแก้ก่อนส่งมอบ แล้วอนุมัติย้ายขึ้นเครื่องจริง</p><p class="proof">หลักฐาน: รายการที่ตัดสินแล้ว</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p4-9" data-due="2026-11-13" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ย้ายฐานข้อมูลด้วย pg_dump และไฟล์ที่อัปโหลดขึ้นเครื่องจริง ชี้โดเมนถ้าพร้อม"><span></span></label>
+            <div class="body"><p class="task">ย้ายฐานข้อมูลด้วย pg_dump และไฟล์ที่อัปโหลดขึ้นเครื่องจริง ชี้โดเมนถ้าพร้อม</p><p class="proof">หลักฐาน: ข้อมูลบนเครื่องจริงตรงกับเครื่องทดสอบ</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p4-7" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="รายการแก้ไขจากการทดลองใช้"><span></span></label>
-        <div class="body"><p class="task">รายการแก้ไขจากการทดลองใช้</p><p class="proof">หลักฐาน: แบบฟอร์มแจ้งแก้ไขที่ได้รับ</p></div>
-        <div class="meta"><span class="chip wait">รอจากลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">ลูกค้า</div>
-        <div class="due">พ. 11 พ.ย.</div>
+      <li class="day" data-due="2026-11-13">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">ก่อน 13 พ.ย.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p4-10" data-due="2026-11-13" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="รายการตรวจความปลอดภัย อ้างอิงแนวทาง ISO/IEC 27002 ผ่านทุกข้อแล้วลงชื่อ ก่อนขึ้นเครื่องจริง"><span></span></label>
+            <div class="body"><p class="task">รายการตรวจความปลอดภัย อ้างอิงแนวทาง ISO/IEC 27002 ผ่านทุกข้อแล้วลงชื่อ ก่อนขึ้นเครื่องจริง</p><p class="proof">หลักฐาน: รายการตรวจที่ลงชื่อ</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p4-8" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ตัดสินว่าข้อไหนต้องแก้ก่อนส่งมอบ แล้วอนุมัติย้ายขึ้นเครื่องจริง"><span></span></label>
-        <div class="body"><p class="task">ตัดสินว่าข้อไหนต้องแก้ก่อนส่งมอบ แล้วอนุมัติย้ายขึ้นเครื่องจริง</p><p class="proof">หลักฐาน: รายการที่ตัดสินแล้ว</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">12 ถึง 13 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p4-9" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ย้ายฐานข้อมูลด้วย pg_dump และไฟล์ที่อัปโหลดขึ้นเครื่องจริง ชี้โดเมนถ้าพร้อม"><span></span></label>
-        <div class="body"><p class="task">ย้ายฐานข้อมูลด้วย pg_dump และไฟล์ที่อัปโหลดขึ้นเครื่องจริง ชี้โดเมนถ้าพร้อม</p><p class="proof">หลักฐาน: ข้อมูลบนเครื่องจริงตรงกับเครื่องทดสอบ</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">12 ถึง 13 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p4-10" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="รายการตรวจความปลอดภัย อ้างอิงแนวทาง ISO/IEC 27002 ผ่านทุกข้อแล้วลงชื่อ ก่อนขึ้นเครื่องจริง"><span></span></label>
-        <div class="body"><p class="task">รายการตรวจความปลอดภัย อ้างอิงแนวทาง ISO/IEC 27002 ผ่านทุกข้อแล้วลงชื่อ ก่อนขึ้นเครื่องจริง</p><p class="proof">หลักฐาน: รายการตรวจที่ลงชื่อ</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ก่อน 13 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p4-11" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ตรวจทุกหน้าบนเครื่องจริงหลังย้าย"><span></span></label>
-        <div class="body"><p class="task">ตรวจทุกหน้าบนเครื่องจริงหลังย้าย</p><p class="proof">หลักฐาน: ผลตรวจหลังย้าย</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">QA</div>
-        <div class="due">ศ. 13 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p4-12" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="สรุปผลทดสอบ ใส่เฉพาะค่าที่วัดได้จริง"><span></span></label>
-        <div class="body"><p class="task">สรุปผลทดสอบ ใส่เฉพาะค่าที่วัดได้จริง</p><p class="proof">หลักฐาน: ไฟล์สรุปผลทดสอบ</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ศ. 13 พ.ย.</div>
+      <li class="day" data-due="2026-11-13">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">ศ. 13 พ.ย.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p4-11" data-due="2026-11-13" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ตรวจทุกหน้าบนเครื่องจริงหลังย้าย"><span></span></label>
+            <div class="body"><p class="task">ตรวจทุกหน้าบนเครื่องจริงหลังย้าย</p><p class="proof">หลักฐาน: ผลตรวจหลังย้าย</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">QA</div>
+          </li>
+          <li class="item" data-id="p4-12" data-due="2026-11-13" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="สรุปผลทดสอบ ใส่เฉพาะค่าที่วัดได้จริง"><span></span></label>
+            <div class="body"><p class="task">สรุปผลทดสอบ ใส่เฉพาะค่าที่วัดได้จริง</p><p class="proof">หลักฐาน: ไฟล์สรุปผลทดสอบ</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
     </ol>
   </section>
-  <section class="phase" aria-labelledby="h-p5">
+  <section class="phase" id="p5" aria-labelledby="h-p5">
     <div class="ph"><span class="when">5 · ส. 14 พ.ย.</span><h2 id="h-p5">นัดครั้งที่ 3 · ตรวจรับ · งวดที่ 3</h2><span class="n">9 ข้อ</span><p class="note">ส่งมอบเว็บไซต์และระบบหลังบ้าน พร้อมเอกสารส่งมอบ</p></div>
-    <div class="head" aria-hidden="true"><span></span><span>งาน</span><span>ประเภทและสถานะ</span><span>ผู้รับผิดชอบ</span><span>กำหนด</span></div>
-    <ol>
-      <li class="item" data-id="p5-1" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ใบตรวจรับงาน ให้ลูกค้าลงนาม ใช้ปิดงวดที่ 3"><span></span></label>
-        <div class="body"><p class="task">ใบตรวจรับงาน ให้ลูกค้าลงนาม ใช้ปิดงวดที่ 3</p><p class="proof">หลักฐาน: ใบตรวจรับที่ลงนามแล้ว</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ส. 14 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p5-2" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="คู่มือผู้ดูแลระบบฉบับจริง: สินค้า บทความ ผลงาน แคตตาล็อก ข้อความลูกค้า"><span></span></label>
-        <div class="body"><p class="task">คู่มือผู้ดูแลระบบฉบับจริง: สินค้า บทความ ผลงาน แคตตาล็อก ข้อความลูกค้า</p><p class="proof">หลักฐาน: ไฟล์คู่มือ</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Frontend หลังบ้าน</div>
-        <div class="due">ส. 14 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p5-3" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="รายการบัญชีและผู้ให้บริการ: โดเมน server อีเมล ที่เก็บโค้ด ใครเป็นเจ้าของ ใครเข้าถึงได้ ต้องอยู่ในชื่อลูกค้า ตอนนี้ repo และ Vercel ยังอยู่ในบัญชีของผู้พัฒนา"><span></span></label>
-        <div class="body"><p class="task">รายการบัญชีและผู้ให้บริการ: โดเมน server อีเมล ที่เก็บโค้ด ใครเป็นเจ้าของ ใครเข้าถึงได้ ต้องอยู่ในชื่อลูกค้า ตอนนี้ repo และ Vercel ยังอยู่ในบัญชีของผู้พัฒนา</p><p class="proof">หลักฐาน: รายการที่ลูกค้ารับทราบ</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">ส. 14 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p5-4" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="รายการตรวจความปลอดภัยที่ลงชื่อแล้ว"><span></span></label>
-        <div class="body"><p class="task">รายการตรวจความปลอดภัยที่ลงชื่อแล้ว</p><p class="proof">หลักฐาน: สำเนาที่ส่ง</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ส. 14 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p5-5" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="บันทึกการกู้คืนข้อมูลสำรอง"><span></span></label>
-        <div class="body"><p class="task">บันทึกการกู้คืนข้อมูลสำรอง</p><p class="proof">หลักฐาน: สำเนาที่ส่ง</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">ส. 14 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p5-6" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="เอกสารดูแลระบบ: ขั้นตอน deploy ค่าตั้งที่ต้องใช้ การสำรองข้อมูล การแจ้งเตือน"><span></span></label>
-        <div class="body"><p class="task">เอกสารดูแลระบบ: ขั้นตอน deploy ค่าตั้งที่ต้องใช้ การสำรองข้อมูล การแจ้งเตือน</p><p class="proof">หลักฐาน: ทำตามเอกสารบนเครื่องเปล่าได้ 1 ครั้ง</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">ส. 14 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p5-7" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ข้อเสนอดูแลรายเดือน: ขอบเขต เวลาตอบกลับ ราคา ตามที่ตกลงกันเท่านั้น"><span></span></label>
-        <div class="body"><p class="task">ข้อเสนอดูแลรายเดือน: ขอบเขต เวลาตอบกลับ ราคา ตามที่ตกลงกันเท่านั้น</p><p class="proof">หลักฐาน: ข้อเสนอที่ส่ง</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ส. 14 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p5-8" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="สอนผู้ดูแลระบบใช้หลังบ้าน"><span></span></label>
-        <div class="body"><p class="task">สอนผู้ดูแลระบบใช้หลังบ้าน</p><p class="proof">หลักฐาน: ผู้ดูแลระบบเพิ่มบทความพร้อมรูปได้เอง</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Frontend หลังบ้าน</div>
-        <div class="due">ส. 14 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p5-9" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="เอกสารเรียกเก็บงวดที่ 3 ตามที่ตกลงไว้"><span></span></label>
-        <div class="body"><p class="task">เอกสารเรียกเก็บงวดที่ 3 ตามที่ตกลงไว้</p><p class="proof">หลักฐาน: เอกสารเรียกเก็บที่ส่งแล้ว</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ส. 14 พ.ย.</div>
+    <ol class="days">
+      <li class="day" data-due="2026-11-14">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">ส. 14 พ.ย.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p5-1" data-due="2026-11-14" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ใบตรวจรับงาน ให้ลูกค้าลงนาม ใช้ปิดงวดที่ 3"><span></span></label>
+            <div class="body"><p class="task">ใบตรวจรับงาน ให้ลูกค้าลงนาม ใช้ปิดงวดที่ 3</p><p class="proof">หลักฐาน: ใบตรวจรับที่ลงนามแล้ว</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p5-2" data-due="2026-11-14" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="คู่มือผู้ดูแลระบบฉบับจริง: สินค้า บทความ ผลงาน แคตตาล็อก ข้อความลูกค้า"><span></span></label>
+            <div class="body"><p class="task">คู่มือผู้ดูแลระบบฉบับจริง: สินค้า บทความ ผลงาน แคตตาล็อก ข้อความลูกค้า</p><p class="proof">หลักฐาน: ไฟล์คู่มือ</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Frontend หลังบ้าน</div>
+          </li>
+          <li class="item" data-id="p5-3" data-due="2026-11-14" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="รายการบัญชีและผู้ให้บริการ: โดเมน server อีเมล ที่เก็บโค้ด ใครเป็นเจ้าของ ใครเข้าถึงได้ ต้องอยู่ในชื่อลูกค้า ตอนนี้ repo และ Vercel ยังอยู่ในบัญชีของผู้พัฒนา"><span></span></label>
+            <div class="body"><p class="task">รายการบัญชีและผู้ให้บริการ: โดเมน server อีเมล ที่เก็บโค้ด ใครเป็นเจ้าของ ใครเข้าถึงได้ ต้องอยู่ในชื่อลูกค้า ตอนนี้ repo และ Vercel ยังอยู่ในบัญชีของผู้พัฒนา</p><p class="proof">หลักฐาน: รายการที่ลูกค้ารับทราบ</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+          <li class="item" data-id="p5-4" data-due="2026-11-14" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="รายการตรวจความปลอดภัยที่ลงชื่อแล้ว"><span></span></label>
+            <div class="body"><p class="task">รายการตรวจความปลอดภัยที่ลงชื่อแล้ว</p><p class="proof">หลักฐาน: สำเนาที่ส่ง</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p5-5" data-due="2026-11-14" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="บันทึกการกู้คืนข้อมูลสำรอง"><span></span></label>
+            <div class="body"><p class="task">บันทึกการกู้คืนข้อมูลสำรอง</p><p class="proof">หลักฐาน: สำเนาที่ส่ง</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+          <li class="item" data-id="p5-6" data-due="2026-11-14" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="เอกสารดูแลระบบ: ขั้นตอน deploy ค่าตั้งที่ต้องใช้ การสำรองข้อมูล การแจ้งเตือน"><span></span></label>
+            <div class="body"><p class="task">เอกสารดูแลระบบ: ขั้นตอน deploy ค่าตั้งที่ต้องใช้ การสำรองข้อมูล การแจ้งเตือน</p><p class="proof">หลักฐาน: ทำตามเอกสารบนเครื่องเปล่าได้ 1 ครั้ง</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+          <li class="item" data-id="p5-7" data-due="2026-11-14" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ข้อเสนอดูแลรายเดือน: ขอบเขต เวลาตอบกลับ ราคา ตามที่ตกลงกันเท่านั้น"><span></span></label>
+            <div class="body"><p class="task">ข้อเสนอดูแลรายเดือน: ขอบเขต เวลาตอบกลับ ราคา ตามที่ตกลงกันเท่านั้น</p><p class="proof">หลักฐาน: ข้อเสนอที่ส่ง</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+          <li class="item" data-id="p5-8" data-due="2026-11-14" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="สอนผู้ดูแลระบบใช้หลังบ้าน"><span></span></label>
+            <div class="body"><p class="task">สอนผู้ดูแลระบบใช้หลังบ้าน</p><p class="proof">หลักฐาน: ผู้ดูแลระบบเพิ่มบทความพร้อมรูปได้เอง</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Frontend หลังบ้าน</div>
+          </li>
+          <li class="item" data-id="p5-9" data-due="2026-11-14" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="เอกสารเรียกเก็บงวดที่ 3 ตามที่ตกลงไว้"><span></span></label>
+            <div class="body"><p class="task">เอกสารเรียกเก็บงวดที่ 3 ตามที่ตกลงไว้</p><p class="proof">หลักฐาน: เอกสารเรียกเก็บที่ส่งแล้ว</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
     </ol>
   </section>
-  <section class="phase" aria-labelledby="h-p6">
+  <section class="phase" id="p6" aria-labelledby="h-p6">
     <div class="ph"><span class="when">6 · 15 ถึง 20 พ.ย. และหลังจากนั้น</span><h2 id="h-p6">เฝ้าดูระบบ และเริ่มใช้งานจริง</h2><span class="n">4 ข้อ</span><p class="note">หลังส่งมอบทีมเฝ้าดูระบบอย่างเดียว ลูกค้าเริ่มใช้งานจริง ศ. 20 พ.ย.</p></div>
-    <div class="head" aria-hidden="true"><span></span><span>งาน</span><span>ประเภทและสถานะ</span><span>ผู้รับผิดชอบ</span><span>กำหนด</span></div>
-    <ol>
-      <li class="item" data-id="p6-1" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="เฝ้าดูระบบ ตรวจว่าแจ้งเตือนเมื่อเว็บล่มหรือดิสก์ใกล้เต็มได้จริง"><span></span></label>
-        <div class="body"><p class="task">เฝ้าดูระบบ ตรวจว่าแจ้งเตือนเมื่อเว็บล่มหรือดิสก์ใกล้เต็มได้จริง</p><p class="proof">หลักฐาน: บันทึกการเฝ้าดู</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">DevOps</div>
-        <div class="due">15 ถึง 20 พ.ย.</div>
+    <ol class="days">
+      <li class="day" data-due="2026-11-20">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">15 ถึง 20 พ.ย.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p6-1" data-due="2026-11-20" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="เฝ้าดูระบบ ตรวจว่าแจ้งเตือนเมื่อเว็บล่มหรือดิสก์ใกล้เต็มได้จริง"><span></span></label>
+            <div class="body"><p class="task">เฝ้าดูระบบ ตรวจว่าแจ้งเตือนเมื่อเว็บล่มหรือดิสก์ใกล้เต็มได้จริง</p><p class="proof">หลักฐาน: บันทึกการเฝ้าดู</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">DevOps</div>
+          </li>
+          <li class="item" data-id="p6-2" data-due="2026-11-20" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="รับเรื่องจากลูกค้าระหว่างเฝ้าดูระบบ"><span></span></label>
+            <div class="body"><p class="task">รับเรื่องจากลูกค้าระหว่างเฝ้าดูระบบ</p><p class="proof">หลักฐาน: รายการเรื่องที่รับ และผล</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p6-2" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="รับเรื่องจากลูกค้าระหว่างเฝ้าดูระบบ"><span></span></label>
-        <div class="body"><p class="task">รับเรื่องจากลูกค้าระหว่างเฝ้าดูระบบ</p><p class="proof">หลักฐาน: รายการเรื่องที่รับ และผล</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">15 ถึง 20 พ.ย.</div>
+      <li class="day" data-due="2026-11-20">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">ศ. 20 พ.ย.<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p6-3" data-due="2026-11-20" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="ลูกค้าเริ่มใช้งานจริง"><span></span></label>
+            <div class="body"><p class="task">ลูกค้าเริ่มใช้งานจริง</p><p class="proof">หลักฐาน: เว็บจริงเปิดใช้</p></div>
+            <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
-      <li class="item" data-id="p6-3" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="ลูกค้าเริ่มใช้งานจริง"><span></span></label>
-        <div class="body"><p class="task">ลูกค้าเริ่มใช้งานจริง</p><p class="proof">หลักฐาน: เว็บจริงเปิดใช้</p></div>
-        <div class="meta"><span class="chip do">ทำภายใน</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">ศ. 20 พ.ย.</div>
-      </li>
-      <li class="item" data-id="p6-4" data-done="0">
-        <label class="tick"><input type="checkbox" aria-label="รายงานประจำเดือน: uptime ผลสำรองข้อมูล แพ็กเกจที่อัปเดต ช่องโหว่ที่ตรวจพบ ถ้าตกลงเรื่องดูแลรายเดือนแล้ว"><span></span></label>
-        <div class="body"><p class="task">รายงานประจำเดือน: uptime ผลสำรองข้อมูล แพ็กเกจที่อัปเดต ช่องโหว่ที่ตรวจพบ ถ้าตกลงเรื่องดูแลรายเดือนแล้ว</p><p class="proof">หลักฐาน: รายงานที่ส่ง</p></div>
-        <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span></div>
-        <div class="who">Lead / PM</div>
-        <div class="due">รายเดือน</div>
+      <li class="day" data-due="">
+        <span class="dot" aria-hidden="true"></span>
+        <p class="dlabel">รายเดือน<span class="today-tag">วันนี้</span></p>
+        <ol class="items">
+          <li class="item" data-id="p6-4" data-due="" data-done="0">
+            <label class="tick"><input type="checkbox" aria-label="รายงานประจำเดือน: uptime ผลสำรองข้อมูล แพ็กเกจที่อัปเดต ช่องโหว่ที่ตรวจพบ ถ้าตกลงเรื่องดูแลรายเดือนแล้ว"><span></span></label>
+            <div class="body"><p class="task">รายงานประจำเดือน: uptime ผลสำรองข้อมูล แพ็กเกจที่อัปเดต ช่องโหว่ที่ตรวจพบ ถ้าตกลงเรื่องดูแลรายเดือนแล้ว</p><p class="proof">หลักฐาน: รายงานที่ส่ง</p></div>
+            <div class="meta"><span class="chip send">ส่งลูกค้า</span><span class="st todo">ยังไม่เริ่ม</span><span class="late">เลยกำหนด</span></div>
+            <div class="who">Lead / PM</div>
+          </li>
+        </ol>
       </li>
     </ol>
   </section>
@@ -555,9 +706,9 @@
 
   <section class="notes">
     <p><b>สถานะ</b> ตรวจจาก branch บน GitHub วันที่ 16 ต.ค. 2569 ข้อที่ระบุว่า "ยังไม่ได้ตรวจ" คือยังไม่มีหลักฐานว่าทำหรือส่งแล้ว ให้ผู้รับผิดชอบยืนยันแล้วติ๊กเอง</p>
-    <p><b>วันกำหนด</b> ยึดปฏิทินลูกค้าเป็นหลัก ปฏิทินลูกค้าวางแคตตาล็อกกับฟอร์มติดต่อไว้ 2 ถึง 6 พ.ย. ส่วนแผนทีมวางไว้ 28 ถึง 29 ต.ค. โค้ดทั้ง 2 ส่วนเสร็จบน branch แล้ว</p>
+    <p><b>วันกำหนด</b> ยึดปฏิทินลูกค้าเป็นหลัก งานที่เป็นช่วงวันนับวันสุดท้ายของช่วงเป็นวันกำหนด ปฏิทินลูกค้าวางแคตตาล็อกกับฟอร์มติดต่อไว้ 2 ถึง 6 พ.ย. ส่วนแผนทีมวางไว้ 28 ถึง 29 ต.ค. โค้ดทั้ง 2 ส่วนเสร็จบน branch แล้ว</p>
     <p><b>มาตรฐาน</b> รายการตรวจความปลอดภัยและเกณฑ์คุณภาพอ้างอิงแนวทางใน docs/pm/standards.md โครงการไม่มีการตรวจรับรอง</p>
-    <p><b>ช่องติ๊ก</b> จำไว้ในเบราว์เซอร์ของผู้ที่เปิดเท่านั้น ไม่แชร์ข้ามเครื่อง</p>
+    <p><b>ช่องติ๊กและป้ายเลยกำหนด</b> ทำงานเมื่อเปิดในเบราว์เซอร์ การติ๊กจำไว้ในเครื่องของผู้ที่เปิดเท่านั้น ไม่แชร์ข้ามเครื่อง</p>
     <div class="actions"><button type="button" id="reset">ล้างการติ๊กในเครื่องนี้</button></div>
   </section>
 
@@ -565,16 +716,38 @@
 </main>
 <script>
 (() => {
-  const KEY = 'iterra-delivery-checklist-v1';
+  const KEY = 'iterra-delivery-checklist-v1', T0 = '2026-10-16', SPAN = 36;
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Bangkok' });
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { saved = {}; }
   const items = [...document.querySelectorAll('.item')];
-  const total = items.length;
+
+  // เส้นวันนี้บนแถบ และจุดของวันที่ผ่านไปแล้ว
+  const d = (s) => Date.parse(s + 'T00:00:00Z') / 864e5, off = d(today) - d(T0);
+  const now = document.getElementById('now');
+  if (off >= 0 && off < SPAN) { now.style.left = ((off + 0.5) / SPAN * 100) + '%'; now.hidden = false; }
+  document.querySelectorAll('.day').forEach((el) => {
+    const due = el.dataset.due;
+    if (!due) return;
+    el.classList.toggle('past', due < today);
+    el.classList.toggle('is-today', due === today);
+  });
+
   function paint() {
     let n = 0;
-    items.forEach((li) => { const c = li.querySelector('input').checked; li.classList.toggle('checked', c); if (c) n++; });
-    document.getElementById('progress').textContent = 'ติ๊กแล้ว ' + n + ' จาก ' + total + ' ข้อ';
-    document.getElementById('meter').style.width = (n / total * 100) + '%';
+    items.forEach((li) => {
+      const c = li.querySelector('input').checked;
+      li.classList.toggle('checked', c);
+      li.classList.toggle('overdue', !c && !!li.dataset.due && li.dataset.due < today);
+      if (c) n++;
+    });
+    document.getElementById('progress').textContent = 'ติ๊กแล้ว ' + n + ' จาก ' + items.length + ' ข้อ · เลยกำหนด ' + document.querySelectorAll('.item.overdue').length + ' ข้อ';
+    document.querySelectorAll('.pcard').forEach((a) => {
+      const list = items.filter((li) => li.dataset.id.startsWith(a.dataset.phase + '-'));
+      const k = list.filter((li) => li.classList.contains('checked')).length;
+      a.querySelector('.pm i').style.width = (k / list.length * 100) + '%';
+      a.querySelector('.pc').textContent = 'ติ๊กแล้ว ' + k + ' จาก ' + list.length + ' ข้อ';
+    });
   }
   items.forEach((li) => {
     const box = li.querySelector('input'), id = li.dataset.id;
