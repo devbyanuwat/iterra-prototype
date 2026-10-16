@@ -1,0 +1,11 @@
+# ล้างข้อมูลเก่าตามระยะเก็บใน spec หัวข้อ 11.5 (scripts/db-prune.mjs)
+[Unit]
+Description=ITERRA: prune old logins, sessions, audit rows and search counts
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=iterra
+WorkingDirectory=/srv/iterra
+ExecStart=/usr/bin/docker compose run --rm -T app npm run db:prune

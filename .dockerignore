@@ -1,0 +1,16 @@
+# ของที่ไม่ต้องเข้า image: ของในเครื่องพัฒนา ความลับ และเอกสาร
+.git
+.github
+.githooks
+.claude
+.superpowers
+node_modules
+.next
+out
+.vercel
+.env*
+!.env.example
+docs
+deploy
+*.tsbuildinfo
+.DS_Store

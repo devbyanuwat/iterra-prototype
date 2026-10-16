@@ -1,0 +1,10 @@
+[Unit]
+Description=ITERRA: nightly backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=iterra
+WorkingDirectory=/srv/iterra
+ExecStart=/srv/iterra/backup.sh
