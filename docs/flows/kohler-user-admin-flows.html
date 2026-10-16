@@ -130,12 +130,11 @@
   @media (max-width: 480px) { .grid { padding: 20px 16px 12px; gap: 14px 4px; grid-template-columns: repeat(4, minmax(0, 1fr)); } .ico { width: 60px; height: 60px; border-radius: 14px; font-size: 19px; } .lbl { font-size: 11px; } .in { padding: 22px 16px 40px; } h2 { font-size: 26px; } .tables { grid-template-columns: minmax(0, 1fr); } }
   /* ตัวชี้แบบ iPad: JS ใส่ ptr-on เมื่อขยับเมาส์หรือ trackpad จริงเท่านั้น จอสัมผัสไม่เห็น */
   html.ptr-on, html.ptr-on * { cursor: none !important; }
-  .ptr { position: fixed; left: 0; top: 0; z-index: 50; width: 20px; height: 20px; border-radius: 10px; background: rgb(87 83 78 / 0.5); box-shadow: 0 0 0 1px rgb(255 255 255 / 0.45); pointer-events: none; opacity: 0; transition: opacity 0.2s, border-radius 0.25s var(--ease), background-color 0.25s, box-shadow 0.25s, scale 0.15s var(--ease); }
+  .ptr { position: fixed; left: 0; top: 0; z-index: 50; width: 20px; height: 20px; border-radius: 10px; background: rgb(87 83 78 / 0.5); box-shadow: 0 0 0 1px rgb(255 255 255 / 0.45); pointer-events: none; opacity: 0; transition: opacity 0.2s, border-radius 0.25s var(--ease), background-color 0.25s, box-shadow 0.25s; }
   .ptr.on { opacity: 1; }
   .ptr.hl { background: rgb(255 255 255 / 0.22); box-shadow: 0 10px 30px rgb(28 25 23 / 0.16); }
   .ptr.btn { background: rgb(28 25 23 / 0.1); box-shadow: none; }
   .ptr.beam { background: rgb(28 25 23 / 0.6); box-shadow: none; }
-  .ptr.down { scale: 0.85; }
   /* พิมพ์หรือแปลง PDF: ไม่มีหน้าโฮม เรียงทุกแอปต่อกันบนพื้นขาว */
   @media print {
     body { background: #fff; } .stage { display: block; padding: 0; } .device, .screen { all: unset; display: block; }
@@ -500,7 +499,7 @@
   dot.className = 'ptr'; dot.setAttribute('aria-hidden', 'true');
   document.body.appendChild(dot);
   let on = false, down = false, raf = 0, lifted = null;
-  let mx = 0, my = 0, x = 0, y = 0, w = DOT, h = DOT;
+  let mx = 0, my = 0, x = 0, y = 0, w = DOT, h = DOT, sc = 1, until = 0;
 
   function lift(ico, t) {
     if (lifted && lifted !== ico) { lifted.style.transform = ''; lifted.style.boxShadow = ''; }
@@ -534,11 +533,14 @@
       }
     }
     const f = reduce.matches ? 1 : 0.3;
-    x += (tx - x) * f; y += (ty - y) * f; w += (tw - w) * f; h += (th - h) * f;
-    dot.style.transform = 'translate(' + (x - w / 2) + 'px, ' + (y - h / 2) + 'px)';
+    const ts = down ? 0.85 : 1;
+    x += (tx - x) * f; y += (ty - y) * f; w += (tw - w) * f; h += (th - h) * f; sc += (ts - sc) * (reduce.matches ? 1 : 0.4);
+    // หดตอนกดอยู่ใน transform เดียวกับตำแหน่ง ให้หดรอบกลางตัวเอง (scale แยกจะหดระยะตำแหน่งไปด้วย จุดจึงกระโดด)
+    dot.style.transform = 'translate(' + (x - w / 2) + 'px, ' + (y - h / 2) + 'px) scale(' + sc + ')';
     dot.style.width = w + 'px'; dot.style.height = h + 'px'; dot.style.borderRadius = r + 'px';
-    dot.className = 'ptr on' + (mode ? ' ' + mode : '') + (down ? ' down' : '');
-    if (Math.abs(tx - x) + Math.abs(ty - y) + Math.abs(tw - w) + Math.abs(th - h) > 0.3) req();
+    dot.className = 'ptr on' + (mode ? ' ' + mode : '');
+    // หลังคลิก หน้าต่างกำลังเปิด ปิด หรือเลื่อนหน้า ของใต้เมาส์เปลี่ยนเองโดยไม่มี pointermove จึงตรวจทุกเฟรมจนนิ่ง
+    if (performance.now() < until || Math.abs(tx - x) + Math.abs(ty - y) + Math.abs(tw - w) + Math.abs(th - h) + Math.abs(ts - sc) * 100 > 0.3) req();
   }
   const req = () => { if (!raf) raf = requestAnimationFrame(frame); };
 
@@ -555,7 +557,8 @@
     req();
   }, { passive: true });
   addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') return hide(); down = true; req(); });
-  addEventListener('pointerup', () => { down = false; req(); });
+  addEventListener('pointerup', () => { down = false; until = performance.now() + 700; req(); });
+  addEventListener('keydown', () => { until = performance.now() + 700; req(); });
   addEventListener('scroll', req, { capture: true, passive: true });
   root.addEventListener('mouseleave', hide);
   addEventListener('blur', hide);
