@@ -23,38 +23,42 @@
 
 - โค้ดหลังบ้าน (DB, login, อัปโหลด) อยู่ที่ branch `feat/backend-content` **ยังไม่ merge เข้า `main`**
 - `main` ตอนนี้ยังเป็นเว็บต้นแบบที่ไม่มี DB
-- เครื่องทดสอบ deploy จาก branch ที่คนคุมโครงการระบุในแต่ละรอบ เครื่องจริง deploy จาก `main` เท่านั้น
+- ไฟล์ deploy (`Dockerfile`, `.github/workflows/image.yml`, `deploy/`) อยู่ที่ branch `chore/container-deploy` ยังไม่ merge
 - ตรวจ commit ล่าสุดเอาสด ๆ ตอนจะ deploy: `git log --oneline -1 origin/<branch>`
 
 ## 1. ภาพรวม
 
 ```
-ผู้เข้าชม / แอดมิน
-   |  HTTPS 443
+push ไป deploy/test หรือ main
+   |
    v
-reverse proxy (ตั้งผ่าน 1Panel) ---- /uploads/ ส่งไฟล์จาก UPLOAD_DIR ตรง
+GitHub Actions build image ---- ghcr.io (tag: sha, test, main)
+                                   ^
+                                   |  เครื่องดึงเอง (ไม่ต้องเปิดพอร์ตเข้า ไม่มีความลับบน GitHub)
+ผู้เข้าชม / แอดมิน                    |
+   |  HTTPS 443                    |
+   v                               |
+reverse proxy (1Panel) ---- /uploads/ ส่งไฟล์จาก /srv/iterra/uploads ตรง
    |  http://127.0.0.1:3000
    v
-Next.js (next start)  ---- PostgreSQL 16 (ฟังเฉพาะในเครื่อง)
+container app (next start) ---- container db (PostgreSQL 16, ไม่เปิดพอร์ต)
    |
-UPLOAD_DIR (ดิสก์ถาวร นอกโฟลเดอร์โค้ด)
+/srv/iterra/uploads (โฟลเดอร์บนเครื่อง mount เข้า container)
 
-cron บนเครื่อง:  db:prune วันละครั้ง · backup วันละครั้ง
+systemd timer บนเครื่อง: backup 02:30 · db:prune 03:00 · เครื่องทดสอบเท่านั้น: เช็ก image ใหม่ทุก 5 นาที
 เครื่องเก็บสำรอง (นอก cloud): ดึงไฟล์ backup ทุกคืน · เฝ้าเว็บล่ม
 ```
 
 มี 2 เครื่อง ตั้งเหมือนกันทุกอย่าง:
 
-- **เครื่องทดสอบ**: ใช้ทดสอบ 3 รอบช่วง 19 ถึง 30 ต.ค.
-- **เครื่องจริง**: ตั้ง 2 ถึง 6 พ.ย. แล้วย้ายข้อมูลวันที่ 12 ถึง 13 พ.ย.
+- **เครื่องทดสอบ**: ใช้ทดสอบ 3 รอบช่วง 19 ถึง 30 ต.ค. deploy อัตโนมัติเมื่อ branch `deploy/test` มี commit ใหม่
+- **เครื่องจริง**: ตั้ง 2 ถึง 6 พ.ย. แล้วย้ายข้อมูลวันที่ 12 ถึง 13 พ.ย. deploy เมื่อมีคนสั่งเท่านั้น
 
 ## 2. เครื่อง
 
 - สเปกเครื่องจริงตามใบเสนอราคา: CPU 4 Core, RAM 8 GB, ดิสก์ 50 GB, Ubuntu 24
-- เครื่องทดสอบใช้สเปกเล็กกว่าได้ แต่ `next build` ต้องใช้ RAM ราว 2 GB ขึ้นไป
-  - ตัวเลข 2 GB เป็นค่าประมาณ **ยังไม่ได้วัด**
-  - ถ้า RAM ไม่พอ ให้เพิ่ม swap 2 GB
-- ตั้งเขตเวลาเครื่องเป็น `Asia/Bangkok` เพื่อให้ cron ทำงานตามเวลาไทย
+- เครื่องทดสอบใช้สเปกเล็กกว่าได้ เพราะ build บน GitHub ไม่ได้ build บนเครื่อง
+- ตั้งเขตเวลาเครื่องเป็น `Asia/Bangkok` เพื่อให้ timer ทำงานตามเวลาไทย
 
 ### 2.1 ความปลอดภัยของเครื่อง (จาก `docs/pm/standards.md`)
 
@@ -64,90 +68,70 @@ cron บนเครื่อง:  db:prune วันละครั้ง · ba
   - ถ้าทำได้ ให้พอร์ต 1Panel เปิดเฉพาะ IP ของทีม
   - **ห้ามเปิดพอร์ต 3000 กับ 5432 ออกนอกเครื่อง**
   - เหตุผลข้อ 3000: ถ้าเปิด คนนอกยิงตรงเข้า Node แล้วปลอม `X-Real-IP` ได้ ระบบกันเดารหัสกับระบบจำกัดการส่งฟอร์มจะใช้ไม่ได้
+  - docker เปิดพอร์ตผ่าน iptables เอง **ข้าม firewall ของเครื่อง** จึงต้องผูก `127.0.0.1` ใน `compose.yml` เสมอ (ไฟล์ตั้งไว้แล้ว ห้ามแก้เป็น `3000:3000`)
 - [ ] เปิด security update อัตโนมัติ (`unattended-upgrades`)
 - [ ] บัญชีที่รันแอปเป็นผู้ใช้ธรรมดา เช่น `iterra` ไม่ใช่ root
 
 ## 3. ซอฟต์แวร์
 
-| ตัว | เวอร์ชัน | หมายเหตุ |
+| ตัว | ที่มา | หมายเหตุ |
 |---|---|---|
-| Node.js | 22 LTS (ต่ำสุด 20.9 ตามที่ Next 16.3.8 กำหนด) | ใช้ `npm` ไม่ใช่ yarn/pnpm |
-| PostgreSQL | 16 | ฟังเฉพาะ localhost |
+| Docker Engine และ Docker Compose v2 | ลงบนเครื่อง (1Panel ใช้ Docker อยู่แล้ว) | ผู้ใช้ `iterra` ต้องอยู่กลุ่ม `docker` |
+| แอป (Next.js บน Node 22) | image `ghcr.io/devbyanuwat/iterra-prototype` | build จาก `Dockerfile` บน GitHub Actions ทุก push ไป `deploy/test` และ `main` |
+| PostgreSQL 16 | image `postgres:16-bookworm` ใน `compose.yml` | ไม่เปิดพอร์ตออกนอก docker network ข้อมูลอยู่ที่ `/srv/iterra/pgdata` |
 | reverse proxy | ตัวที่มากับ 1Panel | ดูหัวข้อ 6 |
+| `gnupg`, `flock` | ลงบนเครื่อง | ใช้ใน `backup.sh` กับ `deploy.sh` |
 
-**วิธีรัน Node (เลือกหนึ่งทาง แล้วจดลงไฟล์นี้)**
+ถ้า image บน ghcr เป็น private (หลัง repo เปลี่ยนเป็น private) ต้อง `docker login ghcr.io` บนเครื่องด้วย token ที่มีสิทธิ์ `read:packages` อย่างเดียว token เก็บบนเครื่อง ห้ามใส่ใน repo
 
-1. **systemd บนเครื่องตรง (แนะนำ)**: path ของ `UPLOAD_DIR` ตรงไปตรงมา และ cron เรียก `npm run` ได้เลย ตัวอย่าง unit อยู่หัวข้อ 3.1
-2. **Node runtime ของ 1Panel**: ต้อง mount `UPLOAD_DIR` และไฟล์ `.env` เข้า container เอง และ cron ต้องสั่งผ่าน container
-   - **ยังไม่ได้ตรวจ** ว่าวิธีนี้ทำได้ครบ
+### 3.1 ไฟล์บนเครื่อง
 
-ไม่ว่าจะเลือกทางไหน ต้องได้ครบ 4 อย่าง:
+ก๊อปจากโฟลเดอร์ `deploy/` ใน repo ไปไว้ที่ `/srv/iterra` (เจ้าของคือผู้ใช้ `iterra`):
 
-- ฟังที่ `127.0.0.1:3000`
-- ล่มแล้วขึ้นใหม่เอง
-- อ่านค่าตั้งจาก `.env`
-- เครื่อง reboot แล้วขึ้นเอง
-
-### 3.1 ตัวอย่าง systemd unit
-
-```ini
-# /etc/systemd/system/iterra.service
-[Unit]
-Description=ITERRA web
-After=network.target postgresql.service
-
-[Service]
-User=iterra
-WorkingDirectory=/srv/iterra/app
-Environment=NODE_ENV=production
-EnvironmentFile=/srv/iterra/app/.env
-ExecStart=/usr/bin/npm run start -- -H 127.0.0.1 -p 3000
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
+```
+/srv/iterra/
+  compose.yml          จาก deploy/compose.yml
+  deploy.sh            จาก deploy/deploy.sh
+  update-test.sh       จาก deploy/update-test.sh (เครื่องทดสอบเท่านั้น)
+  backup.sh            จาก deploy/backup.sh
+  app.env              จาก deploy/app.env.example   chmod 600
+  db.env               จาก deploy/db.env.example    chmod 600
+  backup.env           จาก deploy/backup.env.example
+  .env                 deploy.sh เขียนเอง (ITERRA_REF = image ที่ใช้อยู่) ห้ามแก้มือ
+  uploads/             ไฟล์อัปโหลด chown 1000:1000 (ผู้ใช้ node ใน image)
+  pgdata/              ข้อมูล PostgreSQL
+  backups/             ไฟล์สำรองที่เข้ารหัสแล้ว
 ```
 
-ข้อควรระวังเรื่อง `EnvironmentFile` ของ systemd:
-
-- อ่านได้เฉพาะบรรทัดแบบ `KEY=value`
-- ข้ามบรรทัดที่ขึ้นต้นด้วย `#`
-- ห้ามมีช่องว่างรอบ `=`
-
-ไฟล์ `.env.example` ใน repo เขียนตามรูปแบบนี้อยู่แล้ว
+ไฟล์ systemd อยู่ใน `deploy/systemd/` ก๊อปไป `/etc/systemd/system/` แล้ว `systemctl daemon-reload`
 
 ## 4. ฐานข้อมูล
 
-```sql
--- รันเป็น postgres superuser · ตั้งรหัสจริงจากที่เก็บรหัสของทีม
-create role iterra login password '...';
-create database iterra owner iterra;
-```
-
-- `DATABASE_URL` ใช้รูปแบบ URL ของ PostgreSQL: ผู้ใช้ `iterra` รหัสจากที่เก็บรหัสของทีม host `127.0.0.1` port `5432` ชื่อ DB `iterra` (คั่นผู้ใช้กับรหัสด้วย `:` และใส่ `@` หน้า host)
+- PostgreSQL รันเป็น container `db` สร้าง DB `iterra` และผู้ใช้ `iterra` ให้เองตอนขึ้นครั้งแรก จากค่าใน `db.env`
+- `DATABASE_URL` ใน `app.env` ใช้ host `db` (ชื่อ service ใน compose) ไม่ใช่ `127.0.0.1` รหัสต้องตรงกับ `POSTGRES_PASSWORD`
 - ชื่อ DB บน server **ห้ามลงท้ายด้วย `_test`**
   - เหตุผล: `npm run check:db` ล้าง schema ทั้งหมด และยอมรันกับ DB ที่ชื่อลงท้าย `_test` เท่านั้น
   - **ห้ามรัน `check:db` บน server เด็ดขาด**
-- migration อยู่ใน `db/migrations/*.sql` และรันด้วย `npm run db:migrate`
+- migration อยู่ใน `db/migrations/*.sql` `deploy.sh` รัน `npm run db:migrate` ให้ทุกรอบ
   - รันได้ทางเดียว ย้อนกลับไม่ได้ ถ้าไฟล์ไหนพัง ไฟล์นั้นถอยกลับทั้งไฟล์แล้วหยุด
-  - ก่อน migrate ทุกครั้งต้อง backup ก่อน (หัวข้อ 9)
+  - `deploy.sh` backup ก่อน migrate ทุกครั้ง (หัวข้อ 9)
 
-## 5. ค่าตั้ง `.env`
+## 5. ค่าตั้ง
 
-วาง `.env` ไว้ที่ `/srv/iterra/app/.env` ตั้งสิทธิ์ `600` ให้เจ้าของเป็นผู้ใช้ `iterra` **ห้าม commit**
+`app.env` อ่านโดย container `app` **ห้าม commit**
 
 | ค่า | ใช้ทำอะไร | ค่าบน server |
 |---|---|---|
 | `DATABASE_URL` | ต่อ DB | ตามหัวข้อ 4 |
-| `UPLOAD_DIR` | ที่เก็บรูปและ PDF ที่อัปโหลด | path เต็ม นอกโฟลเดอร์โค้ด เช่น `/srv/iterra/uploads` ผู้ใช้ `iterra` ต้องเขียนได้ |
 | `IP_SALT` | ผสมก่อน hash IP | สุ่มใหม่สำหรับแต่ละเครื่อง เช่น `openssl rand -hex 32` ถ้าไม่ตั้ง แอปจะ error ตอน production |
 | `SESSION_DAYS` | อายุ session ของแอดมิน (วัน) | `14` |
 | `SESSION_IDLE_MIN` | ไม่ได้ใช้งานกี่นาทีแล้วต้อง login ใหม่ | `120` |
-| `NODE_ENV` | ให้ cookie ส่งเฉพาะทาง HTTPS (`secure`) | `production` (ตั้งใน unit แล้ว) |
-| `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD` | ใช้ตอนสร้างหรือรีเซ็ตแอดมินเท่านั้น | **ห้ามเก็บไว้ใน `.env` ของ server** ใส่นำหน้าคำสั่งครั้งเดียว (หัวข้อ 11) |
+| `UPLOAD_DIR`, `NODE_ENV` | ที่เก็บไฟล์ใน container และโหมด production | `compose.yml` ตั้งให้แล้ว ไม่ต้องใส่ |
+| `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD` | ใช้ตอนสร้างหรือรีเซ็ตแอดมินเท่านั้น | **ห้ามเก็บไว้ใน `app.env`** ส่งเข้าคำสั่งครั้งเดียว (หัวข้อ 11) |
 | `TEST_DATABASE_URL` | ใช้กับ `check:db` | **ห้ามตั้งบน server** |
 | `SMTP_URL`, `INQUIRY_TO` | ส่งอีเมลแจ้งเมื่อมีคนส่งฟอร์มติดต่อ | ยังไม่ได้ทำในโค้ด ยังไม่ต้องตั้ง |
+
+`backup.env`: `BACKUP_GPG_KEY` (fingerprint ของ public key ผู้ถือกุญแจ) และ `ITERRA_ENV` (`test` หรือ `prod`)
 
 ## 6. Reverse proxy และ HTTPS
 
@@ -160,7 +144,7 @@ create database iterra owner iterra;
 | `location /uploads/` ส่งไฟล์จาก `UPLOAD_DIR` ตรง | ลดงานของ Node ถ้าไม่ตั้ง แอปก็ยังส่งไฟล์เองได้ |
 | HTTPS พร้อม redirect จาก 80 ไป 443 | cookie ของแอดมินตั้งแบบ `secure` ถ้าไม่มี HTTPS จะ login ไม่ได้ |
 
-ตัวอย่าง (รูปแบบ nginx ใน 1Panel ใส่ใน config ของเว็บ **ยังไม่ได้ตรวจ** ว่าต้องวางตรงไหนของ 1Panel):
+ตัวอย่างเต็มอยู่ที่ `deploy/nginx.conf` (รูปแบบ nginx ใน 1Panel ใส่ใน config ของเว็บ **ยังไม่ได้ตรวจ** ว่าต้องวางตรงไหนของ 1Panel):
 
 ```nginx
 client_max_body_size 31m;
@@ -180,7 +164,9 @@ location / {
 }
 ```
 
-ถ้าวาง `alias /uploads/` ต้องเช็กให้ผู้ใช้ที่รัน proxy อ่านโฟลเดอร์ `UPLOAD_DIR` ได้
+- ถ้าวาง `alias /uploads/` ต้องเช็กให้ผู้ใช้ที่รัน proxy อ่าน `/srv/iterra/uploads` ได้
+- ถ้า proxy ของ 1Panel รันเป็น container เอง ต้อง mount `/srv/iterra/uploads` เข้า container ของ proxy ด้วย **ยังไม่ได้ตรวจ**
+- วิดีโอ (webm) ต้องส่งผ่าน alias นี้ เพราะ nginx รองรับ Range request ซึ่ง iPhone ต้องใช้ ส่วน route `/uploads/` ใน Next อ่านไฟล์ทั้งก้อน ไม่รองรับ Range
 
 ### 6.1 DNS บน Cloudflare
 
@@ -202,19 +188,18 @@ location / {
 ## 7. Deploy ครั้งแรก
 
 ```bash
-# ผู้ใช้ iterra
-git clone <repo> /srv/iterra/app
-cd /srv/iterra/app
-git checkout <branch หรือ commit ที่คนคุมโครงการระบุ>
-npm ci
-cp .env.example .env && chmod 600 .env   # แล้วแก้ค่าตามหัวข้อ 5
-npm run db:migrate
-npm run db:seed                          # ครั้งเดียว กับ DB ที่ยังว่าง รันซ้ำไม่ได้
-npm run build
-sudo systemctl enable --now iterra
+# ผู้ใช้ iterra ใน /srv/iterra หลังวางไฟล์ตามหัวข้อ 3.1 และแก้ app.env db.env backup.env แล้ว
+mkdir -p uploads pgdata backups && sudo chown 1000:1000 uploads
+./deploy.sh test                     # เครื่องจริงใช้ ./deploy.sh <sha 40 ตัว>
+docker compose run --rm -T app npm run db:seed   # ครั้งเดียว กับ DB ที่ยังว่าง รันซ้ำไม่ได้
 ```
 
-จากนั้นสร้างแอดมินคนแรกตามหัวข้อ 11
+จากนั้นสร้างแอดมินคนแรกตามหัวข้อ 11 แล้วเปิด timer:
+
+```bash
+sudo systemctl enable --now iterra-backup.timer iterra-prune.timer
+sudo systemctl enable --now iterra-update.timer   # เครื่องทดสอบเท่านั้น
+```
 
 **ต้องแก้โค้ดก่อนขึ้นเครื่องจริง** งานนี้ทีม dev ทำ ไม่ใช่ infra:
 
@@ -223,20 +208,18 @@ sudo systemctl enable --now iterra
 
 ## 8. Deploy รอบถัดไป
 
-```bash
-cd /srv/iterra/app
-/srv/iterra/bin/backup.sh                # backup ก่อนทุกครั้ง (หัวข้อ 9)
-git fetch && git checkout <commit ที่ระบุ>
-npm ci
-npm run build
-npm run db:migrate
-sudo systemctl restart iterra
-```
+`deploy.sh` ทำตามลำดับนี้ทุกรอบ: กันไม่ให้รันซ้อน, ดึง image, ถ้าเป็นตัวเดิมก็จบ, backup, migrate, เปิดตัวใหม่, เช็กว่า `/` ตอบภายใน 60 วินาที ถ้าไม่ตอบจะถอยกลับไปตัวเดิมเอง
 
-- เว็บหยุดไม่กี่วินาทีตอน restart
-- ทุกรอบ deploy ให้จด commit ที่ขึ้นไว้ในรายงานของรอบนั้น (checklist ใช้เป็นหลักฐาน)
-- **ถอยกลับ**: checkout commit เดิม แล้ว `npm ci && npm run build && sudo systemctl restart iterra`
-  - ถ้ารอบนั้นมี migration ใหม่ โค้ดเก่าอาจใช้กับ schema ใหม่ไม่ได้ ให้กู้ DB จาก backup ที่ทำก่อน deploy (หัวข้อ 9.3)
+- **เครื่องทดสอบ (อัตโนมัติ)**: ทีม dev push หรือ merge เข้า `deploy/test` แล้ว GitHub build image tag `test` ภายในไม่กี่นาที `iterra-update.timer` เจอ image ใหม่แล้ว deploy เอง ดูผลที่ `journalctl -u iterra-update`
+- **เครื่องจริง (คนสั่ง)**: เลือก sha จาก commit ที่ merge เข้า `main` แล้วและ image build ผ่าน (ดูที่แท็บ Actions)
+
+  ```bash
+  cd /srv/iterra && ./deploy.sh <sha 40 ตัว>
+  ```
+
+- ทุกรอบ deploy ให้จด sha ที่ขึ้นไว้ในรายงานของรอบนั้น (checklist ใช้เป็นหลักฐาน)
+- **ถอยกลับเอง**: `./deploy.sh <sha ตัวก่อน>`
+  - ถอยได้เฉพาะโค้ด ถ้ารอบนั้นมี migration ใหม่ โค้ดเก่าอาจใช้กับ schema ใหม่ไม่ได้ ให้กู้ DB จาก backup ที่ `deploy.sh` ทำไว้ก่อน migrate (หัวข้อ 9.3)
 
 ## 9. สำรองข้อมูล
 
@@ -253,28 +236,12 @@ backup ที่ระบบ cloud ทำให้อัตโนมัติ (�
 
 ไฟล์สำรองต้องเข้ารหัส เพราะใน DB มีชื่อ อีเมล และข้อความจากฟอร์มติดต่อ
 
-- เข้ารหัสด้วย public key ของคนที่ถือกุญแจ
-- server เก็บแค่ public key ถอดรหัสบน server ไม่ได้
+- `backup.sh` dump DB จาก container `db` และ tar โฟลเดอร์ `uploads` แล้วเข้ารหัสด้วย public key ของคนที่ถือกุญแจ เก็บที่ `backups/` 14 วัน
+- server เก็บแค่ public key ถอดรหัสบน server ไม่ได้ นำเข้าด้วย `gpg --import` แล้วใส่ fingerprint ใน `backup.env`
 - ใครถือกุญแจถอดรหัส **รอคำตอบ**
-
-```bash
-#!/bin/sh
-# /srv/iterra/bin/backup.sh · รันเป็นผู้ใช้ iterra
-set -eu
-set -a; . /srv/iterra/app/.env; set +a
-OUT=/srv/iterra/backups
-STAMP=$(date +%Y-%m-%d_%H%M)
-KEY=<fingerprint ของ public key ผู้ถือกุญแจ>
-mkdir -p "$OUT"
-pg_dump --format=custom --dbname="$DATABASE_URL" \
-  | gpg --batch --yes --encrypt --recipient "$KEY" --output "$OUT/db_$STAMP.dump.gpg"
-tar -C "$(dirname "$UPLOAD_DIR")" -czf - "$(basename "$UPLOAD_DIR")" \
-  | gpg --batch --yes --encrypt --recipient "$KEY" --output "$OUT/uploads_$STAMP.tar.gz.gpg"
-find "$OUT" -name '*.gpg' -mtime +14 -delete
-```
-
-- ต้องลง `postgresql-client` เวอร์ชัน 16 เพื่อให้มี `pg_dump` ตรงกับ server และต้องมี `gnupg`
-- ทำ `UPLOAD_DIR` ทั้งก้อนทุกคืนไปก่อน เพราะตอนเริ่มข้อมูลยังน้อย ถ้าโตจนช้าเกินไปค่อยเปลี่ยนเป็นแบบส่วนต่าง
+- เครื่องจริงไม่มี key แล้ว `backup.sh` จะล้ม และ `deploy.sh` จะหยุดก่อน migrate
+- เครื่องทดสอบ (`ITERRA_ENV=test`) ที่ยังไม่มี key จะข้ามการสำรองพร้อมเตือน เพื่อให้รอบทดสอบเดินได้ก่อนได้คำตอบ
+- ทำ `uploads` ทั้งก้อนทุกคืนไปก่อน เพราะตอนเริ่มข้อมูลยังน้อย ถ้าโตจนช้าเกินไปค่อยเปลี่ยนเป็นแบบส่วนต่าง
 
 ### 9.2 นอกเครื่อง: ให้เครื่องเก็บสำรองมาดึงเอง
 
@@ -308,13 +275,15 @@ find "$OUT" -name '*.gpg' -mtime +14 -delete
 ### 9.3 กู้คืน (ทำซ้อมบนเครื่องทดสอบก่อน 14 พ.ย.)
 
 ```bash
-set -a; . /srv/iterra/app/.env; set +a
+cd /srv/iterra
 gpg --decrypt db_<stamp>.dump.gpg > db.dump
-sudo systemctl stop iterra
-dropdb iterra && createdb -O iterra iterra          # เฉพาะตอนซ้อมหรือเมื่อตั้งใจกู้ทับ
-pg_restore --no-owner --role=iterra --dbname="$DATABASE_URL" db.dump
+docker compose stop app
+docker compose exec -T db dropdb -U iterra iterra        # เฉพาะตอนซ้อมหรือเมื่อตั้งใจกู้ทับ
+docker compose exec -T db createdb -U iterra iterra
+docker compose exec -T db pg_restore -U iterra -d iterra --no-owner < db.dump
 gpg --decrypt uploads_<stamp>.tar.gz.gpg | tar -C /srv/iterra -xzf -
-sudo systemctl start iterra
+docker compose start app
+rm db.dump
 ```
 
 กู้แล้วต้องตรวจ 3 อย่าง:
@@ -327,13 +296,15 @@ sudo systemctl start iterra
 
 **คำเตือน: `dropdb` ลบข้อมูลทั้ง DB บนเครื่องจริงห้ามรันถ้าไม่มี backup ที่ตรวจแล้วว่ากู้ได้**
 
-## 10. cron บนเครื่อง
+## 10. timer บนเครื่อง
 
-```
-# crontab ของผู้ใช้ iterra (เวลาไทย)
-30 2 * * *  /srv/iterra/bin/backup.sh >> /srv/iterra/logs/backup.log 2>&1
-0 3 * * *   cd /srv/iterra/app && npm run db:prune >> /srv/iterra/logs/prune.log 2>&1
-```
+| timer | เวลา | ทำอะไร |
+|---|---|---|
+| `iterra-backup.timer` | 02:30 ทุกวัน | `backup.sh` |
+| `iterra-prune.timer` | 03:00 ทุกวัน | `docker compose run --rm -T app npm run db:prune` |
+| `iterra-update.timer` | ทุก 5 นาที | `update-test.sh` **เครื่องทดสอบเท่านั้น ห้าม enable บนเครื่องจริง** |
+
+ดู log ด้วย `journalctl -u <ชื่อ service>`
 
 - `db:prune` ลบข้อมูลเก่าตามระยะเก็บใน spec หัวข้อ 11.5:
   - บันทึก login เก่ากว่า 90 วัน
@@ -341,16 +312,15 @@ sudo systemctl start iterra
   - audit log เก่ากว่า 365 วัน
   - สถิติคำค้นเก่ากว่า 400 วัน
 - `db:prune` ไม่ลบข้อความจากฟอร์มติดต่อ เพราะยังรอฝ่ายกฎหมายกำหนดระยะเก็บ
-- ทำ logrotate ให้ `/srv/iterra/logs/*.log` ด้วย
 
 ## 11. งานบัญชีแอดมิน
 
 ```bash
-cd /srv/iterra/app
+cd /srv/iterra
 # สร้างหรือรีเซ็ตรหัส · เว้นวรรคหน้าคำสั่งเพื่อไม่ให้ติด shell history (ต้องตั้ง HISTCONTROL=ignorespace)
- ADMIN_EMAIL=name@example.com ADMIN_NAME='ชื่อ' ADMIN_PASSWORD='...' npm run db:admin
+ docker compose run --rm -T -e ADMIN_EMAIL=name@example.com -e ADMIN_NAME='ชื่อ' -e ADMIN_PASSWORD='...' app npm run db:admin
 # ปิดบัญชีคนที่ลาออก (ลบ session ทั้งหมดและเขียน audit)
-ADMIN_EMAIL=name@example.com npm run db:disable-admin
+docker compose run --rm -T -e ADMIN_EMAIL=name@example.com app npm run db:disable-admin
 ```
 
 ## 12. เฝ้าระวัง
@@ -366,6 +336,7 @@ ADMIN_EMAIL=name@example.com npm run db:disable-admin
 
 - [ ] อัปเดตระบบปฏิบัติการและ 1Panel อย่างน้อยเดือนละครั้ง
 - [ ] รัน `npm audit --omit=dev` ก่อนทุกรอบ deploy ช่องโหว่ระดับ high ขึ้นไปให้แจ้งทีม dev
+- [ ] ดึง image `postgres:16-bookworm` ใหม่ทุกเดือน (`docker compose pull db && docker compose up -d db`) หลัง backup
 - [ ] ตรวจว่าไฟล์ backup ครบ 14 วันบนเครื่องเก็บสำรอง
 - [ ] สรุปลงรายงานประจำเดือน: uptime ผลสำรอง แพ็กเกจที่อัปเดต และช่องโหว่ที่เจอ
 
@@ -373,7 +344,8 @@ ADMIN_EMAIL=name@example.com npm run db:disable-admin
 
 | เรื่อง | กระทบหัวข้อ |
 |---|---|
-| วิธีรัน Node: systemd หรือ Node runtime ของ 1Panel | 3 |
+| ใครมีสิทธิ์สั่ง deploy ขึ้นเครื่องจริง | 8 |
+| ใช้ proxy ของ 1Panel แบบ container หรือบนเครื่อง (กระทบการ mount uploads) | 6 |
 | Cloudflare เปิดโหมด proxy หรือไม่ | 6.1 |
 | ใครถือกุญแจถอดรหัส backup | 9.1, 9.3 |
 | ข้อมูลเครื่องเก็บสำรอง: OS อะไร อยู่หลัง NAT หรือไม่ | 9.2, 12 |
