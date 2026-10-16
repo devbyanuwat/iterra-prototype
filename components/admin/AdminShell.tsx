@@ -25,6 +25,7 @@ const MENU: MenuItem[] = [
   { href: '/admin/categories/', label: 'หมวด แบรนด์ วัสดุ', icon: 'tag' },
   { href: '/admin/announcement/', label: 'ประกาศ', icon: 'megaphone' },
   { href: '/admin/catalog/', label: 'แคตตาล็อก', icon: 'book' },
+  { href: '/admin/hero/', label: 'วิดีโอหน้าแรก', icon: 'film' },
 ];
 const MORE_LABEL = 'อื่น ๆ: เมนูที่เหลือ ความทึบกระจก เปิดหน้าเว็บ ออกจากระบบ';
 
@@ -57,6 +58,12 @@ const ICON_PATHS = {
     <>
       <path d="M4 20.5h16M6 20.5V9.5L12 4.5l6 5v11" />
       <path d="M10 20.5v-5h4v5" />
+    </>
+  ),
+  film: (
+    <>
+      <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+      <path d="m10 9.5 4.5 2.5-4.5 2.5z" />
     </>
   ),
   book: (

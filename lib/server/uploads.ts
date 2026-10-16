@@ -5,7 +5,10 @@ import sharp from 'sharp';
 
 export const MAX_IMAGE = 5 * 1024 * 1024;
 export type UploadResult = { ok: true; url: string } | { ok: false; error: string };
-export const TYPES: Record<string, string> = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', pdf: 'application/pdf' };
+// webm/mp4 คือวิดีโอ hero (lib/server/hero-video.ts) · route นี้ส่งทั้งไฟล์ ไม่รองรับ Range บนเครื่องจริงต้องให้ proxy ส่ง /uploads/ ตรง
+export const TYPES: Record<string, string> = {
+  jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', pdf: 'application/pdf', webm: 'video/webm', mp4: 'video/mp4',
+};
 
 // ดูชนิดจากไบต์แรกของไฟล์ ไม่เชื่อนามสกุลหรือ type ที่เบราว์เซอร์ส่งมา
 export function imageExt(b: Uint8Array): 'jpg' | 'png' | 'webp' | null {

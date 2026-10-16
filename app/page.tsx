@@ -3,6 +3,7 @@ import HomeContent from '@/components/home/HomeContent';
 import { SITE_TAGLINE_TH, SITE_TAGLINE_EN } from '@/lib/site';
 import { db } from '@/lib/db';
 import { getCatalog } from '@/lib/server/catalog';
+import { getHeroVideo } from '@/lib/server/hero-video';
 
 export const metadata: Metadata = {
   title: `ITERRA — ${SITE_TAGLINE_TH} | ${SITE_TAGLINE_EN}`,
@@ -12,5 +13,6 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  return <HomeContent catalog={await getCatalog(db)} />;
+  const [catalog, hero] = await Promise.all([getCatalog(db), getHeroVideo(db)]);
+  return <HomeContent catalog={catalog} hero={hero} />;
 }

@@ -10,6 +10,11 @@ import * as inq from '../lib/server/inquiries.ts';
 import { readFileSync } from 'node:fs';
 import { CATALOG } from '../lib/catalog.ts';
 import * as cat from '../lib/server/catalog.ts';
+import * as hero from '../lib/server/hero-video.ts';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import * as proj from '../lib/server/projects.ts';
 import * as post from '../lib/server/posts.ts';
 import { audit } from '../lib/server/audit.ts';
@@ -33,13 +38,13 @@ try {
   await c.query('drop schema public cascade; create schema public');
 
   // ── migrate (Task 1) ──
-  assert.deepEqual(await migrate(c), ['001_init.sql', '002_audit_session_idle.sql', '003_search_queries.sql']);
+  assert.deepEqual(await migrate(c), ['001_init.sql', '002_audit_session_idle.sql', '003_search_queries.sql', '004_hero_video.sql']);
   assert.deepEqual(await migrate(c), [], 'รันซ้ำต้องไม่รันไฟล์เดิม');
   const tables = (await c.query("select table_name from information_schema.tables where table_schema = 'public'")).rows
     .map((r) => r.table_name)
     .sort();
   assert.deepEqual(tables, [
-    'admin_users', 'announcement', 'audit_log', 'brands', 'catalog', 'categories', 'inquiries', 'login_attempts',
+    'admin_users', 'announcement', 'audit_log', 'brands', 'catalog', 'categories', 'hero_video', 'inquiries', 'login_attempts',
     'materials', 'posts', 'products', 'project_products', 'projects', 'schema_migrations', 'search_queries', 'sessions',
   ]);
   // ตารางค่าชุดเดียวมีได้แถวเดียว
@@ -467,6 +472,91 @@ try {
     assert.equal(await count(`products where id = ${ids[1]}`), 1);
     await assert.rejects(proj.saveProject(c, id, draft), /ไม่พบผลงานนี้/);
     await assert.rejects(proj.setProjectPublished(c, id, true), /ไม่พบผลงานนี้/);
+  }
+  // ── วิดีโอ hero หน้าแรก ──
+  {
+    // ยังไม่มีแถว = ใช้ไฟล์ตั้งต้นใน public/media/hero
+    assert.deepEqual(await hero.getHeroVideo(c), { ...hero.DEFAULT_HERO, custom: false });
+    const admin0 = await hero.getHeroAdmin(c);
+    assert.equal(admin0.job.status, 'idle');
+    assert.equal(admin0.custom, false);
+    // งานแปลงมีได้ทีละงาน
+    assert.equal(await hero.startHeroJob(c), true);
+    assert.equal(await hero.startHeroJob(c), false, 'กำลังแปลงอยู่ต้องรับงานใหม่ไม่ได้');
+    assert.equal((await hero.getHeroAdmin(c)).job.status, 'processing');
+    // งานค้างเกิน STALE_MIN (เช่น server restart กลางทาง) ถือว่าล้ม และเริ่มงานใหม่ได้
+    await c.query(`update hero_video set job_started_at = now() - make_interval(mins => $1)`, [hero.STALE_MIN + 1]);
+    const stale = await hero.getHeroAdmin(c);
+    assert.equal(stale.job.status, 'failed');
+    assert.match(stale.job.error, /ค้าง/);
+    assert.equal(await hero.startHeroJob(c), true);
+    // แปลงเสร็จ: หน้าเว็บใช้ไฟล์ใหม่ งานกลับเป็นว่าง
+    const media = { webm: '/uploads/2026/10/a.webm', mp4: '/uploads/2026/10/a.mp4', poster: '/uploads/2026/10/a.webp' };
+    await hero.finishHeroJob(c, media);
+    assert.deepEqual(await hero.getHeroVideo(c), { ...media, custom: true });
+    assert.equal((await hero.getHeroAdmin(c)).job.status, 'idle');
+    await assert.rejects(hero.finishHeroJob(c, { ...media, webm: '/uploads/../../etc/passwd.webm' }), /ไม่ถูกต้อง/);
+    await assert.rejects(hero.finishHeroJob(c, { ...media, poster: 'https://evil.example/x.webp' }), /ไม่ถูกต้อง/);
+    // ไฟล์ต้องมาครบชุด ห้ามมีแค่บางไฟล์
+    await assert.rejects(c.query("update hero_video set mp4 = null"), /hero_video_check/);
+    await assert.rejects(c.query("insert into hero_video (id, job_status) values (2, 'idle')"), /hero_video_id_check/);
+    // แปลงล้ม: เก็บข้อความ ไฟล์ที่หน้าเว็บใช้อยู่ไม่เปลี่ยน
+    assert.equal(await hero.startHeroJob(c), true);
+    await hero.failHeroJob(c, 'อ่านไฟล์ไม่ได้');
+    const failed = await hero.getHeroAdmin(c);
+    assert.deepEqual([failed.job.status, failed.job.error], ['failed', 'อ่านไฟล์ไม่ได้']);
+    assert.deepEqual(await hero.getHeroVideo(c), { ...media, custom: true });
+    // กลับไปใช้ตัวตั้งต้น
+    await hero.resetHero(c);
+    assert.deepEqual(await hero.getHeroVideo(c), { ...hero.DEFAULT_HERO, custom: false });
+    assert.equal(hero.MAX_VIDEO, 100 * 1024 * 1024);
+    assert.equal(hero.MAX_SECONDS, 30);
+
+    // ffprobe/ffmpeg จริง: สร้างคลิปทดสอบสั้น ๆ ด้วย lavfi
+    const dir = mkdtempSync(path.join(tmpdir(), 'iterra-hero-'));
+    try {
+      const clip = (name, args) => {
+        const f = path.join(dir, name);
+        execFileSync('ffmpeg', ['-v', 'error', '-y', ...args, f]);
+        return f;
+      };
+      const wide = clip('wide.mp4', ['-f', 'lavfi', '-i', 'testsrc=size=2560x1440:rate=60:duration=1', '-f', 'lavfi', '-i', 'sine=duration=1', '-shortest', '-c:v', 'libx264', '-preset', 'ultrafast', '-c:a', 'aac']);
+      const tall = clip('tall.mov', ['-f', 'lavfi', '-i', 'testsrc=size=1080x2400:rate=30:duration=1', '-c:v', 'libx264', '-preset', 'ultrafast']);
+      const long = clip('long.mp4', ['-f', 'lavfi', '-i', 'testsrc=size=64x36:rate=5:duration=31', '-c:v', 'libx264', '-preset', 'ultrafast']);
+      const sound = clip('sound.m4a', ['-f', 'lavfi', '-i', 'sine=duration=1', '-c:a', 'aac']);
+      const fake = path.join(dir, 'fake.mp4');
+      execFileSync('cp', ['public/media/catalog/kohler-kitchens-2026.pdf', fake]);
+
+      const p = await hero.probeVideo(wide);
+      assert.deepEqual([p.width, p.height], [2560, 1440]);
+      assert.ok(Math.abs(p.seconds - 1) < 0.2, String(p.seconds));
+      await assert.rejects(hero.probeVideo(long), /ยาวเกิน 30 วินาที/);
+      await assert.rejects(hero.probeVideo(sound), /ไม่พบภาพวิดีโอ/);
+      await assert.rejects(hero.probeVideo(fake), /ไม่ใช่ไฟล์วิดีโอ/);
+
+      const probe = (f) => JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-print_format', 'json', '-show_streams', f]).toString()).streams;
+      const out = path.join(dir, 'uploads');
+      const m = await hero.convertVideo(wide, out);
+      for (const [k, ext] of [['webm', 'webm'], ['mp4', 'mp4'], ['poster', 'webp']]) {
+        assert.match(m[k], new RegExp(`^/uploads/\\d{4}/\\d{2}/[0-9a-f]{24}\\.${ext}$`), m[k]);
+        assert.ok(existsSync(path.join(out, m[k].slice('/uploads/'.length))), m[k]);
+      }
+      const file = (u) => path.join(out, u.slice('/uploads/'.length));
+      const webm = probe(file(m.webm));
+      assert.deepEqual(webm.map((x) => x.codec_type), ['video'], 'ตัดเสียงทิ้ง');
+      assert.deepEqual([webm[0].codec_name, webm[0].width, webm[0].height], ['vp9', 1920, 1080]);
+      assert.equal(webm[0].r_frame_rate, '30/1', 'ไม่เกิน 30 fps');
+      const mp4 = probe(file(m.mp4));
+      assert.deepEqual(mp4.map((x) => x.codec_type), ['video']);
+      assert.deepEqual([mp4[0].codec_name, mp4[0].width, mp4[0].height, mp4[0].pix_fmt], ['h264', 1920, 1080, 'yuv420p']);
+      const poster = await sharp(file(m.poster)).metadata();
+      assert.deepEqual([poster.format, poster.width, poster.height], ['webp', 1920, 1080]);
+      // แนวตั้ง: ด้านยาวไม่เกิน 1920 ด้านสั้นตามสัดส่วน (เลขคู่)
+      const t = probe(file((await hero.convertVideo(tall, out)).webm))[0];
+      assert.deepEqual([t.width, t.height], [864, 1920]);
+    } finally {
+      execFileSync('rm', ['-rf', dir]);
+    }
   }
   // ── แคตตาล็อก PDF (แผน 2 Task 4) ──
   {

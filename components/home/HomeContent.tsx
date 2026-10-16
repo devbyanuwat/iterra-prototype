@@ -14,6 +14,7 @@ import Placeholder from '@/components/Placeholder';
 import { useLang } from '@/components/LangProvider';
 import { useCatalog } from '@/components/CatalogProvider';
 import type { CatalogInfo } from '@/lib/server/catalog';
+import type { HeroMedia } from '@/lib/server/hero-video';
 
 // ภาพเรื่องราวจากแคตตาล็อก KOHLER Kitchens 2026 (ลำดับตรงกับ t.home.storySlides) · scripts/build-media.sh scenes
 const STORY_IMAGES = [1, 2, 3].map((n) => `/media/scenes/story-${n}.webp`);
@@ -181,10 +182,10 @@ function ContactCta() {
   );
 }
 
-export default function HomeContent({ catalog }: { catalog: CatalogInfo | null }) {
+export default function HomeContent({ catalog, hero }: { catalog: CatalogInfo | null; hero: HeroMedia }) {
   return (
     <>
-      <Hero />
+      <Hero media={hero} />
       <ImageWall />
       <StoryRows />
       <FeaturedProducts />
