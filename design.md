@@ -178,6 +178,20 @@ tag always has a word.
 - Buttons: ยกเลิก, which has focus when the dialog opens, and ลบ (`border border-danger bg-danger text-paper`).
 - Only deleting asks. Hiding does not.
 
+### Toast
+
+Confirms that an action finished when its result is not where the admin is looking.
+
+- Use for: saved, deleted, hidden or shown, uploaded, marked as handled. It replaces the status line under the page header (`role="status"` with `min-h-6`), which is out of sight once a long list has scrolled.
+- Not for: a field error, which stays under its field with `role="alert"`; an error that needs ลองใหม่, which stays in the page; a question before deleting, which is the Confirm dialog; the login page, which keeps its message inline.
+- Position: fixed, bottom centre, `w-[calc(100%-2rem)] max-w-md`. Below `md` it sits above the tab bar at `bottom: calc(5.75rem + env(safe-area-inset-bottom))` (the bar is 4rem tall and 0.75rem from the edge). From `md`: `bottom-6`.
+- Success: `rounded-full bg-ink px-5 py-3 text-sm text-paper`, the same shape as the `solid` button. It closes by itself after 4 seconds.
+- Error: the same shape on `bg-[#9f2d20]`, the danger colour. It stays until ปิด is pressed (`min-h-11`).
+- The text says what happened to what: บันทึกสินค้าแล้ว, ลบ followed by the name and แล้ว. Colour is never the only signal.
+- One at a time: a new toast replaces the one on screen.
+- Screen readers: the success container is always in the DOM with `role="status" aria-live="polite"`. An error uses `role="alert"`.
+- Motion: slides up 0.5rem and fades in over 300ms. With reduced motion it only fades.
+
 ### States every screen needs
 
 - Loading: blocks of `bg-warm-100` in the shape of the content, with visually hidden text กำลังโหลด.
