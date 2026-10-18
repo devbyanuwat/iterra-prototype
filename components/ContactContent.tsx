@@ -2,10 +2,9 @@
 
 // หน้าติดต่อ: ฟอร์มส่งเข้า DB ผ่าน submitInquiryAction (app/contact/actions.ts) · ยังไม่ส่งอีเมล ผู้ดูแลอ่านที่ /admin/inquiries/
 // ช่อง hp_x ซ่อนไว้ดักบอท · ตรวจข้อมูลจริงที่ฝั่ง server แล้วแปลรหัสข้อผิดตามภาษาจาก lib/i18n.ts
-// + แผนที่ placeholder (ของจริงฝัง Google Maps embed ตรงนี้)
+// + แผนที่ Google Maps แบบกดเพื่อโหลด: ไม่โหลด iframe (และคุกกี้ของ Google) จนกว่าผู้ใช้กด
 
 import { useEffect, useRef, useState } from 'react';
-import Placeholder from './Placeholder';
 import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { CONTACT } from '@/lib/site';
@@ -20,6 +19,7 @@ export default function ContactContent() {
   const [toast, setToast] = useState(false);
   const [error, setError] = useState<InquiryError | 'server' | ''>('');
   const [busy, setBusy] = useState(false);
+  const [map, setMap] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // เคลียร์ timer ของ toast ตอน unmount
@@ -108,7 +108,21 @@ export default function ContactContent() {
               <p>{CONTACT.email}</p>
               <p>{lang === 'th' ? CONTACT.hours_th : CONTACT.hours_en}</p>
             </address>
-            <Placeholder label="แผนที่ Google Maps (ฝังของจริงตรงนี้)" ratio="16/9" />
+            <div className="relative aspect-video w-full overflow-hidden bg-warm-100">
+              {map ? (
+                <iframe src={CONTACT.map_embed} title={t.contact.mapTitle} className="absolute inset-0 h-full w-full border-0" loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-6 text-center">
+                  <button type="button" onClick={() => setMap(true)} className="inline-flex min-h-11 items-center border border-ink bg-ink px-6 text-[11px] font-normal uppercase tracking-widest2 text-paper transition-colors hover:bg-paper hover:text-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-ink">
+                    {t.contact.mapShow}
+                  </button>
+                  <p className="text-xs font-light text-stone-600">{t.contact.mapNote}</p>
+                </div>
+              )}
+            </div>
+            <a href={CONTACT.map_link} target="_blank" rel="noopener" className="mt-3 inline-flex min-h-11 items-center text-sm font-light text-stone-600 underline underline-offset-4 hover:text-ink">
+              {t.contact.mapOpen}
+            </a>
           </Reveal>
         </div>
       </section>

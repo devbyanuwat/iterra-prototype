@@ -180,6 +180,10 @@ export const dict = {
     },
     contact: {
       title: 'ติดต่อเรา',
+      mapShow: 'แสดงแผนที่',
+      mapOpen: 'เปิดใน Google Maps',
+      mapNote: 'แผนที่จาก Google โหลดเมื่อกดเท่านั้น',
+      mapTitle: 'แผนที่โชว์รูม KOHLER Kitchens อาคารโนเบิลรีมิกซ์',
       sub: 'ทีมที่ปรึกษาพร้อมตอบทุกคำถาม ภายใน 24 ชั่วโมง',
       name: 'ชื่อ',
       email: 'อีเมลหรือเบอร์โทร',
@@ -378,6 +382,10 @@ export const dict = {
     },
     contact: {
       title: 'Contact Us',
+      mapShow: 'Show map',
+      mapOpen: 'Open in Google Maps',
+      mapNote: 'The map comes from Google and loads only when you ask for it',
+      mapTitle: 'Map of the KOHLER Kitchens showroom, Noble Remix Building',
       sub: 'Our consultants reply within 24 hours',
       name: 'Name',
       email: 'Email or phone',
