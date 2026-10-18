@@ -2,8 +2,11 @@ import { cache } from 'react';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { PoolClient } from 'pg';
-import { db } from './db';
+import { randomBytes } from 'node:crypto';
+import { DEMO, db } from './db';
 import { SESSION_COOKIE, sessionUser, sha256, type Admin } from './server/auth';
+
+const g = globalThis as unknown as { iterraDemoSalt?: string };
 
 export type Result = { ok: true } | { ok: false; error: string };
 
@@ -25,7 +28,8 @@ export async function requireAdmin(): Promise<Admin> {
 export async function ipHash(): Promise<string> {
   const h = await headers();
   const ip = h.get('x-real-ip')?.trim() || h.get('x-forwarded-for')?.split(',').at(-1)?.trim() || 'local';
-  const salt = process.env.IP_SALT;
+  // โหมดนำเสนอไม่ต้องตั้ง IP_SALT: สุ่มต่อ process (ข้อมูลเดโมก็หายเมื่อ process เริ่มใหม่อยู่แล้ว)
+  const salt = process.env.IP_SALT || (DEMO ? (g.iterraDemoSalt ??= randomBytes(16).toString('hex')) : undefined);
   if (!salt && process.env.NODE_ENV === 'production') throw new Error('IP_SALT is not set');
   return sha256(`${salt ?? ''}:${ip}`);
 }
