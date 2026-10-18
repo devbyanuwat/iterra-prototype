@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<script>document.documentElement.classList.add('js')</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ITERRA Runbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Noto+Sans+Thai:wght@200;300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  /* โทนเดียวกับ checklist ส่งมอบ: พื้นกระดาษ หมึก เส้นบาง · สร้างจาก docs/ops/runbook.md ห้ามแก้ไฟล์นี้ตรง */
+  :root { --paper: #faf9f7; --ink: #1c1917; --warm-100: #f5f4f1; --warm-200: #e9e7e2; --warm-300: #d6d3cc; --warm-500: #78716c; --stone-600: #57534e; --stone-700: #44403c; --late: #9f2d20; --wait: #8a5a00; --wait-bg: #f6ecd6; --code: #f1efeb; }
+  * { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: Inter, 'Noto Sans Thai', system-ui, sans-serif; font-weight: 300; line-height: 1.65; font-size: 15px; }
+  a { color: inherit; text-underline-offset: 3px; }
+  b { font-weight: 500; }
+  code { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 0.86em; background: var(--code); padding: 0.1em 0.35em; overflow-wrap: anywhere; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 72px 24px 96px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 56px; }
+  .label { margin: 0 0 14px; font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--stone-600); }
+  h1 { margin: 0; font-size: 40px; font-weight: 200; letter-spacing: 0.025em; line-height: 1.2; }
+  .lead { margin-top: 20px; color: var(--stone-600); font-size: 14px; }
+  .lead p { margin: 0 0 10px; max-width: 46rem; }
+  .lead ul { padding-left: 1.1rem; }
+  /* สารบัญ */
+  .toc { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow: auto; font-size: 13px; }
+  .toc summary { display: none; }
+  .toc ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--warm-300); }
+  .toc a { display: grid; grid-template-columns: 1.8rem minmax(0, 1fr); padding: 5px 0 5px 14px; margin-left: -1px; border-left: 1px solid transparent; text-decoration: none; color: var(--stone-600); }
+  .toc a:hover, .toc a.on { color: var(--ink); border-left-color: var(--ink); }
+  .toc .n { color: var(--warm-500); }
+  .toc .top { margin: 0 0 14px; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--stone-600); }
+  /* สรุป */
+  .sum { margin: 44px 0 0; }
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .card { background: var(--warm-100); border: 1px solid var(--warm-200); padding: 20px; }
+  .card.wide { margin-top: 16px; }
+  .cap { margin: 0 0 14px; font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--stone-600); }
+  .flow { display: grid; justify-items: start; font-size: 13px; }
+  .node { display: inline-block; padding: 6px 10px; background: var(--paper); border: 1px solid var(--warm-300); }
+  .node.strong { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .node.out { border-style: dashed; }
+  .pair { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ln { position: relative; display: block; font-style: normal; height: 22px; margin-left: 16px; border-left: 1px solid var(--stone-700); }
+  .ln.dash { border-left-style: dashed; height: 28px; }
+  .ln[data-t]::after { content: attr(data-t); position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--stone-600); white-space: nowrap; }
+  .dates { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+  .dates li { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 8px; padding: 7px 0; border-top: 1px solid var(--warm-200); }
+  .dates li:first-child { border-top: 0; padding-top: 0; }
+  .warnc { background: #fbf1ef; border-color: #efd6d1; }
+  .warnc .cap { color: var(--late); }
+  .dont { margin: 0; padding: 0; list-style: none; font-size: 13px; }
+  .dont li { padding: 7px 0; border-top: 1px solid #efd6d1; }
+  .dont li:first-child { border-top: 0; padding-top: 0; }
+  .dont a { color: var(--stone-600); white-space: nowrap; }
+  /* เนื้อหา */
+  .sec { margin-top: 64px; scroll-margin-top: 24px; }
+  h2 { display: flex; gap: 14px; align-items: baseline; margin: 0 0 18px; padding-bottom: 12px; border-bottom: 1px solid var(--ink); font-size: 24px; font-weight: 200; letter-spacing: 0.02em; line-height: 1.3; }
+  h2 .no { font-size: 13px; font-weight: 400; color: var(--warm-500); min-width: 1.4rem; }
+  h3 { margin: 32px 0 10px; font-size: 16px; font-weight: 500; scroll-margin-top: 24px; }
+  .sec p { margin: 10px 0; max-width: 48rem; }
+  .sec ul, .sec ol { margin: 8px 0; padding-left: 1.3rem; max-width: 50rem; }
+  .sec li { margin: 4px 0; }
+  .sec li > ul, .sec li > ol { margin: 4px 0; }
+  ul.checks { list-style: none; padding-left: 0; }
+  ul.checks ul { list-style: disc; padding-left: 2.9rem; }
+  .chk { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; cursor: pointer; }
+  .chk input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--ink); }
+  .chk input:checked + span { color: var(--warm-500); text-decoration: line-through; text-decoration-color: var(--warm-300); }
+  .tag { display: inline-block; padding: 0 6px; font-size: 0.82em; font-weight: 500; white-space: nowrap; }
+  .tag.wait { background: var(--wait-bg); color: var(--wait); }
+  .tag.unk { background: var(--warm-200); color: var(--stone-700); }
+  .warn { padding: 12px 14px; background: #fbf1ef; border-left: 2px solid var(--late); color: var(--late); }
+  .warn b { font-weight: 500; }
+  .tw { overflow-x: auto; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; font-size: 11px; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: var(--stone-600); padding: 8px 12px 8px 0; border-bottom: 1px solid var(--warm-300); }
+  td { vertical-align: top; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--warm-200); overflow-wrap: anywhere; }
+  td:first-child { min-width: 9rem; }
+  .code { position: relative; margin: 12px 0; max-width: 54rem; }
+  pre { margin: 0; padding: 16px 18px; background: var(--ink); color: #eae7e1; overflow-x: auto; font-size: 12.5px; line-height: 1.6; }
+  pre code { background: none; padding: 0; font-size: inherit; overflow-wrap: normal; }
+  pre[data-lang]::before { content: attr(data-lang); display: block; margin-bottom: 8px; font-family: Inter, sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #a8a29e; }
+  .sec .nest { margin-left: 1.6rem; }
+  .copy { position: absolute; top: 8px; right: 8px; min-height: 32px; padding: 0 12px; border: 1px solid #57534e; background: #292524; color: #eae7e1; font: 400 11px Inter, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
+  .copy:hover { background: #44403c; }
+  .copy:focus-visible, .toc a:focus-visible, .chk input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .copy:focus-visible { outline-color: #eae7e1; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; margin-top: 28px; font-size: 12px; color: var(--stone-600); }
+  .bar button { min-height: 36px; padding: 0 14px; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); font: 400 11px Inter, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; }
+  .bar button:hover { background: var(--ink); color: var(--paper); }
+  html:not(.js) .copy, html:not(.js) .bar button { display: none; }
+  footer { margin-top: 72px; padding-top: 16px; border-top: 1px solid var(--warm-300); font-size: 12px; color: var(--stone-600); }
+  @media screen and (max-width: 960px) {
+    .cards { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media screen and (max-width: 860px) {
+    .wrap { display: block; padding: 48px 16px 72px; }
+    .toc { position: static; max-height: none; margin: 0 0 32px; border: 1px solid var(--warm-300); padding: 12px 14px; }
+    .toc summary { display: block; min-height: 28px; cursor: pointer; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--stone-600); }
+    .toc .top { display: none; }
+    .toc ol { margin-top: 10px; }
+    h1 { font-size: 32px; }
+    h2 { font-size: 21px; }
+    .dates li { grid-template-columns: 6.5rem minmax(0, 1fr); }
+    .sec .nest { margin-left: 0.8rem; }
+    /* ตารางบนมือถือ: แต่ละแถวเป็นการ์ด หัวคอลัมน์ขึ้นหน้าแต่ละช่อง */
+    .tw table, .tw tbody, .tw tr, .tw td { display: block; width: 100%; }
+    .tw thead { display: none; }
+    .tw tr { padding: 10px 0; border-bottom: 1px solid var(--warm-200); }
+    .tw td { border: 0; padding: 2px 0; }
+    .tw td::before { content: attr(data-h); display: block; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--stone-600); }
+    .tw td:first-child { font-weight: 400; }
+  }
+  /* ตัวไทยห้ามถ่างตัวอักษร (สระลอยแยก) ใช้ระยะถ่างกับตัวละตินเท่านั้น */
+  .cap, th, .toc .top, .toc summary, .tw td::before { letter-spacing: 0.04em; }
+  @media print {
+    @page { size: A4; margin: 14mm 12mm; }
+    body { background: #fff; font-size: 11.5px; }
+    .wrap { display: block; max-width: none; padding: 0; }
+    .toc, .copy, .bar { display: none; }
+    h1 { font-size: 28px; }
+    .sec { margin-top: 30px; }
+    h2 { font-size: 18px; break-after: avoid; }
+    h3 { break-after: avoid; }
+    .code, tr, .card { break-inside: avoid; }
+    pre { white-space: pre-wrap; font-size: 10.5px; }
+    .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="toc" aria-label="สารบัญ">
+    <details open><summary>สารบัญ</summary>
+      <p class="top">สารบัญ</p>
+      <ol><li><a href="#s0"><span class="n">0</span><span>สถานะโค้ด</span></a></li><li><a href="#s1"><span class="n">1</span><span>ภาพรวม</span></a></li><li><a href="#s2"><span class="n">2</span><span>เครื่อง</span></a></li><li><a href="#s3"><span class="n">3</span><span>ซอฟต์แวร์</span></a></li><li><a href="#s4"><span class="n">4</span><span>ฐานข้อมูล</span></a></li><li><a href="#s5"><span class="n">5</span><span>ค่าตั้ง</span></a></li><li><a href="#s6"><span class="n">6</span><span>Reverse proxy และ HTTPS</span></a></li><li><a href="#s7"><span class="n">7</span><span>Deploy ครั้งแรก</span></a></li><li><a href="#s8"><span class="n">8</span><span>Deploy รอบถัดไป</span></a></li><li><a href="#s9"><span class="n">9</span><span>สำรองข้อมูล</span></a></li><li><a href="#s10"><span class="n">10</span><span>timer บนเครื่อง</span></a></li><li><a href="#s11"><span class="n">11</span><span>งานบัญชีแอดมิน</span></a></li><li><a href="#s12"><span class="n">12</span><span>เฝ้าระวัง</span></a></li><li><a href="#s13"><span class="n">13</span><span>ดูแลรายเดือน (จาก standards)</span></a></li><li><a href="#s14"><span class="n">14</span><span>เรื่องที่รอคำตอบ</span></a></li></ol>
+    </details>
+  </nav>
+  <main>
+    <p class="label">Infra runbook · Internal</p>
+    <h1>คู่มือตั้งและดูแลเครื่อง (ฉบับทีม infra)</h1>
+<div class="lead"><p class="">เอกสารภายในทีม ใช้ส่งต่อให้คนตั้งเครื่อง ไม่ใช่เอกสารส่งมอบลูกค้า เอกสารส่งมอบลูกค้าเขียนตอนตรวจรับ จากสิ่งที่ตั้งจริง</p><ul><li>อัปเดตล่าสุด: 16 ต.ค. 2569</li><li>repo นี้ยังเป็น public ห้ามใส่รหัสผ่าน IP ชื่อบัญชี หรือชื่อผู้ให้บริการลงไฟล์นี้ ของพวกนั้นเก็บในที่เก็บรหัสของทีม</li><li>ข้อที่เขียนว่า <span class="tag unk">ยังไม่ได้ตรวจ</span> คือยังไม่ได้ลองบนเครื่องจริง ทำแล้วให้แก้ไฟล์นี้ตามที่เจอ</li><li>ข้อที่เขียนว่า <span class="tag wait">รอคำตอบ</span> คือรอคนคุมโครงการตัดสินใจ ห้ามเดาเอง</li></ul><p class="">แหล่งที่มาของข้อกำหนด:</p><div class="tw"><table><thead><tr><th>เรื่อง</th><th>ที่มา</th></tr></thead><tbody><tr><td data-h="เรื่อง">สเปกเครื่อง, ระบบปฏิบัติการ, แผงควบคุม, DNS</td><td data-h="ที่มา"><code>docs/quotation/hosting-estimate.html</code></td></tr><tr><td data-h="เรื่อง">รายการตรวจด้านความปลอดภัย สำรองข้อมูล เฝ้าระวัง อัปเดต</td><td data-h="ที่มา"><code>docs/pm/standards.md</code></td></tr><tr><td data-h="เรื่อง">ตาราง ค่าตั้ง ระยะเก็บข้อมูล</td><td data-h="ที่มา">spec <code>docs/superpowers/specs/2026-10-15-backend-postgres-design.md</code> (branch <code>docs/backend-spec</code>)</td></tr><tr><td data-h="เรื่อง">ค่าที่ proxy ต้องตั้ง</td><td data-h="ที่มา">comment ใน <code>lib/admin.ts</code>, <code>app/api/catalog-pdf/route.ts</code>, <code>app/uploads/[...path]/route.ts</code></td></tr></tbody></table></div></div>
+<section class="sum" aria-label="สรุปสำหรับทีม">
+  <div class="cards">
+    <div class="card">
+      <p class="cap">ภาพรวมเครื่อง</p>
+      <div class="flow" role="img" aria-label="GitHub build image แล้วเครื่องดึงเอง ผู้ใช้ผ่าน HTTPS เข้า reverse proxy แล้วไป container app ที่ต่อ container db และโฟลเดอร์ไฟล์ เครื่องเก็บสำรองนอก cloud มาดึง backup และเฝ้าเว็บ">
+        <span class="node out">GitHub Actions build image ขึ้น ghcr.io</span><i class="ln dash" data-t="เครื่องดึง image เอง"></i>
+        <span class="node">ผู้เข้าชม / แอดมิน</span><i class="ln" data-t="HTTPS 443"></i>
+        <span class="node">reverse proxy (1Panel)</span><i class="ln" data-t="127.0.0.1:3000"></i>
+        <span class="node strong">container app (Next.js)</span><i class="ln"></i>
+        <span class="pair"><span class="node">container db (PostgreSQL 16)</span><span class="node">/srv/iterra/uploads</span></span>
+        <i class="ln dash" data-t="ดึง backup ทุกคืน · เฝ้าเว็บล่ม"></i>
+        <span class="node out">เครื่องเก็บสำรอง (นอก cloud)</span>
+      </div>
+    </div>
+    <div class="card">
+      <p class="cap">วันสำคัญ</p>
+      <ol class="dates">
+        <li><b>21 ต.ค.</b><span>เครื่องทดสอบพร้อม</span></li>
+        <li><b>19 ถึง 30 ต.ค.</b><span>deploy อัตโนมัติจาก deploy/test และทดสอบ 3 รอบ</span></li>
+        <li><b>2 ถึง 6 พ.ย.</b><span>ตั้งเครื่องจริงแบบเดียวกับเครื่องทดสอบ</span></li>
+        <li><b>12 ถึง 13 พ.ย.</b><span>ย้ายข้อมูลขึ้นเครื่องจริง</span></li>
+        <li><b>ก่อน 14 พ.ย.</b><span>ซ้อมกู้ข้อมูลสำเร็จ 1 ครั้ง</span></li>
+      </ol>
+    </div>
+    <div class="card warnc">
+      <p class="cap">ห้ามพลาด</p>
+      <ul class="dont">
+        <li><b>ห้ามเปิดพอร์ต 3000 และ 5432</b> ออกนอกเครื่อง docker ข้าม firewall ได้ ต้องผูก 127.0.0.1 <a href="#s2-1">หัวข้อ 2.1</a></li>
+        <li><b>ห้าม enable <code>iterra-update.timer</code></b> บนเครื่องจริง <a href="#s10">หัวข้อ 10</a></li>
+        <li><b>ห้ามรัน <code>check:db</code></b> บน server มันล้าง schema ทั้งหมด <a href="#s4">หัวข้อ 4</a></li>
+        <li><b><code>dropdb</code> ลบทั้ง DB</b> รันเฉพาะตอนซ้อมหรือมี backup ที่กู้ได้แล้ว <a href="#s9-3">หัวข้อ 9.3</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="card wide">
+    <p class="cap">รอคำตอบ 8 เรื่อง</p>
+    <div class="tw"><table><thead><tr><th>เรื่อง</th><th>กระทบหัวข้อ</th></tr></thead><tbody><tr><td data-h="เรื่อง">ใครมีสิทธิ์สั่ง deploy ขึ้นเครื่องจริง</td><td data-h="กระทบหัวข้อ"><a href="#s8">8</a></td></tr><tr><td data-h="เรื่อง">ใช้ proxy ของ 1Panel แบบ container หรือบนเครื่อง (กระทบการ mount uploads)</td><td data-h="กระทบหัวข้อ"><a href="#s6">6</a></td></tr><tr><td data-h="เรื่อง">Cloudflare เปิดโหมด proxy หรือไม่</td><td data-h="กระทบหัวข้อ"><a href="#s6-1">6.1</a></td></tr><tr><td data-h="เรื่อง">ใครถือกุญแจถอดรหัส backup</td><td data-h="กระทบหัวข้อ"><a href="#s9-1">9.1</a>, <a href="#s9-3">9.3</a></td></tr><tr><td data-h="เรื่อง">ข้อมูลเครื่องเก็บสำรอง: OS อะไร อยู่หลัง NAT หรือไม่</td><td data-h="กระทบหัวข้อ"><a href="#s9-2">9.2</a>, <a href="#s12">12</a></td></tr><tr><td data-h="เรื่อง">ช่องทางแจ้งเตือน</td><td data-h="กระทบหัวข้อ"><a href="#s12">12</a></td></tr><tr><td data-h="เรื่อง">บัญชีที่ใช้เปิดเครื่องเป็นของใคร</td><td data-h="กระทบหัวข้อ">ไม่กระทบขั้นตอน แต่กระทบรายการบัญชีที่ส่งมอบ</td></tr><tr><td data-h="เรื่อง">ตัวเก็บสถิติที่ใช้แทนตัวเดิม</td><td data-h="กระทบหัวข้อ"><a href="#s7">7</a></td></tr></tbody></table></div>
+  </div>
+</section><div class="bar"><span>ช่องติ๊กในเอกสารนี้จำไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น</span><button type="button" id="reset">ล้างช่องติ๊ก</button></div><section class="sec" id="s0" aria-labelledby="h-s0"><h2 id="h-s0"><span class="no">0</span>สถานะโค้ด</h2><ul><li>โค้ดหลังบ้าน (DB, login, อัปโหลด) อยู่ที่ branch <code>feat/backend-content</code> <b>ยังไม่ merge เข้า <code>main</code></b></li><li><code>main</code> ตอนนี้ยังเป็นเว็บต้นแบบที่ไม่มี DB</li><li>ไฟล์ deploy (<code>Dockerfile</code>, <code>.github/workflows/image.yml</code>, <code>deploy/</code>) อยู่ที่ branch <code>chore/container-deploy</code> ยังไม่ merge</li><li>ตรวจ commit ล่าสุดเอาสด ๆ ตอนจะ deploy: <code>git log --oneline -1 origin/&lt;branch&gt;</code></li></ul></section><section class="sec" id="s1" aria-labelledby="h-s1"><h2 id="h-s1"><span class="no">1</span>ภาพรวม</h2><div class="code"><pre><code>push ไป deploy/test หรือ main
+   |
+   v
+GitHub Actions build image ---- ghcr.io (tag: sha, test, main)
+                                   ^
+                                   |  เครื่องดึงเอง (ไม่ต้องเปิดพอร์ตเข้า ไม่มีความลับบน GitHub)
+ผู้เข้าชม / แอดมิน                    |
+   |  HTTPS 443                    |
+   v                               |
+reverse proxy (1Panel) ---- /uploads/ ส่งไฟล์จาก /srv/iterra/uploads ตรง
+   |  http://127.0.0.1:3000
+   v
+container app (next start) ---- container db (PostgreSQL 16, ไม่เปิดพอร์ต)
+   |
+/srv/iterra/uploads (โฟลเดอร์บนเครื่อง mount เข้า container)
+
+systemd timer บนเครื่อง: backup 02:30 · db:prune 03:00 · เครื่องทดสอบเท่านั้น: เช็ก image ใหม่ทุก 5 นาที
+เครื่องเก็บสำรอง (นอก cloud): ดึงไฟล์ backup ทุกคืน · เฝ้าเว็บล่ม</code></pre></div><p class="">มี 2 เครื่อง ตั้งเหมือนกันทุกอย่าง:</p><ul><li><b>เครื่องทดสอบ</b>: ใช้ทดสอบ 3 รอบช่วง 19 ถึง 30 ต.ค. deploy อัตโนมัติเมื่อ branch <code>deploy/test</code> มี commit ใหม่</li><li><b>เครื่องจริง</b>: ตั้ง 2 ถึง 6 พ.ย. แล้วย้ายข้อมูลวันที่ 12 ถึง 13 พ.ย. deploy เมื่อมีคนสั่งเท่านั้น</li></ul></section><section class="sec" id="s2" aria-labelledby="h-s2"><h2 id="h-s2"><span class="no">2</span>เครื่อง</h2><ul><li>สเปกเครื่องจริงตามใบเสนอราคา: CPU 4 Core, RAM 8 GB, ดิสก์ 50 GB, Ubuntu 24</li><li>เครื่องทดสอบใช้สเปกเล็กกว่าได้ เพราะ build บน GitHub ไม่ได้ build บนเครื่อง</li><li>ตั้งเขตเวลาเครื่องเป็น <code>Asia/Bangkok</code> เพื่อให้ timer ทำงานตามเวลาไทย</li></ul><h3 id="s2-1">2.1 ความปลอดภัยของเครื่อง (จาก <code>docs/pm/standards.md</code>)</h3><ul class="checks"><li><label class="chk"><input type="checkbox" data-k="c1"><span>SSH เข้าด้วยกุญแจเท่านั้น ปิดการ login ด้วยรหัสผ่าน และปิด login ตรงเป็น root</span></label></li><li><label class="chk"><input type="checkbox" data-k="c2"><span>1Panel ใช้รหัสผ่านที่แข็งแรง ไม่ใช้พอร์ตเริ่มต้น และ entrance path ไม่ใช่ค่าเริ่มต้น</span></label></li><li><label class="chk"><input type="checkbox" data-k="c3"><span>firewall เปิดแค่ 22, 80, 443 และพอร์ตของ 1Panel</span></label><ul class="checks"><li>ถ้าทำได้ ให้พอร์ต 1Panel เปิดเฉพาะ IP ของทีม</li><li><b>ห้ามเปิดพอร์ต 3000 กับ 5432 ออกนอกเครื่อง</b></li><li>เหตุผลข้อ 3000: ถ้าเปิด คนนอกยิงตรงเข้า Node แล้วปลอม <code>X-Real-IP</code> ได้ ระบบกันเดารหัสกับระบบจำกัดการส่งฟอร์มจะใช้ไม่ได้</li><li>docker เปิดพอร์ตผ่าน iptables เอง <b>ข้าม firewall ของเครื่อง</b> จึงต้องผูก <code>127.0.0.1</code> ใน <code>compose.yml</code> เสมอ (ไฟล์ตั้งไว้แล้ว ห้ามแก้เป็น <code>3000:3000</code>)</li></ul></li><li><label class="chk"><input type="checkbox" data-k="c4"><span>เปิด security update อัตโนมัติ (<code>unattended-upgrades</code>)</span></label></li><li><label class="chk"><input type="checkbox" data-k="c5"><span>บัญชีที่รันแอปเป็นผู้ใช้ธรรมดา เช่น <code>iterra</code> ไม่ใช่ root</span></label></li></ul></section><section class="sec" id="s3" aria-labelledby="h-s3"><h2 id="h-s3"><span class="no">3</span>ซอฟต์แวร์</h2><div class="tw"><table><thead><tr><th>ตัว</th><th>ที่มา</th><th>หมายเหตุ</th></tr></thead><tbody><tr><td data-h="ตัว">Docker Engine และ Docker Compose v2</td><td data-h="ที่มา">ลงบนเครื่อง (1Panel ใช้ Docker อยู่แล้ว)</td><td data-h="หมายเหตุ">ผู้ใช้ <code>iterra</code> ต้องอยู่กลุ่ม <code>docker</code></td></tr><tr><td data-h="ตัว">แอป (Next.js บน Node 22)</td><td data-h="ที่มา">image <code>ghcr.io/devbyanuwat/iterra-prototype</code></td><td data-h="หมายเหตุ">build จาก <code>Dockerfile</code> บน GitHub Actions ทุก push ไป <code>deploy/test</code> และ <code>main</code></td></tr><tr><td data-h="ตัว">PostgreSQL 16</td><td data-h="ที่มา">image <code>postgres:16-bookworm</code> ใน <code>compose.yml</code></td><td data-h="หมายเหตุ">ไม่เปิดพอร์ตออกนอก docker network ข้อมูลอยู่ที่ <code>/srv/iterra/pgdata</code></td></tr><tr><td data-h="ตัว">reverse proxy</td><td data-h="ที่มา">ตัวที่มากับ 1Panel</td><td data-h="หมายเหตุ">ดูหัวข้อ 6</td></tr><tr><td data-h="ตัว"><code>gnupg</code>, <code>flock</code></td><td data-h="ที่มา">ลงบนเครื่อง</td><td data-h="หมายเหตุ">ใช้ใน <code>backup.sh</code> กับ <code>deploy.sh</code></td></tr></tbody></table></div><p class="">ถ้า image บน ghcr เป็น private (หลัง repo เปลี่ยนเป็น private) ต้อง <code>docker login ghcr.io</code> บนเครื่องด้วย token ที่มีสิทธิ์ <code>read:packages</code> อย่างเดียว token เก็บบนเครื่อง ห้ามใส่ใน repo</p><h3 id="s3-1">3.1 ไฟล์บนเครื่อง</h3><p class="">ก๊อปจากโฟลเดอร์ <code>deploy/</code> ใน repo ไปไว้ที่ <code>/srv/iterra</code> (เจ้าของคือผู้ใช้ <code>iterra</code>):</p><div class="code"><pre><code>/srv/iterra/
+  compose.yml          จาก deploy/compose.yml
+  deploy.sh            จาก deploy/deploy.sh
+  update-test.sh       จาก deploy/update-test.sh (เครื่องทดสอบเท่านั้น)
+  backup.sh            จาก deploy/backup.sh
+  app.env              จาก deploy/app.env.example   chmod 600
+  db.env               จาก deploy/db.env.example    chmod 600
+  backup.env           จาก deploy/backup.env.example
+  .env                 deploy.sh เขียนเอง (ITERRA_REF = image ที่ใช้อยู่) ห้ามแก้มือ
+  uploads/             ไฟล์อัปโหลด chown 1000:1000 (ผู้ใช้ node ใน image)
+  pgdata/              ข้อมูล PostgreSQL
+  backups/             ไฟล์สำรองที่เข้ารหัสแล้ว</code></pre></div><p class="">ไฟล์ systemd อยู่ใน <code>deploy/systemd/</code> ก๊อปไป <code>/etc/systemd/system/</code> แล้ว <code>systemctl daemon-reload</code></p></section><section class="sec" id="s4" aria-labelledby="h-s4"><h2 id="h-s4"><span class="no">4</span>ฐานข้อมูล</h2><ul><li>PostgreSQL รันเป็น container <code>db</code> สร้าง DB <code>iterra</code> และผู้ใช้ <code>iterra</code> ให้เองตอนขึ้นครั้งแรก จากค่าใน <code>db.env</code></li><li><code>DATABASE_URL</code> ใน <code>app.env</code> ใช้ host <code>db</code> (ชื่อ service ใน compose) ไม่ใช่ <code>127.0.0.1</code> รหัสต้องตรงกับ <code>POSTGRES_PASSWORD</code></li><li>ชื่อ DB บน server <b>ห้ามลงท้ายด้วย <code>_test</code></b><ul><li>เหตุผล: <code>npm run check:db</code> ล้าง schema ทั้งหมด และยอมรันกับ DB ที่ชื่อลงท้าย <code>_test</code> เท่านั้น</li><li><b>ห้ามรัน <code>check:db</code> บน server เด็ดขาด</b></li></ul></li><li>migration อยู่ใน <code>db/migrations/*.sql</code> <code>deploy.sh</code> รัน <code>npm run db:migrate</code> ให้ทุกรอบ<ul><li>รันได้ทางเดียว ย้อนกลับไม่ได้ ถ้าไฟล์ไหนพัง ไฟล์นั้นถอยกลับทั้งไฟล์แล้วหยุด</li><li><code>deploy.sh</code> backup ก่อน migrate ทุกครั้ง (หัวข้อ 9)</li></ul></li></ul></section><section class="sec" id="s5" aria-labelledby="h-s5"><h2 id="h-s5"><span class="no">5</span>ค่าตั้ง</h2><p class=""><code>app.env</code> อ่านโดย container <code>app</code> <b>ห้าม commit</b></p><div class="tw"><table><thead><tr><th>ค่า</th><th>ใช้ทำอะไร</th><th>ค่าบน server</th></tr></thead><tbody><tr><td data-h="ค่า"><code>DATABASE_URL</code></td><td data-h="ใช้ทำอะไร">ต่อ DB</td><td data-h="ค่าบน server">ตามหัวข้อ 4</td></tr><tr><td data-h="ค่า"><code>IP_SALT</code></td><td data-h="ใช้ทำอะไร">ผสมก่อน hash IP</td><td data-h="ค่าบน server">สุ่มใหม่สำหรับแต่ละเครื่อง เช่น <code>openssl rand -hex 32</code> ถ้าไม่ตั้ง แอปจะ error ตอน production</td></tr><tr><td data-h="ค่า"><code>SESSION_DAYS</code></td><td data-h="ใช้ทำอะไร">อายุ session ของแอดมิน (วัน)</td><td data-h="ค่าบน server"><code>14</code></td></tr><tr><td data-h="ค่า"><code>SESSION_IDLE_MIN</code></td><td data-h="ใช้ทำอะไร">ไม่ได้ใช้งานกี่นาทีแล้วต้อง login ใหม่</td><td data-h="ค่าบน server"><code>120</code></td></tr><tr><td data-h="ค่า"><code>UPLOAD_DIR</code>, <code>NODE_ENV</code></td><td data-h="ใช้ทำอะไร">ที่เก็บไฟล์ใน container และโหมด production</td><td data-h="ค่าบน server"><code>compose.yml</code> ตั้งให้แล้ว ไม่ต้องใส่</td></tr><tr><td data-h="ค่า"><code>ADMIN_EMAIL</code>, <code>ADMIN_NAME</code>, <code>ADMIN_PASSWORD</code></td><td data-h="ใช้ทำอะไร">ใช้ตอนสร้างหรือรีเซ็ตแอดมินเท่านั้น</td><td data-h="ค่าบน server"><b>ห้ามเก็บไว้ใน <code>app.env</code></b> ส่งเข้าคำสั่งครั้งเดียว (หัวข้อ 11)</td></tr><tr><td data-h="ค่า"><code>TEST_DATABASE_URL</code></td><td data-h="ใช้ทำอะไร">ใช้กับ <code>check:db</code></td><td data-h="ค่าบน server"><b>ห้ามตั้งบน server</b></td></tr><tr><td data-h="ค่า"><code>SMTP_URL</code>, <code>INQUIRY_TO</code></td><td data-h="ใช้ทำอะไร">ส่งอีเมลแจ้งเมื่อมีคนส่งฟอร์มติดต่อ</td><td data-h="ค่าบน server">ยังไม่ได้ทำในโค้ด ยังไม่ต้องตั้ง</td></tr></tbody></table></div><p class=""><code>backup.env</code>: <code>BACKUP_GPG_KEY</code> (fingerprint ของ public key ผู้ถือกุญแจ) และ <code>ITERRA_ENV</code> (<code>test</code> หรือ <code>prod</code>)</p></section><section class="sec" id="s6" aria-labelledby="h-s6"><h2 id="h-s6"><span class="no">6</span>Reverse proxy และ HTTPS</h2><p class="">ค่าที่โค้ดต้องการจากตัว proxy:</p><div class="tw"><table><thead><tr><th>ค่า</th><th>เหตุผล</th></tr></thead><tbody><tr><td data-h="ค่า"><code>proxy_set_header X-Real-IP $remote_addr;</code></td><td data-h="เหตุผล"><code>lib/admin.ts</code> ใช้ IP นี้นับการเดารหัสและจำกัดการส่งฟอร์มติดต่อต่อ IP</td></tr><tr><td data-h="ค่า"><code>client_max_body_size 31m;</code></td><td data-h="เหตุผล">ไฟล์แคตตาล็อก PDF รับได้ไม่เกิน 30 MB</td></tr><tr><td data-h="ค่า"><code>location /uploads/</code> ส่งไฟล์จาก <code>UPLOAD_DIR</code> ตรง</td><td data-h="เหตุผล">ลดงานของ Node ถ้าไม่ตั้ง แอปก็ยังส่งไฟล์เองได้</td></tr><tr><td data-h="ค่า">HTTPS พร้อม redirect จาก 80 ไป 443</td><td data-h="เหตุผล">cookie ของแอดมินตั้งแบบ <code>secure</code> ถ้าไม่มี HTTPS จะ login ไม่ได้</td></tr></tbody></table></div><p class="">ตัวอย่างเต็มอยู่ที่ <code>deploy/nginx.conf</code> (รูปแบบ nginx ใน 1Panel ใส่ใน config ของเว็บ <span class="tag unk">ยังไม่ได้ตรวจ</span> ว่าต้องวางตรงไหนของ 1Panel):</p><div class="code"><pre data-lang="nginx"><code>client_max_body_size 31m;
+
+location /uploads/ {
+    alias /srv/iterra/uploads/;
+    add_header X-Content-Type-Options nosniff;
+    expires 1y;
+    access_log off;
+}
+
+location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}</code></pre></div><ul><li>ถ้าวาง <code>alias /uploads/</code> ต้องเช็กให้ผู้ใช้ที่รัน proxy อ่าน <code>/srv/iterra/uploads</code> ได้</li><li>ถ้า proxy ของ 1Panel รันเป็น container เอง ต้อง mount <code>/srv/iterra/uploads</code> เข้า container ของ proxy ด้วย <span class="tag unk">ยังไม่ได้ตรวจ</span></li><li>วิดีโอ (webm) ต้องส่งผ่าน alias นี้ เพราะ nginx รองรับ Range request ซึ่ง iPhone ต้องใช้ ส่วน route <code>/uploads/</code> ใน Next อ่านไฟล์ทั้งก้อน ไม่รองรับ Range</li></ul><h3 id="s6-1">6.1 DNS บน Cloudflare</h3><p class="">ใบเสนอราคาระบุว่า DNS ใช้ Cloudflare ส่วนจะเปิดโหมด proxy (เมฆสีส้ม) หรือไม่ <span class="tag wait">รอคำตอบ</span></p><ul><li><b>DNS only (เมฆสีเทา)</b>: ใช้ค่าตามด้านบนได้เลย</li><li><b>proxied (เมฆสีส้ม)</b>: <code>$remote_addr</code> จะกลายเป็น IP ของ Cloudflare แปลว่าผู้ใช้ทุกคนจะใช้ IP ร่วมกัน ระบบล็อกตอนรหัสผิดจะล็อกทุกคนพร้อมกัน ต้องตั้งเพิ่ม:</li></ul><div class="code nest"><pre data-lang="nginx"><code># ใส่ช่วง IP ของ Cloudflare ทุกช่วง (ดูรายการล่าสุดที่ https://www.cloudflare.com/ips/)
+set_real_ip_from 173.245.48.0/20;   # ตัวอย่าง 1 ช่วง ต้องใส่ให้ครบ
+real_ip_header CF-Connecting-IP;</code></pre></div><ul><li>ตั้ง SSL/TLS ของ Cloudflare เป็น Full (strict)</li><li>firewall ควรรับ 443 เฉพาะจาก IP ของ Cloudflare</li><li>ขนาดไฟล์อัปโหลดต่อ request ที่ Cloudflare รับได้ต้องไม่ต่ำกว่า 31 MB <span class="tag unk">ยังไม่ได้ตรวจ</span> ว่าเพดานของแพ็กเกจที่ใช้คือเท่าไร</li></ul></section><section class="sec" id="s7" aria-labelledby="h-s7"><h2 id="h-s7"><span class="no">7</span>Deploy ครั้งแรก</h2><div class="code"><pre data-lang="bash"><code># ผู้ใช้ iterra ใน /srv/iterra หลังวางไฟล์ตามหัวข้อ 3.1 และแก้ app.env db.env backup.env แล้ว
+mkdir -p uploads pgdata backups &amp;&amp; sudo chown 1000:1000 uploads
+./deploy.sh test                     # เครื่องจริงใช้ ./deploy.sh &lt;sha 40 ตัว&gt;
+docker compose run --rm -T app npm run db:seed   # ครั้งเดียว กับ DB ที่ยังว่าง รันซ้ำไม่ได้</code></pre></div><p class="">จากนั้นสร้างแอดมินคนแรกตามหัวข้อ 11 แล้วเปิด timer:</p><div class="code"><pre data-lang="bash"><code>sudo systemctl enable --now iterra-backup.timer iterra-prune.timer
+sudo systemctl enable --now iterra-update.timer   # เครื่องทดสอบเท่านั้น</code></pre></div><p class=""><b>ต้องแก้โค้ดก่อนขึ้นเครื่องจริง</b> งานนี้ทีม dev ทำ ไม่ใช่ infra:</p><ul><li><code>lib/site.ts</code> ยังเป็นค่าตัวอย่าง: <code>SITE_URL</code> (มีผลกับ sitemap, robots, OG) และข้อมูลติดต่อ (<code>CONTACT</code>)</li><li>ตัวเก็บสถิติใน <code>components/CookieConsent.tsx</code> ยังเป็นตัวที่ใช้ได้เฉพาะ Vercel <span class="tag wait">รอคำตอบ</span> ว่าจะใช้อะไรแทน</li></ul></section><section class="sec" id="s8" aria-labelledby="h-s8"><h2 id="h-s8"><span class="no">8</span>Deploy รอบถัดไป</h2><p class=""><code>deploy.sh</code> ทำตามลำดับนี้ทุกรอบ: กันไม่ให้รันซ้อน, ดึง image, ถ้าเป็นตัวเดิมก็จบ, backup, migrate, เปิดตัวใหม่, เช็กว่า <code>/</code> ตอบภายใน 60 วินาที ถ้าไม่ตอบจะถอยกลับไปตัวเดิมเอง</p><ul><li><b>เครื่องทดสอบ (อัตโนมัติ)</b>: ทีม dev push หรือ merge เข้า <code>deploy/test</code> แล้ว GitHub build image tag <code>test</code> ภายในไม่กี่นาที <code>iterra-update.timer</code> เจอ image ใหม่แล้ว deploy เอง ดูผลที่ <code>journalctl -u iterra-update</code></li><li><b>เครื่องจริง (คนสั่ง)</b>: เลือก sha จาก commit ที่ merge เข้า <code>main</code> แล้วและ image build ผ่าน (ดูที่แท็บ Actions)</li></ul><div class="code nest"><pre data-lang="bash"><code>cd /srv/iterra &amp;&amp; ./deploy.sh &lt;sha 40 ตัว&gt;</code></pre></div><ul><li>ทุกรอบ deploy ให้จด sha ที่ขึ้นไว้ในรายงานของรอบนั้น (checklist ใช้เป็นหลักฐาน)</li><li><b>ถอยกลับเอง</b>: <code>./deploy.sh &lt;sha ตัวก่อน&gt;</code><ul><li>ถอยได้เฉพาะโค้ด ถ้ารอบนั้นมี migration ใหม่ โค้ดเก่าอาจใช้กับ schema ใหม่ไม่ได้ ให้กู้ DB จาก backup ที่ <code>deploy.sh</code> ทำไว้ก่อน migrate (หัวข้อ 9.3)</li></ul></li></ul></section><section class="sec" id="s9" aria-labelledby="h-s9"><h2 id="h-s9"><span class="no">9</span>สำรองข้อมูล</h2><p class="">ข้อกำหนด (standards + spec):</p><ul><li>สำรอง DB และ <code>UPLOAD_DIR</code> ทุกวัน</li><li>เก็บย้อนหลัง 14 วัน</li><li>มีสำเนาอยู่นอกเครื่อง</li><li>ทดสอบกู้คืนสำเร็จอย่างน้อย 1 ครั้งก่อนตรวจรับ (14 พ.ย.)</li></ul><p class="">backup ที่ระบบ cloud ทำให้อัตโนมัติ (ถ้ามี) ใช้เป็นชั้นเสริมได้ แต่ใช้แทนข้อนี้ไม่ได้</p><h3 id="s9-1">9.1 บนเครื่อง: ทำไฟล์สำรองทุกคืน</h3><p class="">ไฟล์สำรองต้องเข้ารหัส เพราะใน DB มีชื่อ อีเมล และข้อความจากฟอร์มติดต่อ</p><ul><li><code>backup.sh</code> dump DB จาก container <code>db</code> และ tar โฟลเดอร์ <code>uploads</code> แล้วเข้ารหัสด้วย public key ของคนที่ถือกุญแจ เก็บที่ <code>backups/</code> 14 วัน</li><li>server เก็บแค่ public key ถอดรหัสบน server ไม่ได้ นำเข้าด้วย <code>gpg --import</code> แล้วใส่ fingerprint ใน <code>backup.env</code></li><li>ใครถือกุญแจถอดรหัส <span class="tag wait">รอคำตอบ</span></li><li>เครื่องจริงไม่มี key แล้ว <code>backup.sh</code> จะล้ม และ <code>deploy.sh</code> จะหยุดก่อน migrate</li><li>เครื่องทดสอบ (<code>ITERRA_ENV=test</code>) ที่ยังไม่มี key จะข้ามการสำรองพร้อมเตือน เพื่อให้รอบทดสอบเดินได้ก่อนได้คำตอบ</li><li>ทำ <code>uploads</code> ทั้งก้อนทุกคืนไปก่อน เพราะตอนเริ่มข้อมูลยังน้อย ถ้าโตจนช้าเกินไปค่อยเปลี่ยนเป็นแบบส่วนต่าง</li></ul><h3 id="s9-2">9.2 นอกเครื่อง: ให้เครื่องเก็บสำรองมาดึงเอง</h3><p class="">เครื่องเก็บสำรองเป็นฝ่ายต่อเข้ามาดึงไฟล์ เครื่องบน cloud ไม่มีสิทธิ์เข้าไปที่เครื่องเก็บสำรอง ได้ 2 อย่าง:</p><ul><li>ถ้าเครื่องบน cloud โดนเจาะ คนเจาะจะลบสำเนานอกเครื่องไม่ได้</li><li>เครื่องเก็บสำรองอยู่หลัง NAT ได้ ไม่ต้องเปิดพอร์ตรับจากข้างนอก</li></ul><p class="">วิธีตั้ง:</p><ol><li>บนเครื่อง cloud สร้างผู้ใช้ <code>backupread</code> ที่อ่าน <code>/srv/iterra/backups</code> ได้อย่างเดียว</li><li>ใส่ key ของเครื่องเก็บสำรองแบบจำกัดคำสั่ง ให้อ่านได้อย่างเดียว:</li></ol><div class="code nest"><pre><code># ~backupread/.ssh/authorized_keys
+command=&quot;rrsync -ro /srv/iterra/backups&quot;,restrict ssh-ed25519 AAAA... backup-puller</code></pre></div><p class=" nest">ต้องมี <code>rrsync</code> บนเครื่อง Ubuntu 24 ได้มากับแพ็กเกจ <code>rsync</code> <span class="tag unk">ยังไม่ได้ตรวจ</span> path ที่ติดตั้ง</p><ol start="3"><li>บนเครื่องเก็บสำรอง ตั้ง cron ให้ดึงหลังเวลาที่ backup เสร็จ:</li></ol><div class="code nest"><pre data-lang="bash"><code>rsync -a --delete-after backupread@&lt;เครื่อง cloud&gt;: /backup/iterra/</code></pre></div><p class=" nest">แล้วเก็บย้อนหลังเองอย่างน้อย 14 วัน เช่น snapshot โฟลเดอร์รายวัน</p><p class="">ข้อมูลเครื่องเก็บสำรอง (OS อะไร อยู่หลัง NAT หรือไม่) <span class="tag wait">รอคำตอบ</span></p><h3 id="s9-3">9.3 กู้คืน (ทำซ้อมบนเครื่องทดสอบก่อน 14 พ.ย.)</h3><div class="code"><pre data-lang="bash"><code>cd /srv/iterra
+gpg --decrypt db_&lt;stamp&gt;.dump.gpg &gt; db.dump
+docker compose stop app
+docker compose exec -T db dropdb -U iterra iterra        # เฉพาะตอนซ้อมหรือเมื่อตั้งใจกู้ทับ
+docker compose exec -T db createdb -U iterra iterra
+docker compose exec -T db pg_restore -U iterra -d iterra --no-owner &lt; db.dump
+gpg --decrypt uploads_&lt;stamp&gt;.tar.gz.gpg | tar -C /srv/iterra -xzf -
+docker compose start app
+rm db.dump</code></pre></div><p class="">กู้แล้วต้องตรวจ 3 อย่าง:</p><ul><li>login หลังบ้านได้</li><li>รูปสินค้าขึ้น</li><li>PDF แคตตาล็อกดาวน์โหลดได้</li></ul><p class="">ผลการซ้อมให้จดวันที่ เวลาที่ใช้ และสิ่งที่เจอ เป็นหลักฐานใน checklist</p><p class="warn"><b>คำเตือน: <code>dropdb</code> ลบข้อมูลทั้ง DB บนเครื่องจริงห้ามรันถ้าไม่มี backup ที่ตรวจแล้วว่ากู้ได้</b></p></section><section class="sec" id="s10" aria-labelledby="h-s10"><h2 id="h-s10"><span class="no">10</span>timer บนเครื่อง</h2><div class="tw"><table><thead><tr><th>timer</th><th>เวลา</th><th>ทำอะไร</th></tr></thead><tbody><tr><td data-h="timer"><code>iterra-backup.timer</code></td><td data-h="เวลา">02:30 ทุกวัน</td><td data-h="ทำอะไร"><code>backup.sh</code></td></tr><tr><td data-h="timer"><code>iterra-prune.timer</code></td><td data-h="เวลา">03:00 ทุกวัน</td><td data-h="ทำอะไร"><code>docker compose run --rm -T app npm run db:prune</code></td></tr><tr><td data-h="timer"><code>iterra-update.timer</code></td><td data-h="เวลา">ทุก 5 นาที</td><td data-h="ทำอะไร"><code>update-test.sh</code> <b>เครื่องทดสอบเท่านั้น ห้าม enable บนเครื่องจริง</b></td></tr></tbody></table></div><p class="">ดู log ด้วย <code>journalctl -u &lt;ชื่อ service&gt;</code></p><ul><li><code>db:prune</code> ลบข้อมูลเก่าตามระยะเก็บใน spec หัวข้อ 11.5:<ul><li>บันทึก login เก่ากว่า 90 วัน</li><li>session ที่หมดอายุ</li><li>audit log เก่ากว่า 365 วัน</li><li>สถิติคำค้นเก่ากว่า 400 วัน</li></ul></li><li><code>db:prune</code> ไม่ลบข้อความจากฟอร์มติดต่อ เพราะยังรอฝ่ายกฎหมายกำหนดระยะเก็บ</li></ul></section><section class="sec" id="s11" aria-labelledby="h-s11"><h2 id="h-s11"><span class="no">11</span>งานบัญชีแอดมิน</h2><div class="code"><pre data-lang="bash"><code>cd /srv/iterra
+# สร้างหรือรีเซ็ตรหัส · เว้นวรรคหน้าคำสั่งเพื่อไม่ให้ติด shell history (ต้องตั้ง HISTCONTROL=ignorespace)
+ docker compose run --rm -T -e ADMIN_EMAIL=name@example.com -e ADMIN_NAME='ชื่อ' -e ADMIN_PASSWORD='...' app npm run db:admin
+# ปิดบัญชีคนที่ลาออก (ลบ session ทั้งหมดและเขียน audit)
+docker compose run --rm -T -e ADMIN_EMAIL=name@example.com app npm run db:disable-admin</code></pre></div></section><section class="sec" id="s12" aria-labelledby="h-s12"><h2 id="h-s12"><span class="no">12</span>เฝ้าระวัง</h2><ul class="checks"><li><label class="chk"><input type="checkbox" data-k="c6"><span>ตัวเฝ้าเว็บล่ม <b>ต้องอยู่นอกเครื่องที่ถูกเฝ้า</b> แนะนำให้รันบนเครื่องเก็บสำรอง</span></label><ul class="checks"><li>เช็ก <code>/</code> กับ <code>/admin/login/</code> ทุก 1 ถึง 5 นาที</li><li>ช่องทางแจ้งเตือน <span class="tag wait">รอคำตอบ</span></li></ul></li><li><label class="chk"><input type="checkbox" data-k="c7"><span>แจ้งเตือนเมื่อดิสก์ใช้เกิน 80%</span></label></li><li><label class="chk"><input type="checkbox" data-k="c8"><span>แจ้งเตือนเมื่อไฟล์ backup ล่าสุดเก่ากว่า 26 ชั่วโมง ตรวจที่เครื่องเก็บสำรอง</span></label></li><li><label class="chk"><input type="checkbox" data-k="c9"><span>ใบรับรอง HTTPS ต่ออายุอัตโนมัติ และแจ้งเตือนเมื่อเหลือไม่ถึง 14 วัน</span></label></li></ul></section><section class="sec" id="s13" aria-labelledby="h-s13"><h2 id="h-s13"><span class="no">13</span>ดูแลรายเดือน (จาก standards)</h2><ul class="checks"><li><label class="chk"><input type="checkbox" data-k="c10"><span>อัปเดตระบบปฏิบัติการและ 1Panel อย่างน้อยเดือนละครั้ง</span></label></li><li><label class="chk"><input type="checkbox" data-k="c11"><span>รัน <code>npm audit --omit=dev</code> ก่อนทุกรอบ deploy ช่องโหว่ระดับ high ขึ้นไปให้แจ้งทีม dev</span></label></li><li><label class="chk"><input type="checkbox" data-k="c12"><span>ดึง image <code>postgres:16-bookworm</code> ใหม่ทุกเดือน (<code>docker compose pull db &amp;&amp; docker compose up -d db</code>) หลัง backup</span></label></li><li><label class="chk"><input type="checkbox" data-k="c13"><span>ตรวจว่าไฟล์ backup ครบ 14 วันบนเครื่องเก็บสำรอง</span></label></li><li><label class="chk"><input type="checkbox" data-k="c14"><span>สรุปลงรายงานประจำเดือน: uptime ผลสำรอง แพ็กเกจที่อัปเดต และช่องโหว่ที่เจอ</span></label></li></ul></section><section class="sec" id="s14" aria-labelledby="h-s14"><h2 id="h-s14"><span class="no">14</span>เรื่องที่รอคำตอบ</h2><div class="tw"><table><thead><tr><th>เรื่อง</th><th>กระทบหัวข้อ</th></tr></thead><tbody><tr><td data-h="เรื่อง">ใครมีสิทธิ์สั่ง deploy ขึ้นเครื่องจริง</td><td data-h="กระทบหัวข้อ">8</td></tr><tr><td data-h="เรื่อง">ใช้ proxy ของ 1Panel แบบ container หรือบนเครื่อง (กระทบการ mount uploads)</td><td data-h="กระทบหัวข้อ">6</td></tr><tr><td data-h="เรื่อง">Cloudflare เปิดโหมด proxy หรือไม่</td><td data-h="กระทบหัวข้อ">6.1</td></tr><tr><td data-h="เรื่อง">ใครถือกุญแจถอดรหัส backup</td><td data-h="กระทบหัวข้อ">9.1, 9.3</td></tr><tr><td data-h="เรื่อง">ข้อมูลเครื่องเก็บสำรอง: OS อะไร อยู่หลัง NAT หรือไม่</td><td data-h="กระทบหัวข้อ">9.2, 12</td></tr><tr><td data-h="เรื่อง">ช่องทางแจ้งเตือน</td><td data-h="กระทบหัวข้อ">12</td></tr><tr><td data-h="เรื่อง">บัญชีที่ใช้เปิดเครื่องเป็นของใคร</td><td data-h="กระทบหัวข้อ">ไม่กระทบขั้นตอน แต่กระทบรายการบัญชีที่ส่งมอบ</td></tr><tr><td data-h="เรื่อง">ตัวเก็บสถิติที่ใช้แทนตัวเดิม</td><td data-h="กระทบหัวข้อ">7</td></tr></tbody></table></div></section>
+    <footer>ITERRA · สร้างจาก docs/ops/runbook.md · แก้เนื้อหาที่ไฟล์ .md แล้วสร้างไฟล์นี้ใหม่</footer>
+  </main>
+</div>
+<script>
+(() => {
+  const KEY = 'iterra-runbook-v1';
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+  const write = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+  const boxes = [...document.querySelectorAll('.chk input')];
+  const state = read();
+  boxes.forEach((b) => { if (b.dataset.k in state) b.checked = state[b.dataset.k]; b.addEventListener('change', () => { const s = read(); s[b.dataset.k] = b.checked; write(s); }); });
+  document.getElementById('reset').addEventListener('click', () => { write({}); boxes.forEach((b) => (b.checked = b.defaultChecked)); });
+
+  document.querySelectorAll('.code').forEach((box) => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'copy'; btn.textContent = 'คัดลอก';
+    btn.addEventListener('click', async () => {
+      const text = box.querySelector('code').textContent;
+      try { await navigator.clipboard.writeText(text); btn.textContent = 'คัดลอกแล้ว'; }
+      catch { btn.textContent = 'คัดลอกไม่ได้'; }
+      setTimeout(() => (btn.textContent = 'คัดลอก'), 1600);
+    });
+    box.appendChild(btn);
+  });
+
+  // ไฮไลต์หัวข้อที่กำลังอ่านในสารบัญ
+  const links = new Map([...document.querySelectorAll('.toc a')].map((a) => [a.getAttribute('href').slice(1), a]));
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { links.forEach((a) => a.classList.remove('on')); links.get(e.target.id)?.classList.add('on'); } }), { rootMargin: '0px 0px -70% 0px' });
+  document.querySelectorAll('.sec').forEach((s) => io.observe(s));
+  if (matchMedia('(max-width: 860px)').matches) document.querySelector('.toc details').open = false;
+})();
+</script>
+</body>
+</html>

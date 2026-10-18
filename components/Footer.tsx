@@ -32,9 +32,9 @@ export default function Footer() {
           <p className="mb-4 text-[11px] uppercase tracking-widest2 text-paper/50">{t.footer.contact}</p>
           <address className="space-y-2.5 text-sm font-light not-italic text-paper/75">
             <p>{lang === 'th' ? CONTACT.address_th : CONTACT.address_en}</p>
-            <p>{CONTACT.phone} · LINE {CONTACT.line}</p>
+            <p>{lang === 'th' ? CONTACT.phone : CONTACT.phone_en}{CONTACT.line && ` · LINE ${CONTACT.line}`}</p>
             <p>{CONTACT.email}</p>
-            <p>{CONTACT.hours_th}</p>
+            <p>{lang === 'th' ? CONTACT.hours_th : CONTACT.hours_en}</p>
           </address>
         </div>
       </div>

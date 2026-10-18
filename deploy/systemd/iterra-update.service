@@ -1,0 +1,11 @@
+# เครื่องทดสอบเท่านั้น · ดึง image tag test แล้ว deploy ถ้าเปลี่ยน
+[Unit]
+Description=ITERRA: deploy the latest test image
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=iterra
+WorkingDirectory=/srv/iterra
+ExecStart=/srv/iterra/update-test.sh

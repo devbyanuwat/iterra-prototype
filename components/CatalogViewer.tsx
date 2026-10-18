@@ -9,12 +9,13 @@ import Reveal from './Reveal';
 import { useLang } from './LangProvider';
 import { CATALOG } from '@/lib/catalog';
 
-export default function CatalogViewer() {
+// pages = จำนวนหน้าจาก DB · pdf = ไฟล์ปัจจุบัน · แสดงเฉพาะเมื่อภาพรายหน้าตรงกับไฟล์ (CatalogContent ตัดสิน)
+export default function CatalogViewer({ pages: total, pdf }: { pages: number; pdf: string }) {
   const { t } = useLang();
   const [open, setOpen] = useState<number | null>(null); // เลขหน้า 1..49
   const go = useCallback(
-    (d: number) => setOpen((n) => (n === null ? n : Math.min(CATALOG.pages, Math.max(1, n + d)))),
-    [],
+    (d: number) => setOpen((n) => (n === null ? n : Math.min(total, Math.max(1, n + d)))),
+    [total],
   );
 
   const isOpen = open !== null;
@@ -60,14 +61,14 @@ export default function CatalogViewer() {
   }, [isOpen, go]);
 
   const touch = useRef({ x: 0, y: 0 });
-  const pages = Array.from({ length: CATALOG.pages }, (_, i) => i + 1);
+  const pages = Array.from({ length: total }, (_, i) => i + 1);
 
   // ปุ่มก่อน/ถัดไป: ฟังก์ชันคืน JSX (ไม่ใช่ component — กัน remount ทำโฟกัสหลุด) ใช้ซ้ำทั้งแถบล่างมือถือและลูกศรข้างจอ md+
   const arrow = (d: 1 | -1, className: string) => (
     <button
       type="button"
       onClick={() => go(d)}
-      disabled={d < 0 ? open === 1 : open === CATALOG.pages}
+      disabled={d < 0 ? open === 1 : open === total}
       aria-label={d < 0 ? t.catalog.prev : t.catalog.next}
       className={`text-3xl font-extralight disabled:opacity-20 ${className}`}
     >
@@ -101,7 +102,7 @@ export default function CatalogViewer() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={`${t.catalog.page} ${open} ${t.catalog.of} ${CATALOG.pages}`}
+          aria-label={`${t.catalog.page} ${open} ${t.catalog.of} ${total}`}
           ref={dialogRef}
           data-lenis-prevent
           className="fixed inset-0 z-[70] flex flex-col bg-ink text-paper"
@@ -114,10 +115,10 @@ export default function CatalogViewer() {
         >
           <div className="flex items-center justify-between px-6 py-5 text-[11px] uppercase tracking-widest2">
             <span>
-              {t.catalog.page} {open} {t.catalog.of} {CATALOG.pages}
+              {t.catalog.page} {open} {t.catalog.of} {total}
             </span>
             <div className="flex items-center gap-6">
-              <a href={CATALOG.pdf} download className="underline-offset-8 hover:underline">
+              <a href={pdf} download className="underline-offset-8 hover:underline">
                 {t.catalog.download}
               </a>
               <button type="button" ref={closeRef} onClick={() => setOpen(null)} aria-label={t.catalog.close} className="text-2xl font-extralight">

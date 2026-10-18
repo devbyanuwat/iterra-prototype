@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Reveal from '@/components/Reveal';
 import ParallaxImage from '@/components/ParallaxImage';
-import { posts } from '@/lib/posts';
+import { db } from '@/lib/db';
+import { listPublishedPosts } from '@/lib/server/posts';
 
 export const metadata: Metadata = {
   title: 'บทความ — ไอเดียครัวสไตล์โชว์รูม',
@@ -11,7 +12,8 @@ export const metadata: Metadata = {
   alternates: { canonical: '/articles/' },
 };
 
-export default function ArticlesPage() {
+export default async function ArticlesPage() {
+  const posts = await listPublishedPosts(db);
   return (
     <>
       <section className="px-6 pb-14 pt-36 md:px-[8vw] md:pb-20 md:pt-44">

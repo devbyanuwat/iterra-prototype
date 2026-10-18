@@ -12,8 +12,9 @@ import ParallaxImage from '@/components/ParallaxImage';
 import ProductCard from '@/components/ProductCard';
 import Placeholder from '@/components/Placeholder';
 import { useLang } from '@/components/LangProvider';
-import { featuredProducts } from '@/lib/products';
-import { posts } from '@/lib/posts';
+import { useCatalog } from '@/components/CatalogProvider';
+import type { CatalogInfo } from '@/lib/server/catalog';
+import type { HeroMedia } from '@/lib/server/hero-video';
 
 // ภาพเรื่องราวจากแคตตาล็อก KOHLER Kitchens 2026 (ลำดับตรงกับ t.home.storySlides) · scripts/build-media.sh scenes
 const STORY_IMAGES = [1, 2, 3].map((n) => `/media/scenes/story-${n}.webp`);
@@ -61,7 +62,8 @@ function StoryRows() {
 // reveal หัวข้อ ใบหลัก แล้วรายการทีละแถว (เหตุผล: ลำดับความสำคัญ สินค้าหลักมาก่อน) · รูปย่อขยายตอน hover (เหตุผล: บอกว่าแถวนี้กดได้)
 function FeaturedProducts() {
   const { lang, t } = useLang();
-  const [lead, ...rest] = featuredProducts;
+  const [lead, ...rest] = useCatalog().products.filter((p) => p.featured);
+  if (!lead) return null;
   return (
     <section className="border-t border-warm-200 px-6 py-24 md:px-[8vw] md:py-32">
       <Reveal className="mb-14 flex items-end justify-between gap-6">
@@ -123,7 +125,7 @@ function Stats() {
 
 function LatestPosts() {
   const { lang, t } = useLang();
-  const latest = posts.slice(0, 3);
+  const latest = useCatalog().posts.slice(0, 3);
   return (
     <section className="px-6 py-24 md:px-[8vw] md:py-32">
       <Reveal className="mb-14 flex items-end justify-between">
@@ -180,15 +182,15 @@ function ContactCta() {
   );
 }
 
-export default function HomeContent() {
+export default function HomeContent({ catalog, hero }: { catalog: CatalogInfo | null; hero: HeroMedia }) {
   return (
     <>
-      <Hero />
+      <Hero media={hero} />
       <ImageWall />
       <StoryRows />
       <FeaturedProducts />
       <Stats />
-      <CatalogTeaser />
+      <CatalogTeaser catalog={catalog} />
       <LatestPosts />
       <ContactCta />
     </>

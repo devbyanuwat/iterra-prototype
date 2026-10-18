@@ -7,11 +7,11 @@ import Link from 'next/link';
 import Reveal from './Reveal';
 import ProjectSlides from './ProjectSlides';
 import { useLang } from './LangProvider';
-import { projects } from '@/lib/projects';
-import { getProduct } from '@/lib/products';
+import { useCatalog } from './CatalogProvider';
 
 export default function ProjectsContent() {
   const { lang, t } = useLang();
+  const { products, projects } = useCatalog();
   return (
     <>
       <section className="px-6 pb-14 pt-36 md:px-[8vw] md:pb-20 md:pt-44">
@@ -35,7 +35,7 @@ export default function ProjectsContent() {
                 <p className="mt-3 text-[11px] font-normal uppercase tracking-widest2 text-warm-500">{t.projects.used}</p>
                 <ul className="mt-1">
                   {p.products.map((slug) => {
-                    const product = getProduct(slug);
+                    const product = products.find((x) => x.slug === slug);
                     return product ? (
                       <li key={slug}>
                         <Link href={`/products/${slug}/`} className="inline-flex min-h-11 items-center text-[13px] font-light underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-1 focus-visible:outline-ink">
