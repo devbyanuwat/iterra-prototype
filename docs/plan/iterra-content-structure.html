@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ข้อมูลที่ต้องเตรียม ITERRA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&family=Noto+Sans+Thai:wght@200;300;400;500&display=swap">
+<style>
+  /* สีและตัวอักษรตาม design.md ที่ root ของ repo */
+  :root {
+    --paper: #faf9f7;
+    --ink: #1c1917;
+    --warm-100: #f5f4f1;
+    --warm-300: #d6d3cc;
+    --warm-500: #78716c;
+    --stone-600: #57534e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Inter, 'Noto Sans Thai', system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 1040px; margin: 0 auto; padding: 72px 24px 96px; }
+  .label { margin: 0 0 12px; font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--warm-500); }
+  h1 { margin: 0 0 12px; font-size: 36px; font-weight: 200; line-height: 1.25; }
+  .intro { margin: 0 0 40px; font-size: 14px; color: var(--stone-600); }
+  table { width: 100%; border-collapse: collapse; }
+  th { padding: 10px 12px 10px 0; font-size: 11px; font-weight: 400; color: var(--warm-500); text-align: left; border-bottom: 1px solid var(--ink); }
+  td { padding: 14px 12px 14px 0; vertical-align: top; border-bottom: 1px solid var(--warm-300); font-size: 14px; }
+  td:first-child { width: 11rem; font-weight: 400; }
+  td ul { margin: 0; padding-left: 18px; }
+  .who { width: 9rem; }
+  .fill { display: block; min-height: 1.7em; border-bottom: 1px dashed var(--warm-300); }
+  .admin, .dev { display: inline-block; padding: 0 8px; font-size: 11px; font-weight: 400; white-space: nowrap; }
+  .admin { background: var(--ink); color: var(--paper); }
+  .dev { border: 1px solid var(--ink); }
+  .note { color: var(--warm-500); font-size: 12px; }
+  .key td { background: var(--warm-100); }
+  @media (max-width: 720px) {
+    thead { display: none; }
+    tr, td { display: block; width: auto !important; }
+    tr { padding: 12px 0; border-bottom: 1px solid var(--warm-300); }
+    td { padding: 4px 0; border: 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="label">Content</p>
+  <h1>ข้อมูลที่ต้องเตรียม</h1>
+  <p class="intro">ทุกข้อความต้องมีภาษาไทยและอังกฤษ · <span class="admin">หลังบ้าน</span> แก้เองได้ · <span class="dev">ทีมพัฒนา</span> ส่งให้ทีมแก้</p>
+
+  <table>
+    <thead>
+      <tr><th>หน้า</th><th>ข้อมูล</th><th>แก้ที่</th><th class="who">ใครเตรียม / ส่งเมื่อไร</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>หน้าแรก</td>
+        <td><ul>
+          <li>วิดีโอเปิดหน้า: ไม่เกิน 100 MB ยาวไม่เกิน 30 วินาที ระบบย่อเหลือด้านยาว 1920 px</li>
+          <li>สินค้าเด่น: เลือกจากสินค้า</li>
+          <li>ข้อความหัวเรื่องและตัวเลขสรุป</li>
+        </ul></td>
+        <td><span class="admin">หลังบ้าน</span><br><span class="dev">ทีมพัฒนา</span> <span class="note">ข้อความ</span></td>
+        <td class="who"><span class="fill"></span></td>
+      </tr>
+      <tr>
+        <td>หมวด แบรนด์ วัสดุ</td>
+        <td><ul>
+          <li>หมวด 7 หมวด: ชุดครัว ตู้เสื้อผ้า อุปกรณ์เสริม ก๊อกล้างจาน อ่างล้างจาน เครื่องใช้ไฟฟ้า ท็อปหิน</li>
+          <li>รายชื่อแบรนด์</li>
+          <li>วัสดุ: ทองเหลือง สเตนเลสสตีล เหล็กหล่อ</li>
+        </ul></td>
+        <td><span class="admin">หลังบ้าน</span></td>
+        <td class="who"><span class="fill"></span></td>
+      </tr>
+      <tr>
+        <td>สินค้า (ต่อชิ้น)</td>
+        <td><ul>
+          <li>ชื่อ ซีรีส์ แบรนด์ หมวด วัสดุ</li>
+          <li>คำอธิบาย</li>
+          <li>สเปก เป็นคู่ หัวข้อ และ ค่า</li>
+          <li>ราคา หรือ "สอบถามราคา"</li>
+          <li>รูปสินค้า และรูปบรรยากาศ: JPG PNG หรือ WebP ไม่เกิน 5 MB ต่อรูป ระบบย่อเหลือด้านยาว 2560 px</li>
+        </ul></td>
+        <td><span class="admin">หลังบ้าน</span></td>
+        <td class="who"><span class="fill"></span></td>
+      </tr>
+      <tr>
+        <td>ผลงานอ้างอิง (ต่อโครงการ)</td>
+        <td><ul>
+          <li>ชื่อโครงการ ที่ตั้ง ประเภท ปี</li>
+          <li>รูปหลายรูป</li>
+          <li>สินค้าที่ใช้ในโครงการ</li>
+        </ul></td>
+        <td><span class="admin">หลังบ้าน</span></td>
+        <td class="who"><span class="fill"></span></td>
+      </tr>
+      <tr>
+        <td>บทความ (ต่อเรื่อง)</td>
+        <td><ul>
+          <li>ชื่อเรื่อง คำโปรย เนื้อหา ป้ายหมวด</li>
+          <li>รูปปก และรูปในเนื้อหา</li>
+          <li>วันที่เผยแพร่</li>
+        </ul></td>
+        <td><span class="admin">หลังบ้าน</span></td>
+        <td class="who"><span class="fill"></span></td>
+      </tr>
+      <tr>
+        <td>แคตตาล็อก</td>
+        <td><ul><li>ไฟล์ PDF ไม่เกิน 30 MB</li></ul></td>
+        <td><span class="admin">หลังบ้าน</span></td>
+        <td class="who"><span class="fill"></span></td>
+      </tr>
+      <tr>
+        <td>ประกาศตอนเข้าเว็บ</td>
+        <td><ul>
+          <li>หัวข้อ ข้อความ รูป</li>
+          <li>ปุ่ม: ข้อความบนปุ่ม และลิงก์</li>
+          <li>เปิดหรือปิดประกาศ</li>
+        </ul></td>
+        <td><span class="admin">หลังบ้าน</span></td>
+        <td class="who"><span class="fill"></span></td>
+      </tr>
+      <tr>
+        <td>ติดต่อเรา</td>
+        <td><ul>
+          <li>ได้แล้ว: ที่อยู่ เบอร์โทร แผนที่</li>
+          <li>ยังรอ: อีเมลกลางของร้าน LINE ID เวลาทำการ</li>
+          <li>อีเมลที่รับข้อความจากแบบฟอร์ม</li>
+        </ul></td>
+        <td><span class="dev">ทีมพัฒนา</span></td>
+        <td class="who"><span class="fill"></span></td>
+      </tr>
+      <tr>
+        <td>เกี่ยวกับเรา</td>
+        <td><ul>
+          <li>ประวัติร้าน และข้อความแต่ละช่วง</li>
+          <li>ตัวเลขที่อ้างถึง เช่น จำนวนปี จำนวนแบรนด์</li>
+        </ul><span class="note">ตอนนี้เป็นข้อความตัวอย่าง ต้องได้ของจริง</span></td>
+        <td><span class="dev">ทีมพัฒนา</span></td>
+        <td class="who"><span class="fill"></span></td>
+      </tr>
+      <tr>
+        <td>นโยบายความเป็นส่วนตัว</td>
+        <td><ul><li>ฉบับที่ผ่านการตรวจทางกฎหมาย</li></ul></td>
+        <td><span class="dev">ทีมพัฒนา</span></td>
+        <td class="who"><span class="fill"></span></td>
+      </tr>
+      <tr class="key">
+        <td>ห้องจำลอง</td>
+        <td><ul><li>ข้อสรุปขอบเขตห้องจำลอง ภายในนัด 31 ต.ค.</li></ul></td>
+        <td><span class="dev">ทีมพัฒนา</span></td>
+        <td class="who"><span class="fill"></span></td>
+      </tr>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>
