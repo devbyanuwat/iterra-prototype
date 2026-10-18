@@ -6,12 +6,13 @@ import { db } from '@/lib/db';
 import { ipHash } from '@/lib/admin';
 import { SESSION_COOKIE, login, logout } from '@/lib/server/auth';
 
-// ล็อกเพราะผิดเกินจำนวน ตอบข้อความเดียวกับรหัสผิด ไม่บอกผู้เดาว่าโดนล็อก
+// รหัสผิดตอบข้อความเดียวไม่บอกว่าอีเมลไหนมีจริง · ล็อกนับตาม IP จึงบอกเวลาที่เหลือได้โดยไม่เผยบัญชี
 export async function loginAction(_prev: string | null, form: FormData): Promise<string | null> {
   const email = String(form.get('email') ?? '');
   const password = String(form.get('password') ?? '');
   if (!email.trim() || !password) return 'กรุณากรอกอีเมลและรหัสผ่าน';
   const r = await login(db, email, password, await ipHash(), Number(process.env.SESSION_DAYS) || 14);
+  if ('minutes' in r) return `เข้าสู่ระบบผิดเกิน 5 ครั้ง ระบบล็อกไว้ชั่วคราว ลองใหม่ในอีก ${r.minutes} นาที`;
   if ('error' in r) return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
   (await cookies()).set(SESSION_COOKIE, r.token, {
     httpOnly: true,

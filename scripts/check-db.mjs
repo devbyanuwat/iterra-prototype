@@ -85,7 +85,10 @@ try {
   assert.equal(await sessionUser(c, undefined), null);
   // ผิด 5 ครั้งจาก IP เดียว: ครั้งต่อไปรหัสถูกก็ไม่ผ่าน · IP อื่นยังเข้าได้
   for (let i = 0; i < 5; i++) assert.deepEqual(await login(c, 'admin@example.test', 'wrong', 'ip-b', 14), { error: 'invalid' });
-  assert.deepEqual(await login(c, 'admin@example.test', pw, 'ip-b', 14), { error: 'locked' });
+  // ล็อกบอกเวลาที่เหลือ: เพิ่งผิดครบ = 15 นาที · ย้อนเวลาครั้งผิด 10 นาที = เหลือ 5 นาที
+  assert.deepEqual(await login(c, 'admin@example.test', pw, 'ip-b', 14), { error: 'locked', minutes: 15 });
+  await c.query("update login_attempts set at = at - interval '10 minutes' where ip_hash = 'ip-b'");
+  assert.deepEqual(await login(c, 'admin@example.test', pw, 'ip-b', 14), { error: 'locked', minutes: 5 });
   assert.ok('token' in (await login(c, 'admin@example.test', pw, 'ip-c', 14)));
   // หมดอายุ
   await c.query("update sessions set expires_at = now() - interval '1 second' where token_hash = $1", [sha256(s1.token)]);

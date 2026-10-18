@@ -38,12 +38,21 @@ export async function login(
   password: string,
   ipHash: string,
   days: number,
-): Promise<{ token: string; expires: Date } | { error: 'locked' | 'invalid' }> {
+): Promise<{ token: string; expires: Date } | { error: 'locked'; minutes: number } | { error: 'invalid' }> {
   const tries = await db.query(
     'select count(*)::int as n from login_attempts where ip_hash = $1 and at > now() - make_interval(mins => $2)',
     [ipHash, WINDOW_MIN],
   );
-  if (tries.rows[0].n >= MAX_ATTEMPTS) return { error: 'locked' };
+  if (tries.rows[0].n >= MAX_ATTEMPTS) {
+    // ปลดล็อกเมื่อครั้งผิดที่ MAX_ATTEMPTS นับจากล่าสุดพ้นช่วงเวลา · ปัดขึ้นเป็นนาที
+    const left = await db.query(
+      `select ceil(extract(epoch from at + make_interval(mins => $2) - now()) / 60)::int as m
+         from login_attempts where ip_hash = $1 and at > now() - make_interval(mins => $2)
+        order by at desc offset $3 limit 1`,
+      [ipHash, WINDOW_MIN, MAX_ATTEMPTS - 1],
+    );
+    return { error: 'locked', minutes: Math.max(1, left.rows[0]?.m ?? WINDOW_MIN) };
+  }
   const u = await db.query('select id, password_hash from admin_users where email = $1 and disabled_at is null', [
     email.trim().toLowerCase(),
   ]);
