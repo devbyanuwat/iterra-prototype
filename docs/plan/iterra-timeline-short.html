@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>กำหนดการ ITERRA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&family=Noto+Sans+Thai:wght@200;300;400;500&display=swap">
+<style>
+  /* สีและตัวอักษรตาม design.md ที่ root ของ repo */
+  :root {
+    --paper: #faf9f7;
+    --ink: #1c1917;
+    --warm-100: #f5f4f1;
+    --warm-300: #d6d3cc;
+    --warm-500: #78716c;
+    --stone-600: #57534e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Inter, 'Noto Sans Thai', system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 72px 24px 96px; }
+  .label { margin: 0 0 12px; font-size: 11px; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase; color: var(--warm-500); }
+  h1 { margin: 0 0 40px; font-size: 36px; font-weight: 200; line-height: 1.25; }
+  ol { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--warm-300); }
+  li { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--warm-300); }
+  .date { font-size: 14px; font-weight: 400; color: var(--stone-600); }
+  .what { font-size: 16px; }
+  .key { background: var(--warm-100); margin: 0 -16px; padding: 18px 16px; }
+  .must { display: inline-block; margin-top: 6px; padding: 2px 10px; border: 1px solid var(--ink); font-size: 13px; font-weight: 400; }
+  .ship .what { font-weight: 400; }
+  @media (max-width: 560px) {
+    li { grid-template-columns: 1fr; gap: 2px; }
+  }
+  @media print {
+    main { padding: 0; }
+    .key { margin: 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="label">Timeline</p>
+  <h1>กำหนดการ ITERRA</h1>
+  <ol>
+    <li>
+      <span class="date">26 ถึง 30 ต.ค.</span>
+      <span class="what">ได้ server</span>
+    </li>
+    <li>
+      <span class="date">พ. 28 ต.ค.</span>
+      <span class="what">อัปขึ้น server ให้ทดลองใช้งาน</span>
+    </li>
+    <li class="key">
+      <span class="date">ส. 31 ต.ค.</span>
+      <span class="what">เข้าพบ: เล่น demo (ไม่รวมห้องจำลอง)<br><span class="must">ขอข้อสรุปเรื่องห้องจำลอง</span></span>
+    </li>
+    <li>
+      <span class="date">ส. 7 พ.ย.</span>
+      <span class="what">demo ห้องจำลอง</span>
+    </li>
+    <li class="ship">
+      <span class="date">ส. 14 พ.ย.</span>
+      <span class="what">ส่งมอบงาน</span>
+    </li>
+  </ol>
+</main>
+</body>
+</html>
