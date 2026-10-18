@@ -21,3 +21,24 @@ export async function audit(
     detail ? JSON.stringify(detail) : null,
   ]);
 }
+
+export type AuditRow = {
+  id: number;
+  at: Date;
+  userName: string | null;
+  action: string;
+  entity: string;
+  entityId: string | null;
+  detail: Record<string, unknown> | null;
+};
+
+// หน้าบันทึกการใช้งาน: ใหม่สุดก่อน · ponytail: ไม่มีตัวกรองหรือแบ่งหน้า ดูย้อนเกินจำนวนนี้ใช้ psql
+export async function listAudit(db: Db, limit = 200): Promise<AuditRow[]> {
+  const r = await db.query(
+    `select a.id::int as id, a.at, u.name as "userName", a.action, a.entity, a.entity_id as "entityId", a.detail
+       from audit_log a left join admin_users u on u.id = a.user_id
+      order by a.id desc limit $1`,
+    [limit],
+  );
+  return r.rows;
+}

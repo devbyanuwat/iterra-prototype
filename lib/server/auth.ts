@@ -29,6 +29,12 @@ export async function verifyPassword(pw: string, stored: string): Promise<boolea
   return timingSafeEqual(got, want);
 }
 
+// d***@example.com · ไม่มี @ ก็เก็บแค่ตัวแรก
+const maskEmail = (e: string) => {
+  const at = e.indexOf('@');
+  return `${e.slice(0, 1)}***${at < 0 ? '' : e.slice(at)}`;
+};
+
 // ไม่มีอีเมลนี้ก็ยังคำนวณ scrypt หนึ่งรอบ เวลาตอบจะได้ไม่บอกว่าอีเมลไหนมีจริง
 const NOBODY = `scrypt$${'0'.repeat(32)}$${'0'.repeat(128)}`;
 
@@ -39,6 +45,15 @@ export async function login(
   ipHash: string,
   days: number,
 ): Promise<{ token: string; expires: Date } | { error: 'locked'; minutes: number } | { error: 'invalid' }> {
+  const e = email.trim().toLowerCase();
+  const u = await db.query('select id::int as id, password_hash, disabled_at from admin_users where email = $1', [e]);
+  const user = u.rows[0];
+  // login ไม่ผ่านเขียน audit ให้ผู้ดูแลอ่านย้อนได้ว่าติดเพราะอะไร · อีเมลที่ไม่มีบัญชีอาจเป็นของคนนอก จึงเก็บแบบปิดบางส่วน · ไม่เก็บรหัสผ่าน
+  const failed = (detail: Record<string, unknown>) =>
+    db.query(
+      `insert into audit_log (user_id, action, entity, entity_id, detail) values ($1, 'login_failed', 'admin_user', $2, $3::jsonb)`,
+      [user?.id ?? null, user ? String(user.id) : null, JSON.stringify(user ? detail : { ...detail, email: maskEmail(e) })],
+    );
   const tries = await db.query(
     'select count(*)::int as n from login_attempts where ip_hash = $1 and at > now() - make_interval(mins => $2)',
     [ipHash, WINDOW_MIN],
@@ -51,14 +66,14 @@ export async function login(
         order by at desc offset $3 limit 1`,
       [ipHash, WINDOW_MIN, MAX_ATTEMPTS - 1],
     );
-    return { error: 'locked', minutes: Math.max(1, left.rows[0]?.m ?? WINDOW_MIN) };
+    const minutes = Math.max(1, left.rows[0]?.m ?? WINDOW_MIN);
+    await failed({ reason: 'locked', minutes });
+    return { error: 'locked', minutes };
   }
-  const u = await db.query('select id, password_hash from admin_users where email = $1 and disabled_at is null', [
-    email.trim().toLowerCase(),
-  ]);
-  const ok = await verifyPassword(password, u.rows[0]?.password_hash ?? NOBODY);
-  if (!ok || !u.rows[0]) {
+  const ok = await verifyPassword(password, user?.password_hash ?? NOBODY);
+  if (!ok || !user || user.disabled_at) {
     await db.query('insert into login_attempts (ip_hash) values ($1)', [ipHash]);
+    await failed({ reason: !user ? 'no_user' : user.disabled_at ? 'disabled' : 'wrong_password' });
     return { error: 'invalid' };
   }
   const token = randomBytes(32).toString('base64url');
@@ -67,7 +82,7 @@ export async function login(
   await db.query(
     `with s as (insert into sessions (token_hash, user_id, expires_at) values ($1, $2, $3) returning user_id)
      insert into audit_log (user_id, action, entity, entity_id) select user_id, 'login', 'admin_user', user_id::text from s`,
-    [sha256(token), u.rows[0].id, expires],
+    [sha256(token), user.id, expires],
   );
   return { token, expires };
 }

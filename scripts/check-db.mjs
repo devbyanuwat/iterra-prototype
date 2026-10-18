@@ -17,7 +17,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import * as proj from '../lib/server/projects.ts';
 import * as post from '../lib/server/posts.ts';
-import { audit } from '../lib/server/audit.ts';
+import { audit, listAudit } from '../lib/server/audit.ts';
 import { seed } from '../db/seed.mjs';
 import { products } from '../lib/products.ts';
 import { posts } from '../lib/posts.ts';
@@ -293,13 +293,34 @@ try {
     const uid = (await c.query("select id::int as id from admin_users where email = 'admin@example.test'")).rows[0].id;
     const last = async () =>
       (await c.query('select user_id::int as u, action, entity, entity_id, detail from audit_log order by id desc limit 1')).rows[0];
-    // login สำเร็จเขียน audit · login ผิดไม่เขียน (อยู่ใน login_attempts แทน)
+    // login สำเร็จเขียน audit 'login'
     const logins = await count("audit_log where action = 'login'");
     const s = await login(c, 'admin@example.test', pw2, 'ip-g', 14);
     assert.ok('token' in s);
     assert.deepEqual(await last(), { u: uid, action: 'login', entity: 'admin_user', entity_id: String(uid), detail: null });
-    assert.deepEqual(await login(c, 'admin@example.test', 'wrong', 'ip-g', 14), { error: 'invalid' });
+    // login ไม่ผ่านเขียน 'login_failed' พร้อมสาเหตุ · อีเมลคนนอกปิดบางส่วน · ไม่มีรหัสผ่านใน detail
+    const leak = 'pw-must-not-leak';
+    const failed = (u, detail) => ({ u, action: 'login_failed', entity: 'admin_user', entity_id: u === null ? null : String(u), detail });
+    assert.deepEqual(await login(c, 'admin@example.test', leak, 'ip-g', 14), { error: 'invalid' });
+    assert.deepEqual(await last(), failed(uid, { reason: 'wrong_password' }));
     assert.equal(await count("audit_log where action = 'login'"), logins + 1);
+    assert.deepEqual(await login(c, ' Nobody@Outside.example ', leak, 'ip-g', 14), { error: 'invalid' });
+    assert.deepEqual(await last(), failed(null, { reason: 'no_user', email: 'n***@outside.example' }));
+    await c.query('update admin_users set disabled_at = now() where id = $1', [uid]);
+    assert.deepEqual(await login(c, 'admin@example.test', pw2, 'ip-g', 14), { error: 'invalid' });
+    assert.deepEqual(await last(), failed(uid, { reason: 'disabled' }));
+    await c.query('update admin_users set disabled_at = null where id = $1', [uid]);
+    for (let i = 0; i < 5; i++) await login(c, 'admin@example.test', leak, 'ip-lock', 14);
+    assert.deepEqual(await login(c, 'admin@example.test', pw2, 'ip-lock', 14), { error: 'locked', minutes: 15 });
+    assert.deepEqual(await last(), failed(uid, { reason: 'locked', minutes: 15 }));
+    assert.equal(await count(`audit_log where detail::text like '%${leak}%'`), 0);
+    // หน้าบันทึกการใช้งาน: ใหม่สุดก่อน มีชื่อผู้ใช้ จำกัดจำนวน
+    const recent = await listAudit(c, 2);
+    assert.equal(recent.length, 2);
+    assert.ok(recent[0].id > recent[1].id);
+    assert.equal(recent[0].action, 'login_failed');
+    assert.equal(recent[0].userName, 'ผู้ทดสอบ');
+    assert.ok(recent[0].at instanceof Date);
     // ออกจากระบบเขียน audit · token ที่ไม่มีจริงไม่เขียน
     await logout(c, s.token);
     assert.deepEqual(await last(), { u: uid, action: 'logout', entity: 'admin_user', entity_id: String(uid), detail: null });
