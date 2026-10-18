@@ -1,0 +1,33 @@
+# วางไฟล์นี้ที่ $ITERRA_HOME (ค่าเริ่มต้น /srv/iterra) บนเครื่อง · ใช้ชุดเดียวกันทั้งเครื่องทดสอบและเครื่องจริง
+# ITERRA_REF (image ที่ใช้อยู่) deploy.sh เขียนลงไฟล์ .env ข้างไฟล์นี้ให้ · ห้ามแก้ image ในไฟล์นี้ตรง ๆ
+# พอร์ตต้องผูก 127.0.0.1 เสมอ: docker เปิดพอร์ตผ่าน iptables เอง ข้าม firewall ของเครื่อง
+name: iterra
+
+services:
+  db:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    env_file: db.env
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iterra -d iterra"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    image: ${ITERRA_REF:?ITERRA_REF is set by deploy.sh}
+    restart: unless-stopped
+    env_file: app.env
+    environment:
+      NODE_ENV: production
+      UPLOAD_DIR: /data/uploads
+    ports:
+      - "127.0.0.1:${ITERRA_PORT:-3000}:3000"
+    volumes:
+      # ไฟล์อัปโหลดอยู่บนเครื่อง ไม่อยู่ใน container · เปลี่ยน image แล้วไฟล์ไม่หาย
+      - ./uploads:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy

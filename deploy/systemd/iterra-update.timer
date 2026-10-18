@@ -1,0 +1,10 @@
+# เครื่องทดสอบเท่านั้น · ห้าม enable บนเครื่องจริง
+[Unit]
+Description=ITERRA: check for a new test image every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
