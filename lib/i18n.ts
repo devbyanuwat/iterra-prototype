@@ -34,6 +34,13 @@ export const dict = {
       products: 'ดูสินค้า',
       search: 'ค้นหาในเว็บ',
     },
+    error: {
+      title: 'ระบบขัดข้องชั่วคราว',
+      body: 'หน้านี้โหลดไม่สำเร็จ ลองใหม่อีกครั้ง หากยังไม่ได้ โทรหาเราได้ที่',
+      retry: 'ลองอีกครั้ง',
+      home: 'กลับหน้าแรก',
+      ref: 'รหัสอ้างอิง',
+    },
     cookie: {
       title: 'เว็บไซต์นี้ใช้คุกกี้',
       body: 'เราใช้คุกกี้ที่จำเป็นเพื่อให้เว็บไซต์ทำงาน และขออนุญาตใช้คุกกี้เพื่อเก็บสถิติการเข้าชม คุณเลือกได้ว่าจะอนุญาตหรือไม่',
@@ -224,6 +231,13 @@ export const dict = {
       home: 'Back to home',
       products: 'View products',
       search: 'Search the site',
+    },
+    error: {
+      title: 'Something went wrong',
+      body: 'This page could not load. Please try again. If it keeps happening, call us at',
+      retry: 'Try again',
+      home: 'Back to home',
+      ref: 'Reference',
     },
     cookie: {
       title: 'This site uses cookies',
