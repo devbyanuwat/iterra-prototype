@@ -104,7 +104,7 @@ function readGlass() {
   }
 }
 
-export default function AdminShell({ name, children }: { name: string; children: React.ReactNode }) {
+export default function AdminShell({ name, demo, children }: { name: string; demo: boolean; children: React.ReactNode }) {
   const path = usePathname();
   const [glass, setGlass] = useState(0.8);
   const moreRef = useRef<HTMLDialogElement>(null);
@@ -240,7 +240,14 @@ export default function AdminShell({ name, children }: { name: string; children:
           <div className="mt-auto space-y-4">{settings(false)}</div>
         </aside>
 
-        <div className="min-w-0 space-y-4 lg:space-y-6">{children}</div>
+        <div className="min-w-0 space-y-4 lg:space-y-6">
+          {demo && (
+            <p role="note" className="glass rounded-full px-5 py-3 text-sm text-ink">
+              โหมดนำเสนอ: ข้อมูลที่แก้จะกลับเป็นค่าเริ่มต้นเมื่อระบบเริ่มใหม่
+            </p>
+          )}
+          {children}
+        </div>
       </div>
 
       {/* มือถือ: แถบลอยแบบ IG แคปซูลกระจก ไอคอนล้วน แท็บที่เลือกมีแคปซูลเทารอง */}

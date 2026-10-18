@@ -21,6 +21,7 @@
     "db:prune": "node --env-file-if-exists=.env scripts/db-prune.mjs"
   },
   "dependencies": {
+    "@electric-sql/pglite": "0.5.10",
     "@vercel/analytics": "^2.0.1",
     "gsap": "^3.12.5",
     "lenis": "^1.1.14",

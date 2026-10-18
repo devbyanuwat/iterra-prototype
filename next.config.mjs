@@ -8,6 +8,9 @@ const nextConfig = {
   // proxy.ts พักข้อมูลได้ 10 MB ตามค่าเริ่มต้น (proxyClientMaxBodySize) จึงไม่ต้องตั้งเพิ่ม
   experimental: { serverActions: { bodySizeLimit: '6mb' } },
   images: { unoptimized: true },
+  // โหมดนำเสนอ (ITERRA_DEMO): PGlite ห้าม bundle · แนบไฟล์ migration ไปกับ server function บน Vercel
+  serverExternalPackages: ['@electric-sql/pglite'],
+  outputFileTracingIncludes: { '/**': ['./db/migrations/*.sql'] },
   // ไม่ต้องให้ Next เขียน AGENTS.md / CLAUDE.md ทับในโปรเจกต์
   agentRules: false,
   // ให้เปิด dev server จากมือถือหรือเครื่องอื่นในวง LAN ได้ (เช่น http://192.168.1.34:4100)

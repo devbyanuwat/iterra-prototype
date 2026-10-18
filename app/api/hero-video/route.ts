@@ -5,7 +5,7 @@ import path from 'node:path';
 import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { after } from 'next/server';
-import { db } from '@/lib/db';
+import { db, DEMO } from '@/lib/db';
 import { currentAdmin, inTx } from '@/lib/admin';
 import { audit } from '@/lib/server/audit';
 import {
@@ -38,6 +38,8 @@ export async function POST(req: Request) {
   const g = await guard(req);
   if (g.res) return g.res;
   const admin = g.admin;
+  // โหมดนำเสนอบน Vercel ไม่มี ffmpeg
+  if (DEMO) return json({ ok: false, error: 'โหมดนำเสนออัปโหลดวิดีโอไม่ได้' }, 400);
   const length = Number(req.headers.get('content-length'));
   if (!length || !req.body) return json({ ok: false, error: 'ไม่พบไฟล์' }, 411);
   if (length > MAX_VIDEO) return json({ ok: false, error: 'ไฟล์ใหญ่เกิน 100 MB' }, 413);
