@@ -8,8 +8,10 @@ import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLang } from './LangProvider';
+import type { HeroMedia } from '@/lib/server/hero-video';
 
-export default function Hero() {
+// media มาจาก DB (หลังบ้าน วิดีโอหน้าแรก) ไม่มีก็ใช้ไฟล์ตั้งต้นใน public/media/hero
+export default function Hero({ media }: { media: HeroMedia }) {
   const root = useRef<HTMLElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const { t } = useLang();
@@ -65,15 +67,15 @@ export default function Hero() {
           <video
             ref={video}
             className="absolute inset-0 h-full w-full object-cover"
-            poster="/media/hero/hero.jpg"
+            poster={media.poster}
             muted
             loop
             playsInline
             preload="metadata"
             aria-hidden
           >
-            <source src="/media/hero/hero.webm" type="video/webm" />
-            <source src="/media/hero/hero.mp4" type="video/mp4" />
+            <source src={media.webm} type="video/webm" />
+            <source src={media.mp4} type="video/mp4" />
           </video>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/25" aria-hidden />

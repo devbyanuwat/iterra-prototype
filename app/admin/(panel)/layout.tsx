@@ -1,0 +1,12 @@
+import type { Metadata } from 'next';
+import AdminShell from '@/components/admin/AdminShell';
+import { requireAdmin } from '@/lib/admin';
+import { DEMO } from '@/lib/db';
+
+// ทุกหน้าใน (panel) ต้องเข้าสู่ระบบ · หน้าในกลุ่มนี้เรียก requireAdmin() ซ้ำเองด้วย เพราะ layout กับ page render พร้อมกัน
+export const metadata: Metadata = { robots: { index: false, follow: false } };
+
+export default async function PanelLayout({ children }: { children: React.ReactNode }) {
+  const admin = await requireAdmin();
+  return <AdminShell name={admin.name} demo={DEMO}>{children}</AdminShell>;
+}

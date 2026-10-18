@@ -2,18 +2,19 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import JsonLd from '@/components/JsonLd';
 import ProductDetail from '@/components/ProductDetail';
-import { getProduct, products } from '@/lib/products';
+import { cache } from 'react';
+import { db } from '@/lib/db';
+import { getPublished } from '@/lib/server/products';
 import { SITE_URL } from '@/lib/site';
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
-}
+// metadata กับหน้าใช้ query เดียวกันใน request เดียว
+const getProduct = cache((slug: string) => getPublished(db, slug));
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProduct(slug);
   if (!product) return {};
   return {
     title: `${product.name.th} (${product.name.en})`,
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProduct(slug);
   if (!product) notFound();
 
   const jsonLd = {
@@ -35,7 +36,7 @@ export default async function ProductPage({ params }: Props) {
     alternateName: product.name.en,
     description: product.desc.th,
     category: 'Kitchen Equipment',
-    brand: { '@type': 'Brand', name: 'KOHLER' },
+    brand: { '@type': 'Brand', name: product.brand },
     url: `${SITE_URL}/products/${product.slug}/`,
     additionalProperty: product.specs.map((s) => ({
       '@type': 'PropertyValue',

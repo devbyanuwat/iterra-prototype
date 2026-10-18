@@ -8,7 +8,18 @@ import FloatingActions from '@/components/FloatingActions';
 import Announcement from '@/components/Announcement';
 import CookieConsent from '@/components/CookieConsent';
 import JsonLd from '@/components/JsonLd';
+import { CatalogProvider } from '@/components/CatalogProvider';
+import { db } from '@/lib/db';
+import { listPublished } from '@/lib/server/products';
+import { getAnnouncement } from '@/lib/server/announcement';
+import { listCategories, listMaterials } from '@/lib/server/taxonomy';
+import { listPublishedPosts } from '@/lib/server/posts';
+import { listPublishedProjects } from '@/lib/server/projects';
 import { CONTACT, SITE_NAME, SITE_TAGLINE_EN, SITE_TAGLINE_TH, SITE_URL } from '@/lib/site';
+
+// ทุกหน้าอ่าน DB ตอน request: หลังบ้านบันทึกแล้วหน้าเว็บเห็นทันที ไม่ต้อง revalidate และ next build ไม่ต้องต่อ DB
+// ponytail: ไม่มี cache ถ้าคนเข้าเยอะจน DB ช้า ค่อยใส่ unstable_cache พร้อม revalidateTag ตอนบันทึก
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -33,11 +44,11 @@ const organizationJsonLd = {
   name: SITE_NAME,
   url: SITE_URL,
   description: 'ดีลเลอร์อุปกรณ์ครัวพรีเมียม',
-  telephone: CONTACT.phone,
+  telephone: CONTACT.phone_en,
   email: CONTACT.email,
   address: {
     '@type': 'PostalAddress',
-    streetAddress: '888 ถนนสุขุมวิท',
+    streetAddress: CONTACT.street_th,
     addressLocality: 'คลองเตย',
     addressRegion: 'กรุงเทพมหานคร',
     postalCode: '10110',
@@ -45,7 +56,15 @@ const organizationJsonLd = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const [products, categories, materials, announcement, posts, projects] = await Promise.all([
+    listPublished(db),
+    listCategories(db),
+    listMaterials(db),
+    getAnnouncement(db),
+    listPublishedPosts(db),
+    listPublishedProjects(db),
+  ]);
   return (
     <html lang="th">
       <head>
@@ -58,13 +77,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <LangProvider>
+          <CatalogProvider value={{ products, categories, materials, posts, projects }}>
           <SmoothScroll />
           <Nav />
           <main>{children}</main>
           <Footer />
           <FloatingActions />
-          <Announcement />
+          <Announcement data={announcement} />
           <CookieConsent />
+        </CatalogProvider>
         </LangProvider>
         <JsonLd data={organizationJsonLd} />
       </body>

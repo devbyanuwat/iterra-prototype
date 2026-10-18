@@ -1,6 +1,7 @@
 // เช็กตรรกะตัวกรองหน้าสินค้ารวมกับข้อมูลสินค้าจริง: npm run check:filter
 import assert from 'node:assert/strict';
-import { products, filterProducts, facetOptions, SUB_FACETS, CATEGORIES } from '../lib/products.ts';
+import { products, CATEGORIES } from '../lib/products.ts';
+import { filterProducts, facetOptions, SUB_FACETS } from '../lib/product-filters.ts';
 
 const none = { category: [], series: [], material: [], brand: [] };
 const slugs = (picked) => filterProducts(products, { ...none, ...picked }).map((p) => p.slug);
@@ -23,8 +24,9 @@ assert.ok(slugs({ series: ['Kumin'] }).includes('kumin-99480t-4'));
 
 // 7 หมวด · แบรนด์แสดงเฉพาะหมวดที่มีหลายผู้ผลิต
 assert.equal(CATEGORIES.length, 7);
-assert.ok(SUB_FACETS('faucet').includes('brand'));
-assert.ok(!SUB_FACETS('wardrobe').includes('brand'));
+assert.ok(SUB_FACETS(true).includes('brand'));
+assert.ok(!SUB_FACETS(false).includes('brand'));
+assert.ok(CATEGORIES.find((c) => c.key === 'faucet').multiBrand && !CATEGORIES.find((c) => c.key === 'wardrobe').multiBrand);
 // ตัวเลือกนับเฉพาะหมวดที่เลือก: ซีรีส์ของอ่างไม่โผล่ในก๊อก · หมวดที่ยังไม่มีสินค้า = ไม่มีตัวเลือก
 assert.ok(!facetOptions(products, 'faucet', 'series').some(([v]) => v === 'Toccata'));
 assert.deepEqual(facetOptions(products, 'wardrobe', 'series'), []);
