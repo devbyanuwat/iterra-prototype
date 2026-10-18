@@ -44,11 +44,11 @@ const organizationJsonLd = {
   name: SITE_NAME,
   url: SITE_URL,
   description: 'ดีลเลอร์อุปกรณ์ครัวพรีเมียม',
-  telephone: CONTACT.phone,
+  telephone: CONTACT.phone_en,
   email: CONTACT.email,
   address: {
     '@type': 'PostalAddress',
-    streetAddress: '888 ถนนสุขุมวิท',
+    streetAddress: CONTACT.street_th,
     addressLocality: 'คลองเตย',
     addressRegion: 'กรุงเทพมหานคร',
     postalCode: '10110',

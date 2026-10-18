@@ -29,7 +29,7 @@ const COPY = {
       { h: 'Cookies and browser storage', p: ['Necessary: remembers your cookie choice and that you closed the announcement. Always on, because the site needs it.', 'Statistics: counts visitors and the pages they open. Runs only if you allow it.', 'Marketing: the site does not use this category yet.'] },
       { h: 'Service providers', p: ['The site runs on a hosting provider and a statistics service, which process data only on our instructions. We do not sell your personal data.'] },
       { h: 'Your rights', p: ['Under Thailand’s Personal Data Protection Act B.E. 2562 you may ask to access, correct or delete your data, object to processing, and withdraw consent at any time.'] },
-      { h: 'Contact', p: [`${SITE_NAME} · ${CONTACT.address_en}`, `Tel. ${CONTACT.phone} · ${CONTACT.email}`] },
+      { h: 'Contact', p: [`${SITE_NAME} · ${CONTACT.address_en}`, `Tel. ${CONTACT.phone_en} · ${CONTACT.email}`] },
     ],
     change: 'Change cookie choices',
   },

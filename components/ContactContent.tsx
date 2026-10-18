@@ -104,7 +104,7 @@ export default function ContactContent() {
           <Reveal delay={0.15}>
             <address className="mb-8 space-y-2.5 text-sm font-light not-italic leading-relaxed text-stone-600">
               <p>{lang === 'th' ? CONTACT.address_th : CONTACT.address_en}</p>
-              <p>{CONTACT.phone} · LINE {CONTACT.line}</p>
+              <p>{lang === 'th' ? CONTACT.phone : CONTACT.phone_en}{CONTACT.line && ` · LINE ${CONTACT.line}`}</p>
               <p>{CONTACT.email}</p>
               <p>{lang === 'th' ? CONTACT.hours_th : CONTACT.hours_en}</p>
             </address>
