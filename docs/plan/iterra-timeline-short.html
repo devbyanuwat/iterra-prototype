@@ -35,8 +35,21 @@
   .key { background: var(--warm-100); margin: 0 -16px; padding: 18px 16px; }
   .must { display: inline-block; margin-top: 6px; padding: 2px 10px; border: 1px solid var(--ink); font-size: 13px; font-weight: 400; }
   .ship .what { font-weight: 400; }
+  h2 { margin: 64px 0 16px; font-size: 24px; font-weight: 200; }
+  .cal { width: 100%; table-layout: fixed; border-collapse: collapse; }
+  .cal th { padding: 8px 4px; font-size: 11px; font-weight: 400; color: var(--warm-500); text-align: left; }
+  .cal td { height: 96px; padding: 8px; vertical-align: top; border: 1px solid var(--warm-300); font-size: 12px; line-height: 1.4; }
+  .cal .n { display: block; margin-bottom: 4px; font-size: 13px; font-weight: 400; color: var(--stone-600); }
+  .cal .we { background: var(--warm-100); }
+  .cal .meet { background: var(--ink); color: var(--paper); }
+  .cal .meet .n { color: var(--paper); }
+  .cal .tag { display: inline-block; margin-top: 4px; padding: 1px 6px; border: 1px solid currentColor; font-size: 11px; }
+  .cal .ship { font-weight: 500; }
   @media (max-width: 560px) {
     li { grid-template-columns: 1fr; gap: 2px; }
+    .cal td { height: 80px; padding: 4px; font-size: 10px; word-break: break-word; }
+    .cal .n { font-size: 11px; }
+    .cal .tag { padding: 0 3px; font-size: 9px; }
   }
   @media print {
     main { padding: 0; }
@@ -70,6 +83,42 @@
       <span class="what">ส่งมอบงาน</span>
     </li>
   </ol>
+
+  <h2>ปฏิทิน</h2>
+  <table class="cal">
+    <thead>
+      <tr><th>จ.</th><th>อ.</th><th>พ.</th><th>พฤ.</th><th>ศ.</th><th>ส.</th><th>อา.</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="n">26 ต.ค.</span>ได้ server</td>
+        <td><span class="n">27</span>ได้ server</td>
+        <td><span class="n">28</span>ได้ server<br>อัปขึ้นทดลองใช้</td>
+        <td><span class="n">29</span>ได้ server</td>
+        <td><span class="n">30</span>ได้ server</td>
+        <td class="we meet"><span class="n">31</span>เข้าพบ demo<br><span class="tag">ขอข้อสรุปห้องจำลอง</span></td>
+        <td class="we"><span class="n">1 พ.ย.</span></td>
+      </tr>
+      <tr>
+        <td><span class="n">2</span></td>
+        <td><span class="n">3</span></td>
+        <td><span class="n">4</span></td>
+        <td><span class="n">5</span></td>
+        <td><span class="n">6</span></td>
+        <td class="we meet"><span class="n">7</span>demo ห้องจำลอง</td>
+        <td class="we"><span class="n">8</span></td>
+      </tr>
+      <tr>
+        <td><span class="n">9</span></td>
+        <td><span class="n">10</span></td>
+        <td><span class="n">11</span></td>
+        <td><span class="n">12</span></td>
+        <td><span class="n">13</span></td>
+        <td class="we meet ship"><span class="n">14</span>ส่งมอบงาน</td>
+        <td class="we"><span class="n">15</span></td>
+      </tr>
+    </tbody>
+  </table>
 </main>
 </body>
 </html>
