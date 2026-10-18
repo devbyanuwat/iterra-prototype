@@ -6,7 +6,11 @@ import type { PGlite } from '@electric-sql/pglite';
 // pool เดียวต่อ process · dev server โหลดโมดูลใหม่บ่อย จึงเก็บไว้ที่ globalThis กันเปิด connection ซ้ำ
 // สร้าง Pool ยังไม่ต่อ DB จนกว่าจะ query ครั้งแรก next build จึงไม่ต้องมี DB
 // ITERRA_DEMO=1: โหมดนำเสนอ ใช้ PGlite ในหน่วยความจำแทน Postgres (ขึ้น Vercel ได้โดยไม่มี DB) ข้อมูลกลับเป็นค่าเริ่มต้นทุกครั้งที่ process เริ่มใหม่
-export const DEMO = process.env.ITERRA_DEMO === '1';
+// บน Vercel ที่ไม่ได้ตั้ง DATABASE_URL ก็เข้าโหมดนำเสนอเอง (ไม่ต้องตั้ง env) · เครื่องจริงที่ลืมตั้ง DATABASE_URL ยัง error ตามเดิม ไม่เปิดบัญชีเดโมเงียบ ๆ
+export const DEMO = process.env.ITERRA_DEMO === '1' || (process.env.VERCEL === '1' && !process.env.DATABASE_URL);
+// บัญชีหลังบ้านเดโมเมื่อไม่ได้ตั้ง DEMO_ADMIN_*: เก็บแค่ hash ของรหัสสุ่ม รหัสจริงอยู่นอก repo (.env.demo ของผู้ดูแล)
+const DEMO_EMAIL = 'demo@iterra.test';
+const DEMO_HASH = 'scrypt$1e1efd954fe76dff50cf43bb3b1a7e1d$6a02cf4b248793025282fa99797c4744cf4ef69a33dc4d502e6d30dfedbe0eb779da342cb35029c1b4a000ee8dbc231896964c1ee3d9b36e53959fa816d61745';
 
 type Result = { rows: any[]; rowCount: number | null };
 
@@ -25,7 +29,7 @@ function demoPool(): Pool {
       await seed(c);
       const { DEMO_ADMIN_EMAIL: email, DEMO_ADMIN_PASSWORD: pw } = process.env;
       if (email && pw) await upsertAdmin(c, email, 'ผู้ดูแลเดโม', pw);
-      else console.warn('ITERRA_DEMO: ไม่ได้ตั้ง DEMO_ADMIN_EMAIL และ DEMO_ADMIN_PASSWORD จึงเข้าหลังบ้านไม่ได้');
+      else await c.query('insert into admin_users (email, name, password_hash) values ($1, $2, $3)', [DEMO_EMAIL, 'ผู้ดูแลเดโม', DEMO_HASH]);
       return pg;
     })());
   // PGlite มี connection เดียว: transaction ต้องเข้าคิวทีละอัน
