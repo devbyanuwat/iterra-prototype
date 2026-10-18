@@ -1,0 +1,26 @@
+#!/bin/sh
+# Blocks commit messages that name an AI tool or say the work was generated.
+# Run it on any text file to check a pull request title and body the same way:
+#   sh .githooks/commit-msg <file>
+
+file=${1:?usage: commit-msg <message-file>}
+
+# Drop git's comment lines and everything below the scissors line of --verbose.
+text=$(sed -e '/^# -* >8 -*$/,$d' -e '/^#/d' "$file")
+
+robot=$(printf '\360\237\244\226')
+words='claude|anthropic|openai|chatgpt|gpt-?[0-9]|copilot|codex|gemini|(^|[^a-z])llms?([^a-z]|$)|generated (with|by)|ai-(generated|assisted)'
+
+hits=$(printf '%s\n' "$text" | grep -Ein "$words")
+hits="$hits
+$(printf '%s\n' "$text" | grep -En "(^|[^A-Za-z])AI([^A-Za-z]|$)")
+$(printf '%s\n' "$text" | LC_ALL=C grep -n "$robot")"
+hits=$(printf '%s\n' "$hits" | grep -v '^$' | sort -un)
+
+if [ -n "$hits" ]; then
+  printf 'commit-msg: the message names an AI tool or says it was generated. Reword these lines:\n%s\n' "$hits" >&2
+  printf 'No Co-Authored-By line for a tool, no "Generated with" line. See AGENTS.md.\n' >&2
+  exit 1
+fi
+
+exit 0
