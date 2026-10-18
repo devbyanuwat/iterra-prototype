@@ -56,6 +56,7 @@ through the lead.
 ## Done means
 
 - `npx tsc --noEmit` passes, ignoring `.next/types`.
+- `npm run check:text` passes. It scans every tracked source file for U+0E4E and the en dash.
 - The `check:*` scripts that apply to the change pass. `npm run check:overflow` needs the dev server on port 4100.
 - `npm run build` passes.
 - The report says what changed, what was verified and how, and what was not verified.
