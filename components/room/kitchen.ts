@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import type { Layout, Module, Run } from '@/lib/room';
+import { HALL, type Layout, type Module, type Run } from '@/lib/room';
 
 export type Mats = ReturnType<typeof makeMaterials>;
 
@@ -23,6 +23,7 @@ export function makeMaterials() {
     floor: standard('#b7a085', 0.62),
     faucet: standard('#f1f2f3', 0.08, 1),
     wall: standard('#dcd7cf', 0.95),
+    island: standard('#f4f2ee', 0.7), // island กล่องขาวเฉย ๆ ไม่เปลี่ยนตามวัสดุที่เลือก
     kick: standard('#2a2725', 0.8), // ขาตู้ และพื้นมืดหลังร่องหน้าบาน
     steel: standard('#c8cacc', 0.32, 1), // มือจับ ฮูด
     sink: standard('#c8cacc', 0.32, 1), // อ่างซิงก์
@@ -310,6 +311,15 @@ function buildRun(run: Run, m: Mats) {
 export function buildKitchen(layout: Layout, m: Mats) {
   const kitchen = new THREE.Group();
   layout.runs.forEach((run) => kitchen.add(buildRun(run, m)));
+  if (layout.sideWall) {
+    // แผ่นเดียวหันหน้าเข้าครัว (+x): กล้องหมุนไปหลังผนัง หน้าหลังถูก cull มองทะลุเห็นครัวได้
+    const { x, z0, z1 } = layout.sideWall;
+    mesh(kitchen, new THREE.PlaneGeometry(z1 - z0, HALL.height).rotateY(Math.PI / 2), m.wall, x, HALL.height / 2, (z0 + z1) / 2);
+  }
+  if (layout.island) {
+    const { x0, x1, z0, z1, h } = layout.island;
+    box(kitchen, m.island, x0, x1, 0, h, z0, z1);
+  }
   mergeStatic(kitchen);
   kitchen.position.x = layout.x;
   return kitchen;

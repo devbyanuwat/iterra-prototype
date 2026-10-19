@@ -245,6 +245,10 @@ export type Layout = {
   home: { azimuth: number; polar: number; distance: number; target: [number, number] };
   focus: Record<Part, Focus>;
   props: Prop[];
+  // ผนังข้างแนวแกน z ติดหลัง run ที่ไม่มีผนัง (x จากกลาง bay, z0 ถึง z1 จากผนังหลัง) · ปั้นเป็นแผ่นหันเข้าครัว กล้องหมุนไปหลังผนังยังมองทะลุเห็นครัว
+  sideWall?: { x: number; z0: number; z1: number };
+  // island: กล่องสีขาวเฉย ๆ ยังไม่มีบานตู้หรือท็อป (2026-10-19 lead ขอให้ลงรายละเอียดทีหลัง) · x, z จากกลาง bay และผนังหลัง
+  island?: { x0: number; x1: number; z0: number; z1: number; h: number };
 };
 // ของวางบนเคาน์เตอร์ (ของประกอบฉาก) · x, z = จุดกลางชิ้น นับจากกลาง bay · check:room ตรวจว่าอยู่บนท็อป ไม่ทับซิงก์หรือเตา
 export type Prop = { kind: 'board' | 'bowl' | 'vase' | 'books'; x: number; z: number };
@@ -321,6 +325,8 @@ export const LAYOUTS: Layout[] = [
       sink: { at: [-1.18, 0.9, 2], azimuth: 0.9, polar: 1.05, distance: 1.5 },
     },
     props: [{ kind: 'bowl', x: -1.2, z: 0.3 }, { kind: 'vase', x: 0.6, z: 0.15 }, { kind: 'board', x: -1.2, z: 2.7 }, { kind: 'books', x: -1.2, z: 0.9 }],
+    sideWall: { x: -1.5, z0: 0, z1: 3 },
+    island: { x0: 0, x1: 1.8, z0: 1.6, z1: 2.5, h: 0.9 },
   },
   {
     id: 'u',

@@ -167,4 +167,27 @@ for (const [name, z, d] of [['ม้านั่ง', bench.z, bench.d], ['ต�
 }
 assert.ok(windows.y0 > SHOWROOM.skirting && windows.y1 < SHOWROOM.rails.y && SHOWROOM.rails.y < HALL.height, 'หน้าต่างหรือรางไฟอยู่ผิดระดับ');
 
+// ── ผนังข้างและ island (มีเฉพาะครัวตัว L ตอนนี้) ──
+const COUNTER_DEPTH = 0.6; // ลึกท็อป ตรงกับ COUNTER ใน components/room/kitchen.ts
+const AISLE = 0.9; // ทางเดินรอบ island อย่างน้อย
+const bayInner = (2.0 - pilasters.w / 2); // เสาคั่นครัวอยู่ที่ ±2.0 จากกลาง bay
+for (const l of LAYOUTS) {
+  if (l.sideWall) {
+    const w = l.sideWall;
+    const leg = l.runs.find((r) => r.turn !== 0 && near(r.x, w.x));
+    assert.ok(leg && !leg.back, `ครัว ${l.id}: ผนังข้างต้องติดหลัง run ที่ไม่มีผนัง`);
+    assert.ok(w.z0 >= 0 && near(w.z1, leg.z) && Math.abs(w.x) < bayInner, `ครัว ${l.id}: ผนังข้างยาวไม่พอดีขาตู้ หรือเลยเสา`);
+  }
+  if (l.island) {
+    const { x0, x1, z0, z1, h } = l.island;
+    assert.ok(x0 < x1 && z0 < z1 && h > 0 && x0 >= -bayInner && x1 <= bayInner, `ครัว ${l.id}: island อยู่นอก bay`);
+    assert.ok(z0 - COUNTER_DEPTH >= AISLE - 1e-6, `ครัว ${l.id}: ทางเดินหน้าตู้ผนังหลังแคบกว่า ${AISLE} ม.`);
+    for (const r of l.runs.filter((r) => r.turn !== 0)) {
+      const front = r.turn === 1 ? r.x + COUNTER_DEPTH : r.x - COUNTER_DEPTH;
+      const gap = r.turn === 1 ? x0 - front : front - x1;
+      assert.ok(gap >= AISLE - 1e-6, `ครัว ${l.id}: ทางเดินระหว่าง island กับขาตู้แคบกว่า ${AISLE} ม.`);
+    }
+  }
+}
+
 console.log('ผ่าน: ข้อมูลห้องจำลอง');
