@@ -3,7 +3,8 @@
 import { adminAction, requireAdmin } from '@/lib/admin';
 import { db } from '@/lib/db';
 import { audit } from '@/lib/server/audit';
-import { deleteProduct, listRevisions, publishDraft, saveDraft, setPublished, type ProductDraft } from '@/lib/server/products';
+import { deleteProduct, listAdmin, listRevisions, publishDraft, saveDraft, setPublished, type ProductDraft } from '@/lib/server/products';
+import { listBrands, listCategories, listMaterials } from '@/lib/server/taxonomy';
 
 // ทุกตัวที่แก้ข้อมูลผ่าน adminAction: ตรวจ session แล้วรันการแก้กับ audit ใน transaction เดียว
 // บันทึกเป็นร่างเสมอ · publish = เผยแพร่ร่างนั้นต่อทันทีใน transaction เดียวกัน
@@ -20,6 +21,13 @@ export async function saveProductAction(id: number | null, input: ProductDraft, 
 export async function productHistoryAction(id: number) {
   await requireAdmin();
   return listRevisions(db, id);
+}
+// แผงแก้ไขบนหน้าเว็บ: ข้อมูลชุดเดียวกับหน้าสินค้าหลังบ้าน · slug เป็นของที่ขึ้นเว็บหรือในร่างก็ได้ (ตอนดูร่าง URL เป็น slug ในร่าง)
+export async function productEditAction(slug: string) {
+  await requireAdmin();
+  const [products, categories, brands, materials] = await Promise.all([listAdmin(db), listCategories(db), listBrands(db), listMaterials(db)]);
+  const product = products.find((p) => p.slug === slug || p.draft?.slug === slug) ?? null;
+  return { product, categories, brands, materials };
 }
 // แถบแอดมินบนหน้าเว็บ: เผยแพร่ร่างของสินค้าที่เปิดดูอยู่
 export async function publishProductAction(id: number) {
