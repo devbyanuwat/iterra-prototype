@@ -10,7 +10,10 @@ import CookieConsent from '@/components/CookieConsent';
 import JsonLd from '@/components/JsonLd';
 import { CatalogProvider } from '@/components/CatalogProvider';
 import { db } from '@/lib/db';
-import { listPublished } from '@/lib/server/products';
+import { draftMode } from 'next/headers';
+import AdminBar from '@/components/AdminBar';
+import { currentAdmin } from '@/lib/admin';
+import { listDrafts, listPreview, listPublished } from '@/lib/server/products';
 import { getAnnouncement } from '@/lib/server/announcement';
 import { listCategories, listMaterials } from '@/lib/server/taxonomy';
 import { listPublishedPosts } from '@/lib/server/posts';
@@ -57,13 +60,17 @@ const organizationJsonLd = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [products, categories, materials, announcement, posts, projects] = await Promise.all([
-    listPublished(db),
+  // ร่างแสดงเฉพาะแอดมินที่ session ยังใช้ได้และเปิดโหมดดูร่าง · ไม่มี cookie session ไม่ query เพิ่ม
+  const admin = await currentAdmin();
+  const preview = !!admin && (await draftMode()).isEnabled;
+  const [products, categories, materials, announcement, posts, projects, drafts] = await Promise.all([
+    preview ? listPreview(db) : listPublished(db),
     listCategories(db),
     listMaterials(db),
     getAnnouncement(db),
     listPublishedPosts(db),
     listPublishedProjects(db),
+    admin ? listDrafts(db) : [],
   ]);
   return (
     <html lang="th">
@@ -85,6 +92,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <FloatingActions />
           <Announcement data={announcement} />
           <CookieConsent />
+          {admin && <AdminBar preview={preview} drafts={drafts} />}
         </CatalogProvider>
         </LangProvider>
         <JsonLd data={organizationJsonLd} />

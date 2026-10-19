@@ -4,13 +4,17 @@ import JsonLd from '@/components/JsonLd';
 import ProductDetail from '@/components/ProductDetail';
 import { cache } from 'react';
 import { db } from '@/lib/db';
-import { getPublished } from '@/lib/server/products';
+import { draftMode } from 'next/headers';
+import { currentAdmin } from '@/lib/admin';
+import { getPreview, getPublished } from '@/lib/server/products';
 import { SITE_URL } from '@/lib/site';
 
 type Props = { params: Promise<{ slug: string }> };
 
-// metadata กับหน้าใช้ query เดียวกันใน request เดียว
-const getProduct = cache((slug: string) => getPublished(db, slug));
+// metadata กับหน้าใช้ query เดียวกันใน request เดียว · โหมดดูร่างของแอดมินเปิดสินค้าที่มีแต่ร่างได้ (ตรงกับ root layout)
+const getProduct = cache(async (slug: string) =>
+  (await currentAdmin()) && (await draftMode()).isEnabled ? getPreview(db, slug) : getPublished(db, slug),
+);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

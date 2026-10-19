@@ -2,6 +2,7 @@
 // import แค่ type เพื่อให้ scripts/check-db.mjs รันไฟล์นี้ด้วย Node ได้ตรง ๆ
 
 import type { Product } from '../products';
+import { applyDraft } from '../product-draft.mjs';
 
 type Db = { query(text: string, values?: unknown[]): Promise<{ rows: any[]; rowCount: number | null }> };
 
@@ -87,14 +88,13 @@ function toAdmin(x: any): AdminProduct {
 }
 const draftOf = ({ id: _i, brand: _b, updated: _u, published: _p, draft: _d, ...rest }: AdminProduct): ProductDraft => rest;
 
+// ร่าง = revision ล่าสุดที่ยังไม่เผยแพร่ · revision ล่าสุดเผยแพร่แล้วได้ draft เป็น null
+const WITH_DRAFT = `select x.*, d.draft from (${SELECT}) x
+  left join lateral (select data as draft, published_at from revisions
+                      where entity = 'product' and entity_id = x.pid order by id desc limit 1) d on d.published_at is null`;
+
 export async function listAdmin(db: Db): Promise<AdminProduct[]> {
-  // ร่าง = revision ล่าสุดที่ยังไม่เผยแพร่ · revision ล่าสุดเผยแพร่แล้วได้ draft เป็น null
-  const r = await db.query(
-    `select x.*, d.draft from (${SELECT}) x
-       left join lateral (select data as draft, published_at from revisions
-                           where entity = 'product' and entity_id = x.pid order by id desc limit 1) d on d.published_at is null
-      order by x.updated_at desc, x.id desc`,
-  );
+  const r = await db.query(`${WITH_DRAFT} order by x.updated_at desc, x.id desc`);
   return r.rows.map(toAdmin);
 }
 
@@ -251,4 +251,26 @@ export async function listPublished(db: Db): Promise<Product[]> {
 export async function getPublished(db: Db, slug: string): Promise<Product | null> {
   const r = await db.query(`${SELECT} where p.published and p.slug = $1`, [slug]);
   return r.rows[0] ? toProduct(r.rows[0]) : null;
+}
+
+// ── โหมดดูร่างของแอดมิน (spec 2026-10-19 ข้อ 3) ──
+// เหมือน listPublished แต่ใช้เนื้อหาร่างแทน และรวมสินค้าที่ยังซ่อนแต่มีร่าง (สินค้าใหม่ที่ยังไม่เคยเผยแพร่)
+export async function listPreview(db: Db): Promise<Product[]> {
+  const r = await db.query(
+    `select y.*, b2.name as draft_brand from (${WITH_DRAFT}) y
+       left join brands b2 on b2.id = (y.draft->>'brandId')::bigint
+      where y.published or y.draft is not null order by y.sort, y.id`,
+  );
+  return r.rows.map((x) => (x.draft ? applyDraft(toProduct(x), x.draft, x.draft_brand ?? x.brand_name) : toProduct(x)));
+}
+
+// ponytail: กรองจากทั้งรายการ สินค้าหลักร้อยพอ
+export async function getPreview(db: Db, slug: string): Promise<Product | null> {
+  return (await listPreview(db)).find((p) => p.slug === slug) ?? null;
+}
+
+// สินค้าที่มีร่างรอเผยแพร่ ให้แถบแอดมินรู้ว่าหน้าไหนกดเผยแพร่ได้ · slug = ที่ขึ้นเว็บอยู่, draftSlug = ในร่าง
+export async function listDrafts(db: Db): Promise<{ id: number; slug: string; draftSlug: string }[]> {
+  const r = await db.query(`select x.pid as id, x.slug, x.draft->>'slug' as "draftSlug" from (${WITH_DRAFT}) x where x.draft is not null`);
+  return r.rows;
 }

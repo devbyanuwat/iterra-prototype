@@ -21,6 +21,13 @@ export async function productHistoryAction(id: number) {
   await requireAdmin();
   return listRevisions(db, id);
 }
+// แถบแอดมินบนหน้าเว็บ: เผยแพร่ร่างของสินค้าที่เปิดดูอยู่
+export async function publishProductAction(id: number) {
+  return adminAction(async (tx, a) => {
+    const rev = await publishDraft(tx, id);
+    await audit(tx, a.id, 'publish', 'product', id, { revision: rev });
+  });
+}
 export async function deleteProductAction(id: number) {
   return adminAction(async (tx, a) => {
     const slug = await deleteProduct(tx, id);

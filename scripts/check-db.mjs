@@ -821,8 +821,28 @@ try {
     await prod.saveDraft(c, oid, h[1].data, uid);
     await prod.publishDraft(c, oid);
     assert.equal((await prod.getPublished(c, 'elate-13963t-c4')).name.th, old.th);
+    // โหมดดูร่าง: หน้าเว็บปกติยังได้ของจริง ดูร่างได้เนื้อหาร่าง (เปลี่ยน slug และแบรนด์ได้) และสินค้าที่ซ่อนแต่มีร่าง
+    const other = (await c.query("insert into brands (name) values ('Preview Brand') returning id::int as id, name")).rows[0];
+    await prod.saveDraft(c, id, { ...base, slug: 'draft-sink-2', brandId: other.id, th: 'ซิงก์พรีวิว', specs: 'วัสดุ: เหล็กหล่อ' }, uid);
+    assert.equal((await prod.getPublished(c, 'draft-sink')).name.th, 'ซิงก์ร่าง');
+    assert.equal(await prod.getPreview(c, 'draft-sink'), null);
+    const pv = await prod.getPreview(c, 'draft-sink-2');
+    assert.deepEqual(
+      [pv.name, pv.brand, pv.specs, pv.price],
+      [{ th: 'ซิงก์พรีวิว', en: 'Draft Sink' }, other.name, [{ label: 'วัสดุ', value: 'เหล็กหล่อ' }], { th: 'สอบถามราคา', en: 'Price on request' }],
+    );
+    const { id: hid } = await prod.saveDraft(c, null, { ...base, slug: 'hidden-new', th: 'ใหม่ยังซ่อน' }, uid);
+    assert.ok(!(await prod.listPublished(c)).some((p) => p.slug === 'hidden-new'));
+    assert.ok((await prod.listPreview(c)).some((p) => p.slug === 'hidden-new'));
+    assert.equal((await prod.listPreview(c)).length, (await prod.listPublished(c)).length + 1, 'ดูร่างเพิ่มแค่สินค้าที่ซ่อนแต่มีร่าง');
+    assert.deepEqual((await prod.listDrafts(c)).sort((a, b) => a.id - b.id), [
+      { id, slug: 'draft-sink', draftSlug: 'draft-sink-2' },
+      { id: hid, slug: 'hidden-new', draftSlug: 'hidden-new' },
+    ]);
+    await prod.deleteProduct(c, hid);
     // ลบสินค้าแล้วประวัติหายด้วย
     await prod.deleteProduct(c, id);
+    await c.query('delete from brands where id = $1', [other.id]);
     assert.equal(await count(`revisions where entity = 'product' and entity_id = ${id}`), 0);
   }
   console.log('ผ่าน: ฐานข้อมูล');
