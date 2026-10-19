@@ -83,7 +83,7 @@ function FeaturedProducts() {
           {rest.map((p, i) => (
             <li key={p.slug}>
               <Reveal delay={i * 0.1} y={20}>
-                <Link href={`/products/${p.slug}/`} className="group flex items-center gap-5 py-6">
+                <Link href={`/products/${p.slug}/`} data-edit={`product:${p.slug}`} data-edit-label="แก้สินค้า" className="group flex items-center gap-5 py-6">
                   <div className="w-24 shrink-0 overflow-hidden md:w-28">
                     <div className="transition-transform duration-700 ease-out group-hover:scale-105">
                       <Placeholder src={p.images[0]} fit="contain" ratio="1/1" />

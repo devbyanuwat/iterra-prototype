@@ -23,7 +23,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const href = `/products/${product.slug}/`;
   return (
     <TiltCard>
-      <div className="group bg-paper">
+      <div className="group bg-paper" data-edit={`product:${product.slug}`} data-edit-label="แก้สินค้า">
         {/* ลิงก์ภาพซ้ำกับลิงก์ชื่อสินค้า → ซ่อนจาก tab/screen reader */}
         <Link
           href={href}

@@ -26,7 +26,7 @@ export default function ProductDetail({ slug }: { slug: string }) {
 
   return (
     <>
-      <section className="px-6 pb-24 pt-32 md:px-[6vw] md:pt-40">
+      <section data-edit={`product:${slug}`} data-edit-label="แก้สินค้า" className="px-6 pb-24 pt-32 md:px-[6vw] md:pt-40">
         {/* breadcrumb */}
         <nav aria-label="breadcrumb" className="mb-10 text-[11px] uppercase tracking-widest2 text-warm-500">
           <Link href="/products/" className="hover:text-ink">

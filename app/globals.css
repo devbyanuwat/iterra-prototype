@@ -105,3 +105,27 @@ html:has(dialog[open]) {
     inset 0 -1px 0 rgb(255 255 255 / 0.3),
     0 12px 40px rgb(28 25 23 / 0.12);
 }
+
+/* โหมดแก้ไขของแอดมินบนหน้าเว็บ (AdminBar ใส่ data-editing ที่ <html>): ส่วนที่แก้ได้มีกรอบเส้นประ ชี้แล้วขึ้นป้ายกลางกรอบ
+   กรอบใช้สีตัวอักษรของส่วนนั้น เห็นได้ทั้งบนวิดีโอมืดและพื้นกระดาษ */
+[data-editing] [data-edit] {
+  position: relative;
+  cursor: pointer;
+  outline: 2px dashed currentColor;
+  outline-offset: -6px;
+}
+[data-editing] [data-edit]::after {
+  content: attr(data-edit-label);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 30;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  @apply rounded-full bg-ink px-4 py-1.5 text-sm font-normal text-paper;
+}
+[data-editing] [data-edit]:hover::after {
+  opacity: 1;
+}

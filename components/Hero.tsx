@@ -60,7 +60,7 @@ export default function Hero({ media }: { media: HeroMedia }) {
   }, []);
 
   return (
-    <section ref={root} className="relative h-[100svh] min-h-[560px] overflow-hidden bg-ink">
+    <section ref={root} data-edit="hero-video" data-edit-label="แก้วิดีโอ" className="relative h-[100svh] min-h-[560px] overflow-hidden bg-ink">
       {/* ชั้น 1: วิดีโอพื้นหลังเต็มจอ */}
       <div data-depth="0.15" className="absolute inset-0 will-change-transform">
         <div data-hero-scale className="absolute inset-0 origin-center will-change-transform">
