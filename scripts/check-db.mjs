@@ -38,14 +38,14 @@ try {
   await c.query('drop schema public cascade; create schema public');
 
   // ── migrate (Task 1) ──
-  assert.deepEqual(await migrate(c), ['001_init.sql', '002_audit_session_idle.sql', '003_search_queries.sql', '004_hero_video.sql']);
+  assert.deepEqual(await migrate(c), ['001_init.sql', '002_audit_session_idle.sql', '003_search_queries.sql', '004_hero_video.sql', '005_revisions.sql']);
   assert.deepEqual(await migrate(c), [], 'รันซ้ำต้องไม่รันไฟล์เดิม');
   const tables = (await c.query("select table_name from information_schema.tables where table_schema = 'public'")).rows
     .map((r) => r.table_name)
     .sort();
   assert.deepEqual(tables, [
     'admin_users', 'announcement', 'audit_log', 'brands', 'catalog', 'categories', 'hero_video', 'inquiries', 'login_attempts',
-    'materials', 'posts', 'products', 'project_products', 'projects', 'schema_migrations', 'search_queries', 'sessions',
+    'materials', 'posts', 'products', 'project_products', 'projects', 'revisions', 'schema_migrations', 'search_queries', 'sessions',
   ]);
   // ตารางค่าชุดเดียวมีได้แถวเดียว
   await assert.rejects(
@@ -765,6 +765,65 @@ try {
     assert.equal(await count("inquiries where ip_hash = 'prune'"), 1, 'ข้อความติดต่อไม่ลบ รอฝ่ายกฎหมาย');
     // รันซ้ำทันที ไม่มีอะไรให้ลบ
     assert.deepEqual(await prune(c, 120), { loginAttempts: 0, sessions: 0, audit: 0, searches: 0 });
+  }
+  // ── ร่าง เผยแพร่ ประวัติ ของสินค้า (spec 2026-10-19) ──
+  {
+    const uid = (await c.query("select id::int as id from admin_users where email = 'admin@example.test'")).rows[0].id;
+    const brandId = (await tax.listBrands(c))[0].id;
+    const base = {
+      slug: '', category: 'sink', brandId, material: '', series: '', th: 'ซิงก์ร่าง', en: 'Draft Sink', descTh: '', descEn: '',
+      specs: '', images: [], featured: false,
+    };
+    const find = async (id) => (await prod.listAdmin(c)).find((p) => p.id === id);
+    // สินค้าใหม่: บันทึกร่างได้แถวที่ซ่อนไว้ หน้าเว็บยังไม่เห็น
+    const { id, rev } = await prod.saveDraft(c, null, base, uid);
+    assert.equal(await prod.getPublished(c, 'draft-sink'), null);
+    let row = await find(id);
+    assert.equal(row.published, false);
+    assert.deepEqual([row.draft.th, row.draft.slug], ['ซิงก์ร่าง', 'draft-sink']);
+    // เผยแพร่: ขึ้นเว็บ ร่างหมด กดซ้ำได้ข้อความผิด
+    assert.equal(await prod.publishDraft(c, id), rev);
+    assert.equal((await prod.getPublished(c, 'draft-sink')).name.th, 'ซิงก์ร่าง');
+    row = await find(id);
+    assert.deepEqual([row.draft, row.published], [null, true]);
+    await assert.rejects(prod.publishDraft(c, id), /ไม่มีฉบับร่าง/);
+    // แก้เป็นร่าง: หน้าเว็บยังเป็นฉบับเดิมจนกว่าจะเผยแพร่
+    await prod.saveDraft(c, id, { ...base, slug: 'draft-sink', th: 'ซิงก์ร่าง 2' }, uid);
+    assert.equal((await prod.getPublished(c, 'draft-sink')).name.th, 'ซิงก์ร่าง');
+    assert.equal((await find(id)).draft.th, 'ซิงก์ร่าง 2');
+    // ซ่อนยังมีผลทันทีและไม่ทำให้ร่างหาย · เผยแพร่แล้วกลับมาแสดง
+    await prod.setPublished(c, id, false);
+    assert.equal((await find(id)).draft.th, 'ซิงก์ร่าง 2');
+    await prod.publishDraft(c, id);
+    assert.equal((await prod.getPublished(c, 'draft-sink')).name.th, 'ซิงก์ร่าง 2');
+    // ประวัติ: ใหม่สุดก่อน มีวันเวลา ผู้แก้ สถานะ
+    let h = await prod.listRevisions(c, id);
+    assert.deepEqual(h.map((r) => [r.data.th, r.published, r.user]), [['ซิงก์ร่าง 2', true, 'ผู้ทดสอบ'], ['ซิงก์ร่าง', true, 'ผู้ทดสอบ']]);
+    assert.match(h[0].at, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
+    // ย้อนกลับ: เอา data ฉบับเก่ามาบันทึกร่างแล้วเผยแพร่ ประวัติเดิมยังอยู่ครบ
+    await prod.saveDraft(c, id, h[1].data, uid);
+    await prod.publishDraft(c, id);
+    assert.equal((await prod.getPublished(c, 'draft-sink')).name.th, 'ซิงก์ร่าง');
+    assert.equal((await prod.listRevisions(c, id)).length, 3);
+    // ร่างที่ผิดไม่ถูกเก็บ
+    await assert.rejects(prod.saveDraft(c, id, { ...base, slug: 'elate-13963t-c4' }, uid), /slug นี้/);
+    await assert.rejects(prod.saveDraft(c, id, { ...base, th: ' ' }, uid), { name: 'InputError' });
+    await assert.rejects(prod.saveDraft(c, id, { ...base, th: 'A<b>' }, uid), /< หรือ >/);
+    await assert.rejects(prod.saveDraft(c, 999999, base, uid), /ไม่พบสินค้านี้/);
+    assert.equal((await prod.listRevisions(c, id)).length, 3);
+    // สินค้าเดิมที่ยังไม่มีประวัติ: ร่างแรกเก็บฉบับที่ขึ้นเว็บอยู่เป็นฉบับตั้งต้น (ไม่มีผู้แก้)
+    const old = (await prod.listAdmin(c)).find((p) => p.slug === 'elate-13963t-c4');
+    const { id: oid, brand: _b, updated: _u, published: _p, draft: _d, ...oldInput } = old;
+    await prod.saveDraft(c, oid, { ...oldInput, th: 'แก้ชื่อ' }, uid);
+    h = await prod.listRevisions(c, oid);
+    assert.deepEqual(h.map((r) => [r.data.th, r.published, r.user]), [['แก้ชื่อ', false, 'ผู้ทดสอบ'], [old.th, true, null]]);
+    assert.deepEqual(h[1].data, oldInput, 'ฉบับตั้งต้นต้องตรงกับที่ขึ้นเว็บ');
+    await prod.saveDraft(c, oid, h[1].data, uid);
+    await prod.publishDraft(c, oid);
+    assert.equal((await prod.getPublished(c, 'elate-13963t-c4')).name.th, old.th);
+    // ลบสินค้าแล้วประวัติหายด้วย
+    await prod.deleteProduct(c, id);
+    assert.equal(await count(`revisions where entity = 'product' and entity_id = ${id}`), 0);
   }
   console.log('ผ่าน: ฐานข้อมูล');
 } finally {

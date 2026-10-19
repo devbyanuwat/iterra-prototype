@@ -5,20 +5,25 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Result } from '@/lib/admin';
-import type { AdminProduct, ProductInput } from '@/lib/server/products';
+import type { AdminProduct, ProductDraft, ProductRevision } from '@/lib/server/products';
 import type { BrandRow, CategoryRow, MaterialRow } from '@/lib/server/taxonomy';
-import { deleteProductAction, saveProductAction, setPublishedAction } from '@/app/admin/(panel)/products/actions';
+import { deleteProductAction, productHistoryAction, saveProductAction, setPublishedAction } from '@/app/admin/(panel)/products/actions';
 import ImageField from './ImageField';
 import { danger, dangerBorder, dangerSolid, ghost, input, label, pill, solid } from './ui';
 
-type Draft = Omit<ProductInput, 'brandId'> & { id: number | null; brandId: string };
+// hasDraft = เปิดฟอร์มจากร่างที่ยังไม่เผยแพร่ ไม่ส่งไป server
+type Draft = Omit<ProductDraft, 'brandId'> & { id: number | null; brandId: string; hasDraft?: boolean };
 type Props = { products: AdminProduct[]; categories: CategoryRow[]; brands: BrandRow[]; materials: MaterialRow[] };
 
 const blank = (category: string): Draft => ({
   id: null, slug: '', category, brandId: '', material: '', series: '', th: '', en: '', descTh: '', descEn: '',
-  specs: '', images: [], published: true, featured: false,
+  specs: '', images: [], featured: false,
 });
-const toDraft = ({ brand: _b, updated: _u, ...p }: AdminProduct): Draft => ({ ...p, brandId: String(p.brandId) });
+// มีร่างเปิดร่าง ไม่มีเปิดฉบับที่ขึ้นเว็บ
+const toDraft = ({ id, brand: _b, updated: _u, published: _p, draft, ...live }: AdminProduct): Draft => {
+  const d = draft ?? live;
+  return { ...d, id, brandId: String(d.brandId), hasDraft: !!draft };
+};
 
 export default function ProductsAdmin({ products, categories, brands, materials }: Props) {
   const router = useRouter();
@@ -31,6 +36,8 @@ export default function ProductsAdmin({ products, categories, brands, materials 
   const [del, setDel] = useState<AdminProduct | null>(null);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const [hist, setHist] = useState<ProductRevision[] | null>(null);
+  const [histNote, setHistNote] = useState('');
   const formRef = useRef<HTMLDialogElement>(null);
   const delRef = useRef<HTMLDialogElement>(null);
 
@@ -58,8 +65,17 @@ export default function ProductsAdmin({ products, categories, brands, materials 
   const open = (d: Draft) => {
     setErrors({});
     setFormError('');
+    setHist(null);
+    setHistNote('');
     setForm(d);
   };
+  async function loadHistory(id: number) {
+    try {
+      setHist(await productHistoryAction(id));
+    } catch {
+      setHistNote('โหลดประวัติไม่สำเร็จ ลองใหม่อีกครั้ง');
+    }
+  }
 
   // คืนข้อความผิด หรือ null ถ้าสำเร็จ
   async function run(fn: () => Promise<Result>, done: string): Promise<string | null> {
@@ -78,8 +94,9 @@ export default function ProductsAdmin({ products, categories, brands, materials 
     return null;
   }
 
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
+  // Enter ในฟอร์ม = บันทึกและเผยแพร่ · ปุ่มบันทึกร่างเรียกเองด้วย publish = false
+  async function save(e: React.FormEvent | null, publish = true) {
+    e?.preventDefault();
     if (!form) return;
     const err: Record<string, string> = {};
     // เรียงตามลำดับช่องในฟอร์ม focus จะได้ไปช่องแรกที่ผิด
@@ -90,8 +107,11 @@ export default function ProductsAdmin({ products, categories, brands, materials 
       formRef.current?.querySelector<HTMLElement>(`[name="${Object.keys(err)[0]}"]`)?.focus();
       return;
     }
-    const { id, ...rest } = form;
-    const error = await run(() => saveProductAction(id, { ...rest, brandId: Number(rest.brandId) }), `บันทึก ${form.th} แล้ว`);
+    const { id, hasDraft: _h, ...rest } = form;
+    const error = await run(
+      () => saveProductAction(id, { ...rest, brandId: Number(rest.brandId) }, publish),
+      publish ? `เผยแพร่ ${form.th} แล้ว` : `บันทึกร่าง ${form.th} แล้ว ยังไม่ขึ้นหน้าเว็บ`,
+    );
     if (error) setFormError(error);
     else setForm(null);
   }
@@ -130,9 +150,12 @@ export default function ProductsAdmin({ products, categories, brands, materials 
     </span>
   );
   const status = (p: AdminProduct, size: string) => (
-    <span className={`shrink-0 rounded-full text-xs ${size} ${p.published ? 'bg-ink text-paper' : 'border border-ink text-ink'}`}>
-      {p.published ? 'เผยแพร่' : 'ซ่อน'}
-    </span>
+    <>
+      <span className={`shrink-0 rounded-full text-xs ${size} ${p.published ? 'bg-ink text-paper' : 'border border-ink text-ink'}`}>
+        {p.published ? 'เผยแพร่' : 'ซ่อน'}
+      </span>
+      {p.draft && <span className={`shrink-0 rounded-full border border-dashed border-ink text-xs ${size}`}>มีร่าง</span>}
+    </>
   );
   const actions = (p: AdminProduct, extra: string) => (
     <>
@@ -261,6 +284,7 @@ export default function ProductsAdmin({ products, categories, brands, materials 
               </h2>
             </div>
             <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-4 md:px-6">
+            {form.hasDraft && <p className="rounded-2xl bg-white/60 px-4 py-3 text-sm">กำลังแก้ฉบับร่าง ยังไม่ขึ้นหน้าเว็บ</p>}
             <div className="grid gap-4 md:grid-cols-2">
               <label className={label}>
                 หมวด (จำเป็น)
@@ -353,14 +377,46 @@ export default function ProductsAdmin({ products, categories, brands, materials 
             </div>
             <div className="flex flex-wrap gap-6">
               <label className="flex min-h-11 items-center gap-3 text-sm">
-                <input type="checkbox" checked={form.published} onChange={(e) => set({ published: e.target.checked })} className="h-4 w-4 accent-ink" />
-                แสดงบนหน้าเว็บ
-              </label>
-              <label className="flex min-h-11 items-center gap-3 text-sm">
                 <input type="checkbox" checked={form.featured} onChange={(e) => set({ featured: e.target.checked })} className="h-4 w-4 accent-ink" />
                 สินค้าเด่นหน้าแรก
               </label>
             </div>
+            {form.id !== null && (
+              <details onToggle={(e) => e.currentTarget.open && !hist && loadHistory(form.id!)}>
+                <summary className={`${label} cursor-pointer`}>ประวัติการแก้ไข</summary>
+                <p role="status" className="min-h-5 text-sm">
+                  {histNote}
+                </p>
+                {hist === null ? (
+                  !histNote && <p className="text-sm text-stone-600">กำลังโหลด</p>
+                ) : hist.length === 0 ? (
+                  <p className="text-sm text-stone-600">ยังไม่มีประวัติ เริ่มเก็บเมื่อบันทึกครั้งถัดไป</p>
+                ) : (
+                  <ul className="divide-y divide-white/70">
+                    {hist.map((r) => (
+                      <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-sm">
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate">{r.data.th}</span>
+                          <span className="block text-xs text-stone-600">
+                            {r.at} · {r.user ?? 'ฉบับตั้งต้น'} · {r.published ? 'เผยแพร่แล้ว' : 'ร่าง'}
+                          </span>
+                        </span>
+                        <button
+                          type="button"
+                          className={`${ghost} text-xs`}
+                          onClick={() => {
+                            setForm({ ...r.data, id: form.id, brandId: String(r.data.brandId), hasDraft: form.hasDraft });
+                            setHistNote(`โหลดฉบับ ${r.at} เข้าฟอร์มแล้ว กดบันทึกร่างหรือเผยแพร่เพื่อใช้ฉบับนี้`);
+                          }}
+                        >
+                          ใช้ฉบับนี้
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </details>
+            )}
             </div>
             <div className="space-y-2 border-t border-white/70 px-5 pt-3 md:border-0 md:px-6 md:pb-6" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
               <p role="alert" className={`min-h-5 text-sm ${danger}`}>
@@ -370,8 +426,11 @@ export default function ProductsAdmin({ products, categories, brands, materials 
                 <button type="button" className={`${ghost} hidden md:inline-flex`} onClick={() => setForm(null)}>
                   ยกเลิก
                 </button>
+                <button type="button" className={`${ghost} w-full justify-center bg-white/60 md:w-auto md:bg-transparent`} disabled={busy} onClick={() => save(null, false)}>
+                  บันทึกร่าง
+                </button>
                 <button type="submit" className={`${solid} w-full justify-center md:w-auto`} disabled={busy}>
-                  {busy ? 'กำลังบันทึก' : 'บันทึก'}
+                  {busy ? 'กำลังบันทึก' : 'บันทึกและเผยแพร่'}
                 </button>
               </div>
             </div>
@@ -391,7 +450,7 @@ export default function ProductsAdmin({ products, categories, brands, materials 
             <h2 id="del-title" className="text-lg font-light">
               ลบ {del.th}
             </h2>
-            <p className="mt-3 text-sm text-stone-600">สินค้านี้จะหายจากหน้าเว็บ และกู้คืนไม่ได้ ถ้าแค่ไม่อยากให้เห็น ใช้ปุ่มซ่อนแทน</p>
+            <p className="mt-3 text-sm text-stone-600">สินค้านี้และประวัติการแก้ไขจะหายไป กู้คืนไม่ได้ ถ้าแค่ไม่อยากให้เห็น ใช้ปุ่มซ่อนแทน</p>
             <div className="mt-6 grid grid-cols-2 gap-2 md:flex md:justify-end">
               <button type="button" autoFocus className={`${ghost} justify-center bg-white/60 md:bg-transparent`} onClick={() => setDel(null)}>
                 ยกเลิก

@@ -26,8 +26,12 @@ export type AdminProduct = {
   published: boolean;
   featured: boolean;
   updated: string; // YYYY-MM-DD
+  draft: ProductDraft | null; // ร่างที่ยังไม่เผยแพร่ · null = ไม่มี
 };
-export type ProductInput = Omit<AdminProduct, 'id' | 'brand' | 'updated'>;
+export type ProductInput = Omit<AdminProduct, 'id' | 'brand' | 'updated' | 'draft'>;
+// เนื้อหาที่เก็บใน revisions · การแสดงหรือซ่อนไม่อยู่ในนี้ เพราะเป็นสวิตช์ที่มีผลทันที
+export type ProductDraft = Omit<ProductInput, 'published'>;
+export type ProductRevision = { id: number; at: string; user: string | null; published: boolean; data: ProductDraft };
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 // รูปต้องเป็นไฟล์ในเว็บเอง: ของเดิมใน public/media หรือที่อัปโหลดใน /uploads
@@ -58,9 +62,10 @@ export function slugFrom(en: string): string {
   return en.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80).replace(/^-+|-+$/g, '');
 }
 
-export async function listAdmin(db: Db): Promise<AdminProduct[]> {
-  const r = await db.query(`${SELECT} order by p.updated_at desc, p.id desc`);
-  return r.rows.map((x) => ({
+const notFound = () => new InputError('ไม่พบสินค้านี้ อาจถูกลบไปแล้ว');
+
+function toAdmin(x: any): AdminProduct {
+  return {
     id: x.pid,
     slug: x.slug,
     category: x.category_key,
@@ -77,12 +82,24 @@ export async function listAdmin(db: Db): Promise<AdminProduct[]> {
     published: x.published,
     featured: x.featured,
     updated: x.updated_day, // วันตามเวลาไทย ไม่ขึ้นกับ timezone ของ Node
-  }));
+    draft: x.draft ?? null,
+  };
+}
+const draftOf = ({ id: _i, brand: _b, updated: _u, published: _p, draft: _d, ...rest }: AdminProduct): ProductDraft => rest;
+
+export async function listAdmin(db: Db): Promise<AdminProduct[]> {
+  // ร่าง = revision ล่าสุดที่ยังไม่เผยแพร่ · revision ล่าสุดเผยแพร่แล้วได้ draft เป็น null
+  const r = await db.query(
+    `select x.*, d.draft from (${SELECT}) x
+       left join lateral (select data as draft, published_at from revisions
+                           where entity = 'product' and entity_id = x.pid order by id desc limit 1) d on d.published_at is null
+      order by x.updated_at desc, x.id desc`,
+  );
+  return r.rows.map(toAdmin);
 }
 
-// คืน id · ไม่แตะราคาและภาพบรรยากาศ (scenes) เพราะยังไม่มีช่องในฟอร์ม
-export async function saveProduct(db: Db, id: number | null, input: ProductInput): Promise<number> {
-  if (id !== null && !Number.isInteger(id)) throw new InputError('ไม่พบสินค้านี้ อาจถูกลบไปแล้ว');
+// ตรวจและจัดข้อมูลให้เรียบร้อย ใช้ทั้งตอนบันทึกลงคอลัมน์และตอนเก็บร่าง
+async function clean(db: Db, input: ProductDraft): Promise<ProductDraft> {
   const th = str(input.th);
   if (!th) throw new InputError('กรุณากรอกชื่อสินค้าภาษาไทย');
   const en = str(input.en);
@@ -91,7 +108,7 @@ export async function saveProduct(db: Db, id: number | null, input: ProductInput
   if (!Number.isInteger(input.brandId)) throw new InputError('กรุณาเลือกแบรนด์');
   const images = Array.isArray(input.images) ? input.images : [];
   if (!images.every(okImage)) throw new InputError('ที่อยู่รูปไม่ถูกต้อง');
-  const specs = parseSpecs(str(input.specs));
+  parseSpecs(str(input.specs));
   const material = str(input.material) || null;
   const ref = await db.query(
     `select exists(select 1 from categories where key = $1) as c,
@@ -102,9 +119,19 @@ export async function saveProduct(db: Db, id: number | null, input: ProductInput
   if (!ref.rows[0].c) throw new InputError('ไม่พบหมวดนี้');
   if (!ref.rows[0].b) throw new InputError('ไม่พบแบรนด์นี้');
   if (!ref.rows[0].m) throw new InputError('ไม่พบวัสดุนี้');
+  return {
+    slug, category: str(input.category), brandId: input.brandId, material: material ?? '', series: str(input.series), th, en,
+    descTh: str(input.descTh), descEn: str(input.descEn), specs: str(input.specs), images, featured: input.featured === true,
+  };
+}
+
+// คืน id · ไม่แตะราคาและภาพบรรยากาศ (scenes) เพราะยังไม่มีช่องในฟอร์ม
+export async function saveProduct(db: Db, id: number | null, input: ProductInput): Promise<number> {
+  if (id !== null && !Number.isInteger(id)) throw notFound();
+  const d = await clean(db, input);
   const v = [
-    slug, str(input.category), input.brandId, material, str(input.series), th, en || th,
-    str(input.descTh), str(input.descEn), JSON.stringify(specs), images, input.featured === true, input.published === true,
+    d.slug, d.category, d.brandId, d.material || null, d.series, d.th, d.en || d.th,
+    d.descTh, d.descEn, JSON.stringify(parseSpecs(d.specs)), d.images, d.featured, input.published === true,
   ];
   if (id === null) {
     const r = await db.query(
@@ -123,13 +150,69 @@ export async function saveProduct(db: Db, id: number | null, input: ProductInput
      where id = $14`,
     [...v, id],
   );
-  if (r.rowCount === 0) throw new InputError('ไม่พบสินค้านี้ อาจถูกลบไปแล้ว');
+  if (r.rowCount === 0) throw notFound();
   return id;
+}
+
+// ── ร่าง เผยแพร่ ประวัติ (spec 2026-10-19) ──
+
+// เก็บร่าง หน้าเว็บยังไม่เปลี่ยน · สินค้าใหม่ได้แถวที่ซ่อนไว้ก่อนเพราะต้องมี id
+export async function saveDraft(db: Db, id: number | null, input: ProductDraft, userId: number): Promise<{ id: number; rev: number }> {
+  if (id !== null && !Number.isInteger(id)) throw notFound();
+  const live = id === null ? null : (await db.query(`${SELECT} where p.id = $1`, [id])).rows[0];
+  if (id !== null && !live) throw notFound();
+  const data = await clean(db, input);
+  // ร่างยังไม่ลงคอลัมน์ unique ของ slug จึงต้องเช็กเอง ไม่งั้นไปเจอตอนกดเผยแพร่
+  if ((await db.query('select 1 from products where slug = $1 and id is distinct from $2', [data.slug, id])).rows.length)
+    throw new InputError('slug นี้มีสินค้าอื่นใช้แล้ว');
+  if (id === null) id = await saveProduct(db, null, { ...data, published: false });
+  else
+    // ร่างแรกของสินค้าที่มีอยู่ก่อน: เก็บฉบับที่ขึ้นเว็บไว้เป็นฉบับตั้งต้น ย้อนกลับมาได้
+    await db.query(
+      `insert into revisions (entity, entity_id, data, user_id, at, published_at)
+       select 'product', $1, $2::jsonb, null, $3, $3
+        where not exists (select 1 from revisions where entity = 'product' and entity_id = $1)`,
+      [id, JSON.stringify(draftOf(toAdmin(live))), live.updated_at],
+    );
+  const r = await db.query(
+    `insert into revisions (entity, entity_id, data, user_id) values ('product', $1, $2::jsonb, $3) returning id::int as id`,
+    [id, JSON.stringify(data), userId],
+  );
+  return { id, rev: r.rows[0].id };
+}
+
+// เขียนร่างล่าสุดลงคอลัมน์ให้หน้าเว็บเห็น และตั้งเป็นแสดง · คืนเลข revision
+export async function publishDraft(db: Db, id: number): Promise<number> {
+  if (!Number.isInteger(id)) throw notFound();
+  const d = (
+    await db.query(
+      `select id::int as id, data, published_at from revisions where entity = 'product' and entity_id = $1 order by id desc limit 1`,
+      [id],
+    )
+  ).rows[0];
+  if (!d || d.published_at) throw new InputError('ไม่มีฉบับร่างให้เผยแพร่');
+  await saveProduct(db, id, { ...d.data, published: true });
+  await db.query('update revisions set published_at = now() where id = $1', [d.id]);
+  return d.id;
+}
+
+// ใหม่สุดก่อน · ponytail: ไม่แบ่งหน้า สินค้าหนึ่งชิ้นแก้ไม่กี่สิบครั้ง
+export async function listRevisions(db: Db, id: number): Promise<ProductRevision[]> {
+  if (!Number.isInteger(id)) throw notFound();
+  const r = await db.query(
+    `select r.id::int as id, to_char(r.at at time zone 'Asia/Bangkok', 'YYYY-MM-DD HH24:MI') as at, u.name as "user",
+            r.published_at is not null as published, r.data
+       from revisions r left join admin_users u on u.id = r.user_id
+      where r.entity = 'product' and r.entity_id = $1 order by r.id desc`,
+    [id],
+  );
+  return r.rows;
 }
 
 // คืน slug ของแถวที่ลบ ให้ audit อ่านย้อนหลังได้ · ไม่มีแถวแล้ว = null
 export async function deleteProduct(db: Db, id: number): Promise<string | null> {
   if (!Number.isInteger(id)) throw new InputError('ไม่พบสินค้านี้');
+  await db.query("delete from revisions where entity = 'product' and entity_id = $1", [id]);
   const r = await db.query('delete from products where id = $1 returning slug', [id]);
   return r.rows[0]?.slug ?? null;
 }

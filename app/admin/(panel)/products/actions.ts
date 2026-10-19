@@ -1,15 +1,25 @@
 'use server';
 
-import { adminAction } from '@/lib/admin';
+import { adminAction, requireAdmin } from '@/lib/admin';
+import { db } from '@/lib/db';
 import { audit } from '@/lib/server/audit';
-import { deleteProduct, saveProduct, setPublished, type ProductInput } from '@/lib/server/products';
+import { deleteProduct, listRevisions, publishDraft, saveDraft, setPublished, type ProductDraft } from '@/lib/server/products';
 
-// ทุกตัวผ่าน adminAction: ตรวจ session แล้วรันการแก้กับ audit ใน transaction เดียว
-export async function saveProductAction(id: number | null, input: ProductInput) {
+// ทุกตัวที่แก้ข้อมูลผ่าน adminAction: ตรวจ session แล้วรันการแก้กับ audit ใน transaction เดียว
+// บันทึกเป็นร่างเสมอ · publish = เผยแพร่ร่างนั้นต่อทันทีใน transaction เดียวกัน
+export async function saveProductAction(id: number | null, input: ProductDraft, publish: boolean) {
   return adminAction(async (tx, a) => {
-    const pid = await saveProduct(tx, id, input);
-    await audit(tx, a.id, id === null ? 'create' : 'update', 'product', pid, { name: String(input.th).trim() });
+    const { id: pid, rev } = await saveDraft(tx, id, input, a.id);
+    await audit(tx, a.id, id === null ? 'create' : 'update', 'product', pid, { name: String(input.th).trim(), revision: rev });
+    if (publish === true) {
+      await publishDraft(tx, pid);
+      await audit(tx, a.id, 'publish', 'product', pid, { revision: rev });
+    }
   });
+}
+export async function productHistoryAction(id: number) {
+  await requireAdmin();
+  return listRevisions(db, id);
 }
 export async function deleteProductAction(id: number) {
   return adminAction(async (tx, a) => {
