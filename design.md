@@ -75,6 +75,24 @@ Dialog backdrops use ink at 60% (`backdrop:bg-ink/60`).
 - Animate `transform`, `opacity` and `clip-path` only.
 - Reduced motion: `globals.css` cuts every animation and transition to near zero, and components that loop must not start.
 
+## Usability and accessibility
+
+The bar for every screen, on the public site and in the back office. It follows
+the guidance of WCAG 2.2 level AA and the usability criteria in
+`docs/pm/standards.md`. Never write that the site passes, meets or is certified
+against WCAG or ISO: write what was checked and how. Where this file already
+sets a stricter value, such as 44px controls, the stricter value wins.
+
+- Contrast: text at least 4.5:1, large text (24px, or 18.66px bold) at least 3:1, and input borders, meaningful icons and the focus ring at least 3:1. Measure the rendered pixels when text sits on a photo, a tint or a translucent surface. Do not work it out from opacity.
+- Keyboard: every action works with the keyboard, in reading order. The focus ring is never hidden under the fixed nav, the sticky action bar, a toast or any other fixed bar.
+- Names: every input has a visible label, every image that carries meaning has `alt`, every icon-only button has `aria-label`, and `<html lang>` follows the language on screen.
+- Reflow: no sideways scrolling at 320px wide, and nothing is lost with text enlarged to 200%.
+- Motion: anything that moves on its own for more than 5 seconds can be paused. A scroll-driven scene (3D, parallax, video scrubbing) has a still version under reduced motion that still shows every product and every line of text.
+- Speed on a phone: LCP at most 2.5s, INP at most 200ms, CLS at most 0.1. Measure on a production build before quoting a number.
+- Limits and errors: show limits before the user acts (file size, file type, format), check them in the browser before sending, and keep the server check. Every error says what happened and what to do next.
+- Review each new screen against Nielsen's ten usability heuristics before it ships. List the ones it misses in the report or the pull request.
+- Before calling a screen done: view it at 375px, 768px and desktop width, tab through it, emulate reduced motion, and measure contrast where text is small, light or over an image. The report says what was checked, how, and what was not.
+
 ## Back office
 
 Status: proposed on 2026-10-12, before any back office code exists. There is no
